@@ -1,5 +1,5 @@
 var basketTestdata = [
-   ['C1-HEADER','', '', '', '', '', '', '', '', '', ''],
+   ['C1-HEADER','XXXXXX', '', '', '', '', '', '', '', '', ''],
    ['C1', '', '05.08.2011', 'Liebig, Ellen, 17.08.1956', '02.05.2011 17:50:43', '', 'Neuer Grund', 'KH-Gutachten', 'Zwei Gutachter', '02.05.2011', '01,02,07,08,99'],
    ['C1', '', '10.06.2013', 'Heine, Heinrich, 07.12.2006', '27.05.2013 12:14:06', 'TestSortierung', 'Frage 251', '', 'Annika Burket', '27.05.2013', '99'],
    ['C1', '', '15.08.2014', 'Manne, Antonia, 17.06.1954', '14.04.2011 18:17:10', '', 'Neuer Grund', 'KH-Gutachten', 'Zwei Gutachter', '14.04.2011', '01,08,99'],

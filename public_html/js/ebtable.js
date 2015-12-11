@@ -37,17 +37,19 @@ $.fn.ebtable = function (opts) {
    };
    var tableTemplate = _.template(
       "<div>\n\
-         <div style='width:100%;'>\n\
-            <div id='ctrlLength'><%= selectLen %></div>\n\
-            <div id='ctrlPage1'><%= browseBtns %></div>\n\
-            <table id='head'>\n\
-               <thead><tr><%= head %></tr></thead>\n\
-            </table>\n\
-         </div>\n\
-         <div style='position:relative; overflow:auto; width:100%; max-height: <%= bodyheight %>px;'>\n\
-            <table id='data'>\n\
-               <tbody><%= data %></tbody>\n\
-            </table>\n\
+         <div id='ctrlLength'><%= selectLen %></div>\n\
+         <div id='ctrlPage1'><%= browseBtns %></div>\n\
+         <div>\n\
+            <div>\n\
+               <table id='head'>\n\
+                  <thead><tr><%= head %></tr></thead>\n\
+               </table>\n\
+            </div>\n\
+            <div id='xxx' style='overflow-y:auto;overflow-x:hidden; max-height:<%= bodyheight %>px;'>\n\
+               <table id='data'>\n\
+                  <tbody><%= data %></tbody>\n\
+               </table>\n\
+            <div>\n\
          </div>\n\
          <div id='info'><%= info %><div>\n\
          <div id='ctrlPage2' style='float:right'><%= browseBtns %></div>\n\
@@ -77,18 +79,25 @@ $.fn.ebtable = function (opts) {
    // ##############################################################################
 
    this.adjustHeader = function adjustHeader() {
-      console.log('>>>adjustHeader');
+      console.log('>>>adjustHeader window-width=', $(window).width());
+      $('#xxx').width($(window).width() - 25);
+      $('#head').width($('#xxx').width() - 20);
+      $('#data').width($('#xxx').width() - 20);
+
       for (var i = 1; i <= opts.head.length; i++) {
-         var w = $('#data tr:first td:nth-child(' + i + ')').width();
-         $('#head').width($('#data').width());
+         var w1 = $('#data tr:first td:nth-child(' + i + ')').width();
+         var w2 = $('#head th:nth-child(' + i + ')').width();
+         var w = Math.max(w1, w2);
          $('#head th:nth-child(' + i + ')').width(w);
+         $('#data tr:first td:nth-child(' + i + ')').width(w);
          $('#ctrlPage1').css('position', 'absolute').css('top', 10);
          $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
          $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
       }
+
+
    };
    // ##############################################################################
 
    return this;
 }
-;

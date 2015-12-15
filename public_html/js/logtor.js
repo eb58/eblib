@@ -1,8 +1,11 @@
 var logtor = function () {
    var lev = 0;
-   
-   function indent(lev) { return '                              '.substring(0,lev*3); }
-   
+   var blanks = '                                                            ';
+
+   function indent(lev) {
+      return blanks.substring(0, lev * 3);
+   }
+
    function apply(f) {
       var logf = function () {
          console.log(indent(lev++), '>>> Begin ', f.name, 'args=', [].slice.call(arguments, 0).toString());
@@ -10,8 +13,10 @@ var logtor = function () {
          console.log(indent(--lev), '<<< End   ', f.name, 'ret=', ret);
          return ret;
       };
-      logf.name    = f.name;
-      logf.restore = function () { return f;};
+      logf.name = f.name;
+      logf.restore = function () {
+         return f;
+      };
       return logf;
    }
    return{
@@ -21,8 +26,14 @@ var logtor = function () {
 
 // -----------------------------------------
 
-function f1(a, b) { console.log('F1');return 'f1-' + f2(a) + f2(b);}
-function f2(a) {  console.log('F2'); return '(f2-' + a + ')';}
+function f1(a, b) {
+   console.log('F1');
+   return 'f1-' + f2(a) + f2(b);
+}
+function f2(a) {
+   console.log('F2');
+   return '(f2-' + a + ')';
+}
 
 f1 = logtor.apply(f1);
 f2 = logtor.apply(f2);

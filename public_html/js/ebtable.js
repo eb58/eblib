@@ -39,13 +39,13 @@ $.fn.ebtable = function (opts) {
       "<div>\n\
          <div id='ctrlLength'><%= selectLen %></div>\n\
          <div id='ctrlPage1'><%= browseBtns %></div>\n\
-         <div>\n\
+         <div style='overflow:auto;'>\n\
             <div>\n\
-               <table id='head'>\n\
+               <table id='head' >\n\
                   <thead><tr><%= head %></tr></thead>\n\
                </table>\n\
             </div>\n\
-            <div id='xxx' style='overflow-y:auto;overflow-x:hidden; max-height:<%= bodyheight %>px;'>\n\
+            <div id='xxx' max-height:<%= bodyheight %>px;'>\n\
                <table id='data'>\n\
                   <tbody><%= data %></tbody>\n\
                </table>\n\
@@ -92,7 +92,7 @@ $.fn.ebtable = function (opts) {
          $('#data tr:first td:nth-child(' + i + ')').width(w);
          $('#ctrlPage1').css('position', 'absolute').css('top', 10);
          $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
-         $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
+         //$('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
       }
 
 
@@ -100,4 +100,4 @@ $.fn.ebtable = function (opts) {
    // ##############################################################################
 
    return this;
-}
+};

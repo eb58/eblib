@@ -1,4 +1,5 @@
 $.fn.ebtable = function (opts) {
+   var pageCur = 0;
    var defopts = {
       selectLen: [10, 25, 50, 100]
       , bodyheight: Math.max(300, $(window).height() - 150)
@@ -7,17 +8,17 @@ $.fn.ebtable = function (opts) {
    var myopts = $.extend(defopts, opts);
    var tableHead = function () {
       var res = '';
-      $.each(opts.head, function (idx, o) {
+      $.each(opts.columns, function (idx, o) {
          res += '<th>' + o + '</th>';
       });
       return res;
    };
    var tableData = function tableData(pageNr) {
       var res = '';
-      var start = myopts.rowsPerPage * pageNr;
-      for (var r = start; r < Math.min(start + myopts.rowsPerPage, myopts.data.length); r++) {
+      var startRow = myopts.rowsPerPage * pageNr;
+      for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, myopts.data.length); r++) {
          res += '<tr>';
-         for (var c = 0; c < start + myopts.head.length; c++) {
+         for (var c = 0; c < myopts.columns.length; c++) {
             res += '<td>' + myopts.data[r][c] + '</td>';
          }
          res += '</tr>\n';
@@ -39,20 +40,19 @@ $.fn.ebtable = function (opts) {
       "<div>\n\
          <div id='ctrlLength'><%= selectLen %></div>\n\
          <div id='ctrlPage1'><%= browseBtns %></div>\n\
-         <div style='overflow:auto;'>\n\
+         <div id='divall' style='overflow-x:auto;'>\n\
             <div>\n\
                <table id='head' >\n\
                   <thead><tr><%= head %></tr></thead>\n\
                </table>\n\
             </div>\n\
-            <div id='xxx' max-height:<%= bodyheight %>px;'>\n\
+            <div class='scroll-pane' id='divdata' style='max-height:<%= bodyheight %>px;'>\n\
                <table id='data'>\n\
                   <tbody><%= data %></tbody>\n\
                </table>\n\
             <div>\n\
          </div>\n\
          <div id='info'><%= info %><div>\n\
-         <div id='ctrlPage2' style='float:right'><%= browseBtns %></div>\n\
       </div>"
 
       );
@@ -65,34 +65,48 @@ $.fn.ebtable = function (opts) {
       , bodyheight: myopts.bodyheight
    }));
    $('#lenctrl')
-      .css('width', '80px')
+      .css('width', '60px')
       .selectmenu({change: function (event, data) {
             console.log('change select', event, data.item.value);
             myopts.rowsPerPage = Number(data.item.value);
-            var newrows = tableData(0);
+            var newrows = tableData(pageCur);
             $('#data tbody').html(newrows);
             window.dispatchEvent(new Event('resize'));
          }
       });
-   $('#back').button();
-   $('#next').button();
+   $('#back').button().click(function () {
+      pageCur = Math.max(0, pageCur - 1);
+      var newrows = tableData(pageCur);
+      $('#data tbody').html(newrows);
+      window.dispatchEvent(new Event('resize'));
+
+   });
+   $('#next').button().click(function () {
+      if( myopts.data.length ===0 )  return;
+      var maxPageCur = Math.floor(myopts.data.length / myopts.rowsPerPage);
+      pageCur = Math.min(maxPageCur-1, pageCur + 1);
+      var newrows = tableData(pageCur);
+      $('#data tbody').html(newrows);
+      window.dispatchEvent(new Event('resize'));
+   });
    // ##############################################################################
 
    this.adjustHeader = function adjustHeader() {
       console.log('>>>adjustHeader window-width=', $(window).width());
-      $('#xxx').width($(window).width() - 25);
-      $('#head').width($('#xxx').width() - 20);
-      $('#data').width($('#xxx').width() - 20);
+      $('#divall').width($(window).width() - 25);
+      $('#head').width($('#divall').width() - 20);
+      $('#data').width($('#divall').width() - 20);
 
-      for (var i = 1; i <= opts.head.length; i++) {
-         var w1 = $('#data tr:first td:nth-child(' + i + ')').width();
-         var w2 = $('#head th:nth-child(' + i + ')').width();
+      for (var i = 1; i <= opts.columns.length; i++) {
+         var w1 = $('#head th:nth-child(' + i + ')').width();
+         var w2 = $('#data td:nth-child(' + i + ')').width();
          var w = Math.max(w1, w2);
+         console.log(i, w1, w2, w);
          $('#head th:nth-child(' + i + ')').width(w);
          $('#data tr:first td:nth-child(' + i + ')').width(w);
          $('#ctrlPage1').css('position', 'absolute').css('top', 10);
          $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
-         //$('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
+         $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
       }
 
 

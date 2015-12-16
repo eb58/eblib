@@ -21,11 +21,28 @@
       <script src="/js/mx.js"></script>
       <script src="/js/ebtable.js"></script>
       <script src="/tests/ebtabletestsData.js"></script>
-      <script src="/tests/ebtabletests.js"></script>
    </head>
    <body>
       <!--      <div id="qunit"></div>
             <div id="qunit-fixture"></div>-->
       <div id="grid"></div>
+      <script>
+         /* global basketTestdata */
+         'use strict';
+
+         var opts = {
+            columns: ["Paket", '', "Datum", "Name", "Fälligkeit", "Auftragspaket", "Frage des AG", "Produkt", "Bearbeiter", "Eingang", "DTA Nummern"]
+            , data: basketTestdata
+            , rowsPerPage: 10
+         };
+         var grid;
+         $().ready(function () {
+            grid = $('#grid').ebtable(opts);
+            grid.adjustHeader();
+         });
+         $(window).on('resize', function () {
+            grid.adjustHeader();
+         });
+      </script>
    </body>
 </html>

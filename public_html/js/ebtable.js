@@ -1,40 +1,37 @@
 /* global _ */
 "use strict";
-jQuery.fn.ebtableSort = {};
-jQuery.fn.ebtableSort.delim = '#|#'; // Used as delimiter between Chargename and content of data
+jQuery.fn.ebtableSort = {
+   delim: '#|#', // Used as delimiter between groupname and content of data
 
-jQuery.fn.ebtableSort.dinDate = function (a) {
-   // '01.01.2013' -->   '2013-01-01' 
-   var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-   return  d ? (d[3] + '-' + d[2] + '-' + d[1]) : '';
-};
-
-jQuery.fn.ebtableSort.dinDateTime = function (a) {
-   // '01.01.2013 12:36'  -->  '2013-01-01 12:36' 
-   var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
-   return  d ? (d[3] + '-' + d[2] + '-' + d[1] + ' ' + d[4] + ':' + d[5]) : '';
-};
-
-jQuery.fn.ebtableSort.normalizeDate = function (a) {
-   // In  'xxx#|#01.01.2013' oder auch nur '01.01.2013'
-   // Out 'xxx#|#2013-01-01' oder '2013-01-01' 
-   if (a.indexOf(jQuery.fn.ebtableSort.delim) >= 0) {
-      var s = a.split(jQuery.fn.ebtableSort.delim);
-      return s[0] + jQuery.fn.ebtableSort.delim + jQuery.fn.ebtableSort.dinDate(s[1]);
+   dinDate: function (a) {
+      // '01.01.2013' -->   '2013-01-01' 
+      var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+      return d ? (d[3] + '-' + d[2] + '-' + d[1]) : '';
+   },
+   dinDateTime: function (a) {
+      // '01.01.2013 12:36'  -->  '2013-01-01 12:36' 
+      var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
+      return d ? (d[3] + '-' + d[2] + '-' + d[1] + ' ' + d[4] + ':' + d[5]) : '';
+   },
+   normalizeDate: function (a) {
+      // In  'xxx#|#01.01.2013' oder auch nur '01.01.2013'
+      // Out 'xxx#|#2013-01-01' oder '2013-01-01' 
+      if (a.indexOf(jQuery.fn.ebtableSort.delim) >= 0) {
+         var s = a.split(jQuery.fn.ebtableSort.delim);
+         return s[0] + jQuery.fn.ebtableSort.delim + jQuery.fn.ebtableSort.dinDate(s[1]);
+      }
+      return jQuery.fn.ebtableSort.dinDate(a);
+   },
+   normalizeDateTime: function (a) {
+      // In  'xxx#|#01.01.2013 12:36' oder auch nur '01.01.2013 12:36'
+      // Out 'xxx#|#2013-01-01 12:36' oder '2013-01-01 12:36' 
+      if (a.indexOf(jQuery.fn.ebtableSort.delim) >= 0) {
+         var s = a.split(jQuery.fn.ebtableSort.delim);
+         return s[0] + jQuery.fn.ebtableSort.delim + jQuery.fn.ebtableSort.dinDate(s[1]);
+      }
+      return jQuery.fn.ebtableSort.dinDateTime(a);
    }
-   return jQuery.fn.ebtableSort.dinDate(a);
 };
-
-jQuery.fn.ebtableSort.normalizeDateTime = function (a) {
-   // In  'xxx#|#01.01.2013 12:36' oder auch nur '01.01.2013 12:36'
-   // Out 'xxx#|#2013-01-01 12:36' oder '2013-01-01 12:36' 
-   if (a.indexOf(jQuery.fn.ebtableSort.delim) >= 0) {
-      var s = a.split(jQuery.fn.ebtableSort.delim);
-      return s[0] + jQuery.fn.ebtableSort.delim + jQuery.fn.ebtableSort.dinDate(s[1]);
-   }
-   return jQuery.fn.ebtableSort.dinDateTime(a);
-};
-
 jQuery.fn.ebtableSort.sorter = {
    'sort-asc': function sortAsc(data, col) {
       return data.sort(function (r1, r2) {
@@ -79,7 +76,7 @@ $.fn.ebtable = function (opts) {
    var tableHead = function () {
       var res = '';
       for (var c = 0; c < myopts.columns.length; c++) {
-         var col = myopts.columns[c]
+         var col = myopts.columns[c];
          if (!col.invisible)
             res += '<th id="' + col.name + '">' + col.name + '</th>';
       }
@@ -94,9 +91,10 @@ $.fn.ebtable = function (opts) {
          for (var c = 0; c < myopts.columns.length; c++) {
             if (myopts.columns[c].invisible)
                continue;
-            var val = myopts.data[r][c];
+            var row = myopts.data[r];
             var rnd = myopts.columns[c].render;
-            val = rnd ? rnd(val) : val;
+            var val = myopts.data[r][c];
+            val = rnd ? rnd(val, row) : val;
             res += '<td>' + val + '</td>';
          }
          res += '</tr>\n';
@@ -109,7 +107,7 @@ $.fn.ebtable = function (opts) {
          if (myopts.columns[c].name === colname)
             return c;
       return -1;
-   }
+   };
 
    var selectLenCtrl = function () {
       var options = '';
@@ -148,7 +146,6 @@ $.fn.ebtable = function (opts) {
          <div id='ctrlInfo'><%= info %><div>\n\
          <div id='ctrlPage2'><%= browseBtns %></div>\n\
       </div>"
-
       );
    this.html(tableTemplate({
       head: tableHead()
@@ -169,6 +166,7 @@ $.fn.ebtable = function (opts) {
             window.dispatchEvent(new Event('resize'));
          }
       });
+
    $('.backBtn').button().click(function () {
       pageCur = Math.max(0, pageCur - 1);
       var newrows = tableData(pageCur);
@@ -177,6 +175,7 @@ $.fn.ebtable = function (opts) {
       window.dispatchEvent(new Event('resize'));
 
    });
+
    $('.nextBtn').button().click(function () {
       if (myopts.data.length === 0)
          return;
@@ -187,6 +186,7 @@ $.fn.ebtable = function (opts) {
       $('#ctrlInfo').html(infoCtrl());
       window.dispatchEvent(new Event('resize'));
    });
+
    $('#head th').on('click', function (event, selector, data) {
       console.log('click', event, event.currentTarget.cellIndex);
       var idx = indexOfCol(event.currentTarget.id);

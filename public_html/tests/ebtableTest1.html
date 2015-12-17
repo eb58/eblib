@@ -38,8 +38,8 @@ and open the template in the editor.
                {name: "Paket", invisible: true},
                {name: "Tierart"},
                {name: "Datum", sortType: 'date-de'},
-               {name: "Name", render: function (data) {
-                     return data + '!!!!'
+               {name: "Name", render: function (data,row) {
+                     return data + ' -- ' + row[0] + '!!'
                   }}
             ]
             , data: basketTestdata

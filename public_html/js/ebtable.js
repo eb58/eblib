@@ -123,8 +123,10 @@ $.fn.ebtable = function (opts) {
       return '<button class="backBtn">Zurück</button><button class="nextBtn">Vor</button> ';
    };
    var infoCtrl = function () {
+      var startRow = myopts.rowsPerPage * pageCur + 1;
+      var endRow = Math.min(startRow + myopts.rowsPerPage - 1, myopts.data.length);
       var templ = _.template("<%=start%> bis <%=end%>  von <%=count%>");
-      return templ({start: 1, end: 10, count: 10});
+      return templ({start: startRow, end: endRow, count: myopts.data.length});
    };
 
    var tableTemplate = _.template(
@@ -143,7 +145,7 @@ $.fn.ebtable = function (opts) {
                </table>\n\
             <div>\n\
          </div>\n\
-         <div id='info'><%= info %><div>\n\
+         <div id='ctrlInfo'><%= info %><div>\n\
          <div id='ctrlPage2'><%= browseBtns %></div>\n\
       </div>"
 
@@ -163,6 +165,7 @@ $.fn.ebtable = function (opts) {
             myopts.rowsPerPage = Number(data.item.value);
             var newrows = tableData(pageCur);
             $('#data tbody').html(newrows);
+            $('#ctrlInfo').html(infoCtrl());
             window.dispatchEvent(new Event('resize'));
          }
       });
@@ -170,6 +173,7 @@ $.fn.ebtable = function (opts) {
       pageCur = Math.max(0, pageCur - 1);
       var newrows = tableData(pageCur);
       $('#data tbody').html(newrows);
+      $('#ctrlInfo').html(infoCtrl());
       window.dispatchEvent(new Event('resize'));
 
    });
@@ -177,9 +181,10 @@ $.fn.ebtable = function (opts) {
       if (myopts.data.length === 0)
          return;
       var maxPageCur = Math.floor(myopts.data.length / myopts.rowsPerPage);
-      pageCur = Math.max(0, Math.min(maxPageCur - 1, pageCur + 1));
+      pageCur = Math.max(0, Math.min(maxPageCur, pageCur + 1));
       var newrows = tableData(pageCur);
       $('#data tbody').html(newrows);
+      $('#ctrlInfo').html(infoCtrl());
       window.dispatchEvent(new Event('resize'));
    });
    $('#head th').on('click', function (event, selector, data) {

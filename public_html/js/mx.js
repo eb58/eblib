@@ -3,10 +3,9 @@
 var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional array
    var data = _.isArray(p1) ? p1 : _.map(_.range(p1), function () {
       return [];
-   }), // [ [], [], [], ..., [] ] 
-      nr = _.isArray(p1) ? p1.length : p1,
-      nc = _.isArray(p1) ? p1[0].length : p2;
-
+   }); // [ [], [], [], ..., [] ] 
+   var nr = _.isArray(p1) ? p1.length : p1;
+   var nc = _.isArray(p1) ? p1[0].length : p2;
 
    data.fill = function (val) {
       val = val || 0;
@@ -39,7 +38,7 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional arra
    data.withoutRows = function (p) { // pred-function or arr
       var d = [];
       for (var r = 0; r < nr; r++) {
-         if (_.isFunction(p)? !p(data[r]) : _.indexOf(p, r) < 0)
+         if (_.isFunction(p) ? !p(data[r]) : _.indexOf(p, r) < 0)
             d.push(_.clone(data[r]));
       }
       return d;
@@ -48,6 +47,13 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional arra
    data.col = function (n) {
       return _.map(_.range(data.length), function (r) {
          return data[r][n];
+      });
+   };
+   data.tablesort = function (col) {
+      return this.sort(function(r1,r2){
+         if( r1[col] > r2[col] ) return +1;
+         if( r1[col] < r2[col] ) return -1;
+         return 0;
       });
    };
    return data;

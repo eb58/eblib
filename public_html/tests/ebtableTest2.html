@@ -4,8 +4,7 @@
       <title>myTable</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-      <link rel="stylesheet" href="/lib/qunit/qunit.css">
+      <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
       <link rel="stylesheet" href="/css/ebtable.css">
       <style>
          * {
@@ -15,23 +14,28 @@
          }
       </style>
       <script src="/lib/underscore-1.8.3.js"></script>
-      <script src="/lib/qunit/qunit.js"></script>
       <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
-      <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-      <script src="/js/mx.js"></script>
+      <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
       <script src="/js/ebtable.js"></script>
       <script src="/tests/ebtabletestsData.js"></script>
-   </head>
-   <body>
-      <!--      <div id="qunit"></div>
-            <div id="qunit-fixture"></div>-->
-      <div id="grid"></div>
       <script>
          /* global basketTestdata */
          'use strict';
 
          var opts = {
-            columns: ["Paket", '', "Datum", "Name", "Fälligkeit", "Auftragspaket", "Frage des AG", "Produkt", "Bearbeiter", "Eingang", "DTA Nummern"]
+            columns: [
+               {name: "Paket"}
+               , {name: 'xx'}
+               , {name: "Datum"}
+               , {name: "Name"}
+               , {name: "Fälligkeit"}
+               , {name: "Auftragspaket"}
+               , {name: "Frage des AG"}
+               , {name: "Produkt"}
+               , {name: "Bearbeiter"}
+               , {name: "Eingang"}
+               , {name: "DTA Nummern"}
+            ]
             , data: basketTestdata
             , rowsPerPage: 10
          };
@@ -44,5 +48,8 @@
             grid.adjustHeader();
          });
       </script>
+   </head>
+   <body>
+      <div id="grid"></div>
    </body>
 </html>

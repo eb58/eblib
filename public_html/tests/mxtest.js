@@ -29,6 +29,8 @@ QUnit.test('testset1 easy ones', function (assert) {
    assert.deepEqual(m3.withoutRows([0,2]),[['21','22','23']]);
    assert.deepEqual(m3.withoutRows(function(row){return row[0] === '21';}),[['11','12','13'],['31','32','33']]);
 
+  var m4 = mx([['11','12','13'],['31','32','33'],['21','22','23']]);
+   assert.deepEqual(m4.tablesort(0),[['11','12','13'],['21','22','23'],['31','32','33']]);
 });
 
 

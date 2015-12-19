@@ -1,65 +1,36 @@
 /* global _ */
 "use strict";
 jQuery.fn.ebtableSort = {
-   delim: '#|#', // Used as delimiter between groupname and content of data
-
-   dinDate: function (a) {
-      // '01.01.2013' -->   '2013-01-01' 
+   'date-de': function (a) { // '01.01.2013' -->   '20130101' 
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-      return d ? (d[3] + '-' + d[2] + '-' + d[1]) : '';
+      return d ? (d[3] + d[2] + d[1]) : '';
    },
-   dinDateTime: function (a) {
-      // '01.01.2013 12:36'  -->  '2013-01-01 12:36' 
+   'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
-      return d ? (d[3] + '-' + d[2] + '-' + d[1] + ' ' + d[4] + ':' + d[5]) : '';
+      return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
    },
-   normalizeDate: function (a) {
-      // In  'xxx#|#01.01.2013' oder auch nur '01.01.2013'
-      // Out 'xxx#|#2013-01-01' oder '2013-01-01' 
-      if (a.indexOf(jQuery.fn.ebtableSort.delim) >= 0) {
-         var s = a.split(jQuery.fn.ebtableSort.delim);
-         return s[0] + jQuery.fn.ebtableSort.delim + jQuery.fn.ebtableSort.dinDate(s[1]);
-      }
-      return jQuery.fn.ebtableSort.dinDate(a);
-   },
-   normalizeDateTime: function (a) {
-      // In  'xxx#|#01.01.2013 12:36' oder auch nur '01.01.2013 12:36'
-      // Out 'xxx#|#2013-01-01 12:36' oder '2013-01-01 12:36' 
-      if (a.indexOf(jQuery.fn.ebtableSort.delim) >= 0) {
-         var s = a.split(jQuery.fn.ebtableSort.delim);
-         return s[0] + jQuery.fn.ebtableSort.delim + jQuery.fn.ebtableSort.dinDate(s[1]);
-      }
-      return jQuery.fn.ebtableSort.dinDateTime(a);
+   rowCmpCols: function (cols) { // [ {col:1,order:asc,format:fmtfct1},{col:3, order:desc, format:fmtfct2},... ]  
+      return function (r1, r2) {
+         for (var i = 0; i < cols.length; i++) {
+            var cdef = cols[i];
+            var bAsc = cdef.order !== 'desc';
+            var x = r1[cdef.col], y = r2[cdef.col];
+            if (jQuery.type(x) === "string")
+               x = x.toLowerCase();
+            if (jQuery.type(y) === "string")
+               y = y.toLowerCase();
+            var fmt = $.fn.ebtableSort[cdef.format];
+            x = fmt ? fmt(x) : x;
+            y = fmt ? fmt(y) : y;
+            var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
+            if (ret !== 0)
+               return bAsc ? ret : -ret;
+         }
+         return 0;
+      };
    }
-};
-jQuery.fn.ebtableSort.sorter = {
-   'sort-asc': function sortAsc(data, col) {
-      return data.sort(function (r1, r2) {
-         var x = r1[col], y = r2[col];
-         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-      });
-   }
-   , 'sort-desc': function sortDesc(data, col) {
-      return data.sort(function (r1, r2) {
-         var x = r1[col], y = r2[col];
-         return ((x < y) ? 1 : ((x > y) ? -1 : 0));
-      });
-   }
-   , 'date-de-asc': function sortDateDeAsc(data, col) {
-      return data.sort(function (r1, r2) {
-         var a = r1[col], b = r2[col];
-         var x = jQuery.fn.ebtableSort.normalizeDate(a);
-         var y = jQuery.fn.ebtableSort.normalizeDate(b);
-         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-      });
-   }
-   , 'date-de-desc': function sortDateDeDesc(data, col) {
-      return data.sort(function (r1, r2) {
-         var a = r1[col], b = r2[col];
-         var x = jQuery.fn.ebtableSort.normalizeDate(a);
-         var y = jQuery.fn.ebtableSort.normalizeDate(b);
-         return ((x < y) ? 1 : ((x > y) ? -1 : 0));
-      });
+   , sort: function (data, cols) {
+      return data.sort($.fn.ebtableSort.rowCmpCols(cols));
    }
 };
 
@@ -68,67 +39,86 @@ jQuery.fn.ebtableSort.sorter = {
 $.fn.ebtable = function (opts) {
    var pageCur = 0;
    var defopts = {
-      selectLen: [10, 25, 50, 100]
-      , bodyheight: Math.max(300, $(window).height() - 150)
+      bodyheight: Math.max(300, $(window).height() - 150)
+      , rowsPerPageSelect: [10, 25, 50, 100]
       , rowsPerPage: 10
+      , colorder: _.range(opts.columns.length) // [0,1,2,... ]
+      , sortmaster: null //[{col:1,order:asc,format:fct1},{col:2}]
    };
    var myopts = $.extend(defopts, opts);
-   var tableHead = function () {
+
+   function tableHead() {
       var res = '';
+      var order = myopts.colorder;
       for (var c = 0; c < myopts.columns.length; c++) {
-         var col = myopts.columns[c];
-         if (!col.invisible)
-            res += '<th id="' + col.name + '">' + col.name + '</th>';
+         var col = myopts.columns[order[c]];
+         if (!col.invisible) {
+            res += '   <th id="' + col.name + '">'
+                    + '   <div class="sort_wrapper">' + col.name
+                    + '      <span class="ui-icon ui-icon-triangle-2-n-s">'
+                    + '   </div>'
+                    + '   <input width="30px" type="text" id="' + col.name + '" />'
+                    + '</th>';
+         }
       }
       ;
       return res;
-   };
-   var tableData = function tableData(pageNr) {
+   }
+
+   function tableData(pageNr) {
       var res = '';
       var startRow = myopts.rowsPerPage * pageNr;
+      var order = myopts.colorder;
       for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, myopts.data.length); r++) {
          res += '<tr>';
          for (var c = 0; c < myopts.columns.length; c++) {
-            if (myopts.columns[c].invisible)
-               continue;
-            var row = myopts.data[r];
-            var rnd = myopts.columns[c].render;
-            var val = myopts.data[r][c];
-            val = rnd ? rnd(val, row) : val;
-            res += '<td>' + val + '</td>';
+            if (!myopts.columns[order[c]].invisible) {
+               var row = myopts.data[r];
+               var rnd = myopts.columns[order[c]].render;
+               var val = myopts.data[r][order[c]];
+               val = rnd ? rnd(val, row) : val;
+               res += '<td>' + val + '</td>';
+            }
          }
          res += '</tr>\n';
       }
       return res;
-   };
+   }
 
-   var indexOfCol = function indexOfCol(colname) {
+   function indexOfCol(colname) {
       for (var c = 0; c < myopts.columns.length; c++)
          if (myopts.columns[c].name === colname)
             return c;
       return -1;
-   };
+   }
 
-   var selectLenCtrl = function () {
+   function selectLenCtrl() {
       var options = '';
-      $.each(myopts.selectLen, function (idx, o) {
+      $.each(myopts.rowsPerPageSelect, function (idx, o) {
          var selected = o === myopts.rowsPerPage ? 'selected' : '';
          options += '<option value="' + o + '" ' + selected + '>' + o + '</option>\n';
       });
       return '<select id="lenctrl">\n' + options + '</select>\n';
-   };
-   var pageBrowseCtrl = function () {
-      return '<button class="backBtn">Zurück</button><button class="nextBtn">Vor</button> ';
-   };
-   var infoCtrl = function () {
+   }
+
+   function pageBrowseCtrl() {
+      return '\n\
+              <button class="firstBtn"><span class="ui-icon ui-icon-seek-first"></span></button>\n\
+              <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev"></span></button>\n\
+              <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next"></span></button>\n\
+              <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"></span></button>';
+   }
+
+   function infoCtrl() {
       var startRow = myopts.rowsPerPage * pageCur + 1;
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, myopts.data.length);
       var templ = _.template("<%=start%> bis <%=end%>  von <%=count%>");
-      return templ({start: startRow, end: endRow, count: myopts.data.length});
-   };
+      var label = templ({start: startRow, end: endRow, count: myopts.data.length});
+      return '<button id="info">' + label + '</button>';
+   }
 
    var tableTemplate = _.template(
-      "<div>\n\
+           "<div>\n\
          <div id='ctrlLength'><%= selectLen %></div>\n\
          <div id='ctrlPage1'><%= browseBtns %></div>\n\
          <div id='divall' style='overflow-x:auto;'>\n\
@@ -141,12 +131,12 @@ $.fn.ebtable = function (opts) {
                <table id='data'>\n\
                   <tbody><%= data %></tbody>\n\
                </table>\n\
-            <div>\n\
+            </div>\n\
          </div>\n\
-         <div id='ctrlInfo'><%= info %><div>\n\
+         <div id='ctrlInfo'><%= info %></div>\n\
          <div id='ctrlPage2'><%= browseBtns %></div>\n\
       </div>"
-      );
+           );
    this.html(tableTemplate({
       head: tableHead()
       , data: tableData(0)
@@ -155,50 +145,89 @@ $.fn.ebtable = function (opts) {
       , info: infoCtrl()
       , bodyheight: myopts.bodyheight
    }));
-   $('#lenctrl')
-      .css('width', '60px')
-      .selectmenu({change: function (event, data) {
-            console.log('change select', event, data.item.value);
-            myopts.rowsPerPage = Number(data.item.value);
-            var newrows = tableData(pageCur);
-            $('#data tbody').html(newrows);
-            $('#ctrlInfo').html(infoCtrl());
-            window.dispatchEvent(new Event('resize'));
-         }
-      });
+   $('#lenctrl').css('width', '60px')
+           .selectmenu({change: function (event, data) {
+                 console.log('change rowsPerPage', event, data.item.value);
+                 var startRow = myopts.rowsPerPage * pageCur + 1;
+                 myopts.rowsPerPage = Number(data.item.value);
+                 pageCur = Math.floor(startRow / myopts.rowsPerPage);
+                 var newrows = tableData(pageCur);
+                 $('#data tbody').html(newrows);
+                 $('#ctrlInfo').html(infoCtrl());
+                 window.dispatchEvent(new Event('resize'));
+              }
+           });
 
-   $('.backBtn').button().click(function () {
-      pageCur = Math.max(0, pageCur - 1);
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      $('#ctrlInfo').html(infoCtrl());
-      window.dispatchEvent(new Event('resize'));
+   $('.firstBtn').button()
+           .click(function () {
+              pageCur = 0;
+              var newrows = tableData(pageCur);
+              $('#data tbody').html(newrows);
+              $('#ctrlInfo').html(infoCtrl());
+              window.dispatchEvent(new Event('resize'));
+           });
+   $('.backBtn').button()
+           .click(function () {
+              pageCur = Math.max(0, pageCur - 1);
+              var newrows = tableData(pageCur);
+              $('#data tbody').html(newrows);
+              $('#ctrlInfo').html(infoCtrl());
+              window.dispatchEvent(new Event('resize'));
+           });
+   $('.nextBtn').button()
+           .click(function () {
+              if (myopts.data.length === 0)
+                 return;
+              var maxPageCur = Math.floor(myopts.data.length / myopts.rowsPerPage);
+              pageCur = Math.max(0, Math.min(maxPageCur, pageCur + 1));
+              var newrows = tableData(pageCur);
+              $('#data tbody').html(newrows);
+              $('#ctrlInfo').html(infoCtrl());
+              window.dispatchEvent(new Event('resize'));
+           });
+   $('.lastBtn').button()
+           .click(function () {
+              pageCur = Math.floor(myopts.data.length / myopts.rowsPerPage);
+              var newrows = tableData(pageCur);
+              $('#data tbody').html(newrows);
+              $('#ctrlInfo').html(infoCtrl());
+              window.dispatchEvent(new Event('resize'));
+           });
 
-   });
-
-   $('.nextBtn').button().click(function () {
-      if (myopts.data.length === 0)
-         return;
-      var maxPageCur = Math.floor(myopts.data.length / myopts.rowsPerPage);
-      pageCur = Math.max(0, Math.min(maxPageCur, pageCur + 1));
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      $('#ctrlInfo').html(infoCtrl());
-      window.dispatchEvent(new Event('resize'));
-   });
-
-   $('#head th').on('click', function (event, selector, data) {
-      console.log('click', event, event.currentTarget.cellIndex);
-      var idx = indexOfCol(event.currentTarget.id);
-      var sorter = jQuery.fn.ebtableSort.sorter;
-      var sortType = opts.columns[idx].sortType ? opts.columns[idx].sortType : 'sort';
-      var sortFct = opts.columns[idx].sortStatus === 'desc' ? sorter[sortType + '-asc'] : sorter[sortType + '-desc'];
-      opts.data = sortFct(opts.data, idx);
-      opts.columns[idx].sortStatus = opts.columns[idx].sortStatus === 'desc' ? 'asc' : 'desc';
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      window.dispatchEvent(new Event('resize'));
-   });
+   $('#head th')
+           .on('click', function (event, selector, data) {
+              console.log('click', event.currentTarget.cellIndex);
+              var idx = indexOfCol(event.currentTarget.id);
+              var col = myopts.columns[idx];
+              var coldefs = (myopts.sortmaster && idx !== myopts.sortmaster[0].col) ? $.extend([], myopts.sortmaster) : [];
+              coldefs.push({col: idx, format: col.format, order: opts.columns[idx].order});
+              myopts.data = $.fn.ebtableSort.sort(opts.data, coldefs);
+              $.each(coldefs, function (idx, o) {
+                 myopts.columns[o.col].order = opts.columns[o.col].order === 'desc' ? 'asc' : 'desc';
+              });
+              //myopts.columns[idx].order = opts.columns[idx].order === 'desc' ? 'asc' : 'desc');
+              var newrows = tableData(pageCur);
+              $('#data tbody').html(newrows);
+              var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
+              $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
+              $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+              window.dispatchEvent(new Event('resize'));
+           });
+   $('#info')
+           .button();
+   $('#head input')
+           .on('keyup change', function (event) {
+              //var c = $('#' + event.target.id);
+              //grid.column(c + ':visIdx').search(this.value).draw();
+              var x = $('#head input');
+              $.each(x, function (idx, o) {
+                 console.log(idx, $(o).val());
+              });
+           })
+           .on('click', function (event) {
+              event.target.focus();
+              return false; // ignore - sorting
+           });
    // ##############################################################################
 
    this.adjustHeader = function adjustHeader() {
@@ -211,7 +240,7 @@ $.fn.ebtable = function (opts) {
          var w1 = $('#head th:nth-child(' + i + ')').width();
          var w2 = $('#data td:nth-child(' + i + ')').width();
          var w = Math.max(w1, w2);
-         console.log(i, w1, w2, w);
+         //console.log(i, w1, w2, w);
          $('#head th:nth-child(' + i + ')').width(w);
          $('#data tr:first td:nth-child(' + i + ')').width(w);
          $('#ctrlPage1').css('position', 'absolute').css('top', 10);

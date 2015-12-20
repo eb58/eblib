@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>Beispiel1</title>
+      <title>Beispiel 1</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
@@ -11,17 +11,7 @@
          * {
             font-family:Arial;
             color: black;
-            font-size: 12px;
-         }
-         div.sort_wrapper {
-            position: relative;
-         }
-         table thead th div.sort_wrapper span {
-            position: absolute;
-            top: 50%;
-            margin-top: -12px;
-            right: -2px;
-            margin-bottom: 18px;
+            font-size: 10px;
          }
       </style>
       <script src="/lib/underscore-1.8.3.js"></script>
@@ -55,15 +45,14 @@
                      return data + ' -- ' + row[0] + '!!';
                   }}
             ]
-            , data: basketTestdata
-                    //, colorder: [0, 3, 2, 1]
+            //, colorder: [0, 3, 2, 1]
             , rowsPerPageSelect: [2, 4, 10, 15]
             , rowsPerPage: 15
             , sortmaster: [{col: 0}] //[{col:1,order:'asc',sortType: 'date-de'},{col:2,order:'desc'}]
          };
          var grid;
          $().ready(function () {
-            grid = $('#grid').ebtable(opts);
+            grid = $('#grid').ebtable(opts,basketTestdata);
             grid.adjustHeader();
          });
          $(window).on('resize', function () {

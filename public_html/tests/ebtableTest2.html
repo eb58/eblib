@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>myTable</title>
+      <title>Beispiel 2</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
@@ -10,7 +10,7 @@
          * {
             font-family:Arial;
             color: black;
-            font-size: 12px;
+            font-size: 10px;
          }
       </style>
       <script src="/lib/underscore-1.8.3.js"></script>
@@ -36,12 +36,11 @@
                , {name: "Eingang"}
                , {name: "DTA Nummern"}
             ]
-            , data: basketTestdata
             , rowsPerPage: 10
          };
          var grid;
          $().ready(function () {
-            grid = $('#grid').ebtable(opts);
+            grid = $('#grid').ebtable(opts,basketTestdata);
             grid.adjustHeader();
          });
          $(window).on('resize', function () {

@@ -1,6 +1,6 @@
 /* global _ */
 "use strict";
-jQuery.fn.ebtableSort = {
+$.fn.ebtableSort = {
    'date-de': function (a) { // '01.01.2013' -->   '20130101' 
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
       return d ? (d[3] + d[2] + d[1]) : '';
@@ -14,17 +14,15 @@ jQuery.fn.ebtableSort = {
          for (var i = 0; i < cols.length; i++) {
             var cdef = cols[i];
             var bAsc = cdef.order !== 'desc';
-            var x = r1[cdef.col], y = r2[cdef.col];
-            if (jQuery.type(x) === "string")
-               x = x.toLowerCase();
-            if (jQuery.type(y) === "string")
-               y = y.toLowerCase();
             var fmt = $.fn.ebtableSort[cdef.format];
+            var x = $.fn.ebtableHelpers.toLower(r1[cdef.col]);
+            var y = $.fn.ebtableHelpers.toLower(r2[cdef.col]);
             x = fmt ? fmt(x) : x;
             y = fmt ? fmt(y) : y;
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
-            if (ret !== 0)
+            if (ret !== 0) {
                return bAsc ? ret : -ret;
+            }
          }
          return 0;
       };
@@ -34,18 +32,36 @@ jQuery.fn.ebtableSort = {
    }
 };
 
+$.fn.ebtableHelpers = {
+   toLower: function toLower(o) {
+      return  $.type(o) === "string" ? o.toLowerCase() : o;
+   }
+   , clip: function clip(v, a, b) {
+      return Math.min(Math.max(a, v), b);
+   }
+};
 // ##########################################################################################
 
-$.fn.ebtable = function (opts) {
+$.fn.ebtable = function (opts, data) {
+   var title = $('title').text();
+   var origData = data || [];
+   var tblData = $.extend([], origData);
    var pageCur = 0;
    var defopts = {
-      bodyheight: Math.max(300, $(window).height() - 150)
+      bodyheight: Math.max(200, $(window).height() - 10)
       , rowsPerPageSelect: [10, 25, 50, 100]
       , rowsPerPage: 10
       , colorder: _.range(opts.columns.length) // [0,1,2,... ]
       , sortmaster: null //[{col:1,order:asc,format:fct1},{col:2}]
+      , saveState: function saveState() {
+         var opts = {rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder};
+         localStorage[title] = JSON.stringify(opts);
+      }
+      , loadState: function loadState() {
+         return localStorage[title] ? $.parseJSON(localStorage[title]) : {};
+      }
    };
-   var myopts = $.extend(defopts, opts);
+   var myopts = $.extend({}, defopts, opts, defopts.loadState());
 
    function tableHead() {
       var res = '';
@@ -57,11 +73,10 @@ $.fn.ebtable = function (opts) {
                     + '   <div class="sort_wrapper">' + col.name
                     + '      <span class="ui-icon ui-icon-triangle-2-n-s">'
                     + '   </div>'
-                    + '   <input width="30px" type="text" id="' + col.name + '" />'
+                    + '   <input type="text" id="' + col.name + '" />'
                     + '</th>';
          }
       }
-      ;
       return res;
    }
 
@@ -69,13 +84,13 @@ $.fn.ebtable = function (opts) {
       var res = '';
       var startRow = myopts.rowsPerPage * pageNr;
       var order = myopts.colorder;
-      for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, myopts.data.length); r++) {
+      for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
          res += '<tr>';
          for (var c = 0; c < myopts.columns.length; c++) {
             if (!myopts.columns[order[c]].invisible) {
-               var row = myopts.data[r];
+               var row = tblData[r];
                var rnd = myopts.columns[order[c]].render;
-               var val = myopts.data[r][order[c]];
+               var val = tblData[r][order[c]];
                val = rnd ? rnd(val, row) : val;
                res += '<td>' + val + '</td>';
             }
@@ -111,10 +126,38 @@ $.fn.ebtable = function (opts) {
 
    function infoCtrl() {
       var startRow = myopts.rowsPerPage * pageCur + 1;
-      var endRow = Math.min(startRow + myopts.rowsPerPage - 1, myopts.data.length);
+      var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
       var templ = _.template("<%=start%> bis <%=end%>  von <%=count%>");
-      var label = templ({start: startRow, end: endRow, count: myopts.data.length});
+      var label = templ({start: startRow, end: endRow, count: tblData.length});
       return '<button id="info">' + label + '</button>';
+   }
+
+   function filterData() {
+      var filters = [];
+      $('#head input').each(function (idx, o) {
+         var filterText = $(o).val();
+         if (filterText)
+            filters.push({col: myopts.colorder[idx], text: filterText});
+      })
+      if (filters.length === 0) {
+         tblData = origData;
+         return true;
+      }
+
+      var fData = [];
+      for (var r = 0; r < origData.length; r++) {
+         var b = true;
+         for (var i = 0; i < filters.length && b; i++) {
+            var f = filters[i];
+            var cellData = $.fn.ebtableHelpers.toLower(origData[r][f.col]);
+            b = b && cellData.indexOf(f.text) >= 0;
+         }
+         if (b) {
+            fData.push(origData[r]);
+         }
+      }
+      tblData = fData;
+      return true;
    }
 
    var tableTemplate = _.template(
@@ -155,6 +198,7 @@ $.fn.ebtable = function (opts) {
                  $('#data tbody').html(newrows);
                  $('#ctrlInfo').html(infoCtrl());
                  window.dispatchEvent(new Event('resize'));
+                 myopts.saveState();
               }
            });
 
@@ -176,10 +220,10 @@ $.fn.ebtable = function (opts) {
            });
    $('.nextBtn').button()
            .click(function () {
-              if (myopts.data.length === 0)
+              if (tblData.length === 0)
                  return;
-              var maxPageCur = Math.floor(myopts.data.length / myopts.rowsPerPage);
-              pageCur = Math.max(0, Math.min(maxPageCur, pageCur + 1));
+              var maxPageCur = Math.floor(tblData.length / myopts.rowsPerPage);
+              pageCur = $.fn.ebtableHelpers.clip(pageCur + 1, 0, maxPageCur);
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
               $('#ctrlInfo').html(infoCtrl());
@@ -187,7 +231,7 @@ $.fn.ebtable = function (opts) {
            });
    $('.lastBtn').button()
            .click(function () {
-              pageCur = Math.floor(myopts.data.length / myopts.rowsPerPage);
+              pageCur = Math.floor(tblData.length / myopts.rowsPerPage);
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
               $('#ctrlInfo').html(infoCtrl());
@@ -201,11 +245,10 @@ $.fn.ebtable = function (opts) {
               var col = myopts.columns[idx];
               var coldefs = (myopts.sortmaster && idx !== myopts.sortmaster[0].col) ? $.extend([], myopts.sortmaster) : [];
               coldefs.push({col: idx, format: col.format, order: opts.columns[idx].order});
-              myopts.data = $.fn.ebtableSort.sort(opts.data, coldefs);
+              tblData = $.fn.ebtableSort.sort(tblData, coldefs);
               $.each(coldefs, function (idx, o) {
                  myopts.columns[o.col].order = opts.columns[o.col].order === 'desc' ? 'asc' : 'desc';
               });
-              //myopts.columns[idx].order = opts.columns[idx].order === 'desc' ? 'asc' : 'desc');
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
               var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
@@ -216,13 +259,11 @@ $.fn.ebtable = function (opts) {
    $('#info')
            .button();
    $('#head input')
-           .on('keyup change', function (event) {
-              //var c = $('#' + event.target.id);
-              //grid.column(c + ':visIdx').search(this.value).draw();
-              var x = $('#head input');
-              $.each(x, function (idx, o) {
-                 console.log(idx, $(o).val());
-              });
+           .on('keyup', function (event) {
+              console.log('filter', event);
+              filterData();
+              $('#data tbody').html(tableData(pageCur));
+              window.dispatchEvent(new Event('resize'));
            })
            .on('click', function (event) {
               event.target.focus();
@@ -240,13 +281,13 @@ $.fn.ebtable = function (opts) {
          var w1 = $('#head th:nth-child(' + i + ')').width();
          var w2 = $('#data td:nth-child(' + i + ')').width();
          var w = Math.max(w1, w2);
-         //console.log(i, w1, w2, w);
+         console.log(i,'head:', w1, 'data:',w2, 'max:', w);
          $('#head th:nth-child(' + i + ')').width(w);
          $('#data tr:first td:nth-child(' + i + ')').width(w);
-         $('#ctrlPage1').css('position', 'absolute').css('top', 10);
-         $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
-         $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width());
       }
+      $('#ctrlPage1').css('position', 'absolute').css('top', 5);
+      $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
+      $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
    };
    // ##############################################################################
 

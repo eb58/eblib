@@ -43,7 +43,7 @@ $.fn.ebtableHelpers = {
 // ##########################################################################################
 
 $.fn.ebtable = function (opts, data) {
-   var title = $('title').text();
+   var localStorageKey = 'ebtable-' + $('title').text().replace(' ', '');
    var origData = data || [];
    var tblData = $.extend([], origData);
    var pageCur = 0;
@@ -55,10 +55,10 @@ $.fn.ebtable = function (opts, data) {
       , sortmaster: null //[{col:1,order:asc,format:fct1},{col:2}]
       , saveState: function saveState() {
          var opts = {rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder};
-         localStorage[title] = JSON.stringify(opts);
+         localStorage[localStorageKey] = JSON.stringify(opts);
       }
       , loadState: function loadState() {
-         return localStorage[title] ? $.parseJSON(localStorage[title]) : {};
+         return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
       }
    };
    var myopts = $.extend({}, defopts, opts, defopts.loadState());
@@ -70,10 +70,10 @@ $.fn.ebtable = function (opts, data) {
          var col = myopts.columns[order[c]];
          if (!col.invisible) {
             res += '   <th id="' + col.name + '">'
+                    + '   <input type="text" id="' + col.name + '" />'
                     + '   <div class="sort_wrapper">' + col.name
                     + '      <span class="ui-icon ui-icon-triangle-2-n-s">'
                     + '   </div>'
-                    + '   <input type="text" id="' + col.name + '" />'
                     + '</th>';
          }
       }
@@ -138,7 +138,7 @@ $.fn.ebtable = function (opts, data) {
          var filterText = $(o).val();
          if (filterText)
             filters.push({col: myopts.colorder[idx], text: filterText});
-      })
+      });
       if (filters.length === 0) {
          tblData = origData;
          return true;
@@ -159,6 +159,29 @@ $.fn.ebtable = function (opts, data) {
       tblData = fData;
       return true;
    }
+// ##############################################################################
+
+   function adjustHeader() {
+      console.log('>>>adjustHeader window-width=', $(window).width());
+      $('#divall').width($(window).width() - 25);
+      $('#head').width($('#divall').width() - 20);
+      $('#data').width($('#divall').width() - 20);
+
+      for (var i = 1; i <= opts.columns.length; i++) {
+         var w1 = $('#head th:nth-child(' + i + ')').width();
+         var w2 = $('#data td:nth-child(' + i + ')').width();
+         var w = Math.max(w1, w2);
+         console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
+         $('#head th:nth-child(' + i + ')').width(w);
+         $('#data tr:first td:nth-child(' + i + ')').width(w);
+      }
+      $('#ctrlPage1').css('position', 'absolute').css('top', 5);
+      $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
+      $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
+   }
+   ;
+   // ##############################################################################
+
 
    var tableTemplate = _.template(
            "<div>\n\
@@ -188,6 +211,12 @@ $.fn.ebtable = function (opts, data) {
       , info: infoCtrl()
       , bodyheight: myopts.bodyheight
    }));
+   adjustHeader();
+
+   // #################################################################
+   // Actions
+   // #################################################################
+
    $('#lenctrl').css('width', '60px')
            .selectmenu({change: function (event, data) {
                  console.log('change rowsPerPage', event, data.item.value);
@@ -197,7 +226,7 @@ $.fn.ebtable = function (opts, data) {
                  var newrows = tableData(pageCur);
                  $('#data tbody').html(newrows);
                  $('#ctrlInfo').html(infoCtrl());
-                 window.dispatchEvent(new Event('resize'));
+                 $(window).trigger('resize');
                  myopts.saveState();
               }
            });
@@ -208,7 +237,7 @@ $.fn.ebtable = function (opts, data) {
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
               $('#ctrlInfo').html(infoCtrl());
-              window.dispatchEvent(new Event('resize'));
+              $(window).trigger('resize');
            });
    $('.backBtn').button()
            .click(function () {
@@ -216,7 +245,7 @@ $.fn.ebtable = function (opts, data) {
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
               $('#ctrlInfo').html(infoCtrl());
-              window.dispatchEvent(new Event('resize'));
+              $(window).trigger('resize');
            });
    $('.nextBtn').button()
            .click(function () {
@@ -227,7 +256,7 @@ $.fn.ebtable = function (opts, data) {
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
               $('#ctrlInfo').html(infoCtrl());
-              window.dispatchEvent(new Event('resize'));
+              $(window).trigger('resize');
            });
    $('.lastBtn').button()
            .click(function () {
@@ -235,7 +264,7 @@ $.fn.ebtable = function (opts, data) {
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
               $('#ctrlInfo').html(infoCtrl());
-              window.dispatchEvent(new Event('resize'));
+              $(window).trigger('resize');
            });
 
    $('#head th')
@@ -249,12 +278,14 @@ $.fn.ebtable = function (opts, data) {
               $.each(coldefs, function (idx, o) {
                  myopts.columns[o.col].order = opts.columns[o.col].order === 'desc' ? 'asc' : 'desc';
               });
+              pageCur = 0;
               var newrows = tableData(pageCur);
               $('#data tbody').html(newrows);
+              $('#ctrlInfo').html(infoCtrl());
               var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
               $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
               $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
-              window.dispatchEvent(new Event('resize'));
+              $(window).trigger('resize');
            });
    $('#info')
            .button();
@@ -262,34 +293,20 @@ $.fn.ebtable = function (opts, data) {
            .on('keyup', function (event) {
               console.log('filter', event);
               filterData();
+              pageCur = 0;
               $('#data tbody').html(tableData(pageCur));
-              window.dispatchEvent(new Event('resize'));
+              $('#ctrlInfo').html(infoCtrl());
+              $(window).trigger('resize');
            })
            .on('click', function (event) {
               event.target.focus();
               return false; // ignore - sorting
            });
-   // ##############################################################################
 
-   this.adjustHeader = function adjustHeader() {
-      console.log('>>>adjustHeader window-width=', $(window).width());
-      $('#divall').width($(window).width() - 25);
-      $('#head').width($('#divall').width() - 20);
-      $('#data').width($('#divall').width() - 20);
-
-      for (var i = 1; i <= opts.columns.length; i++) {
-         var w1 = $('#head th:nth-child(' + i + ')').width();
-         var w2 = $('#data td:nth-child(' + i + ')').width();
-         var w = Math.max(w1, w2);
-         console.log(i,'head:', w1, 'data:',w2, 'max:', w);
-         $('#head th:nth-child(' + i + ')').width(w);
-         $('#data tr:first td:nth-child(' + i + ')').width(w);
-      }
-      $('#ctrlPage1').css('position', 'absolute').css('top', 5);
-      $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
-      $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
-   };
-   // ##############################################################################
-
+   $(window)
+           .on('resize', function () {
+              console.log('resize!!!');
+              adjustHeader();
+           });
    return this;
 };

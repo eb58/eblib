@@ -24,8 +24,8 @@
 
          var opts = {
             columns: [
-               {name: "Paket"}
-               , {name: 'xx'}
+               {name: "Paket", invisible:true}
+               , {name: 'xx', invisible:true}
                , {name: "Datum"}
                , {name: "Name"}
                , {name: "Fälligkeit"}
@@ -41,10 +41,6 @@
          var grid;
          $().ready(function () {
             grid = $('#grid').ebtable(opts,basketTestdata);
-            grid.adjustHeader();
-         });
-         $(window).on('resize', function () {
-            grid.adjustHeader();
          });
       </script>
    </head>

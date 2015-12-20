@@ -33,7 +33,7 @@
             ['', 'Wolperdinger', '31.08.1915', ''],
             ['', 'Yeti', '31.08.2016', ''],
             ['', 'Einhorn', '04.11.2017', ''],
-            ['', 'LIndwurm', '31.12.2018', ''],
+            ['', 'Lindwurm', '31.12.2018', '']
          ];
 
          var opts = {
@@ -53,10 +53,6 @@
          var grid;
          $().ready(function () {
             grid = $('#grid').ebtable(opts,basketTestdata);
-            grid.adjustHeader();
-         });
-         $(window).on('resize', function () {
-            grid.adjustHeader();
          });
       </script>
    </head>

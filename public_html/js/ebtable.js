@@ -136,8 +136,11 @@ $.fn.ebtable = function (opts, data) {
       var filters = [];
       $('#head input').each(function (idx, o) {
          var filterText = $(o).val();
-         if (filterText)
-            filters.push({col: myopts.colorder[idx], text: filterText});
+         if (filterText) {
+            var colName = $(o).attr('id');
+            var col = indexOfCol(colName);
+            filters.push({col: col, text: filterText});
+         }
       });
       if (filters.length === 0) {
          tblData = origData;
@@ -150,7 +153,8 @@ $.fn.ebtable = function (opts, data) {
          for (var i = 0; i < filters.length && b; i++) {
             var f = filters[i];
             var cellData = $.fn.ebtableHelpers.toLower(origData[r][f.col]);
-            b = b && cellData.indexOf(f.text) >= 0;
+            var searchText = $.fn.ebtableHelpers.toLower(f.text);
+            b = b && cellData.indexOf(searchText) >= 0;
          }
          if (b) {
             fData.push(origData[r]);

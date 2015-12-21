@@ -38,14 +38,14 @@
 
          var opts = {
             columns: [
-               {name: "Gattung", invisible: false},
+               {name: "Gattung", invisible: true},
                {name: "Tierart"},
                {name: "Datum", format: 'date-de'},
                {name: "Name", render: function (data, row) {
-                     return data + ' -- ' + row[0] + '!!';
+                     return data + ' -- ' + row[0];
                   }}
             ]
-            //, colorder: [0, 3, 2, 1]
+            , colorder: [0, 3, 2, 1]
             , rowsPerPageSelect: [2, 4, 10, 15]
             , rowsPerPage: 15
             , sortmaster: [{col: 0}] //[{col:1,order:'asc',sortType: 'date-de'},{col:2,order:'desc'}]

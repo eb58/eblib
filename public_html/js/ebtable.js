@@ -43,7 +43,7 @@ $.fn.ebtableHelpers = {
 // ##########################################################################################
 
 $.fn.ebtable = function (opts, data) {
-   var localStorageKey = 'ebtable-' + $('title').text().replace(' ', '');
+   var localStorageKey = 'ebtable-' + $(document)[0].title.replace(' ', '');
    var origData = data || [];
    var tblData = $.extend([], origData);
    var pageCur = 0;
@@ -53,11 +53,11 @@ $.fn.ebtable = function (opts, data) {
       , rowsPerPage: 10
       , colorder: _.range(opts.columns.length) // [0,1,2,... ]
       , sortmaster: null //[{col:1,order:asc,format:fct1},{col:2}]
-      , saveState: function saveState() {
+      , saveState: function () {
          var opts = {rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder};
          localStorage[localStorageKey] = JSON.stringify(opts);
       }
-      , loadState: function loadState() {
+      , loadState: function () {
          return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
       }
    };
@@ -66,6 +66,9 @@ $.fn.ebtable = function (opts, data) {
    function tableHead() {
       var res = '';
       var order = myopts.colorder;
+      if (myopts.selection) {
+         res += '<th><input type="checkbox" id="select"></th>';
+      }
       for (var c = 0; c < myopts.columns.length; c++) {
          var col = myopts.columns[order[c]];
          if (!col.invisible) {
@@ -86,6 +89,9 @@ $.fn.ebtable = function (opts, data) {
       var order = myopts.colorder;
       for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
          res += '<tr>';
+         if (myopts.selection) {
+            res += '<td><input type="checkbox" id="select"></td>';
+         }
          for (var c = 0; c < myopts.columns.length; c++) {
             if (!myopts.columns[order[c]].invisible) {
                var row = tblData[r];
@@ -171,7 +177,11 @@ $.fn.ebtable = function (opts, data) {
       $('#head').width($('#divall').width() - 20);
       $('#data').width($('#divall').width() - 20);
 
-      for (var i = 1; i <= opts.columns.length; i++) {
+      if (myopts.selection) {
+         $('#head th:first').width(20);
+         $('#data tr:first td:first').width(20);
+      }
+      for (var i = (myopts.selection ? 2 : 1); i <= opts.columns.length + (myopts.selection ? 1 : 0); i++) {
          var w1 = $('#head th:nth-child(' + i + ')').width();
          var w2 = $('#data td:nth-child(' + i + ')').width();
          var w = Math.max(w1, w2);
@@ -273,7 +283,9 @@ $.fn.ebtable = function (opts, data) {
 
    $('#head th')
            .on('click', function (event, selector, data) {
-              console.log('click', event.currentTarget.cellIndex);
+              console.log('click', event.currentTarget.id);
+              if (!event.currentTarget.id)
+                 return
               var idx = indexOfCol(event.currentTarget.id);
               var col = myopts.columns[idx];
               var coldefs = (myopts.sortmaster && idx !== myopts.sortmaster[0].col) ? $.extend([], myopts.sortmaster) : [];

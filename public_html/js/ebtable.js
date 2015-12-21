@@ -140,7 +140,7 @@ $.fn.ebtable = function (opts, data) {
 
    function filterData() {
       var filters = [];
-      $('#head input').each(function (idx, o) {
+      $('#head input[type=text]').each(function (idx, o) {
          var filterText = $(o).val();
          if (filterText) {
             var colName = $(o).attr('id');

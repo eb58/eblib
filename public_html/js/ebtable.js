@@ -67,7 +67,7 @@ $.fn.ebtable = function (opts, data) {
       var res = '';
       var order = myopts.colorder;
       if (myopts.selection) {
-         res += '<th><input type="checkbox" id="selectHead"></th>';
+         res += '<th><input type="checkbox" id="selectAll"></th>';
       }
       for (var c = 0; c < myopts.columns.length; c++) {
          var col = myopts.columns[order[c]];
@@ -190,7 +190,7 @@ $.fn.ebtable = function (opts, data) {
          var w2 = $('#data td:nth-child(' + i + ')').innerWidth();
          if (w1 !== w2) {
             console.log('Aua!', i, 'head:', w1, 'data:', w2);
-            $(document).width($(document).width() + 100);
+            //???$(document).width($(document).width() + 100);
             //adjustColumn();
          }
       }
@@ -200,6 +200,7 @@ $.fn.ebtable = function (opts, data) {
       $('#divall').width($(window).width() - 25);
       $('#head').width($('#divall').width() - 20);
       $('#data').width($('#divall').width() - 20);
+      $('th,td').removeAttr('width');
       adjustColumns();
       $('#ctrlPage1').css('position', 'absolute').css('top', 5);
       $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
@@ -212,13 +213,13 @@ $.fn.ebtable = function (opts, data) {
            "<div>\n\
          <div id='ctrlLength'><%= selectLen %></div>\n\
          <div id='ctrlPage1'><%= browseBtns %></div>\n\
-         <div id='divall' style='overflow-x:auto;'>\n\
+         <div id='divall'>\n\
             <div>\n\
                <table id='head' >\n\
                   <thead><tr><%= head %></tr></thead>\n\
                </table>\n\
             </div>\n\
-            <div class='scroll-pane' id='divdata' style='max-height:<%= bodyheight %>px;'>\n\
+            <div id='divdata' style='max-height:<%= bodyheight %>px;'>\n\
                <table id='data'>\n\
                   <tbody><%= data %></tbody>\n\
                </table>\n\
@@ -288,7 +289,7 @@ $.fn.ebtable = function (opts, data) {
       $(window).trigger('resize');
    });
 
-   $('#head th').on('click', function (event, selector, data) {
+   $('#head th:gt(0)').on('click', function (event, selector, data) {
       console.log('click', event.currentTarget.id);
       if (!event.currentTarget.id)
          return;
@@ -320,11 +321,17 @@ $.fn.ebtable = function (opts, data) {
       event.target.focus();
       return false; // ignore - sorting
    });
-   $('#data input[type=checkbox]').on('change', function (event) {
-      console.log('change!', event)
-   });
 
    $('#info').button();
+
+   $('#data input[type=checkbox]').on('change', function (event) {
+      console.log('change !', event.target);
+   });
+   
+   $('#selectAll').on('click', function (event) {
+      console.log('change!', event.target, $(event.target).prop('checked') );
+      $('#data input[type=checkbox]').prop( "checked",  $(event.target).prop('checked') );
+   });
 
    $(window)
            .on('resize', function () {

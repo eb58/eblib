@@ -1,13 +1,10 @@
 #grid table{ background-color:lightgray;  }
 
 th{ 
-   font-size: 12px;
-   background-color:aliceblue; 
-   border-color: black;
-   padding-top: 4px;
-   padding-bottom: 4px;
+   background-color:#ddc; 
+   padding: 3px 3px 3px 3px;
 }
-td{ background-color:white ;
+td{ background-color:white;
     padding: 3px 3px 3px 3px
 }
 thead input {
@@ -25,19 +22,17 @@ input[type=checkbox] {
 div.sort_wrapper {
    position: relative;
 }
+
 table thead th div.sort_wrapper span {
    position: absolute;
-   top: 50%;
-   margin-top: -10px;
-   right: 2px;
-   margin-bottom: 18px;
+   margin-top: -6px;
+   right: -6px;
 }
 #xhead th, #xdata td {
   overflow: hidden;
   -ms-text-overflow: ellipsis;
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 

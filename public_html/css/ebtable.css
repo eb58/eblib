@@ -4,9 +4,18 @@
    background-color:#ddc; 
    padding: 3px 3px 3px 3px;
 }
-#grid table td{ background-color:white;
+#grid table td{ 
+   background-color:white;
     padding: 3px 3px 3px 3px
 }
+
+#grid table td.group{
+   background-color: #fffde0 !important;
+}
+#grid table td.groupheader{
+   background-color: #fff5a8!important;
+}
+
 #grid table thead th input {
    width: 90%;
    padding: 0px;

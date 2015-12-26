@@ -13,7 +13,7 @@ $.fn.ebtableSort = {
       return function (r1, r2) {
          for (var i = 0; i < cols.length; i++) {
             var cdef = cols[i];
-            var bAsc = cdef.order !== 'desc';
+            var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
             var fmt = $.fn.ebtableSort[cdef.format];
             var x = $.fn.ebtableHelpers.toLower(r1[cdef.col]);
             var y = $.fn.ebtableHelpers.toLower(r2[cdef.col]);
@@ -40,6 +40,7 @@ $.fn.ebtableHelpers = {
       return Math.min(Math.max(a, v), b);
    }
 };
+
 // ##########################################################################################
 
 $.fn.ebtable = function (opts, data) {
@@ -52,7 +53,6 @@ $.fn.ebtable = function (opts, data) {
       , rowsPerPageSelectValues: [10, 25, 50, 100]
       , rowsPerPage: 10
       , colorder: _.range(opts.columns.length) // [0,1,2,... ]
-      , sortmaster: null //[{col:1,order:asc,format:fct1},{col:2}]
       , saveState: function () {
          var opts = {rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder};
          localStorage[localStorageKey] = JSON.stringify(opts);
@@ -60,26 +60,59 @@ $.fn.ebtable = function (opts, data) {
       , loadState: function () {
          return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
       }
+      , sortmaster: [] //[{col:1,order:asc,format:fct1},{col:2}]
+      , groupingCols: null //{groupid:1,groupsort:0,grouphead:'GA'}
+      , groups:[]
+
    };
    var myopts = $.extend({}, defopts, opts, defopts.loadState());
+
+   function preprocessData(){
+      for (var r = 0; r < tblData.length; r++) {
+         var groupName = tblData[r][myopts.groupingCols.groupid];
+         tblData[r].isGroupHeader = tblData[r][myopts.groupingCols.groupsort]===myopts.groupingCols.grouphead;
+         tblData[r].isGroupElement = !!groupName && !tblData[r].isGroupHeader;
+         if( !!groupName ) myopts.groups[groupName] =  {isOpen:false};
+      }
+   }
+
+   function selectRows(event) { // select row
+      var rowNr = event.target.id.replace('check', '');
+      tblData[rowNr].selected = $(event.target).prop('checked');
+      console.log('change !', event.target.id, rowNr, tblData[rowNr], tblData[rowNr].selected);
+      // Grouping
+      if (myopts.groupingCols && tblData[rowNr][myopts.groupingCols.groupid]
+              && tblData[rowNr][myopts.groupingCols.groupsort] === myopts.groupingCols.grouphead) {
+         var groupId = tblData[rowNr][myopts.groupingCols.groupid];
+         var groupSort = tblData[rowNr][myopts.groupingCols.groupsort];
+         console.log('Group', groupId, groupSort);
+         for (var i = 0; i < tblData.length; i++) {
+            if (tblData[i][myopts.groupingCols.groupid] === groupId) {
+               tblData[i].selected = tblData[rowNr].selected
+               $('#check' + i).prop('checked', tblData[rowNr].selected);
+            }
+         }
+      }
+   }
 
    function tableHead() {
       var res = '';
       var order = myopts.colorder;
       if (myopts.selection) {
-         res += '<th><input type="checkbox" id="selectAll"></th>';
+//         res += '<th><input type="checkbox" id="selectAll"></th>';
+         res += '<th></th>';
       }
       for (var c = 0; c < myopts.columns.length; c++) {
          var col = myopts.columns[order[c]];
          if (!col.invisible) {
-             var templ = _.template(
-                     '<th id="<%=colname%>">\n\
+            var templ = _.template(
+                    '<th id="<%=colname%>">\n\
                         <div class="sort_wrapper">\n\
                            <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\n\
                         </div>\n\
                         <input type="text" id="<%=colname%>" />\n\
                      </th>');
-             res += templ({colname: col.name});
+            res += templ({colname: col.name});
          }
       }
       return res;
@@ -90,9 +123,16 @@ $.fn.ebtable = function (opts, data) {
       var startRow = myopts.rowsPerPage * pageNr;
       var order = myopts.colorder;
       for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
+         var groupName = tblData[r][myopts.groupingCols.groupid];
+         if( tblData[r].isGroupElement && !myopts.groups[groupName].isOpen ) continue
+         var cls = tblData[r].isGroupElement ? ' class="group" ' : '';
+         cls = tblData[r].isGroupHeader ? ' class="groupheader" ' : cls;
          res += '<tr>';
          if (myopts.selection) {
-            res += '<td><input type="checkbox" id="select' + r + '"></td>';
+            var c = !!tblData[r].selected ? ' checked="checked" ' : ' ';
+            res += '<td' +cls +'>\n\
+                      <input type="checkbox" class="checkRow"' + c + 'id="check' + r + '"/>\n\
+                    </td>';
          }
          for (var c = 0; c < myopts.columns.length; c++) {
             if (!myopts.columns[order[c]].invisible) {
@@ -100,7 +140,7 @@ $.fn.ebtable = function (opts, data) {
                var rnd = myopts.columns[order[c]].render;
                var val = tblData[r][order[c]];
                val = rnd ? rnd(val, row) : val;
-               res += '<td>' + val + '</td>';
+               res += '<td' +cls +'>' + val + '</td>';
             }
          }
          res += '</tr>\n';
@@ -141,16 +181,19 @@ $.fn.ebtable = function (opts, data) {
       return '<button id="info">' + label + '</button>';
    }
 
-   function filterData() {
+   function getFilters() {
       var filters = [];
       $('#head input[type=text]').each(function (idx, o) {
-         var filterText = $(o).val();
-         if (filterText) {
-            var colName = $(o).attr('id');
-            var col = indexOfCol(colName);
-            filters.push({col: col, text: filterText});
+         if ($(o).val()) {
+            var col = indexOfCol($(o).attr('id'));
+            filters.push({col: col,searchtext: $.fn.ebtableHelpers.toLower($(o).val())});
          }
       });
+      return filters
+
+   }
+   function filterData() {
+      var filters = getFilters();
       if (filters.length === 0) {
          tblData = origData;
          return true;
@@ -162,7 +205,7 @@ $.fn.ebtable = function (opts, data) {
          for (var i = 0; i < filters.length && b; i++) {
             var f = filters[i];
             var cellData = $.fn.ebtableHelpers.toLower(origData[r][f.col]);
-            var searchText = $.fn.ebtableHelpers.toLower(f.text);
+            var searchText = f.searchtext;
             b = b && cellData.indexOf(searchText) >= 0;
          }
          if (b) {
@@ -230,6 +273,7 @@ $.fn.ebtable = function (opts, data) {
          <div id='ctrlPage2'><%= browseBtns %></div>\n\
       </div>"
            );
+   preprocessData();
    this.html(tableTemplate({
       head: tableHead()
       , data: tableData(0)
@@ -245,6 +289,7 @@ $.fn.ebtable = function (opts, data) {
       $('#data tbody').html(newrows);
       $('#ctrlInfo').html(infoCtrl());
       $(window).trigger('resize');
+      $('#data input[type=checkbox]').on('change', selectRows);
 
    }
    // #################################################################
@@ -288,12 +333,18 @@ $.fn.ebtable = function (opts, data) {
          return;
       var idx = indexOfCol(event.currentTarget.id);
       var col = myopts.columns[idx];
-      var coldefs = (myopts.sortmaster && idx !== myopts.sortmaster[0].col) ? $.extend([], myopts.sortmaster) : [];
-      coldefs.push({col: idx, format: col.format, order: opts.columns[idx].order});
+      var sm = myopts.sortmaster && myopts.sortmaster[col] != idx ? myopts.sortmaster : []
+      var coldefs = $.extend([], sm);
+      coldefs.push({col: idx, format: col.format, order: myopts.columns[idx].order});
+      $.each(coldefs, function (idx, o) {
+         o.order = myopts.columns[o.col].order || 'asc';
+      });
       tblData = $.fn.ebtableSort.sort(tblData, coldefs);
       $.each(coldefs, function (idx, o) {
-         myopts.columns[o.col].order = opts.columns[o.col].order === 'desc' ? 'asc' : 'desc';
+         var toggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+         myopts.columns[o.col].order = myopts.columns[o.col].order ? toggle[myopts.columns[o.col].order] : 'asc';
       });
+      console.log('sorting2', myopts.columns);
       var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
       $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
       $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
@@ -313,19 +364,25 @@ $.fn.ebtable = function (opts, data) {
 
    $('#info').button();
 
-   $('#data input[type=checkbox]').on('change', function (event) {
-      console.log('change !', event.target);
-   });
-
-   $('#selectAll').on('click', function (event) {
-      console.log('change!', event.target, $(event.target).prop('checked'));
-      $('#data input[type=checkbox]').prop("checked", $(event.target).prop('checked'));
-   });
+//   $('#selectAll').on('click', function (event) { // select all rows
+//      console.log('change!!!', event.target, $(event.target).prop('checked'));
+//      $('#data input[type=checkbox]').prop("checked", $(event.target).prop('checked'));
+//   });
+   $('#data input[type=checkbox]').on('change', selectRows);
 
    $(window)
            .on('resize', function () {
               console.log('resize!!!');
               adjustTable();
            });
+           
+// ##########  Exports ############           
+   this.toggleGroupIsOpen = function(groupName){
+      myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
+      redraw(pageCur);
+   }
+   this.groupIsOpen = function(groupName){
+      return _.property('isOpen')(myopts.groups[groupName]);
+   }
    return this;
 };

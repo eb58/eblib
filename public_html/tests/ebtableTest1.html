@@ -21,39 +21,52 @@
       <script>
          'use strict';
          var basketTestdata = [
-            ['Säugetier', 'Esel', '05.08.2011', 'Liebig, Ellen, 17.08.1956', ],
-            ['Säugetier', 'Affe', '10.06.2013', 'Heine, Heinrich, 07.12.2006'],
-            ['Säugetier', 'Maus', '15.09.2014', 'Manne, Antonia, 17.06.1954'],
-            ['Säugetier', 'Hase', '15.09.2014', 'Liebig, Ellen, 17.08.1956'],
-            ['Säugetier', 'Hund', '31.08.2015', 'Mann, Heinrich, 17.08.1878'],
-            ['Insekt', 'Fliege', '31.08.2009', 'Mann, Thomas'],
-            ['Insekt', 'Biene', '31.08.2001', 'Lessing, Gottfried'],
-            ['Insekt', 'Hummel', '01.08.1759', 'Schiller, Friedrich'],
-            ['Insekt', 'Wespe', '31.06.1900', 'Storm, Theodor'],
-            ['', 'Wolperdinger', '31.08.1915', ''],
-            ['', 'Yeti', '31.08.2016', ''],
-            ['', 'Einhorn', '04.11.2017', ''],
-            ['', 'Lindwurm', '31.12.2018', '']
+            ['GA', 'Säugetier', '', '', ''],
+            ['GB', 'Säugetier', 'Esel', '05.08.2011', 'Liebig, Ellen, 17.08.1956'],
+            ['GB', 'Säugetier', 'Affe', '10.06.2013', 'Heine, Heinrich, 07.12.2006'],
+            ['GB', 'Säugetier', 'Maus', '15.09.2014', 'Manne, Antonia, 17.06.1954'],
+            ['GB', 'Säugetier', 'Hase', '15.09.2014', 'Liebig, Ellen, 17.08.1956'],
+            ['GB', 'Säugetier', 'Hund', '31.08.2015', 'Mann, Heinrich, 17.08.1878'],
+            ['GA', 'Insekt', '', '', ''],
+            ['GB', 'Insekt', 'Fliege', '31.08.2009', 'Mann, Thomas'],
+            ['GB', 'Insekt', 'Biene', '31.08.2001', 'Lessing, Gottfried'],
+            ['GB', 'Insekt', 'Hummel', '01.08.1759', 'Schiller, Friedrich'],
+            ['GB', 'Insekt', 'Wespe', '31.06.1900', 'Storm, Theodor'],
+            ['', '', 'Wolperdinger', '31.08.1915', ''],
+            ['', '', 'Yeti', '31.08.2016', ''],
+            ['', '', 'Einhorn', '04.11.2017', ''],
+            ['', '', 'Lindwurm', '31.12.2018', '']
          ];
 
          var opts = {
             columns: [
-               {name: "Gattung", invisible: false},
+               {name: "Grouping", invisible: true, order: 'asc-fix'},
+               {name: "Gattung", invisible: true},
                {name: "Tierart"},
                {name: "Datum", format: 'date-de'},
                {name: "Name", render: function (data, row) {
-                     return data + ' -- ' + row[0];
+                     var isOpen = grid? grid.groupIsOpen(row[1]): false;
+                     var imgsrc = '/images/group_' + (isOpen?'opened':'closed') + '.gif';
+                     return data || !row[1] ? 
+                     data 
+                     : '<img src="' + imgsrc + '"\n\
+                        onclick=grid.toggleGroupIsOpen("'+row[1]+ '")\n\
+                        /><b>&nbsp;' + row[1] + '</b>';
                   }}
             ]
             , selection: true
-            , colorder: [0, 3, 2, 1]
-            , rowsPerPageSelectValues: [2, 4, 10, 15]
+            , colorder: [0, 1, 4, 3, 2]
+            , rowsPerPageSelectValues: [2, 4, 5, 10, 15]
             , rowsPerPage: 15
-            , sortmaster: [{col: 0}] //[{col:1,order:'asc',sortType: 'date-de'},{col:2,order:'desc'}]
+            , sortmaster: [{col: 1}, {col: 0}] //[{col:1,order:'asc',sortType: 'date-de'},{col:2,order:'desc'}]
+            , groupingCols: {groupid:1,groupsort:0,grouphead:'GA'}
          };
          var grid;
+         function toggle(groupName){
+            grid.toggleGroupIsOpen(groupName);
+         }
          $().ready(function () {
-            grid = $('#grid').ebtable(opts,basketTestdata);
+            grid = $('#grid').ebtable(opts, basketTestdata);
          });
       </script>
    </head>

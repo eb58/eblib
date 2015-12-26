@@ -72,13 +72,14 @@ $.fn.ebtable = function (opts, data) {
       for (var c = 0; c < myopts.columns.length; c++) {
          var col = myopts.columns[order[c]];
          if (!col.invisible) {
-            res += '   <th id="' + col.name + '">'
-                    + '   <div class="sort_wrapper">'
-                    + '      <span class="ui-icon ui-icon-triangle-2-n-s"/>'
-                    + col.name
-                    + '   </div>'
-                    + '   <input type="text" id="' + col.name + '" />'
-                    + '</th>';
+             var templ = _.template(
+                     '<th id="<%=colname%>">\n\
+                        <div class="sort_wrapper">\n\
+                           <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\n\
+                        </div>\n\
+                        <input type="text" id="<%=colname%>" />\n\
+                     </th>');
+             res += templ({colname: col.name});
          }
       }
       return res;
@@ -175,7 +176,7 @@ $.fn.ebtable = function (opts, data) {
    function adjustColumns() {
       if (myopts.selection) {
          $('#head th:first').width(20);
-         $('#data tr:first td:first').width(20);
+         $('#data td:first').width(20);
       }
       for (var i = (myopts.selection ? 2 : 1); i <= opts.columns.length + (myopts.selection ? 1 : 0); i++) {
          var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
@@ -239,6 +240,13 @@ $.fn.ebtable = function (opts, data) {
    }));
    adjustTable();
 
+   function redraw(pageCur) {
+      var newrows = tableData(pageCur);
+      $('#data tbody').html(newrows);
+      $('#ctrlInfo').html(infoCtrl());
+      $(window).trigger('resize');
+
+   }
    // #################################################################
    // Actions
    // #################################################################
@@ -246,51 +254,36 @@ $.fn.ebtable = function (opts, data) {
    $('#lenctrl').css('width', '60px')
            .selectmenu({change: function (event, data) {
                  console.log('change rowsPerPage', event, data.item.value);
-                 var startRow = myopts.rowsPerPage * pageCur + 1;
                  myopts.rowsPerPage = Number(data.item.value);
+                 var startRow = myopts.rowsPerPage * pageCur + 1;
                  pageCur = Math.floor(startRow / myopts.rowsPerPage);
-                 var newrows = tableData(pageCur);
-                 $('#data tbody').html(newrows);
-                 $('#ctrlInfo').html(infoCtrl());
-                 $(window).trigger('resize');
+                 redraw(pageCur);
                  myopts.saveState();
               }
            });
 
    $('.firstBtn').button().on('click', function () {
       pageCur = 0;
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      $('#ctrlInfo').html(infoCtrl());
-      $(window).trigger('resize');
+      redraw(pageCur);
    });
    $('.backBtn').button().on('click', function () {
       pageCur = Math.max(0, pageCur - 1);
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      $('#ctrlInfo').html(infoCtrl());
-      $(window).trigger('resize');
+      redraw(pageCur);
    });
    $('.nextBtn').button().on('click', function () {
       if (tblData.length === 0)
          return;
       var maxPageCur = Math.floor(tblData.length / myopts.rowsPerPage);
       pageCur = $.fn.ebtableHelpers.clip(pageCur + 1, 0, maxPageCur);
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      $('#ctrlInfo').html(infoCtrl());
-      $(window).trigger('resize');
+      redraw(pageCur);
    });
    $('.lastBtn').button().on('click', function () {
       pageCur = Math.floor(tblData.length / myopts.rowsPerPage);
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      $('#ctrlInfo').html(infoCtrl());
-      $(window).trigger('resize');
+      redraw(pageCur);
    });
 
-   $('#head th:gt(0)').on('click', function (event, selector, data) {
-      console.log('click', event.currentTarget.id);
+   $('#head th:gt(0)').on('click', function (event) { // sorting
+      console.log('sorting', event.currentTarget.id);
       if (!event.currentTarget.id)
          return;
       var idx = indexOfCol(event.currentTarget.id);
@@ -301,22 +294,18 @@ $.fn.ebtable = function (opts, data) {
       $.each(coldefs, function (idx, o) {
          myopts.columns[o.col].order = opts.columns[o.col].order === 'desc' ? 'asc' : 'desc';
       });
-      pageCur = 0;
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
-      $('#ctrlInfo').html(infoCtrl());
       var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
       $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
       $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
-      $(window).trigger('resize');
+      pageCur = 0;
+      redraw(pageCur);
    });
-   $('#head input[type=text]').on('keyup', function (event) {
-      console.log('filter', event);
+
+   $('#head input[type=text]').on('keyup', function (event) { // filtering
+      console.log('filtering', event);
       filterData();
       pageCur = 0;
-      $('#data tbody').html(tableData(pageCur));
-      $('#ctrlInfo').html(infoCtrl());
-      $(window).trigger('resize');
+      redraw(pageCur);
    }).on('click', function (event) {
       event.target.focus();
       return false; // ignore - sorting
@@ -327,10 +316,10 @@ $.fn.ebtable = function (opts, data) {
    $('#data input[type=checkbox]').on('change', function (event) {
       console.log('change !', event.target);
    });
-   
+
    $('#selectAll').on('click', function (event) {
-      console.log('change!', event.target, $(event.target).prop('checked') );
-      $('#data input[type=checkbox]').prop( "checked",  $(event.target).prop('checked') );
+      console.log('change!', event.target, $(event.target).prop('checked'));
+      $('#data input[type=checkbox]').prop("checked", $(event.target).prop('checked'));
    });
 
    $(window)

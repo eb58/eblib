@@ -24,10 +24,12 @@
 
          var opts = {
             columns: [
-               {name: "Paket", invisible:true}
-               , {name: 'xx', invisible:true}
+               {name: "Paket", invisible:false}
+               , {name: 'xx', invisible:false}
                , {name: "Datum"}
-               , {name: "Name"}
+               , {name: "Name",  render: function (data, row) {
+                     return data + ' -- ' + row[0];
+                  }}
                , {name: "Fälligkeit"}
                , {name: "Auftragspaket"}
                , {name: "Frage des AG"}
@@ -36,6 +38,7 @@
                , {name: "Eingang"}
                , {name: "DTA Nummern"}
             ]
+            , selection: true
             , rowsPerPage: 10
          };
          var grid;

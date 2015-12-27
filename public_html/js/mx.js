@@ -96,8 +96,8 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional arra
          var b = true;
          for (var i = 0; i < filters.length && b; i++) {
             var f = filters[i];
-            var cellData = $.trim(this.row(r)[f.col]);
-            var searchText = f.searchtext;
+            var cellData = $.trim(this.row(r)[f.col]).toLowerCase();
+            var searchText = f.searchtext.toLowerCase();
             b = b && cellData.indexOf(searchText) >= 0;
             
 //            if (cellData) {

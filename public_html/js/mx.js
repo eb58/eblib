@@ -19,7 +19,7 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional arra
       }
    };
    data.helpers = {
-      toLower: function(o) {
+      toLower: function (o) {
          return  $.type(o) === "string" ? o.toLowerCase() : o;
       }
    };
@@ -71,6 +71,7 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional arra
 
    data.rowCmpCols = function (coldefs) { // [ {col:1,order:asc,format:fmtfct1},{col:3, order:desc, format:fmtfct2},... ]  
       return function (r1, r2) {
+         if( !_.isArray(coldefs) ) coldefs = [coldefs];
          for (var i = 0; i < coldefs.length; i++) {
             var cdef = coldefs[i];
             var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
@@ -86,6 +87,29 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional arra
          }
          return 0;
       };
+   };
+
+   data.filterData = function filterData(filters) { // filters [{col: col,searchtext: text},...]
+      if( !_.isArray(filters) ) filters = [filters];
+      var d = [];
+      for (var r = 0; r < this.length; r++) {
+         var b = true;
+         for (var i = 0; i < filters.length && b; i++) {
+            var f = filters[i];
+            var cellData = $.trim(this.row(r)[f.col]);
+            var searchText = f.searchtext;
+            b = b && cellData.indexOf(searchText) >= 0;
+            
+//            if (cellData) {
+//               var rx = new RegExp(cellData, 'i');
+//               b = b && rx.test(f.searchText);
+//            }
+         }
+         if (b) {
+            d.push(this[r]);
+         }
+      }
+      return d;
    };
    return data;
 };

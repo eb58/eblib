@@ -1,20 +1,5 @@
 /* global QUnit, mx */
 
-QUnit.test('testset0 Array functions', function (assert) {
-   var m = mx([['11', '12', '13'],['31', '32', '33'], ['21', '22', '23']]);
-   assert.deepEqual(m.length,3);
-   assert.deepEqual(m.sort(), [['11', '12', '13'], ['21', '22', '23'],['31', '32', '33']]);
-   
-   var cmp = m.rowCmpCols([{col: 1, order:'desc'}]);
-   assert.deepEqual(m.sort(cmp), [['31', '32', '33'], ['21', '22', '23'],['11', '12', '13']]);
-  
-   var m = mx([['11', '12', '13'], ['31', '32', '33'], ['21', '22', '23']]);
-   assert.deepEqual(m.sort(m.rowCmpCols([{col: 1, order:'asc'}])), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
-   
-   var m = mx([['01.01.2011'], ['01.01.2015'], ['01.01.2013'], ['01.01.2001']]);
-   assert.deepEqual(m.sort(m.rowCmpCols([{col: 0, order:'asc', format:'date-de'}])), [['01.01.2001'], ['01.01.2011'], ['01.01.2013'], ['01.01.2015']]);
-});
-
 QUnit.test('testset1 easy ones', function (assert) {
    assert.notEqual(mx(2, 2), mx(2, 2));
    assert.deepEqual(mx(2, 2), [[], []]);
@@ -47,6 +32,23 @@ QUnit.test('testset1 easy ones', function (assert) {
    assert.deepEqual(m.withoutRows(function (row) {
       return row[0] === '21';
    }), [['11', '12', '13'], ['31', '32', '33']]);
+
+});
+
+QUnit.test('testset2 Array functions', function (assert) {
+   var m = mx([['11', '12', '13'], ['31', '32', '33'], ['21', '22', '23']]);
+   assert.deepEqual(m.length, 3);
+   assert.deepEqual(m.sort(), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
+   assert.deepEqual(m.sort(m.rowCmpCols({col: 1, order: 'desc'})), [['31', '32', '33'], ['21', '22', '23'], ['11', '12', '13']]);
+   assert.deepEqual(m.sort(m.rowCmpCols({col: 1, order: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
+   assert.deepEqual(m.sort(m.rowCmpCols({col: 3, order: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
+
+   var m = mx([['01.01.2011'], ['01.01.2015'], ['01.01.2013'], ['01.01.2001']]);
+   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', format: 'date-de'})), [['01.01.2001'], ['01.01.2011'], ['01.01.2013'], ['01.01.2015']]);
+   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', format: 'date-de'})), [['01.01.2015'], ['01.01.2013'], ['01.01.2011'], ['01.01.2001']]);
+
+   var m = mx([['test', '01.01.2011'], ['', '01.01.2015'], ['', '01.01.2013'], ['testA', '01.01.2001']]);
+   assert.deepEqual(m.filterData({col: 0, searchtext: 'te'}), [['test', '01.01.2011'], ['testA', '01.01.2001']]);
 
 });
 

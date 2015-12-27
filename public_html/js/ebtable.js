@@ -9,10 +9,10 @@ $.fn.ebtableSort = {
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
       return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
    },
-   rowCmpCols: function (cols) { // [ {col:1,order:asc,format:fmtfct1},{col:3, order:desc, format:fmtfct2},... ]  
+   rowCmpCols: function (coldefs) { // [ {col:1,order:asc,format:fmtfct1},{col:3, order:desc, format:fmtfct2},... ]  
       return function (r1, r2) {
-         for (var i = 0; i < cols.length; i++) {
-            var cdef = cols[i];
+         for (var i = 0; i < coldefs.length; i++) {
+            var cdef = coldefs[i];
             var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
             var fmt = $.fn.ebtableSort[cdef.format];
             var x = $.fn.ebtableHelpers.toLower(r1[cdef.col]);
@@ -26,9 +26,6 @@ $.fn.ebtableSort = {
          }
          return 0;
       };
-   }
-   , sort: function (data, cols) {
-      return data.sort($.fn.ebtableSort.rowCmpCols(cols));
    }
 };
 
@@ -60,7 +57,7 @@ $.fn.ebtable = function (opts, data) {
       , loadState: function () {
          return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
       }
-      , sortmaster: [] //[{col:1,order:asc,format:fct1},{col:2}]
+      , sortmaster: [] //[{col:1,order:asc,format:fct1},{col:2,order:asc-fix}]
       , groupingCols: null //{groupid:1,groupsort:0,grouphead:'GA'}
       , groups:[]
 
@@ -189,7 +186,7 @@ $.fn.ebtable = function (opts, data) {
             filters.push({col: col,searchtext: $.fn.ebtableHelpers.toLower($(o).val())});
          }
       });
-      return filters
+      return filters;
 
    }
    function filterData() {
@@ -316,8 +313,6 @@ $.fn.ebtable = function (opts, data) {
       redraw(pageCur);
    });
    $('.nextBtn').button().on('click', function () {
-      if (tblData.length === 0)
-         return;
       var maxPageCur = Math.floor(tblData.length / myopts.rowsPerPage);
       pageCur = $.fn.ebtableHelpers.clip(pageCur + 1, 0, maxPageCur);
       redraw(pageCur);
@@ -333,13 +328,13 @@ $.fn.ebtable = function (opts, data) {
          return;
       var idx = indexOfCol(event.currentTarget.id);
       var col = myopts.columns[idx];
-      var sm = myopts.sortmaster && myopts.sortmaster[col] != idx ? myopts.sortmaster : []
+      var sm = (myopts.sortmaster && myopts.sortmaster[col] !== idx) ? myopts.sortmaster : [];
       var coldefs = $.extend([], sm);
       coldefs.push({col: idx, format: col.format, order: myopts.columns[idx].order});
       $.each(coldefs, function (idx, o) {
          o.order = myopts.columns[o.col].order || 'asc';
       });
-      tblData = $.fn.ebtableSort.sort(tblData, coldefs);
+      tblData = tblData.sort($.fn.ebtableSort.rowCmpCols(coldefs));
       $.each(coldefs, function (idx, o) {
          var toggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
          myopts.columns[o.col].order = myopts.columns[o.col].order ? toggle[myopts.columns[o.col].order] : 'asc';
@@ -380,9 +375,9 @@ $.fn.ebtable = function (opts, data) {
    this.toggleGroupIsOpen = function(groupName){
       myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
       redraw(pageCur);
-   }
+   };
    this.groupIsOpen = function(groupName){
       return _.property('isOpen')(myopts.groups[groupName]);
-   }
+   };
    return this;
 };

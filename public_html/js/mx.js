@@ -1,6 +1,6 @@
 /* global _ */
 
-var mx = function mx(p1, p2) { // nr #rows, nc #cols OR  p1 = 2-dimensional array
+var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
    var data = _.isArray(p1) ? p1 : _.map(_.range(p1), function () {
       return [];
    }); // [ [], [], [], ..., [] ] 

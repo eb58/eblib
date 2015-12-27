@@ -1,6 +1,9 @@
 /* global _ */
 "use strict";
 $.fn.ebtable = function (opts, data) {
+   var title = $(document).prop('title').replace(' ', '');
+   var localStorageKey = 'ebtable-' + title;
+   var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
    var defopts = {
       bodyheight: Math.max(200, $(window).height() - 10)
       , rowsPerPageSelectValues: [10, 25, 50, 100]
@@ -14,8 +17,6 @@ $.fn.ebtable = function (opts, data) {
    };
    var myopts = $.extend({}, defopts, opts, defopts.loadState());
 
-   var title = $(document).prop('title').replace(' ', '');
-   var localStorageKey = 'ebtable-' + title;
    var origData = mx(data);
    var tblData = mx($.extend([], origData));
    var pageCur = 0;
@@ -42,31 +43,33 @@ $.fn.ebtable = function (opts, data) {
       return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
    }
 
-   function preprocessData() {
+   function initGroups() { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
       var gc = myopts.groupingCols;
       for (var r = 0; gc && r < tblData.length; r++) {
-         var groupName = tblData[r][gc.groupid];
-         tblData[r].isGroupHeader = tblData[r][gc.groupsort] === gc.grouphead;
-         tblData[r].isGroupElement = !!groupName && !tblData[r].isGroupHeader;
-         if (!!groupName)
+         var row = tblData[r];
+         var groupName = row[gc.groupid];
+         row.isGroupHeader = row[gc.groupsort] === gc.grouphead;
+         row.isGroupElement = groupName && !row.isGroupHeader;
+         if (groupName)
             myopts.groups[groupName] = {isOpen: false};
       }
    }
 
    function selectRows(event) { // select row
       var rowNr = event.target.id.replace('check', '');
-      tblData[rowNr].selected = $(event.target).prop('checked');
-      console.log('change !', event.target.id, rowNr, tblData[rowNr], tblData[rowNr].selected);
+      var row = tblData[rowNr];
+      row.selected = $(event.target).prop('checked');
+      console.log('change !', event.target.id, rowNr, row, row.selected);
       // Grouping
       var gc = myopts.groupingCols;
-      if (gc && tblData[rowNr][gc.groupid] && tblData[rowNr][gc.groupsort] === gc.grouphead) {
-         var groupId = tblData[rowNr][gc.groupid];
-         var groupSort = tblData[rowNr][gc.groupsort];
-         console.log('Group', groupId, groupSort);
+      if (gc && row[gc.groupid] && row[gc.groupsort] === gc.grouphead) {
+         var groupId = row[gc.groupid];
+         var groupSort = row[gc.groupsort];
+         console.log('Group', row[gc.groupid], row[gc.groupsort]);
          for (var i = 0; i < tblData.length; i++) {
             if (tblData[i][gc.groupid] === groupId) {
-               tblData[i].selected = tblData[rowNr].selected;
-               $('#check' + i).prop('checked', tblData[rowNr].selected);
+               tblData[i].selected = row.selected;
+               $('#check' + i).prop('checked', row.selected);
             }
          }
       }
@@ -91,7 +94,6 @@ $.fn.ebtable = function (opts, data) {
 
    function tableData(pageNr) {
       if (origData[0] && origData[0].length !== myopts.columns.length) {
-         //alert('data and column definition don\'t match!');
          return '';
       }
 
@@ -103,8 +105,8 @@ $.fn.ebtable = function (opts, data) {
          var row = tblData[r];
          if (gc && row.isGroupElement && !myopts.groups[tblData[r][gc.groupid]].isOpen)
             continue
-         var cls = tblData[r].isGroupElement ? ' class="group" ' : '';
-         cls = tblData[r].isGroupHeader ? ' class="groupheader" ' : cls;
+         var cls = row.isGroupElement ? ' class="group" ' : '';
+         cls = row.isGroupHeader ? ' class="groupheader" ' : cls;
          res += '<tr>';
          if (myopts.selection) {
             var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
@@ -114,7 +116,6 @@ $.fn.ebtable = function (opts, data) {
          }
          for (var c = 0; c < myopts.columns.length; c++) {
             if (!myopts.columns[order[c]].invisible) {
-               var row = tblData[r];
                var val = tblData[r][order[c]];
                var render = myopts.columns[order[c]].render;
                val = render ? render(val, row) : val;
@@ -159,21 +160,6 @@ $.fn.ebtable = function (opts, data) {
       //return label;
    }
 
-   function getFilters() {
-      var filters = [];
-      $('#head input[type=text]').each(function (idx, o) {
-         if ($(o).val()) {
-            var col = indexOfCol($(o).attr('id'));
-            filters.push({col: col, searchtext: $(o).val()});
-         }
-      });
-      return filters;
-
-   }
-   function filterData() {
-      var filters = getFilters();
-      tblData = filters.length === 0 ? origData : origData.filterData(filters);
-   }
 
 // ##############################################################################
    function adjustColumns() {
@@ -183,9 +169,9 @@ $.fn.ebtable = function (opts, data) {
       }
       for (var i = (myopts.selection ? 2 : 1); i <= opts.columns.length + (myopts.selection ? 1 : 0); i++) {
          var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
-         var w2 = $('#data td:nth-child(' + i + ')').innerWidth();
+         var w2 = $('#data tr:first td:nth-child(' + i + ')').innerWidth();
          var w = Math.max(w1, w2);
-         //console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
+         console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
          $('#head th:nth-child(' + i + ')').innerWidth(w);
          $('#data tr:first td:nth-child(' + i + ')').innerWidth(w);
       }
@@ -210,6 +196,17 @@ $.fn.ebtable = function (opts, data) {
       $('#ctrlPage1').css('position', 'absolute').css('top', 5);
       $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
       $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
+   }
+
+   function filterData() {
+      var filters = [];
+      $('#head input[type=text]').each(function (idx, o) {
+         if ($(o).val()) {
+            var col = indexOfCol($(o).attr('id'));
+            filters.push({col: col, searchtext: $(o).val()});
+         }
+      });
+      tblData = filters.length === 0 ? origData : origData.filterData(filters);
    }
 
    function redraw(pageCur) {
@@ -243,7 +240,7 @@ $.fn.ebtable = function (opts, data) {
             </div>"
            );
 
-   preprocessData();
+   initGroups();
    this.html(tableTemplate({
       head: tableHead()
       , data: tableData(pageCur)
@@ -290,26 +287,24 @@ $.fn.ebtable = function (opts, data) {
 
    $('#head th:gt(0)').on('click', function (event) { // sorting
       console.log('sorting', event.currentTarget.id);
-      if (!event.currentTarget.id)
-         return;
-      var idx = indexOfCol(event.currentTarget.id);
-      var col = myopts.columns[idx];
-      var sm = (myopts.sortmaster && myopts.sortmaster[col] !== idx) ? myopts.sortmaster : [];
-      var coldefs = $.extend([], sm);
-      coldefs.push({col: idx, format: col.format, order: myopts.columns[idx].order});
-      $.each(coldefs, function (idx, o) {
-         o.order = myopts.columns[o.col].order || 'asc';
-      });
-      tblData = tblData.sort(tblData.rowCmpCols(coldefs));
-      $.each(coldefs, function (idx, o) {
-         var toggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
-         myopts.columns[o.col].order = myopts.columns[o.col].order ? toggle[myopts.columns[o.col].order] : 'asc';
-      });
-      var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
-      $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
-      $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
-      pageCur = 0;
-      redraw(pageCur);
+      if (event.currentTarget.id) {
+         var idx = indexOfCol(event.currentTarget.id);
+         var col = myopts.columns[idx];
+         var coldefs = $.extend([],  myopts.sortmaster, [{col: idx, format: col.format, order: col.order}]);
+         $.each(coldefs, function (idx, o) {
+            o.order = myopts.columns[o.col].order || 'desc';
+         });
+         tblData = tblData.sort(tblData.rowCmpCols(coldefs));
+         $.each(coldefs, function (idx, o) {
+            var c =  myopts.columns[o.col];
+            c.order = c.order ? sortToggle[c.order] : 'asc';
+         });
+         var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
+         $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
+         $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+         pageCur = 0;
+         redraw(pageCur);
+      }
    });
 
    $('#head input[type=text]').on('keyup', function (event) { // filtering

@@ -12,6 +12,10 @@
             font-size: 10px;
          }
       </style>
+       <style>
+  #xselectable { list-style-type: none; padding: 0; }
+  #xselectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+  </style>
       <link rel="stylesheet" href="/css/ebtable.css">
 
       <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
@@ -41,10 +45,10 @@
 
          var opts = {
             columns: [
-               {name: "Grouping", invisible: true, order: 'asc-fix'},
-               {name: "Gattung", invisible: true},
+               {name: "Grouping", order: 'asc-fix', invisible: true, technical: true},
+               {name: "Gattung", invisible: true, technical: true},
                {name: "Tierart"},
-               {name: "Datum", format: 'date-de'},
+               {name: "Datum", invisible: true, format: 'date-de'},
                {name: "Name", render: function (data, row) {
                      var isOpen = grid? grid.groupIsOpen(row[1]): false;
                      var imgsrc = '/images/group_' + (isOpen?'opened':'closed') + '.gif';
@@ -72,6 +76,7 @@
       </script>
    </head>
    <body>
+      <div id="grid"></div>
       <div id="grid"></div>
    </body>
 </html>

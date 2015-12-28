@@ -5,10 +5,12 @@ $.fn.ebtable = function (opts, data) {
    var localStorageKey = 'ebtable-' + title;
    var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
    var defopts = {
-      bodyheight: Math.max(200, $(window).height() - 10)
+      columns: []
+      , bodyheight: Math.max(200, $(window).height() - 10)
       , rowsPerPageSelectValues: [10, 25, 50, 100]
       , rowsPerPage: 10
       , colorder: _.range(opts.columns.length) // [0,1,2,... ]
+      , selection: false
       , saveState: saveState
       , loadState: loadState
       , sortmaster: [] //[{col:1,order:asc,format:fct1},{col:2,order:asc-fix}]
@@ -30,6 +32,15 @@ $.fn.ebtable = function (opts, data) {
    }
 
 // ##############################################################################
+   function indexOfCol(colname) {
+      for (var c = 0; c < myopts.columns.length; c++)
+         if (myopts.columns[c].name === colname)
+            return c;
+      return -1;
+   }
+   function colInVisible(colname) {
+      return myopts.columns[indexOfCol(colname)].invisible;
+   }
 
    function clip(v, a, b) {
       return Math.min(Math.max(a, v), b);
@@ -73,6 +84,22 @@ $.fn.ebtable = function (opts, data) {
             }
          }
       }
+   }
+
+   function configBtn() {
+      var list = _.reduce(_.pluck(myopts.columns, 'name'), function (memo, name) {
+         return colInVisible(name) ? memo : memo + '<li id="' + name + '" class="ui-widget-content">' + name + '</li>';
+      }, '');
+
+      return '<button id="configBtn">Anpassen</button>\n\
+               <div id="configDlg" title="Anpassen">\n\
+               <ol id="selectable">' + list +
+               '</ol>\n\
+               </div>\n\
+               <style>\n\
+                  #selectable { list-style-type: none; padding: 0; width: 100%; }\n\
+                  #selectable li { margin 5px 5px px px; font-size: 10px; font-weight: bold; background-color:lightgray;  height: 20px}\n\
+               </style>'
    }
 
    function tableHead() {
@@ -127,12 +154,6 @@ $.fn.ebtable = function (opts, data) {
       return res;
    }
 
-   function indexOfCol(colname) {
-      for (var c = 0; c < myopts.columns.length; c++)
-         if (myopts.columns[c].name === colname)
-            return c;
-      return -1;
-   }
 
    function selectLenCtrl() {
       var options = '';
@@ -156,8 +177,8 @@ $.fn.ebtable = function (opts, data) {
       var filtered = origData.length === tblData.length ? '' : ' (gefiltert von ' + origData.length + ' Einträgen)';
       var templ = _.template("<%=start%> bis <%=end%> von <%=count%> Einträgen <%= filtered %>");
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
-      return '<button id="info">' + label + '</button>';
-      //return label;
+      //return '<button id="info">' + label + '</button>';
+      return label;
    }
 
 
@@ -221,8 +242,11 @@ $.fn.ebtable = function (opts, data) {
 
    var tableTemplate = _.template(
            "<div>\n\
-               <div id='ctrlLength'><%= selectLen %></div>\n\
-               <div id='ctrlPage1'><%= browseBtns %></div>\n\
+               <table>\n\
+                  <th id='ctrlLength'><%= selectLen %></th>\n\
+                  <th id='ctrlConfig'><%= configBtn %></th>\n\
+                  <th id='ctrlPage1'><%= browseBtns %></th>\n\
+               </table>\n\
                <div id='divall'>\n\
                   <div>\n\
                      <table id='head' >\n\
@@ -235,8 +259,10 @@ $.fn.ebtable = function (opts, data) {
                      </table>\n\
                   </div>\n\
                </div>\n\
-               <div id='ctrlInfo'><%= info %></div>\n\
-               <div id='ctrlPage2'><%= browseBtns %></div>\n\
+               <table>\n\
+                  <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
+                  <th id='ctrlPage2'><%= browseBtns %></th>\n\
+               </table>\n\
             </div>"
            );
 
@@ -245,8 +271,9 @@ $.fn.ebtable = function (opts, data) {
       head: tableHead()
       , data: tableData(pageCur)
       , selectLen: selectLenCtrl()
+      , configBtn: configBtn()
       , browseBtns: pageBrowseCtrl()
-      , info: infoCtrl()
+      , infoCtrl: infoCtrl()
       , bodyheight: myopts.bodyheight
    }));
    adjustTable();
@@ -267,6 +294,30 @@ $.fn.ebtable = function (opts, data) {
                  myopts.saveState();
               }
            });
+   $('#configBtn').button().on('click', function () {
+      $("#configDlg").dialog("open");
+   });
+   $("#selectable").sortable();
+   $("#configDlg").dialog({
+      autoOpen: false
+      , height: myopts.columns.length * 32
+      , width: 100
+      , modal: true
+      , resizable: true
+      , buttons: {
+         "OK": function () {
+            var res = [];
+            $('#configDlg li').each(function (idx,o) {
+               res.push($(o).prop('id'));
+            });
+            console.log(res);
+            $(this).dialog("close");
+         }
+         , 'Abbrechen': function () {
+            $(this).dialog("close");
+         }
+      }
+   });
 
    $('.firstBtn').button().on('click', function () {
       pageCur = 0;
@@ -290,13 +341,13 @@ $.fn.ebtable = function (opts, data) {
       if (event.currentTarget.id) {
          var idx = indexOfCol(event.currentTarget.id);
          var col = myopts.columns[idx];
-         var coldefs = $.extend([],  myopts.sortmaster, [{col: idx, format: col.format, order: col.order}]);
+         var coldefs = $.extend([], myopts.sortmaster, [{col: idx, format: col.format, order: col.order}]);
          $.each(coldefs, function (idx, o) {
             o.order = myopts.columns[o.col].order || 'desc';
          });
          tblData = tblData.sort(tblData.rowCmpCols(coldefs));
          $.each(coldefs, function (idx, o) {
-            var c =  myopts.columns[o.col];
+            var c = myopts.columns[o.col];
             c.order = c.order ? sortToggle[c.order] : 'asc';
          });
          var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';

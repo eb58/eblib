@@ -1,12 +1,10 @@
-#grid table{ background-color:lightgray;  }
+#grid #head, #grid #data { background-color:lightgray;  }
 
-#grid table th{ 
+#grid #head table th{ 
    background-color:#ddc; 
-   padding: 3px 3px 3px 3px;
 }
 #grid table td{ 
    background-color:white;
-    padding: 3px 3px 3px 3px
 }
 
 #grid table td.group{
@@ -39,10 +37,10 @@
 }
 
 #xhead th, #xdata td {
-  overflow: hidden;
-  -ms-text-overflow: ellipsis;
-  -o-text-overflow: ellipsis;
-  text-overflow: ellipsis;
+   overflow: hidden;
+   -ms-text-overflow: ellipsis;
+   -o-text-overflow: ellipsis;
+   text-overflow: ellipsis;
 }
 
 

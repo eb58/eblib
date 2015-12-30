@@ -1,9 +1,39 @@
 /* global _ */
 "use strict";
 $.fn.ebtable = function (opts, data) {
-   var title = $(document).prop('title').replace(' ', '');
-   var localStorageKey = 'ebtable-' + title;
+   var util = {
+      indexOfCol: function indexOfCol(colname) {
+         for (var c = 0; c < myopts.columns.length; c++)
+            if (myopts.columns[c].name === colname)
+               return c;
+         return -1;
+      }
+      , colIsInvisible: function colIsInvisible(colname) {
+         return myopts.columns[util.indexOfCol(colname)].invisible;
+      }
+      , clip: function clip(v, a, b) {
+         return Math.min(Math.max(a, v), b);
+      }
+      , saveState: function saveState() {
+         localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder});
+      }
+      , loadState: function loadState() {
+         return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
+      }
+      , checkConfig: function checkConfig() {
+         if (origData[0] && origData[0].length !== myopts.columns.length) {
+            alert('Data definition and column definition don\'t match!');
+            localStorage[localStorageKey] = '';
+            delete opts.colorder;
+            myopts = $.extend({}, defopts, opts);
+         }
+      }
+   };
+// ##############################################################################
+
+   var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '');
    var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+
    var defopts = {
       columns: []
       , bodyheight: Math.max(200, $(window).height() - 10)
@@ -11,48 +41,17 @@ $.fn.ebtable = function (opts, data) {
       , rowsPerPage: 10
       , colorder: _.range(opts.columns.length) // [0,1,2,... ]
       , selection: false
-      , saveState: saveState
-      , loadState: loadState
+      , saveState: util.saveState
+      , loadState: util.loadState
       , sortmaster: [] //[{col:1,order:asc,format:fct1},{col:2,order:asc-fix}]
       , groupingCols: null //{groupid:1,groupsort:0,grouphead:'GA'}
       , groups: []
    };
    var myopts = $.extend({}, defopts, opts, defopts.loadState());
-
    var origData = mx(data);
    var tblData = mx($.extend([], origData));
    var pageCur = 0;
-   var maxPageCur = Math.floor(tblData.length / myopts.rowsPerPage);
-
-   if (origData[0] && origData[0].length !== myopts.columns.length) {
-      alert('Data definition and column definition don\'t match!');
-      localStorage[localStorageKey] = '';
-      delete opts.colorder;
-      myopts = $.extend({}, defopts, opts);
-   }
-
-// ##############################################################################
-   function indexOfCol(colname) {
-      for (var c = 0; c < myopts.columns.length; c++)
-         if (myopts.columns[c].name === colname)
-            return c;
-      return -1;
-   }
-   function colInVisible(colname) {
-      return myopts.columns[indexOfCol(colname)].invisible;
-   }
-
-   function clip(v, a, b) {
-      return Math.min(Math.max(a, v), b);
-   }
-
-   function saveState() {
-      localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder});
-   }
-
-   function loadState() {
-      return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
-   }
+   var pageCurMax = Math.floor(tblData.length / myopts.rowsPerPage);
 
    function initGroups() { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
       var gc = myopts.groupingCols;
@@ -88,13 +87,12 @@ $.fn.ebtable = function (opts, data) {
 
    function configBtn() {
       var list = _.reduce(_.pluck(myopts.columns, 'name'), function (memo, name) {
-         return colInVisible(name) ? memo : memo + '<li id="' + name + '" class="ui-widget-content">' + name + '</li>';
+         return util.colIsInvisible(name) ? memo : memo + '<li id="' + name + '" class="ui-widget-content">' + name + '</li>';
       }, '');
-
       return '<button id="configBtn">Anpassen</button>\n\
                <div id="configDlg" title="Anpassen">\n\
                <ol id="selectable">' + list +
-               '</ol>\n\
+              '</ol>\n\
                </div>\n\
                <style>\n\
                   #selectable { list-style-type: none; padding: 0; width: 100%; }\n\
@@ -192,7 +190,7 @@ $.fn.ebtable = function (opts, data) {
          var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
          var w2 = $('#data tr:first td:nth-child(' + i + ')').innerWidth();
          var w = Math.max(w1, w2);
-         console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
+         //console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
          $('#head th:nth-child(' + i + ')').innerWidth(w);
          $('#data tr:first td:nth-child(' + i + ')').innerWidth(w);
       }
@@ -200,9 +198,9 @@ $.fn.ebtable = function (opts, data) {
          var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
          var w2 = $('#data td:nth-child(' + i + ')').innerWidth();
          if (w1 !== w2) {
-            console.log('Aua!', i, 'head:', w1, 'data:', w2);
+            //console.log('Aua!', i, 'head:', w1, 'data:', w2);
             //???$(document).width($(document).width() + 100);
-            //adjustColumn();
+            //adjustColumns();
          }
       }
    }
@@ -223,7 +221,7 @@ $.fn.ebtable = function (opts, data) {
       var filters = [];
       $('#head input[type=text]').each(function (idx, o) {
          if ($(o).val()) {
-            var col = indexOfCol($(o).attr('id'));
+            var col = util.indexOfCol($(o).attr('id'));
             filters.push({col: col, searchtext: $(o).val()});
          }
       });
@@ -234,8 +232,8 @@ $.fn.ebtable = function (opts, data) {
       var newrows = tableData(pageCur);
       $('#data tbody').html(newrows);
       $('#ctrlInfo').html(infoCtrl());
-      $(window).trigger('resize');
       $('#data input[type=checkbox]').on('change', selectRows);
+      adjustTable();
    }
 
    // ##############################################################################
@@ -265,7 +263,8 @@ $.fn.ebtable = function (opts, data) {
                </table>\n\
             </div>"
            );
-
+   
+   util.checkConfig();
    initGroups();
    this.html(tableTemplate({
       head: tableHead()
@@ -277,7 +276,6 @@ $.fn.ebtable = function (opts, data) {
       , bodyheight: myopts.bodyheight
    }));
    adjustTable();
-
    // #################################################################
    // Actions
    // #################################################################
@@ -286,10 +284,9 @@ $.fn.ebtable = function (opts, data) {
            .selectmenu({change: function (event, data) {
                  console.log('change rowsPerPage', event, data.item.value);
                  myopts.rowsPerPage = Number(data.item.value);
-                 maxPageCur = Math.floor(tblData.length / myopts.rowsPerPage);
+                 pageCurMax = Math.floor(tblData.length / myopts.rowsPerPage);
                  var startRow = myopts.rowsPerPage * pageCur + 1;
                  pageCur = Math.floor(startRow / myopts.rowsPerPage);
-
                  redraw(pageCur);
                  myopts.saveState();
               }
@@ -307,7 +304,7 @@ $.fn.ebtable = function (opts, data) {
       , buttons: {
          "OK": function () {
             var res = [];
-            $('#configDlg li').each(function (idx,o) {
+            $('#configDlg li').each(function (idx, o) {
                res.push($(o).prop('id'));
             });
             console.log(res);
@@ -318,7 +315,6 @@ $.fn.ebtable = function (opts, data) {
          }
       }
    });
-
    $('.firstBtn').button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);
@@ -328,28 +324,26 @@ $.fn.ebtable = function (opts, data) {
       redraw(pageCur);
    });
    $('.nextBtn').button().on('click', function () {
-      pageCur = clip(pageCur + 1, 0, maxPageCur);
+      pageCur = util.clip(pageCur + 1, 0, pageCurMax);
       redraw(pageCur);
    });
    $('.lastBtn').button().on('click', function () {
       pageCur = Math.floor(tblData.length / myopts.rowsPerPage);
       redraw(pageCur);
    });
-
    $('#head th:gt(0)').on('click', function (event) { // sorting
       console.log('sorting', event.currentTarget.id);
       if (event.currentTarget.id) {
-         var idx = indexOfCol(event.currentTarget.id);
+         var idx = util.indexOfCol(event.currentTarget.id);
          var col = myopts.columns[idx];
-         var coldefs = $.extend([], myopts.sortmaster, [{col: idx, format: col.format, order: col.order}]);
-         $.each(coldefs, function (idx, o) {
-            o.order = myopts.columns[o.col].order || 'desc';
-         });
-         tblData = tblData.sort(tblData.rowCmpCols(coldefs));
+         var coldefs = $.extend([], myopts.sortmaster );
+         coldefs.push({col: idx, format: col.format, order: col.order});
          $.each(coldefs, function (idx, o) {
             var c = myopts.columns[o.col];
+            o.order = c.order || 'desc';
             c.order = c.order ? sortToggle[c.order] : 'asc';
          });
+         tblData = tblData.sort(tblData.rowCmpCols(coldefs));
          var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
          $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
          $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);

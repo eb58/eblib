@@ -21,7 +21,11 @@ $.fn.ebtable = function (opts, data) {
          localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder, invisible: _.pluck(myopts.columns, 'invisible')});
       }
       , loadState: function loadState() {
-         return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
+         var state = localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
+         _.each(state.invisible, function (o, idx) {
+            opts.columns[idx].invisible = !!o;
+         });
+         return state;
       }
       , checkConfig: function checkConfig() {
          if (origData[0] && origData[0].length !== myopts.columns.length) {

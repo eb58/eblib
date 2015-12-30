@@ -35,6 +35,13 @@
    padding: 0px;
    margin:0px;
 }
+#selectable { list-style-type: none; padding: 0px; width: 100%; }
+#selectable li.visible{ 
+   margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:lightgray;
+}
+#selectable li.invisible{ 
+   margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:#eee;
+}
 
 #xhead th, #xdata td {
    overflow: hidden;

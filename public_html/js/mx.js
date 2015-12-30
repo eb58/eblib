@@ -8,6 +8,13 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
    var nc = _.isArray(p1) ? p1[0].length : p2;
 
 // ###################################################################
+   util = {
+      toLower: function (o) {
+         return  $.type(o) === "string" ? o.toLowerCase() : o;
+      }
+   };
+
+// ###################################################################
    data.sorters = {
       'date-de': function (a) { // '01.01.2013' -->   '20130101' 
          var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
@@ -16,11 +23,6 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
       'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
          var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
          return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
-      }
-   };
-   data.helpers = {
-      toLower: function (o) {
-         return  $.type(o) === "string" ? o.toLowerCase() : o;
       }
    };
 
@@ -71,13 +73,14 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
 
    data.rowCmpCols = function (coldefs) { // [ {col:1,order:asc,format:fmtfct1},{col:3, order:desc, format:fmtfct2},... ]  
       return function (r1, r2) {
-         if( !_.isArray(coldefs) ) coldefs = [coldefs];
+         if (!_.isArray(coldefs))
+            coldefs = [coldefs];
          for (var i = 0; i < coldefs.length; i++) {
             var cdef = coldefs[i];
             var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
             var fmt = cdef.format ? data.sorters[cdef.format] : undefined;
-            var x = data.helpers.toLower(r1[cdef.col]);
-            var y = data.helpers.toLower(r2[cdef.col]);
+            var x = util.toLower(r1[cdef.col]);
+            var y = util.toLower(r2[cdef.col]);
             x = fmt ? fmt(x) : x;
             y = fmt ? fmt(y) : y;
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
@@ -90,7 +93,8 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
    };
 
    data.filterData = function filterData(filters) { // filters [{col: col,searchtext: text},...]
-      if( !_.isArray(filters) ) filters = [filters];
+      if (!_.isArray(filters))
+         filters = [filters];
       var d = [];
       for (var r = 0; r < this.length; r++) {
          var b = true;
@@ -99,7 +103,7 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
             var cellData = $.trim(this.row(r)[f.col]).toLowerCase();
             var searchText = f.searchtext.toLowerCase();
             b = b && cellData.indexOf(searchText) >= 0;
-            
+
 //            if (cellData) {
 //               var rx = new RegExp(cellData, 'i');
 //               b = b && rx.test(f.searchText);

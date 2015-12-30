@@ -11,14 +11,20 @@ $.fn.ebtable = function (opts, data) {
       , colIsInvisible: function colIsInvisible(colname) {
          return myopts.columns[util.indexOfCol(colname)].invisible;
       }
+      , colIsTechnical: function colIsTechnical(colname) {
+         return myopts.columns[util.indexOfCol(colname)].technical;
+      }
       , clip: function clip(v, a, b) {
          return Math.min(Math.max(a, v), b);
       }
       , saveState: function saveState() {
-         localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder});
+         localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder, invisible: _.pluck(myopts.columns, 'invisible')});
       }
       , loadState: function loadState() {
-         return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
+         var state = localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
+         _.each(state.invisible, function (o, idx) {
+            opts.columns[idx].invisible = !!o;
+         });
       }
       , checkConfig: function checkConfig() {
          if (origData[0] && origData[0].length !== myopts.columns.length) {
@@ -53,6 +59,10 @@ $.fn.ebtable = function (opts, data) {
    var pageCur = 0;
    var pageCurMax = Math.floor(tblData.length / myopts.rowsPerPage);
 
+   $.each(myopts.columns, function () {
+      this.invisible = !!this.invisible;
+   });
+   
    function initGroups() { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
       var gc = myopts.groupingCols;
       for (var r = 0; gc && r < tblData.length; r++) {
@@ -65,39 +75,16 @@ $.fn.ebtable = function (opts, data) {
       }
    }
 
-   function selectRows(event) { // select row
-      var rowNr = event.target.id.replace('check', '');
-      var row = tblData[rowNr];
-      row.selected = $(event.target).prop('checked');
-      console.log('change !', event.target.id, rowNr, row, row.selected);
-      // Grouping
-      var gc = myopts.groupingCols;
-      if (gc && row[gc.groupid] && row[gc.groupsort] === gc.grouphead) {
-         var groupId = row[gc.groupid];
-         var groupSort = row[gc.groupsort];
-         console.log('Group', row[gc.groupid], row[gc.groupsort]);
-         for (var i = 0; i < tblData.length; i++) {
-            if (tblData[i][gc.groupid] === groupId) {
-               tblData[i].selected = row.selected;
-               $('#check' + i).prop('checked', row.selected);
-            }
-         }
-      }
-   }
-
    function configBtn() {
-      var list = _.reduce(_.pluck(myopts.columns, 'name'), function (memo, name) {
-         return util.colIsInvisible(name) ? memo : memo + '<li id="' + name + '" class="ui-widget-content">' + name + '</li>';
+      var list = _.reduce(myopts.columns, function (res, col) {
+         var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
+         return res + (col.technical ? '' : _.template(t)({name: col.name, cls: col.invisible ? 'invisible' : 'visible'}));
       }, '');
-      return '<button id="configBtn">Anpassen</button>\n\
+      var t = '<button id="configBtn">Anpassen</button>\n\
                <div id="configDlg" title="Anpassen">\n\
-               <ol id="selectable">' + list +
-              '</ol>\n\
-               </div>\n\
-               <style>\n\
-                  #selectable { list-style-type: none; padding: 0; width: 100%; }\n\
-                  #selectable li { margin 5px 5px px px; font-size: 10px; font-weight: bold; background-color:lightgray;  height: 20px}\n\
-               </style>'
+                  <ol id="selectable"><%=list%></ol>\n\
+               </div>';
+      return _.template(t)({list: list});
    }
 
    function tableHead() {
@@ -179,6 +166,57 @@ $.fn.ebtable = function (opts, data) {
       return label;
    }
 
+   function selectRows(event) { // select row
+      var rowNr = event.target.id.replace('check', '');
+      var row = tblData[rowNr];
+      row.selected = $(event.target).prop('checked');
+      console.log('change !', event.target.id, rowNr, row, row.selected);
+      // Grouping
+      var gc = myopts.groupingCols;
+      if (gc && row[gc.groupid] && row[gc.groupsort] === gc.grouphead) {
+         var groupId = row[gc.groupid];
+         var groupSort = row[gc.groupsort];
+         console.log('Group', row[gc.groupid], row[gc.groupsort]);
+         for (var i = 0; i < tblData.length; i++) {
+            if (tblData[i][gc.groupid] === groupId) {
+               tblData[i].selected = row.selected;
+               $('#check' + i).prop('checked', row.selected);
+            }
+         }
+      }
+   }
+
+   function sorting(event) { // sorting
+      console.log('sorting', event.currentTarget.id);
+      if (event.currentTarget.id) {
+         var idx = util.indexOfCol(event.currentTarget.id);
+         var col = myopts.columns[idx];
+         var coldefs = $.extend([], myopts.sortmaster);
+         coldefs.push({col: idx, format: col.format, order: col.order});
+         $.each(coldefs, function (idx, o) {
+            var c = myopts.columns[o.col];
+            o.order = c.order || 'desc';
+            c.order = c.order ? sortToggle[c.order] : 'asc';
+         });
+         tblData = tblData.sort(tblData.rowCmpCols(coldefs));
+         var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
+         $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
+         $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+         pageCur = 0;
+         redraw(pageCur);
+      }
+   }
+   function filtering(event) { // filtering
+      console.log('filtering', event);
+      filterData();
+      pageCur = 0;
+      redraw(pageCur);
+   }
+
+   function ignoreSorting(event) {
+      event.target.focus();
+      return false; // ignore - sorting
+   }
 
 // ##############################################################################
    function adjustColumns() {
@@ -228,18 +266,25 @@ $.fn.ebtable = function (opts, data) {
       tblData = filters.length === 0 ? origData : origData.filterData(filters);
    }
 
-   function redraw(pageCur) {
-      var newrows = tableData(pageCur);
-      $('#data tbody').html(newrows);
+   function redraw(pageCur, withHead) {
       $('#ctrlInfo').html(infoCtrl());
+      $('#data tbody').html(tableData(pageCur));
       $('#data input[type=checkbox]').on('change', selectRows);
+      if (withHead) {
+         $('#head thead tr').html(tableHead());
+         $('#head thead th:gt(0)').on('click', sorting);
+         $('#head input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
+      }
       adjustTable();
    }
 
    // ##############################################################################
 
-   var tableTemplate = _.template(
-           "<div>\n\
+   function initGrid(a) {
+      util.checkConfig();
+      initGroups();
+      var tableTemplate = _.template(
+              "<div>\n\
                <table>\n\
                   <th id='ctrlLength'><%= selectLen %></th>\n\
                   <th id='ctrlConfig'><%= configBtn %></th>\n\
@@ -262,20 +307,21 @@ $.fn.ebtable = function (opts, data) {
                   <th id='ctrlPage2'><%= browseBtns %></th>\n\
                </table>\n\
             </div>"
-           );
-   
-   util.checkConfig();
-   initGroups();
-   this.html(tableTemplate({
-      head: tableHead()
-      , data: tableData(pageCur)
-      , selectLen: selectLenCtrl()
-      , configBtn: configBtn()
-      , browseBtns: pageBrowseCtrl()
-      , infoCtrl: infoCtrl()
-      , bodyheight: myopts.bodyheight
-   }));
-   adjustTable();
+              );
+      a.html(tableTemplate({
+         head: tableHead()
+         , data: tableData(pageCur)
+         , selectLen: selectLenCtrl()
+         , configBtn: configBtn()
+         , browseBtns: pageBrowseCtrl()
+         , infoCtrl: infoCtrl()
+         , bodyheight: myopts.bodyheight
+      }));
+      adjustTable();
+   }
+
+   initGrid(this);
+
    // #################################################################
    // Actions
    // #################################################################
@@ -292,12 +338,18 @@ $.fn.ebtable = function (opts, data) {
               }
            });
    $('#configBtn').button().on('click', function () {
+      $("#selectable").sortable();
       $("#configDlg").dialog("open");
+      $("#configDlg li").off('click').on("click", function (event) {
+         var col = myopts.columns[util.indexOfCol(event.target.id)];
+         col.invisible = !col.invisible;
+         $('#configDlg #' + event.target.id).toggleClass('invisible').toggleClass('visible');
+         console.log('change visibility', event.target.id, 'now visible:', !col.invisible);
+      });
    });
-   $("#selectable").sortable();
    $("#configDlg").dialog({
       autoOpen: false
-      , height: myopts.columns.length * 32
+      , height: myopts.columns.length * 30 + 40
       , width: 100
       , modal: true
       , resizable: true
@@ -307,7 +359,16 @@ $.fn.ebtable = function (opts, data) {
             $('#configDlg li').each(function (idx, o) {
                res.push($(o).prop('id'));
             });
-            console.log(res);
+            console.log("columns order", res);
+            myopts.colorder = _.map(myopts.columns, function (col, idx) {
+               if (col.technical)
+                  return idx;
+               var colname = res.shift();
+               return  col.invisible ? idx : util.indexOfCol(colname);
+            });
+            console.log("columns visibiliy", _.pluck(myopts.columns, 'invisible'));
+            myopts.saveState();
+            redraw(pageCur, true);
             $(this).dialog("close");
          }
          , 'Abbrechen': function () {
@@ -331,39 +392,9 @@ $.fn.ebtable = function (opts, data) {
       pageCur = Math.floor(tblData.length / myopts.rowsPerPage);
       redraw(pageCur);
    });
-   $('#head th:gt(0)').on('click', function (event) { // sorting
-      console.log('sorting', event.currentTarget.id);
-      if (event.currentTarget.id) {
-         var idx = util.indexOfCol(event.currentTarget.id);
-         var col = myopts.columns[idx];
-         var coldefs = $.extend([], myopts.sortmaster );
-         coldefs.push({col: idx, format: col.format, order: col.order});
-         $.each(coldefs, function (idx, o) {
-            var c = myopts.columns[o.col];
-            o.order = c.order || 'desc';
-            c.order = c.order ? sortToggle[c.order] : 'asc';
-         });
-         tblData = tblData.sort(tblData.rowCmpCols(coldefs));
-         var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
-         $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
-         $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
-         pageCur = 0;
-         redraw(pageCur);
-      }
-   });
-
-   $('#head input[type=text]').on('keyup', function (event) { // filtering
-      console.log('filtering', event);
-      filterData();
-      pageCur = 0;
-      redraw(pageCur);
-   }).on('click', function (event) {
-      event.target.focus();
-      return false; // ignore - sorting
-   });
-
+   $('#head th:gt(0)').on('click', sorting);
+   $('#head input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
    $('#info').button();
-
    $('#data input[type=checkbox]').on('change', selectRows);
 
    $(window)

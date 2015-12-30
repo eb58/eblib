@@ -21,10 +21,7 @@ $.fn.ebtable = function (opts, data) {
          localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder, invisible: _.pluck(myopts.columns, 'invisible')});
       }
       , loadState: function loadState() {
-         var state = localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
-         _.each(state.invisible, function (o, idx) {
-            opts.columns[idx].invisible = !!o;
-         });
+         return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
       }
       , checkConfig: function checkConfig() {
          if (origData[0] && origData[0].length !== myopts.columns.length) {
@@ -59,10 +56,6 @@ $.fn.ebtable = function (opts, data) {
    var pageCur = 0;
    var pageCurMax = Math.floor(tblData.length / myopts.rowsPerPage);
 
-   $.each(myopts.columns, function () {
-      this.invisible = !!this.invisible;
-   });
-   
    function initGroups() { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
       var gc = myopts.groupingCols;
       for (var r = 0; gc && r < tblData.length; r++) {
@@ -76,8 +69,9 @@ $.fn.ebtable = function (opts, data) {
    }
 
    function configBtn() {
-      var list = _.reduce(myopts.columns, function (res, col) {
+      var list = _.reduce(myopts.colorder, function (res, idx) {
          var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
+         var col = myopts.columns[idx];
          return res + (col.technical ? '' : _.template(t)({name: col.name, cls: col.invisible ? 'invisible' : 'visible'}));
       }, '');
       var t = '<button id="configBtn">Anpassen</button>\n\
@@ -281,6 +275,9 @@ $.fn.ebtable = function (opts, data) {
    // ##############################################################################
 
    function initGrid(a) {
+      $.each(myopts.columns, function () {
+         this.invisible = !!this.invisible;
+      });
       util.checkConfig();
       initGroups();
       var tableTemplate = _.template(
@@ -355,18 +352,13 @@ $.fn.ebtable = function (opts, data) {
       , resizable: true
       , buttons: {
          "OK": function () {
-            var res = [];
+            var colnames = [];
             $('#configDlg li').each(function (idx, o) {
-               res.push($(o).prop('id'));
+               colnames.push($(o).prop('id'));
             });
-            console.log("columns order", res);
             myopts.colorder = _.map(myopts.columns, function (col, idx) {
-               if (col.technical)
-                  return idx;
-               var colname = res.shift();
-               return  col.invisible ? idx : util.indexOfCol(colname);
+               return col.technical? idx: util.indexOfCol(colnames.shift());
             });
-            console.log("columns visibiliy", _.pluck(myopts.columns, 'invisible'));
             myopts.saveState();
             redraw(pageCur, true);
             $(this).dialog("close");

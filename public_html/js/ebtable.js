@@ -76,7 +76,8 @@ $.fn.ebtable = function (opts, data) {
       var list = _.reduce(myopts.colorder, function (res, idx) {
          var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
          var col = myopts.columns[idx];
-         return res + (col.technical ? '' : _.template(t)({name: col.name, cls: col.invisible ? 'invisible' : 'visible'}));
+         var cls = col.invisible ? 'invisible' : 'visible';
+         return res + (col.technical ? '' : _.template(t)({name: col.name, cls: cls}));
       }, '');
       var t = '<button id="configBtn">Anpassen</button>\n\
                <div id="configDlg" title="Anpassen">\n\
@@ -344,7 +345,7 @@ $.fn.ebtable = function (opts, data) {
       $("#configDlg li").off('click').on("click", function (event) {
          var col = myopts.columns[util.indexOfCol(event.target.id)];
          col.invisible = !col.invisible;
-         $('#configDlg #' + event.target.id).toggleClass('invisible').toggleClass('visible');
+         $('#configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
          console.log('change visibility', event.target.id, 'now visible:', !col.invisible);
       });
    });
@@ -361,7 +362,7 @@ $.fn.ebtable = function (opts, data) {
                colnames.push($(o).prop('id'));
             });
             myopts.colorder = _.map(myopts.columns, function (col, idx) {
-               return col.technical? idx: util.indexOfCol(colnames.shift());
+               return col.technical ? idx : util.indexOfCol(colnames.shift());
             });
             myopts.saveState();
             redraw(pageCur, true);

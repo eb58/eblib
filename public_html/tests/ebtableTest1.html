@@ -45,7 +45,7 @@
                {name: "Gattung", invisible: true, technical: true},
                {name: "Tierart"},
                {name: "Datum", invisible: true, format: 'date-de'},
-               {name: "Name", render: function (data, row) {
+               {name: "Welcher Name", render: function (data, row) {
                      var isOpen = grid ? grid.groupIsOpen(row[1]) : false;
                      var imgsrc = '/images/group_' + (isOpen ? 'opened' : 'closed') + '.gif';
                      return data || !row[1] ?

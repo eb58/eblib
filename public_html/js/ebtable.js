@@ -14,9 +14,6 @@ $.fn.ebtable = function (opts, data) {
       , colIsTechnical: function colIsTechnical(colname) {
          return myopts.columns[util.indexOfCol(colname)].technical;
       }
-      , clip: function clip(v, a, b) {
-         return Math.min(Math.max(a, v), b);
-      }
       , saveState: function saveState() {
          localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder, invisible: _.pluck(myopts.columns, 'invisible')});
       }
@@ -58,7 +55,7 @@ $.fn.ebtable = function (opts, data) {
    var origData = mx(data);
    var tblData = mx($.extend([], origData));
    var pageCur = 0;
-   var pageCurMax = Math.floor(tblData.length / myopts.rowsPerPage);
+   var pageCurMax = Math.floor((tblData.length-1)/ myopts.rowsPerPage);
 
    function initGroups() { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
       var gc = myopts.groupingCols;
@@ -235,7 +232,7 @@ $.fn.ebtable = function (opts, data) {
          var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
          var w2 = $('#data td:nth-child(' + i + ')').innerWidth();
          if (w1 !== w2) {
-            //console.log('Aua!', i, 'head:', w1, 'data:', w2);
+            console.log('Aua!', i, 'head:', w1, 'data:', w2);
             //???$(document).width($(document).width() + 100);
             //adjustColumns();
          }
@@ -247,7 +244,6 @@ $.fn.ebtable = function (opts, data) {
       $('#divall').width($(window).width() - 25);
       $('#head').width($('#divall').width() - 20);
       $('#data').width($('#divall').width() - 20);
-      $('th,td').removeAttr('width');
       adjustColumns();
       $('#ctrlPage1').css('position', 'absolute').css('top', 5);
       $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
@@ -287,28 +283,28 @@ $.fn.ebtable = function (opts, data) {
       initGroups();
       var tableTemplate = _.template(
               "<div>\n\
-               <table>\n\
-                  <th id='ctrlLength'><%= selectLen %></th>\n\
-                  <th id='ctrlConfig'><%= configBtn %></th>\n\
-                  <th id='ctrlPage1'><%= browseBtns %></th>\n\
-               </table>\n\
-               <div id='divall'>\n\
-                  <div>\n\
-                     <table id='head' >\n\
-                        <thead><tr><%= head %></tr></thead>\n\
-                     </table>\n\
+                  <table>\n\
+                     <th id='ctrlLength'><%= selectLen %></th>\n\
+                     <th id='ctrlConfig'><%= configBtn %></th>\n\
+                     <th id='ctrlPage1'><%= browseBtns %></th>\n\
+                  </table>\n\
+                  <div id='divall' style='overflow-y:auto;overflow-x:hidden'>\n\
+                     <div>\n\
+                        <table id='head' >\n\
+                           <thead><tr><%= head %></tr></thead>\n\
+                        </table>\n\
+                     </div>\n\
+                     <div id='divdata' style='max-height:<%= bodyheight %>px;'>\n\
+                        <table id='data'>\n\
+                           <tbody><%= data %></tbody>\n\
+                        </table>\n\
+                     </div>\n\
                   </div>\n\
-                  <div id='divdata' style='max-height:<%= bodyheight %>px;'>\n\
-                     <table id='data'>\n\
-                        <tbody><%= data %></tbody>\n\
-                     </table>\n\
-                  </div>\n\
-               </div>\n\
-               <table>\n\
-                  <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
-                  <th id='ctrlPage2'><%= browseBtns %></th>\n\
-               </table>\n\
-            </div>"
+                  <table>\n\
+                     <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
+                     <th id='ctrlPage2'><%= browseBtns %></th>\n\
+                  </table>\n\
+               </div>"
               );
       a.html(tableTemplate({
          head: tableHead()
@@ -332,9 +328,8 @@ $.fn.ebtable = function (opts, data) {
            .selectmenu({change: function (event, data) {
                  console.log('change rowsPerPage', event, data.item.value);
                  myopts.rowsPerPage = Number(data.item.value);
-                 pageCurMax = Math.floor(tblData.length / myopts.rowsPerPage);
-                 var startRow = myopts.rowsPerPage * pageCur + 1;
-                 pageCur = Math.floor(startRow / myopts.rowsPerPage);
+                 pageCurMax = Math.floor((tblData.length-1)/ myopts.rowsPerPage);
+                 pageCur = 0;
                  redraw(pageCur);
                  myopts.saveState();
               }
@@ -382,11 +377,11 @@ $.fn.ebtable = function (opts, data) {
       redraw(pageCur);
    });
    $('.nextBtn').button().on('click', function () {
-      pageCur = util.clip(pageCur + 1, 0, pageCurMax);
+      pageCur = Math.min(pageCur + 1, pageCurMax);
       redraw(pageCur);
    });
    $('.lastBtn').button().on('click', function () {
-      pageCur = Math.floor(tblData.length / myopts.rowsPerPage);
+      pageCur = pageCurMax;
       redraw(pageCur);
    });
    $('#head th:gt(0)').on('click', sorting);

@@ -1,21 +1,24 @@
-#grid #head, #grid #data { background-color:lightgray;  }
-
-#grid #head table th{ 
-   background-color:#ddc; 
+#grid #head, #grid #data { 
+   background-color:lightgray
 }
+
+#grid #head th{ 
+   background-color:#eee; 
+}
+
 #grid table td{ 
    background-color:white;
 }
 
 #grid table td.group{
-   background-color: #fffde0 !important;
+   background-color: #fffde0;
 }
 #grid table td.groupheader{
-   background-color: #fff5a8!important;
+   background-color: #fff5a8;
 }
 
 #grid table thead th input {
-   width: 90%;
+   width: 80%;
    padding: 0px;
    box-sizing: border-box;
 }
@@ -35,19 +38,14 @@
    padding: 0px;
    margin:0px;
 }
+
+/* ConfigDlg*/
 #selectable { list-style-type: none; padding: 0px; width: 100%; }
 #selectable li.visible{ 
    margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:lightgray;
 }
 #selectable li.invisible{ 
    margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:#eee;
-}
-
-#xhead th, #xdata td {
-   overflow: hidden;
-   -ms-text-overflow: ellipsis;
-   -o-text-overflow: ellipsis;
-   text-overflow: ellipsis;
 }
 
 

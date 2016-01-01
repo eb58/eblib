@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Beispiel 3 Nur ein TEST</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
+      <style>
+         * {
+            font-family:Arial;
+            color: black;
+            font-size: 10px;
+         }
+      </style>
+      <link rel="stylesheet" href="/css/ebtable.css">
+
+      <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
+      <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
+      <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+      <script src="/js/mx.js"></script>
+      <script src="/js/ebtable.js"></script>
+      <script>
+         'use strict';
+         var basketTestdata = [
+            ['GA', 'Säugetier', '', '', ''],
+            ['GB', 'Säugetier', 'Esel', '05.08.2011', 'Liebig, Ellen, 17.08.1956'],
+            ['GB', 'Säugetier', 'Affe', '10.06.2013', 'Heine, Heinrich, 07.12.2006'],
+            ['GB', 'Säugetier', 'Maus', '15.09.2014', 'Manne, Antonia, 17.06.1954'],
+            ['GB', 'Säugetier', 'Hase', '15.09.2014', 'Liebig, Ellen, 17.08.1956'],
+            ['GB', 'Säugetier', 'Hund', '31.08.2015', 'Mann, Heinrich, 17.08.1878'],
+            ['GA', 'Insekt', '', '', ''],
+            ['GB', 'Insekt', 'Fliege', '31.08.2009', 'Mann, Thomas'],
+            ['GB', 'Insekt', 'Biene', '31.08.2001', 'Lessing, Gottfried'],
+            ['GB', 'Insekt', 'Hummel', '01.08.1759', 'Schiller, Friedrich'],
+            ['GB', 'Insekt', 'Wespe', '31.06.1900', 'Storm, Theodor'],
+            ['', '', 'Wolperdinger', '31.08.1915', ''],
+            ['', '', 'Yeti', '31.08.2016', ''],
+            ['', '', 'Einhorn', '04.11.2017', ''],
+            ['', '', 'Lindwurm', '31.12.2018', '']
+         ];
+
+         var opts = {
+            columns: [
+               {name: "Grouping", technical: true, order: 'asc-fix'},
+               {name: "Gattung", render: function (data, row, type) {
+                     if (type === 'filter')
+                        return data;
+                     var isOpen = grid ? grid.groupIsOpen(row[1]) : false;
+                     var isHead = row[0] === 'GA';
+                     var imgsrc = '/images/group_' + (isOpen ? 'opened' : 'closed') + '.gif';
+                     return isHead ? '<img src="' + imgsrc + '"\n\
+                        onclick=grid.toggleGroupIsOpen("' + row[1] + '")\n\
+                        /><b>&nbsp;' + row[1] + '</b>' : '';
+                  }},
+               {name: "Tierart"},
+               {name: "Datum", invisible: true, format: 'date-de'},
+               {name: "Welcher Name"}
+            ]
+            , selection: true
+            , colorder: [0, 1, 4, 3, 2]
+            , rowsPerPageSelectValues: [2, 4, 5, 10, 15]
+            , rowsPerPage: 15
+            , sortmaster: [{col: 0}] //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+            , groupingCols: {groupid: 1, groupsort: 0, grouphead: 'GA'}
+         };
+         var grid;
+         function toggle(groupName) {
+            grid.toggleGroupIsOpen(groupName);
+         }
+         $().ready(function () {
+            grid = $('#grid').ebtable(opts, basketTestdata);
+         });
+      </script>
+   </head>
+   <body>
+      <div id="grid"></div>
+   </body>
+</html>

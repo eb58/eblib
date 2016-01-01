@@ -1,6 +1,7 @@
 /* global _ */
 "use strict";
 $.fn.ebtable = function (opts, data) {
+   var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '');
    var util = {
       indexOfCol: function indexOfCol(colname) {
          for (var c = 0; c < myopts.columns.length; c++)
@@ -28,15 +29,20 @@ $.fn.ebtable = function (opts, data) {
          if (origData[0] && origData[0].length !== myopts.columns.length) {
             alert('Data definition and column definition don\'t match!');
             localStorage[localStorageKey] = '';
-            delete opts.colorder;
             myopts = $.extend({}, defopts, opts);
          }
+         $.each(myopts.columns, function(idx,coldef){
+            if( coldef.technical && !coldef.invisible) alert( coldef.name + ": technical column must be invisble!");
+         });
+         $.each(myopts.columns, function(idx,coldef){ // set reasonable defaults for coldefs
+            coldef.technical = coldef.technical || false;
+            coldef.invisible = coldef.invisible || false;
+            coldef.order  = coldef.order || 'asc';
+         });
       }
    };
 // ##############################################################################
 
-   var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '');
-   var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
 
    var defopts = {
       columns: []
@@ -183,6 +189,7 @@ $.fn.ebtable = function (opts, data) {
    }
 
    function sorting(event) { // sorting
+      var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
       console.log('sorting', event.currentTarget.id);
       if (event.currentTarget.id) {
          var idx = util.indexOfCol(event.currentTarget.id);
@@ -202,6 +209,7 @@ $.fn.ebtable = function (opts, data) {
          redraw(pageCur);
       }
    }
+   
    function filtering(event) { // filtering
       console.log('filtering', event);
       filterData();
@@ -224,7 +232,7 @@ $.fn.ebtable = function (opts, data) {
          var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
          var w2 = $('#data tr:first td:nth-child(' + i + ')').innerWidth();
          var w = Math.max(w1, w2);
-         //console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
+         console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
          $('#head th:nth-child(' + i + ')').innerWidth(w);
          $('#data tr:first td:nth-child(' + i + ')').innerWidth(w);
       }
@@ -254,11 +262,13 @@ $.fn.ebtable = function (opts, data) {
       var filters = [];
       $('#head input[type=text]').each(function (idx, o) {
          if ($(o).val()) {
-            var col = util.indexOfCol($(o).attr('id'));
-            filters.push({col: col, searchtext: $(o).val()});
+            var colname = $(o).attr('id');
+            var col = util.indexOfCol(colname);
+            var render = myopts.columns[col].render;
+            filters.push({col: col, searchtext: $(o).val(), render: render});
          }
       });
-      tblData = filters.length === 0 ? origData : origData.filterData(filters);
+      tblData = filters.length === 0 ? mx(origData) : mx(origData.filterData(filters,myopts));
    }
 
    function redraw(pageCur, withHead) {

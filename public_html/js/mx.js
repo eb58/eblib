@@ -1,21 +1,22 @@
 /* global _ */
 
-var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
-   var data = _.isArray(p1) ? p1 : _.map(_.range(p1), function () {
-      return [];
-   }); // [ [], [], [], ..., [] ] 
-   var nr = data.length;
-   var nc = _.isArray(p1) ? p1[0].length : p2;
+var mx = function mx(m, coldefs) { //  2-dimensional array -- m(atri)x
+   var data = m;
+   coldefs = _.isArray(coldefs) ? coldefs : _.map(_.range(m[0].length), function () {
+      return  {};
+   });
 
 // ###################################################################
-   util = {
+
+   data.util = {
       toLower: function (o) {
          return  $.type(o) === "string" ? o.toLowerCase() : o;
       }
    };
 
 // ###################################################################
-   data.sorters = {
+
+   data.formats = {
       'date-de': function (a) { // '01.01.2013' -->   '20130101' 
          var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
          return d ? (d[3] + d[2] + d[1]) : '';
@@ -24,6 +25,9 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
          var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
          return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
       }
+      , 'scientific': function (a) { // '1e+3'  -->  '1000' 
+         return parseFloat(a);
+      }
    };
 
 // ###################################################################
@@ -31,8 +35,8 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
    data.fill = function (val) {
       val = val || 0;
       var n = 0;
-      for (var r = 0; r < nr; r++) {
-         for (var c = 0; c < nc; c++) {
+      for (var r = 0; r < data.length; r++) {
+         for (var c = 0; c < row.length; c++) {
             data[r][c] = _.isArray(val) ? val[n++] : val;
          }
       }
@@ -49,7 +53,7 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
 
    data.rows = function (arr) {
       var d = [];
-      for (var r = 0; r < nr; r++) {
+      for (var r = 0; r < data.length; r++) {
          if (_.indexOf(arr, r) >= 0)
             d.push(data[r]);
       }
@@ -58,7 +62,7 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
 
    data.withoutRows = function (p) { // pred-function or arr
       var d = [];
-      for (var r = 0; r < nr; r++) {
+      for (var r = 0; r < data.length; r++) {
          if (_.isFunction(p) ? !p(data[r]) : _.indexOf(p, r) < 0)
             d.push(data[r]);
       }
@@ -71,16 +75,16 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
       });
    };
 
+//####################################  sorting #######################
    data.rowCmpCols = function (coldefs) { // [ {col:1,order:asc,format:fmtfct1},{col:3, order:desc, format:fmtfct2},... ]  
+      coldefs = _.isArray(coldefs) ? coldefs : [coldefs];
       return function (r1, r2) {
-         if (!_.isArray(coldefs))
-            coldefs = [coldefs];
          for (var i = 0; i < coldefs.length; i++) {
             var cdef = coldefs[i];
             var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
-            var fmt = cdef.format ? data.sorters[cdef.format] : undefined;
-            var x = util.toLower(r1[cdef.col]);
-            var y = util.toLower(r2[cdef.col]);
+            var x = data.util.toLower(r1[cdef.col]);
+            var y = data.util.toLower(r2[cdef.col]);
+            var fmt = cdef.format ? data.formats[cdef.format] : undefined;
             x = fmt ? fmt(x) : x;
             y = fmt ? fmt(y) : y;
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
@@ -92,24 +96,29 @@ var mx = function mx(p1, p2) { // nr #rows, nc #cols OR p1 = 2-dimensional array
       };
    };
 
-   data.filterData = function filterData(filters) { // filters [{col: col,searchtext: text},...]
-      if (!_.isArray(filters))
-         filters = [filters];
+//####################################  filtering #######################
+   data.rowMatch = function rowMatch(row, filters) {
+      filters = _.isArray(filters) ? filters : [filters];
+      var b = true;
+      for (var i = 0; i < filters.length && b; i++) {
+         var f = filters[i];
+         var cellData = $.trim(row[f.col]).toLowerCase();
+         cellData = f.render ? f.render(cellData, row, 'filter') : cellData;
+         var searchText = f.searchtext.toLowerCase();
+         b = b && cellData.indexOf(searchText) >= 0;
+      }
+      return b;
+   };
+
+   data.isGroupingHeader = function isGroupingHeader(row, myopts) {
+      return row[myopts.groupingCols.groupsort] === myopts.groupingCols.grouphead;
+   };
+
+   data.filterData = function filterData(filters, myopts) { // filters [{col: col,searchtext: text},...]
       var d = [];
       for (var r = 0; r < this.length; r++) {
-         var b = true;
-         for (var i = 0; i < filters.length && b; i++) {
-            var f = filters[i];
-            var cellData = $.trim(this.row(r)[f.col]).toLowerCase();
-            var searchText = f.searchtext.toLowerCase();
-            b = b && cellData.indexOf(searchText) >= 0;
-
-//            if (cellData) {
-//               var rx = new RegExp(cellData, 'i');
-//               b = b && rx.test(f.searchText);
-//            }
-         }
-         if (b) {
+//         if (this.rowMatch(this[r], filters) || this.isGroupingHeader(this[r], myopts)) {
+         if (this.rowMatch(this[r], filters)) {
             d.push(this[r]);
          }
       }

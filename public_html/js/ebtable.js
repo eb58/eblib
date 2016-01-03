@@ -26,18 +26,20 @@ $.fn.ebtable = function (opts, data) {
          return state;
       }
       , checkConfig: function checkConfig() {
+         $.each(myopts.columns, function (idx, coldef) { // set reasonable defaults for coldefs
+            coldef.technical = coldef.technical || false;
+            coldef.invisible = coldef.invisible || false;
+            coldef.order = coldef.order || 'asc';
+         });
+
          if (origData[0] && origData[0].length !== myopts.columns.length) {
             alert('Data definition and column definition don\'t match!');
             localStorage[localStorageKey] = '';
             myopts = $.extend({}, defopts, opts);
          }
-         $.each(myopts.columns, function(idx,coldef){
-            if( coldef.technical && !coldef.invisible) alert( coldef.name + ": technical column must be invisble!");
-         });
-         $.each(myopts.columns, function(idx,coldef){ // set reasonable defaults for coldefs
-            coldef.technical = coldef.technical || false;
-            coldef.invisible = coldef.invisible || false;
-            coldef.order  = coldef.order || 'asc';
+         $.each(myopts.columns, function (idx, coldef) {
+            if (coldef.technical && !coldef.invisible)
+               alert(coldef.name + ": technical column must be invisble!");
          });
       }
    };
@@ -46,7 +48,7 @@ $.fn.ebtable = function (opts, data) {
 
    var defopts = {
       columns: []
-      , bodyheight: Math.max(200, $(window).height() - 10)
+      , bodyheight: Math.max(200, $(window).height() - 150)
       , rowsPerPageSelectValues: [10, 25, 50, 100]
       , rowsPerPage: 10
       , colorder: _.range(opts.columns.length) // [0,1,2,... ]
@@ -61,17 +63,17 @@ $.fn.ebtable = function (opts, data) {
    var origData = mx(data);
    var tblData = mx($.extend([], origData));
    var pageCur = 0;
-   var pageCurMax = Math.floor((tblData.length-1)/ myopts.rowsPerPage);
+   var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
 
    function initGroups() { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
       var gc = myopts.groupingCols;
       for (var r = 0; gc && r < tblData.length; r++) {
          var row = tblData[r];
-         var groupName = row[gc.groupid];
+         var groupId = row[gc.groupid];
          row.isGroupHeader = row[gc.groupsort] === gc.grouphead;
-         row.isGroupElement = groupName && !row.isGroupHeader;
-         if (groupName)
-            myopts.groups[groupName] = {isOpen: false};
+         row.isGroupElement = groupId && !row.isGroupHeader;
+         if (groupId)
+            myopts.groups[groupId] = {isOpen: false};
       }
    }
 
@@ -159,7 +161,7 @@ $.fn.ebtable = function (opts, data) {
    }
 
    function infoCtrl() {
-      var startRow = myopts.rowsPerPage * pageCur + 1;
+      var startRow = Math.min( myopts.rowsPerPage * pageCur + 1, tblData.length );
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
       var filtered = origData.length === tblData.length ? '' : ' (gefiltert von ' + origData.length + ' Einträgen)';
       var templ = _.template("<%=start%> bis <%=end%> von <%=count%> Einträgen <%= filtered %>");
@@ -209,7 +211,7 @@ $.fn.ebtable = function (opts, data) {
          redraw(pageCur);
       }
    }
-   
+
    function filtering(event) { // filtering
       console.log('filtering', event);
       filterData();
@@ -268,17 +270,18 @@ $.fn.ebtable = function (opts, data) {
             filters.push({col: col, searchtext: $(o).val(), render: render});
          }
       });
-      tblData = filters.length === 0 ? mx(origData) : mx(origData.filterData(filters,myopts));
+      tblData = mx(origData.filterGroups(myopts));
+      tblData = filters.length === 0 ? tblData : mx(tblData.filterData(filters, myopts));
    }
 
-   function redraw(pageCur, withHead) {
+   function redraw(pageCur, withHeader) {
       $('#ctrlInfo').html(infoCtrl());
       $('#data tbody').html(tableData(pageCur));
       $('#data input[type=checkbox]').on('change', selectRows);
-      if (withHead) {
+      if (withHeader) {
          $('#head thead tr').html(tableHead());
          $('#head thead th:gt(0)').on('click', sorting);
-         $('#head input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
+         $('#head thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
       }
       adjustTable();
    }
@@ -286,25 +289,23 @@ $.fn.ebtable = function (opts, data) {
    // ##############################################################################
 
    function initGrid(a) {
-      $.each(myopts.columns, function () {
-         this.invisible = !!this.invisible;
-      });
       util.checkConfig();
       initGroups();
+      filterData();
       var tableTemplate = _.template(
               "<div>\n\
                   <table>\n\
-                     <th id='ctrlLength'><%= selectLen %></th>\n\
-                     <th id='ctrlConfig'><%= configBtn %></th>\n\
-                     <th id='ctrlPage1'><%= browseBtns %></th>\n\
+                     <th id='ctrlLength'><%= selectLen  %></th>\n\
+                     <th id='ctrlConfig'><%= configBtn  %></th>\n\
+                     <th id='ctrlPage1' ><%= browseBtns %></th>\n\
                   </table>\n\
-                  <div id='divall' style='overflow-y:auto;overflow-x:hidden'>\n\
+                  <div id='divall' style='overflow:auto'>\n\
                      <div>\n\
                         <table id='head' >\n\
                            <thead><tr><%= head %></tr></thead>\n\
                         </table>\n\
                      </div>\n\
-                     <div id='divdata' style='max-height:<%= bodyheight %>px;'>\n\
+                     <div id='divdata' style='overflow:auto; max-height:<%= bodyheight %>px;'>\n\
                         <table id='data'>\n\
                            <tbody><%= data %></tbody>\n\
                         </table>\n\
@@ -338,7 +339,7 @@ $.fn.ebtable = function (opts, data) {
            .selectmenu({change: function (event, data) {
                  console.log('change rowsPerPage', event, data.item.value);
                  myopts.rowsPerPage = Number(data.item.value);
-                 pageCurMax = Math.floor((tblData.length-1)/ myopts.rowsPerPage);
+                 pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
                  pageCur = 0;
                  redraw(pageCur);
                  myopts.saveState();
@@ -394,20 +395,20 @@ $.fn.ebtable = function (opts, data) {
       pageCur = pageCurMax;
       redraw(pageCur);
    });
-   $('#head th:gt(0)').on('click', sorting);
-   $('#head input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
-   $('#info').button();
+   $('#head thead th:gt(0)').on('click', sorting);
+   $('#head thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
    $('#data input[type=checkbox]').on('change', selectRows);
+   $('#info').button();
 
-   $(window)
-           .on('resize', function () {
-              console.log('resize!!!');
-              adjustTable();
-           });
+   $(window).on('resize', function () {
+      console.log('resize!!!');
+      adjustTable();
+   });
 
 // ##########  Exports ############           
    this.toggleGroupIsOpen = function (groupName) {
       myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
+      filterData();
       redraw(pageCur);
    };
    this.groupIsOpen = function (groupName) {

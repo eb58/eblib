@@ -1,10 +1,10 @@
 /* global _ */
 
-var mx = function mx(m, coldefs) { //  2-dimensional array -- m(atri)x
+var mx = function mx(m) { //  2-dimensional array -- m(atri)x
    var data = m;
-   coldefs = _.isArray(coldefs) ? coldefs : _.map(_.range(m[0].length), function () {
-      return  {};
-   });
+//   coldefs = _.isArray(coldefs) ? coldefs : _.map(_.range(m[0].length), function () {
+//      return  {};
+//   });
 
 // ###################################################################
 
@@ -119,6 +119,18 @@ var mx = function mx(m, coldefs) { //  2-dimensional array -- m(atri)x
       for (var r = 0; r < this.length; r++) {
 //         if (this.rowMatch(this[r], filters) || this.isGroupingHeader(this[r], myopts)) {
          if (this.rowMatch(this[r], filters)) {
+            d.push(this[r]);
+         }
+      }
+      return d;
+   };
+   
+   data.filterGroups = function filterGroups(myopts) { // filters [{col: col,searchtext: text},...]
+      var d = [];
+      var colNrGroupId  = myopts.groupingCols.groupid;
+      for (var r = 0; r < this.length; r++) {
+         var groupId = this[r][colNrGroupId];
+         if (!groupId || this.isGroupingHeader(this[r], myopts)|| myopts.groups[groupId].isOpen) {
             d.push(this[r]);
          }
       }

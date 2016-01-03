@@ -1,39 +1,40 @@
 #grid #head, #grid #data { 
-   background-color:lightgray
+   background-color:#eee;
 }
 
 #grid #head th{ 
-   background-color:#eee; 
+   background-color:#ddd; 
+   padding: 5px 2px 5px 2px;
 }
 
-#grid table td{ 
-   background-color:white;
-}
-
-#grid table td.group{
-   background-color: #fffde0;
-}
-#grid table td.groupheader{
-   background-color: #fff5a8;
-}
-
-#grid table thead th input {
+#grid #head th input {
    width: 80%;
    padding: 0px;
    box-sizing: border-box;
 }
 
-#grid table thead th div.sort_wrapper {
+#grid #head th div.sort_wrapper {
    position: relative;
 }
 
-#grid table thead th div.sort_wrapper span {
+#grid #head th div.sort_wrapper span {
    position: absolute;
    margin-top: 10px;
-   right: -8px;
+   right: -5px;
 }
 
-#grid table input[type=checkbox] {
+#grid #data td{ 
+   background-color:white;
+   padding: 5px 2px 5px 2px;
+}
+#grid #data td.group{
+   background-color: #fffde0;
+}
+#grid #data td.groupheader{
+   background-color: #fff5a8;
+}
+
+#grid #data input[type=checkbox] {
    width: 15px;
    padding: 0px;
    margin:0px;

@@ -47,12 +47,9 @@
                {name: "Datum", invisible: true, format: 'date-de'},
                {name: "Welcher Name", render: function (data, row) {
                      var isOpen = grid ? grid.groupIsOpen(row[1]) : false;
-                     var imgsrc = '/images/group_' + (isOpen ? 'opened' : 'closed') + '.gif';
-                     return data || !row[1] ?
-                             data
-                             : '<img src="' + imgsrc + '"\n\
-                        onclick=grid.toggleGroupIsOpen("' + row[1] + '")\n\
-                        /><b>&nbsp;' + row[1] + '</b>';
+                     var imgsrc = '/images/group_' + (!isOpen ? 'opened' : 'closed') + '.png';
+                     var link = '<img src="' + imgsrc + '" onclick="grid.toggleGroupIsOpen(\'' + row[1] + '\')" /><b>&nbsp;' + row[1] + '</b>';
+                     return data || !row[1] ? data : link;
                   }}
             ]
             , selection: true

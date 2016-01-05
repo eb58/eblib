@@ -1,51 +1,51 @@
-#grid #head, #grid #data { 
+.ebtable #head, .ebtable #data { 
    background-color:#eee;
 }
 
-#grid #head th{ 
+.ebtable #head th{ 
    background-color:#ddd; 
    padding: 5px 2px 5px 2px;
 }
 
-#grid #head th input {
+.ebtable #head th input {
    width: 80%;
    padding: 0px;
    box-sizing: border-box;
 }
 
-#grid #head th div.sort_wrapper {
+.ebtable #head th div.sort_wrapper {
    position: relative;
 }
 
-#grid #head th div.sort_wrapper span {
+.ebtable #head th div.sort_wrapper span {
    position: absolute;
    margin-top: 10px;
    right: -5px;
 }
 
-#grid #data td{ 
+.ebtable #data td{ 
    background-color:white;
    padding: 5px 2px 5px 2px;
 }
-#grid #data td.group{
+.ebtable #data td.group{
    background-color: #fffde0;
 }
-#grid #data td.groupheader{
+.ebtable #data td.groupheader{
    background-color: #fff5a8;
 }
 
-#grid #data input[type=checkbox] {
+.ebtable #data input[type=checkbox] {
    width: 15px;
    padding: 0px;
    margin:0px;
 }
 
-/* ConfigDlg*/
-#selectable { list-style-type: none; padding: 0px; width: 100%; }
-#selectable li.visible{ 
+/* ConfigDlg */
+#configDlg #selectable { list-style-type: none; padding: 0px; width: 100%; }
+#configDlg #selectable li.visible{ 
    margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:lightgray;
 }
-#selectable li.invisible{ 
+#configDlg #selectable li.invisible{ 
    margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:#eee;
 }
 

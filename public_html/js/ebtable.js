@@ -180,7 +180,6 @@
          var gc = myopts.groupingCols;
          if (gc && row[gc.groupid] && row[gc.groupsort] === gc.grouphead) {
             var groupId = row[gc.groupid];
-            var groupSort = row[gc.groupsort];
             console.log('Group', row[gc.groupid], row[gc.groupsort]);
             for (var i = 0; i < tblData.length; i++) {
                if (tblData[i][gc.groupid] === groupId) {
@@ -294,7 +293,7 @@
          initGroups();
          filterData();
          var tableTemplate = _.template(
-                 "<div>\n\
+                 "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\

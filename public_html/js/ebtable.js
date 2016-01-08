@@ -57,7 +57,7 @@
          , saveState: util.saveState
          , loadState: util.loadState
          , sortmaster: [] //[{col:1,order:asc,format:fct1},{col:2,order:asc-fix}]
-         , groupingCols: null //{groupid:1,groupsort:0,grouphead:'GA'}
+         , groupingCols: {} //{groupid:1,groupsort:0,grouphead:'GA'}
          , groups: []
       };
       var myopts = $.extend({}, defopts, opts, defopts.loadState());

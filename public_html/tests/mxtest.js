@@ -16,6 +16,8 @@ QUnit.test('testset1 easy ones', function (assert) {
    assert.deepEqual(m.withoutRows([1, 2]), [[1, 2, 3]]);
    assert.deepEqual(m.withoutRows([0]), [[4, 5, 6], [7, 8, 9]]);
    assert.deepEqual(m.withoutRows([0, 2]), [[4, 5, 6]]);
+   assert.deepEqual(m.cols([0,1]), [[1, 2], [4, 5], [7, 8]]);
+   assert.deepEqual(m.withoutCols([0,1]), [[3], [6], [9]]);
 
    var m = mx([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
    assert.deepEqual(m.withoutRows([0, 2]), [[4, 5, 6]]);
@@ -48,5 +50,12 @@ QUnit.test('testset2 Array filtering functions', function (assert) {
    var m = mx([['test', '01.01.2011'], ['', '01.01.2015'], ['', '01.01.2013'], ['testA', '01.01.2001']]);
    assert.deepEqual(m.filterData({col: 0, searchtext: 'te'}), [['test', '01.01.2011'], ['testA', '01.01.2001']]);
 
+});
+
+QUnit.test('testset3 Array util functions', function (assert) {
+   var m = mx([['', ''],  ['testA', '01.01.2001']]);
+   assert.deepEqual(m.aggrLine, ['testA', '01.01.2001']);
+   var m = mx([['test', 's111111 111'], ['', '01.01.2015'], ['', '01.01.2013'], ['testA', '01.01.2001']]);
+   assert.deepEqual(m.aggrLine, ['testA', 's111111 111']);
 });
 

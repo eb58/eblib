@@ -2,15 +2,14 @@
 
 var mx = function mx(m) { //  2-dimensional array -- m(atri)x
    var data = m;
-//   coldefs = _.isArray(coldefs) ? coldefs : _.map(_.range(m[0].length), function () {
-//      return  {};
-//   });
-
 // ###################################################################
 
    data.util = {
       toLower: function (o) {
          return  $.type(o) === "string" ? o.toLowerCase() : o;
+      },
+      normalizeGroupId: function (id) {
+         return _.isString(id) ? id : (id <= 0 ? 0 : id);
       }
    };
 
@@ -24,24 +23,24 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
          var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
          return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
-      }
-      , 'scientific': function (a) { // '1e+3'  -->  '1000' 
+      },
+      'scientific': function (a) { // '1e+3'  -->  '1000' 
          return parseFloat(a);
       }
    };
 
 // ###################################################################
 
-   data.fill = function (val) {
-      val = val || 0;
-      var n = 0;
-      for (var r = 0; r < data.length; r++) {
-         for (var c = 0; c < row.length; c++) {
-            data[r][c] = _.isArray(val) ? val[n++] : val;
-         }
-      }
-      return this;
-   };
+//   data.fill = function (val) {
+//      val = val || 0;
+//      var n = 0;
+//      for (var r = 0; r < data.length; r++) {
+//         for (var c = 0; c < row.length; c++) {
+//            data[r][c] = _.isArray(val) ? val[n++] : val;
+//         }
+//      }
+//      return this;
+//   };
 
    data.zero = function () {
       return data.fill(0);
@@ -73,6 +72,33 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       return _.map(_.range(data.length), function (r) {
          return data[r][n];
       });
+   };
+
+   data.cols = function (arr) {
+      var res = [];
+      for (var r = 0; r < data.length; r++) {
+         var row = data[r];
+         var nrow = [];
+         for (var c = 0; c < row.length; c++) {
+            if (_.indexOf(arr, c) >= 0)
+               nrow.push(row[c]);
+         }
+         res.push(nrow);
+      }
+      return res;
+   };
+   data.withoutCols = function (arr) {
+      var res = [];
+      for (var r = 0; r < data.length; r++) {
+         var row = data[r];
+         var nrow = [];
+         for (var c = 0; c < row.length; c++) {
+            if (_.indexOf(arr, c) < 0)
+               nrow.push(row[c]);
+         }
+         res.push(nrow);
+      }
+      return res;
    };
 
 //####################################  sorting #######################
@@ -114,6 +140,21 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       return row[myopts.groupingCols.groupsort] === myopts.groupingCols.grouphead;
    };
 
+
+   data.initGroups = function initGroups(myopts) { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
+      var gc = myopts.groupingCols;
+      for (var r = 0; gc && r < this.length; r++) {
+         var row = this[r];
+         var groupId = data.util.normalizeGroupId(row[gc.groupid]);
+         row.isGroupHeader = row[gc.groupsort] === gc.grouphead;
+         row.isGroupElement = groupId && !row.isGroupHeader;
+         if (groupId)
+            myopts.groups[groupId] = {isOpen: false};
+      }
+      return this;
+   };
+
+
    data.filterData = function filterData(filters, myopts) { // filters [{col: col,searchtext: text},...]
       var d = [];
       for (var r = 0; r < this.length; r++) {
@@ -124,17 +165,34 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       }
       return d;
    };
-   
+
    data.filterGroups = function filterGroups(myopts) { // filters [{col: col,searchtext: text},...]
       var d = [];
-      var colNrGroupId  = myopts.groupingCols.groupid;
+      var colNrGroupId = myopts.groupingCols.groupid;
       for (var r = 0; r < this.length; r++) {
-         var groupId = this[r][colNrGroupId];
-         if (!groupId || this.isGroupingHeader(this[r], myopts)|| myopts.groups[groupId].isOpen) {
+         var groupId = data.util.normalizeGroupId((this[r][colNrGroupId]));
+         if (!groupId || this.isGroupingHeader(this[r], myopts) || myopts.groups[groupId].isOpen) {
             d.push(this[r]);
          }
       }
       return d;
    };
+
+   data.aggregateLongestRow = function () {
+      if (this.length === 0)
+         return [];
+      var res = [];
+      for (var r = 0; r < this.length; r++) {
+         var row = this[r];
+         for (var c = 0; c < row.length; c++) {
+            var s1 = '' + row[c];
+            var s2 = res[c] ? res[c] : '';
+            res[c] = s1.length > s2.length ? s1 : s2;
+         }
+      }
+      this.aggrLine = res;
+      console.log('aggr', res);
+   };
+   data.aggregateLongestRow();
    return data;
 };

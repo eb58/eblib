@@ -1,4 +1,5 @@
-var basketTestdataKH = [
+var basketTestdataKH =[ // [];
+//var x= [
 ["W",1,-1,50000006717,16777216,"50000000000015",64,null,"Gesperrt",null,"50000006717 (err)","Eiterfreude (TEST)","Endokrinologie",null,null,"KK St.Stephan","15.08.2014","20.12.2014",null,null,null,null,null,null,null],
 ["W",1,-1,50000003218,2,"50000000000015",0,-1591,"Erfasst",null,"ZumLöschen, Hugo, 04.03.1965","Beißerle",null,null,null,"Neuer AG",null,null,null,20,"KH-Gutachten","250",null,null,null],
 ["W",1,-1,50000003504,2,"50000000000015",0,-1336,"Erfasst",null,"Zimmermann, Georg, 15.12.2006","Helios Klinikum Buch",null,null,null,"AOK Frankfurt a. M.",null,null,null,null,null,"251",null,null,null],

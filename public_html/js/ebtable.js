@@ -9,24 +9,24 @@
                if (myopts.columns[c].name === colname)
                   return c;
             return -1;
-         }
-         , colIsInvisible: function colIsInvisible(colname) {
+         }, 
+         colIsInvisible: function colIsInvisible(colname) {
             return myopts.columns[util.indexOfCol(colname)].invisible;
-         }
-         , colIsTechnical: function colIsTechnical(colname) {
+         }, 
+         colIsTechnical: function colIsTechnical(colname) {
             return myopts.columns[util.indexOfCol(colname)].technical;
-         }
-         , saveState: function saveState() {
+         }, 
+         saveState: function saveState() {
             localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder, invisible: _.pluck(myopts.columns, 'invisible')});
-         }
-         , loadState: function loadState() {
+         },
+         loadState: function loadState() {
             var state = localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
             _.each(state.invisible, function (o, idx) {
                opts.columns[idx].invisible = !!o;
             });
             return state;
-         }
-         , checkConfig: function checkConfig() {
+         },
+         checkConfig: function checkConfig() {
             $.each(myopts.columns, function (idx, coldef) { // set reasonable defaults for coldefs
                coldef.technical = coldef.technical || false;
                coldef.invisible = coldef.invisible || false;
@@ -42,14 +42,20 @@
                if (coldef.technical && !coldef.invisible)
                   alert(coldef.name + ": technical column must be invisble!");
             });
+         },
+         getVisibleCols: function getVisibleCols(){
+            var res = [];
+            for( var i=0;i<myopts.columns.length;i++) {
+               if( !myopts.columns[i].invisivble ) res.push(i);
+            }
+            return res;
          }
       };
 // ##############################################################################
 
-
       var defopts = {
          columns: []
-         , bodyheight: Math.max(200, $(window).height() - 150)
+         , bodyheight: Math.max(200, $(window).height() - 100)
          , rowsPerPageSelectValues: [10, 25, 50, 100]
          , rowsPerPage: 10
          , colorder: _.range(opts.columns.length) // [0,1,2,... ]
@@ -62,21 +68,9 @@
       };
       var myopts = $.extend({}, defopts, opts, defopts.loadState());
       var origData = mx(data);
-      var tblData = mx($.extend([], origData));
+      var tblData = mx($.extend([], origData)).initGroups(myopts);
       var pageCur = 0;
       var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-
-      function initGroups() { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
-         var gc = myopts.groupingCols;
-         for (var r = 0; gc && r < tblData.length; r++) {
-            var row = tblData[r];
-            var groupId = row[gc.groupid];
-            row.isGroupHeader = row[gc.groupsort] === gc.grouphead;
-            row.isGroupElement = groupId && !row.isGroupHeader;
-            if (groupId)
-               myopts.groups[groupId] = {isOpen: false};
-         }
-      }
 
       function configBtn() {
          var list = _.reduce(myopts.colorder, function (res, idx) {
@@ -133,7 +127,7 @@
             }
             for (var c = 0; c < myopts.columns.length; c++) {
                if (!myopts.columns[order[c]].invisible) {
-                  var val = tblData[r][order[c]];
+                  var val = tblData[r][order[c]] || '';
                   var render = myopts.columns[order[c]].render;
                   val = render ? render(val, row) : val;
                   res += '<td' + cls + '>' + val + '</td>';
@@ -205,8 +199,8 @@
             });
             tblData = tblData.sort(tblData.rowCmpCols(coldefs));
             var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
-            $('#head div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
-            $('#head #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+            $('thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
+            $('thead #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
             pageCur = 0;
             redraw(pageCur);
          }
@@ -230,39 +224,41 @@
             $('#head th:first').width(20);
             $('#data td:first').width(20);
          }
-         for (var i = (myopts.selection ? 2 : 1); i <= opts.columns.length + (myopts.selection ? 1 : 0); i++) {
+         $('#head th').each( function(i,o){
             var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
             var w2 = $('#data tr:first td:nth-child(' + i + ')').innerWidth();
             var w = Math.max(w1, w2);
             console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
             $('#head th:nth-child(' + i + ')').innerWidth(w);
             $('#data tr:first td:nth-child(' + i + ')').innerWidth(w);
-         }
-         for (var i = (myopts.selection ? 2 : 1); i <= opts.columns.length + (myopts.selection ? 1 : 0); i++) {
-            var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
-            var w2 = $('#data td:nth-child(' + i + ')').innerWidth();
-            if (w1 !== w2) {
-               console.log('Aua!', i, 'head:', w1, 'data:', w2);
-               //???$(document).width($(document).width() + 100);
-               //adjustColumns();
-            }
-         }
+         });
+//         for (var i = (myopts.selection ? 2 : 1); i <= opts.columns.length + (myopts.selection ? 1 : 0); i++) {
+//            var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
+//            var w2 = $('#data td:nth-child(' + i + ')').innerWidth();
+//            if (w1 !== w2) {
+//               console.log('Aua!', i, 'head:', w1, 'data:', w2);
+//               //???$(document).width($(document).width() + 100);
+//               //adjustColumns();
+//            }
+//         }
       }
 
       function adjustTable() {
          console.log('>>>adjustTable window-width=', $(window).width());
-         $('#divall').width($(window).width() - 25);
-         $('#head').width($('#divall').width() - 20);
-         $('#data').width($('#divall').width() - 20);
+         var viscols = util.getVisibleCols();
+         console.log('viscols', viscols);
+         $('#divall').width($(window).width()-5);
+         $('#head').width($('#divall').width()-5);
+         $('#data').width($('#divall').width()-5);
          adjustColumns();
-         $('#ctrlPage1').css('position', 'absolute').css('top', 5);
-         $('#ctrlPage1').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
-         $('#ctrlPage2').css('position', 'absolute').css('right', $(document).width() - $('#data').width() - 10);
+         //$('#ctrlPage1').css('position', 'absolute').css('top', 5);
+         $('#ctrlPage1').css('position', 'absolute').css('right', "5px");
+         $('#ctrlPage2').css('position', 'absolute').css('right', "5px");
       }
 
       function filterData() {
          var filters = [];
-         $('#head input[type=text]').each(function (idx, o) {
+         $('thead th input[type=text]').each(function (idx, o) {
             if ($(o).val()) {
                var colname = $(o).attr('id');
                var col = util.indexOfCol(colname);
@@ -279,9 +275,9 @@
          $('#data tbody').html(tableData(pageCur));
          $('#data input[type=checkbox]').on('change', selectRows);
          if (withHeader) {
-            $('#head thead tr').html(tableHead());
-            $('#head thead th:gt(0)').on('click', sorting);
-            $('#head thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
+            $('thead thead tr').html(tableHead());
+            $('thead thead th:gt(0)').on('click', sorting);
+            $('thead thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
          }
          adjustTable();
       }
@@ -290,9 +286,8 @@
 
       function initGrid(a) {
          util.checkConfig();
-         initGroups();
          filterData();
-         var tableTemplate = _.template(
+         var tableTemplate1 = _.template(
                  "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
@@ -317,7 +312,34 @@
                   </table>\n\
                </div>"
                  );
-         a.html(tableTemplate({
+         var tableTemplate2 = _.template(
+                 "<div class='ebtable'>\n\
+                     <table>\n\
+                        <tr>\n\
+                           <th id='ctrlLength'><%= selectLen  %></th>\n\
+                           <th id='ctrlConfig'><%= configBtn  %></th>\n\
+                           <th id='ctrlPage1' ><%= browseBtns %></th>\n\
+                        </tr>\n\
+                     </table>\n\
+                     <div id='divhead' style='max-height:<%= bodyheight %>px;'>\n\
+                        <table id='head'>\n\
+                           <thead><%= head %></thead>\n\
+                        </table>\n\
+                     </div>\n\
+                     <div id='divdata' style='overflow:auto; max-height:<%= bodyheight %>px;'>\n\
+                        <table id='data'>\n\
+                           <tbody><%= data %></tbody>\n\
+                        </table>\n\
+                     </div>\n\
+                     <table>\n\
+                        <tr>\n\
+                           <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
+                           <th id='ctrlPage2'><%= browseBtns %></th>\n\
+                        </tr>\n\
+                     </table>\n\
+                  </div>"
+                 );
+         a.html(tableTemplate1({
             head: tableHead()
             , data: tableData(pageCur)
             , selectLen: selectLenCtrl()
@@ -395,8 +417,8 @@
          pageCur = pageCurMax;
          redraw(pageCur);
       });
-      $('#head thead th:gt(0)').on('click', sorting);
-      $('#head thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
+      $('thead th:gt(0)').on('click', sorting);
+      $('thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
       $('#data input[type=checkbox]').on('change', selectRows);
       $('#info').button();
 

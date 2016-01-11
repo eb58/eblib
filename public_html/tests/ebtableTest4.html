@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Beispiel 4 Nur ein TEST</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
+      <style>
+         * {
+            font-family:Arial;
+            color: black;
+            font-size: 10px;
+         }
+      </style>
+      <link rel="stylesheet" href="/css/ebtable.css">
+
+      <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
+      <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
+      <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+      <script src="/js/mx.js"></script>
+      <script src="/js/ebtable.js"></script>
+      <script src="/data/ebTableTestDataKhbasket.js"></script>
+
+      <script>
+         'use strict';
+         var opts = {
+            columns: [
+               {name: "Grouping", technical: true, invisible:true, order: 'asc-fix'},
+               {name: "GroupCount", technical: true,invisible:true },
+               {name: "GroupId", technical: true, invisible:true },
+               {name: "WorkorderId", technical:  true, invisible:true },
+               {name: "StatusId", technical: true, invisible:true},
+               {name: "Performer", technical: true, invisible:true },
+               {name: "Flags" },
+               {name: "Frist" },
+               {name: "Status" },
+               {name: "SSSSS" },
+               {name: "Auftrag" },
+               {name: "Krankenkaus" },
+               {name: "Abteilung" },
+               {name: "AAAA" },
+               {name: "BBBB" },
+               {name: "CCCC" },
+               {name: "Einlieferung" },
+               {name: "Entlassunf" },
+               {name: "DDD" },
+               {name: "BEEEBBB" },
+               {name: "FFF" },
+               {name: "GGG" },
+               {name: "DTA-Nummern" },
+               {name: "IIIII" },
+               {name: "KH-Frist" },
+            ]
+            , selection: true
+            , sortmaster: [{col: 2},{col: 0}] //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+            , groupingCols: {groupid: 2, groupsort: 0, grouphead: 'C'}
+         };
+         $().ready(function () {
+            var grid = $('#grid').ebtable(opts, basketTestdataKH);
+         });
+      </script>
+   </head>
+   <body>
+      <div id="grid"></div>
+   </body>
+</html>

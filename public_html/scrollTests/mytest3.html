@@ -1,0 +1,295 @@
+<html>
+   <head>
+      <title>TODO supply a title</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+         * {
+            font-family:Arial;
+            color: black;
+            font-size: 10px;
+         }
+         #head,#data { 
+            background-color:#eee;
+         }
+
+         #head th{ 
+            background-color:#ddd; 
+            padding: 1px 2px 1px 2px;
+         }
+
+         #head th input {
+            width: 80%;
+            padding: 0px;
+            box-sizing: border-box;
+         }
+
+         #head th div.sort_wrapper {
+            position: relative;
+         }
+
+         #head th div.sort_wrapper span {
+            position: absolute;
+            margin-top: 10px;
+            right: -5px;
+         }
+
+         #data td{ 
+            background-color:white;
+            padding: 1px 2px 1px 2px;
+         }         
+      </style>
+      <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
+      <script src="/lib/jQuery-1.11.3/jquery-1.11.3.js"></script>
+      <script>
+         function adjust() {
+            $('#data').prepend($('#head tr'))
+            var wtable = $('#data').width();
+            var wcells = $('#data tr:first th').map(function (i, o) {
+               return $(o).width();
+            });
+            console.log('wtable:', wtable, 'wcells', wcells);
+            $('#head').append($('#data tr:first'));
+            console.log('Bwtable:', wtable, 'wcells', wcells);
+            $('#head,#data').width(wtable);
+            console.log('Cwtable:', wtable, 'wcells', wcells);
+            $('#head th').each(function (i, o) {
+               $(o).width(wcells[i]);
+            });
+            $('#data tr:first td').each(function (i, o) {
+               $(o).width(wcells[i]);
+            });
+         }
+      </script>
+      <script>
+         $(document).ready(function () {
+            adjust();
+////            $('#head,#data').width(Math.floor(wdths().ww) - 30);
+//            $('#divdata').width($('#data').width() + 14);
+//            adjustColumns(0);
+//            $(window).on("resize", function () {
+//               console.log('resizing');
+//               $('#head,#data').width(Math.floor(wdths().ww) - 30);
+//               $('#divdata').width($('#data').width() + 14);
+//               adjustColumns(0);
+//            });
+         });
+      </script>
+   </head>
+   <body>
+      <div>TODO write content</div>
+      <table id="head" style="width: 1037px;">
+         <tr>
+            <th></th>                  
+            <th id="Flags">Flags
+               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Flags
+               </div>
+               <!--<input type="text" id="Flags">-->
+            </th>                  
+            <th id="Frist">Frist
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Frist
+               </div>
+               <input type="text" id="Frist">-->
+            </th>                  
+            <th id="SSSSS">SSSSS
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>SSSSS
+               </div>
+               <input type="text" id="SSSSS">-->
+            </th>                  
+            <th id="Auftrag">Auftrag
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Auftrag
+               </div>
+               <input type="text" id="Auftrag">-->
+            </th>                  
+            <th id="Krankenhaus">Krankenhaus
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Krankenhaus
+               </div>
+               <input type="text" id="Krankenhaus">-->
+            </th>                  
+            <th id="Abteilung">Abteilung
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Abteilung
+               </div>
+               <input type="text" id="Abteilung">-->
+            </th>                  
+            <th id="AAAA">AAAA
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>AAAA
+               </div>
+               <input type="text" id="AAAA">-->
+            </th>                  <th id="BBBB">
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>BBBB
+               </div>
+               <input type="text" id="BBBB">-->
+            </th>                  
+            <th id="Status">Status
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Status
+               </div>
+               <input type="text" id="Status">-->
+            </th>                  
+            <th id="Einlieferung">
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Einlieferung
+               </div>
+               <input type="text" id="Einlieferung">-->
+            </th>                  
+            <th id="Entlassung">Entlassung
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>Entlassung
+               </div>
+               <input type="text" id="Entlassung">-->
+            </th>                  
+            <th id="DDD">DDD
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>DDD
+               </div>
+               <input type="text" id="DDD">-->
+            </th>                  
+            <th id="BEEEBBB">BEEEBBB
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>BEEEBBB
+               </div>
+               <input type="text" id="BEEEBBB">-->
+            </th>                  
+            <th id="FFF">FFF
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>FFF
+               </div>
+               <input type="text" id="FFF">-->
+            </th>                 
+            <th id="GGG">GGG
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>GGG
+               </div>
+               <input type="text" id="GGG">-->
+            </th>               
+            <th id="CCCC">CCCC
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>CCCC
+               </div>
+               <input type="text" id="CCCC">-->
+            </th>                  
+            <th id="DTA-Nummern">DTA-Nummern
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>DTA-Nummern
+               </div>
+               <input type="text" id="DTA-Nummern">-->
+            </th>                  
+            <th id="WWW">WWW
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>WWW
+               </div>
+               <input type="text" id="WWW">-->
+            </th>                  
+            <th id="KH-Frist">KH-Frist
+<!--               <div class="sort_wrapper">
+                  <span class="ui-icon ui-icon-triangle-2-n-s"></span>KH-Frist
+               </div>
+               <input type="text" id="KH-Frist">-->
+            </th>
+         </tr>
+      </table>
+      <div id="divdata" style="overflow-y: auto; overflow-x: hidden; max-height: 849px; width: 1370px;">
+         <table id="data" style="width: 1037px;">
+            <!--<tr><td>                     <input type="checkbox" class="checkRow" id="check0">                  </td><td>64</td><td></td><td></td><td>50000006717 (err)</td><td>Eiterfreude (TEST)</td><td>Endokrinologie</td><td></td><td></td><td>Gesperrt</td><td>15.08.2014</td><td>20.12.2014</td><td></td><td></td><td></td><td></td><td>KK St.Stephan</td><td></td><td></td><td>aaa</td></tr>-->
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check1">                  </td><td></td><td>-1591</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>ZumLöschen, Hugo, 04.03.1965</td><td>Beißerle</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>250</td><td>Neuer AG</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check2">                  </td><td></td><td>-1336</td><td></td><td>Zimmermann, Georg, 15.12.2006</td><td>Helios Klinikum Buch</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>251</td><td>AOK Frankfurt a. M.</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check3">                  </td><td></td><td>-726</td><td></td><td>Wolf, Großer Böser, 06.06.1966</td><td>Helios Klinikum Buch</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>270</td><td>AOK Buxtehude</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check4">                  </td><td>8</td><td>-199</td><td></td><td>Weibsch', Steffi, 05.10.1973</td><td>KH Hintertupfingen</td><td>Endokrinologie</td><td>allgemein</td><td></td><td>Begehung terminiert</td><td>15.08.2014</td><td>20.12.2014</td><td></td><td>10</td><td>KH-Gutachten</td><td>252</td><td>KK St.Stephan</td><td>01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check5">                  </td><td>72</td><td></td><td></td><td>Weibsch', Steffi, 05.10.1973</td><td>Eiterfreude (TEST)</td><td>Endokrinologie</td><td>allgemein</td><td></td><td>Wartend</td><td>15.08.2014</td><td>20.12.2014</td><td></td><td>10</td><td>KH-Gutachten</td><td>270</td><td>KK St.Stephan</td><td>01,02,09,10,11,17,18</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check6">                  </td><td></td><td>-1385</td><td></td><td>Test1, Sieg€fried, 10.03.2010</td><td>Stadtkrankenhaus</td><td>Neurologie</td><td></td><td></td><td>Unvollständig (teilweise)</td><td>30.08.2007</td><td>07.09.2007</td><td></td><td>20</td><td></td><td>630</td><td>AOK HESSEN</td><td>13,99</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check7">                  </td><td></td><td>-599</td><td></td><td>Test, Egon, 07.06.1956</td><td>Klinikum Heidenheim</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-SFB</td><td>270</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check8">                  </td><td class="groupheader"></td><td class="groupheader">-1337</td><td class="groupheader"></td><td class="groupheader">sts-21.02.2014</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check9">                  </td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader">sts20110718_2</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check10">                  </td><td class="groupheader">32</td><td class="groupheader">42</td><td class="groupheader"></td><td class="groupheader">sts-test123</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check11">                  </td><td class="groupheader">4</td><td class="groupheader">-15</td><td class="groupheader"></td><td class="groupheader">sts-KH-Frist-Filter</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check12">                  </td><td class="groupheader"></td><td class="groupheader">1088</td><td class="groupheader"></td><td class="groupheader">sts-job-wait</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check13">                  </td><td class="groupheader">36</td><td class="groupheader">-1537</td><td class="groupheader"></td><td class="groupheader">stsBGL 20160122 20151204120831</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check14">                  </td><td>2</td><td>-1533</td><td></td><td>Schwarzz, Stephan, 12.12.1980</td><td>Klinikum Lahr - 3 TageFrist</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>210</td><td>AOK Bayern</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check15">                  </td><td>34</td><td>1453</td><td></td><td>Schwarzz, Stephan, 12.12.1980</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>30</td><td>KH-Gutachten</td><td>250</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check16">                  </td><td>2</td><td>-1532</td><td></td><td>Schwarzz, Stephan, 12.12.1980</td><td>Klinikum Lahr - 3 TageFrist</td><td></td><td></td><td></td><td>Wartend</td><td>03.10.2011</td><td>07.10.2011</td><td></td><td>10</td><td>KH-Gutachten</td><td>210</td><td>AOK Bayern</td><td>01,05,10</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check17">                  </td><td></td><td>-205</td><td></td><td>Schwarz, Test, 14.01.1968</td><td>Klinikum der Universität Manchen Campus Großhadern</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>30</td><td>KH-Gutachten</td><td>230</td><td>AOK Baden-Badeente</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check18">                  </td><td>40</td><td>-240</td><td></td><td>Schwarz, Felix, 22.12.1994</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>250</td><td>ag sts 23GMApd</td><td>01,02,03,04,05,06,07,08,09</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check19">                  </td><td></td><td></td><td></td><td>Schwarz, Felix, 22.12.1994</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Wartend</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>250</td><td>ag sts 23GMApd</td><td>01,02,03,04,05,06</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check20">                  </td><td></td><td>-239</td><td></td><td>Schwarz, Felix, 22.12.1994</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>250</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check21">                  </td><td></td><td>-239</td><td></td><td>Schwarz, Felix, 22.12.1994</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>250</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check22">                  </td><td>2</td><td>-8</td><td></td><td>Schwarz, Edelrosalinde, 26.02.1990</td><td>A 17</td><td></td><td></td><td></td><td>Zur Sachbearbeitung</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>250</td><td>AOK Baden-Badeente</td><td>01,02</td><td></td><td>-1438</td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check23">                  </td><td></td><td>145</td><td></td><td>Schwarz, Edelrosalinde, 26.02.1990</td><td>Klinikum der Universität München</td><td></td><td></td><td></td><td>Begehung in Planung</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>250</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check24">                  </td><td></td><td>-186</td><td></td><td>Schwarz, Alex, 23.12.1994</td><td>Klinikum der Universität München</td><td></td><td></td><td></td><td>Wartend</td><td></td><td></td><td></td><td></td><td>KH-Gutachten</td><td>250</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check25">                  </td><td></td><td>177</td><td></td><td>Schwarz, Alex, 23.12.1994</td><td>Klinikum der Universität Manchen Campus Großhadern</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>250</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check26">                  </td><td>32</td><td>-205</td><td></td><td>Schwarz, Alex, 23.12.1994</td><td>Klinikum Lahr - 3 TageFrist</td><td></td><td></td><td></td><td>Wartend</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>250</td><td>AG STS1_KBI</td><td>01,02</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check27">                  </td><td></td><td>-767</td><td></td><td>Schneewittchen, Cinderella, 05.05.1955</td><td>Charite</td><td></td><td></td><td></td><td>Wartend</td><td></td><td></td><td></td><td></td><td></td><td>270</td><td>AOK Baden-Württemberg</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check28">                  </td><td></td><td>-1548</td><td></td><td>Schlächter, Willi, 12.12.1992</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>250</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check29">                  </td><td class="groupheader">4</td><td class="groupheader">-1276</td><td class="groupheader"></td><td class="groupheader">problemtest</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check30">                  </td><td></td><td>-1582</td><td></td><td>PflegeMoe2, Anna, 20.01.2042</td><td>Klinikum Lahr - 3 TageFrist</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>250</td><td>BEK Alpen</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check31">                  </td><td></td><td>-520</td><td></td><td>PflegeMoe, Hans, 20.01.2035</td><td>Diakonie-Klinikum Stuttgart Diakonissenkrankenhaus und Paulinenhilfe gGmbH</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>250</td><td>AG:TestMG</td><td>01,03,10</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check32">                  </td><td></td><td>-1336</td><td></td><td>Oswald, Rudolf, 15.10.1959</td><td>test</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>231</td><td>AOK Berlin</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check33">                  </td><td>32</td><td>-585</td><td></td><td>Nase, Zwerg, 01.01.1971</td><td>Niederrheinklinik</td><td></td><td>allgemein</td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-SFB</td><td>270</td><td>BEK Korschenbroich / Sebastianusstr.</td><td></td><td></td><td></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check34">                  </td><td class="groupheader"></td><td class="groupheader">-1595</td><td class="groupheader"></td><td class="groupheader">meinTest</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check35">                  </td><td></td><td>-1103</td><td></td><td>Maslows, Greg, 07.12.1985</td><td>A 17</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td>KH-SFB</td><td>251</td><td>ag sts 23GMApd</td><td>02,03</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check36">                  </td><td></td><td>-727</td><td></td><td>Lessing, Alexandra, 06.07.1975</td><td>Helios Klinikum Buch</td><td></td><td></td><td></td><td>Zur Sachbearbeitung</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>290</td><td>AOK Baden-Württemberg</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check37">                  </td><td></td><td>-1336</td><td></td><td>Krause, Ingo, 09.03.1945</td><td>Vivantes Klinikum Reinickendorf</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>230</td><td>AOK Buxtehude</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check38">                  </td><td></td><td>-585</td><td></td><td>Knopf, Jim, 07.07.1977</td><td>Park-Krankenhaus Leipzig Süd-Ost GmbH</td><td></td><td></td><td></td><td>Zur Sachbearbeitung</td><td></td><td></td><td></td><td></td><td></td><td>270</td><td>BKK Akzent Leipzig / Humboldstr.</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check39">                  </td><td></td><td>-1483</td><td></td><td>KHtest207, Ernst, 12.11.2045</td><td>Klinikum Schwäbisch Gmünd</td><td>Urologie</td><td></td><td></td><td>Zur Sachbearbeitung</td><td>22.03.2011</td><td>28.03.2011</td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK-BD Ostalb</td><td>10</td><td></td><td></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check40">                  </td><td class="groupheader">4</td><td class="groupheader">-1295</td><td class="groupheader"></td><td class="groupheader">KHSFB-STSTest</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check41">                  </td><td></td><td>-598</td><td></td><td>Kästner, Erika, 03.04.1962</td><td>KH Hintertupfingen</td><td></td><td></td><td>Besonderheit3, Besonderheit4</td><td>Erfasst</td><td></td><td></td><td></td><td></td><td>KH-Gutachten</td><td>270</td><td>AG:TestMG</td><td>40</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check42">                  </td><td></td><td>-598</td><td></td><td>Kästner, Erika, 03.04.1962</td><td>KH 1</td><td></td><td></td><td></td><td>In Bearbeitung</td><td></td><td></td><td></td><td></td><td>KH-Gutachten</td><td>270</td><td>ag sts 23GMApd</td><td>40</td><td></td><td></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check43">                  </td><td class="groupheader">2</td><td class="groupheader">-1453</td><td class="groupheader"></td><td class="groupheader">Jeroen Gruppe</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check44">                  </td><td></td><td>-1320</td><td></td><td>Humboldt, Wilhelm, 06.04.2025</td><td>Diakonie-Klinikum Stuttgart Diakonissenkrankenhaus und Paulinenhilfe gGmbH</td><td></td><td></td><td></td><td>Zur Disposition</td><td></td><td></td><td></td><td></td><td></td><td>231</td><td>AOK Berlin</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check45">                  </td><td></td><td>-1458</td><td></td><td>Humboldt, Alexandra, 06.04.1975</td><td>Charite</td><td></td><td></td><td></td><td>Wartend</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>251</td><td>AOK Berlin</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check46">                  </td><td></td><td>-2566</td><td></td><td>Heid, Richard, 06.06.1941</td><td>Helios Klinik Müllheim</td><td>Innere Medizin</td><td></td><td></td><td>Begehung terminiert</td><td>19.06.2008</td><td>28.06.2008</td><td></td><td></td><td>KH-Gutachten</td><td>251</td><td>HV AOK Baden-Württemberg</td><td>11</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check47">                  </td><td></td><td>-1087</td><td></td><td>Heid, Richard, 06.06.1941</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td>KH-Gutachten</td><td>251</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check48">                  </td><td></td><td>-1335</td><td></td><td>Grimm, Isolde, 17.05.1965</td><td>A 17</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>Sonstiges Gutachten</td><td>210</td><td>AOK Berlin</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check49">                  </td><td></td><td>-1396</td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>KH Hintertupfingen</td><td>Pädiatrie / Nephrologie</td><td>allgemein</td><td></td><td>Wartend auf Unterlagen (Begehung terminiert)</td><td>15.08.2011</td><td>20.12.2011</td><td></td><td></td><td>KH-Gutachten</td><td>250</td><td>KKK</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check50">                  </td><td></td><td>-267</td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>251</td><td>AOK München</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check51">                  </td><td></td><td></td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td>Innere Medizin/Schlaganfallpatienten (Stroke units  Artikel 7 § 1 Abs. 3 GKV-SolG)</td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Baden-Badeente</td><td>01,02,03,04,05,11,13,17,18</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check52">                  </td><td></td><td></td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>30</td><td>KH-Gutachten</td><td>251</td><td>AOK München</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check53">                  </td><td></td><td>-321</td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td></td><td></td><td></td><td>Wartend</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Baden-Badeente</td><td>01</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check54">                  </td><td>8</td><td>-173</td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Beißerle</td><td></td><td></td><td></td><td>Wartend</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Baden-Badeente</td><td>01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check55">                  </td><td></td><td>-173</td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Youpie</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Baden-Badeente</td><td>03,05</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check56">                  </td><td></td><td>-266</td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td>Innere Medizin/Schlaganfallpatienten (Stroke units  Artikel 7 § 1 Abs. 3 GKV-SolG)</td><td>allgemein</td><td></td><td>In Bearbeitung</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>251</td><td>AOK München</td><td>01,02,03,04,05,06,11,13,16,17,18,23,24,30</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check57">                  </td><td>32</td><td></td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Beißerle</td><td>Innere Medizin / Endokrinologie</td><td>operativ</td><td></td><td>Wartend</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Baden-Badeente</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check58">                  </td><td>32</td><td></td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td>Innere Medizin/Schlaganfallpatienten (Stroke units  Artikel 7 § 1 Abs. 3 GKV-SolG)</td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Baden-Badeente</td><td>04,05,11,13,17,18</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check59">                  </td><td>32</td><td></td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>251</td><td>AOK München</td><td>01,02,04</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check60">                  </td><td></td><td>-665</td><td></td><td>Gremmen, Jeroen, 17.08.1972</td><td>Charite</td><td></td><td>allgemein</td><td></td><td>Wartend</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Frankfurt a. M.</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check61">                  </td><td></td><td>14</td><td></td><td>Gremmen, Corné, 18.08.1972</td><td>Charite</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Baden-Badeente</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check62">                  </td><td></td><td>-1646</td><td></td><td>Gregor S von extern-Oracle, Richard, 06.06.2041</td><td>Helios Klinik Müllheim</td><td></td><td></td><td></td><td>Wartend auf Unterlagen (Zur Sachbearbeitung)</td><td></td><td></td><td></td><td></td><td>KH-Gutachten</td><td>251</td><td>HV AOK Baden-Württemberg</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check63">                  </td><td>44</td><td>37</td><td></td><td>Graf vom Hofe Bloch, Ernst, 08.07.1885</td><td>Eiterfreude (TEST)</td><td>Endokrinologie</td><td>allgemein</td><td>Besonderheit3, Besonderheit5</td><td>Wartend auf Unterlagen (Begehung in Planung)</td><td>15.08.2014</td><td>20.12.2014</td><td></td><td>10</td><td>KH-Gutachten</td><td>252</td><td>KK St.Moritz</td><td>01,02,06,07,08,09,10,11,12,16,17,18</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check64">                  </td><td></td><td>-929</td><td></td><td>Fritzer, Ieva, 07.05.1974</td><td>Eiterfreude</td><td>Innere Medizin</td><td>allgemein</td><td></td><td>Wartend</td><td>15.08.2012</td><td>20.12.2012</td><td></td><td>10</td><td>KH-SFB</td><td>251</td><td>KK St.Stephan</td><td>10</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check65">                  </td><td></td><td>-232</td><td></td><td>Fontane, Theodor, 05.03.1953</td><td>Achenbach-Kreiskrankenhaus</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>251</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check66">                  </td><td></td><td>-267</td><td></td><td>Fontane, Theodor, 05.03.1953</td><td>Charite</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>20</td><td>KH-Gutachten</td><td>251</td><td>AOK München</td><td>25,28</td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check67">                  </td><td></td><td>-1682</td><td></td><td>Caspari, Franziska, 13.08.1984</td><td>A 17</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>AOK Buxtehude</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check68">                  </td><td></td><td>-1175</td><td></td><td>Braun, Elfriede, 08.02.2041</td><td>Beißerle</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>231</td><td>AOK Berlin</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check69">                  </td><td></td><td>-1343</td><td></td><td>Brandstifter, Anton, 07.07.1950</td><td>Achenbach-Kreiskrankenhaus</td><td>Innere Medizin / Gastroenterologie</td><td>allgemein</td><td>Besonderheit1</td><td>Unvollständig (teilweise)</td><td>04.03.2012</td><td>08.03.2012</td><td></td><td></td><td>KH-Gutachten</td><td>270</td><td>AG:TestMG</td><td>40</td><td></td><td>-1347</td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check70">                  </td><td class="groupheader">40</td><td class="groupheader">-2566</td><td class="groupheader"></td><td class="groupheader">BGL 20150529 20150512095516</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check71">                  </td><td class="groupheader">40</td><td class="groupheader">-199</td><td class="groupheader"></td><td class="groupheader">BGL 20150310 20150309172719</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check72">                  </td><td class="groupheader"></td><td class="groupheader">-1433</td><td class="groupheader"></td><td class="groupheader">BGL 20150131 20150127162743</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check73">                  </td><td class="groupheader"></td><td class="groupheader">-1483</td><td class="groupheader"></td><td class="groupheader">BGL 20150131 20150102151413</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check74">                  </td><td class="groupheader"></td><td class="groupheader">-1483</td><td class="groupheader"></td><td class="groupheader">BGL 20150127 20150102160938</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check75">                  </td><td class="groupheader"></td><td class="groupheader">-1434</td><td class="groupheader"></td><td class="groupheader">BGL 20150110 20150102170618</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check76">                  </td><td class="groupheader"></td><td class="groupheader">-1341</td><td class="groupheader"></td><td class="groupheader">BGL 20141229 20141218141135</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check77">                  </td><td class="groupheader">8</td><td class="groupheader">-1267</td><td class="groupheader"></td><td class="groupheader">BGL 20120423 20120417133410</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check78">                  </td><td class="groupheader">2</td><td class="groupheader">-1523</td><td class="groupheader"></td><td class="groupheader">Begehungsliste_50000000000015_20111227114202</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td class="groupheader"> <input type="checkbox" class="checkRow" id="check79">                  </td><td class="groupheader">2</td><td class="groupheader">-1554</td><td class="groupheader"></td><td class="groupheader">BBBBB</td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td><td class="groupheader"></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check80">                  </td><td></td><td>-1266</td><td></td><td>Aschiller, El`friede, 05.06.1952</td><td>A 17</td><td>Innere Medizin / Gastroenterologie</td><td>allgemein</td><td>Besonderheit2</td><td>In Bearbeitung</td><td>12.03.2012</td><td>14.03.2012</td><td></td><td>10</td><td>KH-Gutachten</td><td>251</td><td>BEK Alpen</td><td>01,02,03</td><td></td><td>-1334</td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check81">                  </td><td>2</td><td>-1044</td><td></td><td>Aimer, Aurelia, 17.05.1969</td><td>A 17</td><td></td><td></td><td></td><td>Wartend</td><td>01.11.2012</td><td>06.11.2012</td><td></td><td>20</td><td>KH-Gutachten</td><td>210</td><td>BEK Alpen</td><td></td><td></td><td>-1112</td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check82">                  </td><td></td><td></td><td></td><td>Adler, Julia, 10.10.1976</td><td>Beißerle</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>30</td><td>KH-Gutachten</td><td>210</td><td>AOK Baden-Badeente</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check83">                  </td><td></td><td>1453</td><td></td><td>Adler, Julia, 10.10.1976</td><td>Beißerle</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>30</td><td>KH-Gutachten</td><td>250</td><td>AOK Baden-Badeente</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check84">                  </td><td></td><td></td><td></td><td>Adler, Julia, 10.10.1976</td><td>Beißerle</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>30</td><td>KH-Gutachten</td><td>240</td><td>AG STS1_KBI</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check85">                  </td><td></td><td>-1559</td><td></td><td>aaaaaaaa, b_aaaaaaaa, 01.11.1971</td><td>A 17</td><td></td><td></td><td></td><td>Zur Disposition</td><td></td><td></td><td></td><td></td><td>KH-Gutachten</td><td>250</td><td>BEK Alpen</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check86">                  </td><td></td><td>-1530</td><td></td><td>aaaaaaaa, b_aaaaaaaa, 01.11.1971</td><td>A 17</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td>KH-Gutachten</td><td>250</td><td>BEK Alpen</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check87">                  </td><td></td><td>-1502</td><td></td><td>aaaaaaaa, b_aaaaaaaa, 01.11.1971</td><td>Klinikum Lahr - 3 TageFrist</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>231</td><td>ag sts 23GMApd</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check88">                  </td><td></td><td>-1335</td><td></td><td>aaaaaaaa, b_aaaaaaaa, 01.11.1971</td><td>neues KH</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td>10</td><td>KH-Gutachten</td><td>210</td><td>BEK Alpen</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check89">                  </td><td></td><td>-1566</td><td></td><td>aaaaaaaa, b_aaaaaaaa, 01.11.1971</td><td>A 17</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>250</td><td>BEK Achern / Postfach</td><td></td><td></td><td></td></tr>
+            <tr><td>                     <input type="checkbox" class="checkRow" id="check90">                  </td><td></td><td>-1434</td><td></td><td>aaaaaaaa, b_aaaaaaaa, 01.11.1971</td><td>A 17</td><td></td><td></td><td></td><td>Erfasst</td><td></td><td></td><td></td><td></td><td></td><td>250</td><td>AOK Bayern</td><td></td><td></td><td></td></tr>
+         </table>
+      </div>
+   </body>
+</html>

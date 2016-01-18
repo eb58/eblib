@@ -87,6 +87,7 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       }
       return res;
    };
+   
    data.withoutCols = function (arr) {
       var res = [];
       for (var r = 0; r < data.length; r++) {
@@ -193,6 +194,6 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       this.aggrLine = res;
       console.log('aggr', res);
    };
-   data.aggregateLongestRow();
+   ///data.aggregateLongestRow();
    return data;
 };

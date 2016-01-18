@@ -2,25 +2,24 @@
    background-color:#eee;
 }
 
-.ebtable #head th{ 
-   background-color:#ddd; 
+.ebtable #data th{ 
+   background-color:#abc; 
    padding: 5px 2px 5px 2px;
 }
 
-.ebtable #head th input {
-   width: 80%;
-   padding: 0px;
+.ebtable #data th input {
+   width: 70%;
    box-sizing: border-box;
 }
 
-.ebtable #head th div.sort_wrapper {
+.ebtable #data th div.sort_wrapper {
    position: relative;
 }
 
-.ebtable #head th div.sort_wrapper span {
+.ebtable #data th div.sort_wrapper span {
    position: absolute;
    margin-top: 10px;
-   right: -5px;
+   right: -6px;
 }
 
 .ebtable #data td{ 

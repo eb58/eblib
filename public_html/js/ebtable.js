@@ -1,6 +1,6 @@
 /* global _ */
-"use strict";
 (function ($) {
+   "use strict";
    $.fn.ebtable = function (opts, data) {
       var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '');
       var util = {
@@ -9,13 +9,13 @@
                if (myopts.columns[c].name === colname)
                   return c;
             return -1;
-         }, 
+         },
          colIsInvisible: function colIsInvisible(colname) {
             return myopts.columns[util.indexOfCol(colname)].invisible;
-         }, 
+         },
          colIsTechnical: function colIsTechnical(colname) {
             return myopts.columns[util.indexOfCol(colname)].technical;
-         }, 
+         },
          saveState: function saveState() {
             localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder, invisible: _.pluck(myopts.columns, 'invisible')});
          },
@@ -43,16 +43,16 @@
                   alert(coldef.name + ": technical column must be invisble!");
             });
          },
-         getVisibleCols: function getVisibleCols(){
+         getVisibleCols: function getVisibleCols() {
             var res = [];
-            for( var i=0;i<myopts.columns.length;i++) {
-               if( !myopts.columns[i].invisivble ) res.push(i);
+            for (var i = 0; i < myopts.columns.length; i++) {
+               if (!myopts.columns[i].invisible)
+                  res.push(i);
             }
             return res;
          }
       };
 // ##############################################################################
-
       var defopts = {
          columns: []
          , bodyheight: Math.max(200, $(window).height() - 100)
@@ -80,7 +80,7 @@
             return res + (col.technical ? '' : _.template(t)({name: col.name, cls: cls}));
          }, '');
          var t = '<button id="configBtn">Anpassen</button>\n\
-               <div id="configDlg" title="Anpassen">\n\
+               <div id="configDlg">\n\
                   <ol id="selectable"><%=list%></ol>\n\
                </div>';
          return _.template(t)({list: list});
@@ -91,12 +91,13 @@
          for (var c = 0; c < myopts.columns.length; c++) {
             var col = myopts.columns[myopts.colorder[c]];
             if (!col.invisible) {
-               var t = '<th id="<%=colname%>">\n\
-                        <div class="sort_wrapper">\n\
-                           <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\n\
-                        </div>\n\
-                        <input type="text" id="<%=colname%>" />\n\
-                     </th>';
+               var t = '\
+                  <th id="<%=colname%>">\
+                     <div class="sort_wrapper">\
+                        <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
+                     </div>\
+                     <input type="text" id="<%=colname%>" />\
+                  </th>';
                res += _.template(t)({colname: col.name});
             }
          }
@@ -121,9 +122,10 @@
             res += '<tr>';
             if (myopts.selection) {
                var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
-               res += '<td' + cls + '>\n\
-                      <input type="checkbox" class="checkRow"' + checked + 'id="check' + r + '"/>\n\
-                    </td>';
+               res += '\
+                  <td' + cls + '>\
+                     <input type="checkbox" class="checkRow"' + checked + 'id="check' + r + '"/>\
+                  </td>';
             }
             for (var c = 0; c < myopts.columns.length; c++) {
                if (!myopts.columns[order[c]].invisible) {
@@ -138,7 +140,6 @@
          return res;
       }
 
-
       function selectLenCtrl() {
          var options = '';
          $.each(myopts.rowsPerPageSelectValues, function (idx, o) {
@@ -149,10 +150,11 @@
       }
 
       function pageBrowseCtrl() {
-         return '<button class="firstBtn"><span class="ui-icon ui-icon-seek-first"></button>\n\
-              <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" ></button>\n\
-              <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" ></button>\n\
-              <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  ></button>';
+         return '\
+            <button class="firstBtn"><span class="ui-icon ui-icon-seek-first"></button>\n\
+            <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" ></button>\n\
+            <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" ></button>\n\
+            <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  ></button>';
       }
 
       function infoCtrl() {
@@ -219,39 +221,129 @@
       }
 
 // ##############################################################################
-      function adjustColumns() {
-         if (myopts.selection) {
-            $('#head th:first').width(20);
-            $('#data td:first').width(20);
+
+      var adjustxxx = function () {
+         var scrollbarWidth = function () {
+            var div = $('<div style="width:50px;height:50px;overflow:hidden;position:absolute;top:-200px;left:-200px;"><div style="height:100px;"></div></div>');
+            $('body').append(div);
+            var w1 = $('div', div).innerWidth();
+            div.css('overflow-y', 'auto');
+            var w2 = $('div', div).innerWidth();
+            $(div).remove();
+            return w1 - w2;
+         }();
+
+         function wdths() {
+            var wh = $("#head").width();
+            var wd = $("#data").width();
+            var wb = $('body').width();
+            var ww = $(window).width();
+            var wm = Math.floor(Math.max(wh, wd));
+            console.log('Width tables', 'head:', wh, 'data:', wd, 'body', wb, 'win', ww, 'max:', wm, 'sbwidth:', scrollbarWidth);
+            return {wh: wh, wd: wd, wb: wb, ww: ww, wm: wm};
          }
-         $('#head th').each( function(i,o){
-            var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
-            var w2 = $('#data tr:first td:nth-child(' + i + ')').innerWidth();
-            var w = Math.max(w1, w2);
-            console.log(i, 'head:', w1, 'data:', w2, 'max:', w);
-            $('#head th:nth-child(' + i + ')').innerWidth(w);
-            $('#data tr:first td:nth-child(' + i + ')').innerWidth(w);
+
+         function adjustWidth(n) {
+            if (n > 5)
+               return;
+            if (n === 0) {
+               $('#head,#data').css('width', '');
+            }
+            var ws = wdths();
+            if (Math.abs(ws.wh - ws.wd) > 0) {
+               $('#head,#data').width(ws.wm + 10);
+               $('#divdata').width(ws.wm + 10 + scrollbarWidth);
+               adjustWidth(n + 1);
+            }
+         }
+
+         function adjustColumns(n) {
+            if (n > 20)
+               return;
+
+            adjustWidth(0);
+            if (n === 0) {
+               $('#head th, #data td').css('width', '');
+            }
+            $('#head th').each(function (i) {
+               var w1 = $('#head th:nth-child(' + (i + 1) + ')').width();
+               var w2 = $('#data td:nth-child(' + (i + 1) + ')').width();
+               if (Math.abs(w1 - w2) > 0) {
+                  var w = Math.max(w1, w2);
+                  //console.log('Spalte', i + 1, 'head:', w1, 'data:', w2, 'max:', w);
+                  $('#head th:nth-child(' + (i + 1) + ')').width(w);
+                  $('#data td:nth-child(' + (i + 1) + ')').width(w);
+               }
+            });
+            $('#head th').each(function (i) {
+               var w1 = $('#head th:nth-child(' + (i + 1) + ')').width();
+               var w2 = $('#data td:nth-child(' + (i + 1) + ')').width();
+               if (Math.abs(w1 - w2) > 0) {
+                  var w = Math.max(w1, w2);
+                  //console.log('Spalte', i + 1, 'head:', w1, 'data:', w2, 'max:', w);
+                  $('#head th:nth-child(' + (i + 1) + ')').width(w);
+                  $('#data td:nth-child(' + (i + 1) + ')').width(w);
+               }
+            });
+            $('#head th').each(function (i) {
+               var w1 = $('#head th:nth-child(' + (i + 1) + ')').width();
+               var w2 = $('#data td:nth-child(' + (i + 1) + ')').width();
+               if (Math.abs(w1 - w2) > 2) {
+                  console.log('Aua !!!', n, 'Spalte', i + 1, 'whead:', w1, 'wdata:', w2);
+                  var ws = wdths();
+                  $('#head,#data').width(ws.wm + 10);
+                  $('#divdata').width(ws.wm + scrollbarWidth + 10);
+                  return adjustColumns(n + 1);
+               }
+            });
+         }
+         return {
+            adjustColumns: adjustColumns
+         };
+      }();
+
+      function adjust() {
+         $('#data').prepend($('#head tr'))
+         var wtable = $('#data').width();
+         var wcells = $('#data tr:first td').map(function (i, o) {
+            return $(o).width();
          });
-//         for (var i = (myopts.selection ? 2 : 1); i <= opts.columns.length + (myopts.selection ? 1 : 0); i++) {
-//            var w1 = $('#head th:nth-child(' + i + ')').innerWidth();
-//            var w2 = $('#data td:nth-child(' + i + ')').innerWidth();
-//            if (w1 !== w2) {
-//               console.log('Aua!', i, 'head:', w1, 'data:', w2);
-//               //???$(document).width($(document).width() + 100);
-//               //adjustColumns();
-//            }
-//         }
+         console.log('wtable:', wtable, 'wcells', wcells);
+         $('#head').append($('#data tr:first'));
+         $('#head,#data').width(wtable);
+         $('#head td').each(function (i, o) {
+            $(o).width(wcells[i]);
+         });
+         $('#data tr:first td').each(function (i, o) {
+            $(o).width(wcells[i]);
+         });
       }
 
-      function adjustTable() {
-         console.log('>>>adjustTable window-width=', $(window).width());
-         var viscols = util.getVisibleCols();
-         console.log('viscols', viscols);
-         $('#divall').width($(window).width()-5);
-         $('#head').width($('#divall').width()-5);
-         $('#data').width($('#divall').width()-5);
-         adjustColumns();
-         //$('#ctrlPage1').css('position', 'absolute').css('top', 5);
+      function adjustX() {
+//         $('#head, #data').css('width', '');
+//         $('#head th, #data td').css('width', '');
+         $('#data').prepend($('#head tr'));
+         var wtable = $('#data').width();
+         var wcells = $('#data td').map(function (i, o) {
+            return $(o).width();
+         });
+         console.log('wtable:', wtable, 'wcells', wcells);
+//         $('#head').append($('#data tr:first'));
+//         $('#head,#data').width(wtable);
+//         $('#head th').each(function (i, o) {
+//            $(o).width(wcells[i]);
+//         });
+//         $('#data tr:first td').each(function (i, o) {
+//            $(o).width(wcells[i]);
+//         });
+      }
+
+      function adjustLayout() {
+         console.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
+
+         //adjust();
+         $('#head,#data').width(Math.floor($(window).width() - 30));
+         $('#divdata').width($('#data').width() + 14);
          $('#ctrlPage1').css('position', 'absolute').css('right', "5px");
          $('#ctrlPage2').css('position', 'absolute').css('right', "5px");
       }
@@ -275,11 +367,11 @@
          $('#data tbody').html(tableData(pageCur));
          $('#data input[type=checkbox]').on('change', selectRows);
          if (withHeader) {
-            $('thead thead tr').html(tableHead());
-            $('thead thead th:gt(0)').on('click', sorting);
-            $('thead thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
+            $('thead tr').html(tableHead());
+            $('thead th:gt(0)').on('click', sorting);
+            $('thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
          }
-         adjustTable();
+         adjustLayout();
       }
 
       // ##############################################################################
@@ -287,20 +379,39 @@
       function initGrid(a) {
          util.checkConfig();
          filterData();
-         var tableTemplate1 = _.template(
-                 "<div class='ebtable'>\n\
+         var tableTemplate = _.template(
+            "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
                      <th id='ctrlPage1' ><%= browseBtns %></th>\n\
                   </table>\n\
-                  <div id='divall' style='overflow:auto'>\n\
+                  <div id='divdata' max-height:<%= bodyheight %>px;'>\n\
+                     <table id='data'>\n\
+                        <thead><tr><%= head %></tr></thead>\n\
+                        <tbody><%= data %></tbody>\n\
+                     </table>\n\
+                  </div>\n\
+                  <table>\n\
+                     <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
+                     <th id='ctrlPage2'><%= browseBtns %></th>\n\
+                  </table>\n\
+               </div>"
+            );
+         var tableTemplateXXX = _.template(
+            "<div class='ebtable'>\n\
+                  <table>\n\
+                     <th id='ctrlLength'><%= selectLen  %></th>\n\
+                     <th id='ctrlConfig'><%= configBtn  %></th>\n\
+                     <th id='ctrlPage1' ><%= browseBtns %></th>\n\
+                  </table>\n\
+                  <div id='divall' style='overflow-x:auto'>\n\
                      <div>\n\
                         <table id='head' >\n\
                            <thead><tr><%= head %></tr></thead>\n\
                         </table>\n\
                      </div>\n\
-                     <div id='divdata' style='overflow:auto; max-height:<%= bodyheight %>px;'>\n\
+                     <div id='divdata' style='overflow-y:auto;overflow-x:hidden;max-height:<%= bodyheight %>px;'>\n\
                         <table id='data'>\n\
                            <tbody><%= data %></tbody>\n\
                         </table>\n\
@@ -311,44 +422,17 @@
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
                </div>"
-                 );
-         var tableTemplate2 = _.template(
-                 "<div class='ebtable'>\n\
-                     <table>\n\
-                        <tr>\n\
-                           <th id='ctrlLength'><%= selectLen  %></th>\n\
-                           <th id='ctrlConfig'><%= configBtn  %></th>\n\
-                           <th id='ctrlPage1' ><%= browseBtns %></th>\n\
-                        </tr>\n\
-                     </table>\n\
-                     <div id='divhead' style='max-height:<%= bodyheight %>px;'>\n\
-                        <table id='head'>\n\
-                           <thead><%= head %></thead>\n\
-                        </table>\n\
-                     </div>\n\
-                     <div id='divdata' style='overflow:auto; max-height:<%= bodyheight %>px;'>\n\
-                        <table id='data'>\n\
-                           <tbody><%= data %></tbody>\n\
-                        </table>\n\
-                     </div>\n\
-                     <table>\n\
-                        <tr>\n\
-                           <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
-                           <th id='ctrlPage2'><%= browseBtns %></th>\n\
-                        </tr>\n\
-                     </table>\n\
-                  </div>"
-                 );
-         a.html(tableTemplate1({
-            head: tableHead()
-            , data: tableData(pageCur)
-            , selectLen: selectLenCtrl()
-            , configBtn: configBtn()
-            , browseBtns: pageBrowseCtrl()
-            , infoCtrl: infoCtrl()
-            , bodyheight: myopts.bodyheight
+            );
+         a.html(tableTemplate({
+            head: tableHead(),
+            data: tableData(pageCur),
+            selectLen: selectLenCtrl(),
+            configBtn: configBtn(),
+            browseBtns: pageBrowseCtrl(),
+            infoCtrl: infoCtrl(),
+            bodyheight: myopts.bodyheight
          }));
-         adjustTable();
+         adjustLayout();
       }
 
       initGrid(this);
@@ -358,15 +442,15 @@
       // #################################################################
 
       $('#lenctrl').css('width', '60px')
-              .selectmenu({change: function (event, data) {
-                    console.log('change rowsPerPage', event, data.item.value);
-                    myopts.rowsPerPage = Number(data.item.value);
-                    pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-                    pageCur = 0;
-                    redraw(pageCur);
-                    myopts.saveState();
-                 }
-              });
+         .selectmenu({change: function (event, data) {
+               console.log('change rowsPerPage', event, data.item.value);
+               myopts.rowsPerPage = Number(data.item.value);
+               pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+               pageCur = 0;
+               redraw(pageCur);
+               myopts.saveState();
+            }
+         });
       $('#configBtn').button().on('click', function () {
          $("#selectable").sortable();
          $("#configDlg").dialog("open");
@@ -378,12 +462,16 @@
          });
       });
       $("#configDlg").dialog({
-         autoOpen: false
-         , height: myopts.columns.length * 30 + 40
-         , width: 100
-         , modal: true
-         , resizable: true
-         , buttons: {
+         create: function (event, ui) {
+            $(".ui-widget-header").hide();
+         },
+         position: {my: "left top", at: "left bottom", of: '#configBtn'},
+         autoOpen: false,
+         height: myopts.columns.length * 26 + 30,
+         width: 100,
+         modal: true,
+         resizable: true,
+         buttons: {
             "OK": function () {
                var colnames = [];
                $('#configDlg li').each(function (idx, o) {
@@ -422,9 +510,10 @@
       $('#data input[type=checkbox]').on('change', selectRows);
       $('#info').button();
 
+      var inResize = false;
       $(window).on('resize', function () {
-         console.log('resize!!!');
-         adjustTable();
+         console.log('resize!!!', inResize);
+         adjustLayout(0);
       });
 
 // ##########  Exports ############           

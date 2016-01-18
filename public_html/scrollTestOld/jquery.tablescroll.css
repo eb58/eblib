@@ -1,0 +1,21 @@
+.tablescroll
+{ font: 10px normal Arial, sans-serif; background-color:#fff; }
+
+.tablescroll td, 
+.tablescroll_wrapper,
+.tablescroll_head,
+.tablescroll_foot
+{ border:1px solid #ccc; }
+
+.tablescroll td
+{ padding:3px 5px; }
+
+.tablescroll_wrapper
+{ border-left:0; }
+
+.tablescroll_head
+{ font-size:10px; font-weight:bold; background-color:#eee; border-left:0; border-top:0; margin-bottom:3px; }
+
+.tablescroll thead td
+{ border-right:0; border-bottom:0; }
+

@@ -38,6 +38,14 @@
             ['', '', 'Einhorn', '04.11.2017', ''],
             ['', '', 'Lindwurm', '31.12.2018', '']
          ];
+         var renderer = {
+            renderAuftrag: function (data, row) {
+               var isOpen = grid ? grid.groupIsOpen(row[1]) : false;
+               var imgsrc = '/images/group_' + (!isOpen ? 'opened' : 'closed') + '.png';
+               var link = '<img src="' + imgsrc + '" onclick="grid.toggleGroupIsOpen(\'' + row[1] + '\')" /><b>&nbsp;' + row[1] + '</b>';
+               return data || !row[1] ? data : link;
+            }
+         };
 
          var opts = {
             columns: [
@@ -45,12 +53,7 @@
                {name: "Gattung", invisible: true, technical: true},
                {name: "Tierart"},
                {name: "Datum", invisible: true, format: 'date-de'},
-               {name: "Welcher Name", render: function (data, row) {
-                     var isOpen = grid ? grid.groupIsOpen(row[1]) : false;
-                     var imgsrc = '/images/group_' + (!isOpen ? 'opened' : 'closed') + '.png';
-                     var link = '<img src="' + imgsrc + '" onclick="grid.toggleGroupIsOpen(\'' + row[1] + '\')" /><b>&nbsp;' + row[1] + '</b>';
-                     return data || !row[1] ? data : link;
-                  }}
+               {name: "Welcher Name", render: renderer.renderAuftrag}
             ]
             , selection: true
             , colorder: [0, 1, 4, 3, 2]

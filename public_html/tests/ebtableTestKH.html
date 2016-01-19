@@ -20,51 +20,53 @@
       <script src="/js/mx.js"></script>
       <script src="/js/ebtable.js"></script>
       <script src="/data/ebTableTestDataKhbasket.js"></script>
+
       <script>
          'use strict';
-            var grid;
-            var renderer = {
-               renderAuftrag: function (data, row) {
-                  if( row[2]<0) return data;
-                  var isOpen = grid ? grid.groupIsOpen(row[2]) : false;
-                  var imgsrc = '/images/group_' + (!isOpen ? 'opened' : 'closed') + '.png';
-                  var link = '<img src="' + imgsrc + '" onclick="grid.toggleGroupIsOpen(\'' + row[2] + '\')" /><b>&nbsp;' + row[10] + '</b>';
-                  return  link;
-               }
-            };
+         var grid;
+         var renderer = {
+            renderAuftrag: function (data, row) {
+               if (row[2] < 0)
+                  return data;
+               var isOpen = grid ? grid.groupIsOpen(row[2]) : false;
+               var imgsrc = '/images/group_' + (!isOpen ? 'opened' : 'closed') + '.png';
+               var link = '<img src="' + imgsrc + '" onclick="grid.toggleGroupIsOpen(\'' + row[2] + '\')" /><b>&nbsp;' + row[10] + '</b>';
+               return  link;
+            }
+         };
 
-            var opts = {
-               columns: [
-                  {name: "Grouping", technical: true, invisible: true, order: 'asc-fix'},
-                  {name: "GroupCount", technical: true, invisible: true},
-                  {name: "GroupId", technical: true, invisible: true},
-                  {name: "WorkorderId", technical: true, invisible: true},
-                  {name: "StatusId", technical: true, invisible: true},
-                  {name: "Performer", technical: true, invisible: true},
-                  {name: "Flags"},
-                  {name: "Frist"},
-                  {name: "Status"},
-                  {name: "XXXX"},
-                  {name: "Auftrag", render: renderer.renderAuftrag},
-                  {name: "Krankenhaus"},
-                  {name: "Abteilung"},
-                  {name: "AAAA"},
-                  {name: "BBBB"},
-                  {name: "Krankenkasse"},
-                  {name: "Einlieferung"},
-                  {name: "Entlassung"},
-                  {name: "DDD"},
-                  {name: "BEEEBBB"},
-                  {name: "FFF"},
-                  {name: "GGG"},
-                  {name: "DTA-Nummern"},
-                  {name: "WWW"},
-                  {name: "KH-Frist"},
-               ]
-               , selection: true
-               , sortmaster: [{col: 2}, {col: 0}] //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
-               , groupingCols: {groupid: 2, groupsort: 0, grouphead: 'C'}
-            };
+         var opts = {
+            columns: [
+               {name: "Grouping", technical: true, invisible: true, order: 'asc-fix'},
+               {name: "GroupCount", technical: true, invisible: true},
+               {name: "GroupId", technical: true, invisible: true},
+               {name: "WorkorderId", technical: true, invisible: true},
+               {name: "StatusId", technical: true, invisible: true},
+               {name: "Performer", technical: true, invisible: true},
+               {name: "Flags"},
+               {name: "Frist"},
+               {name: "Status"},
+               {name: "XXXX"},
+               {name: "Auftrag", render: renderer.renderAuftrag},
+               {name: "Krankenhaus"},
+               {name: "Abteilung"},
+               {name: "AAAA"},
+               {name: "BBBB"},
+               {name: "Krankenkasse"},
+               {name: "Einlieferung"},
+               {name: "Entlassung"},
+               {name: "DDD"},
+               {name: "BEEEBBB"},
+               {name: "FFF"},
+               {name: "GGG"},
+               {name: "DTA-Nummern"},
+               {name: "WWW"},
+               {name: "KH-Frist"},
+            ],
+            selection: true,
+            sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+            groupingCols: {groupid: 2, groupsort: 0, grouphead: 'C'}
+         };
 
          $().ready(function () {
             grid = $('#grid').ebtable(opts, basketTestdataKH);

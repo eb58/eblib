@@ -45,14 +45,14 @@
          },
          getVisibleCols: function getVisibleCols() {
             var res = [];
-            for (var i = 0; i < myopts.columns.length; i++) {
-               if (!myopts.columns[i].invisible)
-                  res.push(i);
-            }
+            $.each(myopts.columns, function(i,o){
+               if( o.invisible ) res.push(i);
+            });
             return res;
          }
       };
 // ##############################################################################
+
       var defopts = {
          columns: []
          , bodyheight: Math.max(200, $(window).height() - 100)
@@ -510,9 +510,8 @@
       $('#data input[type=checkbox]').on('change', selectRows);
       $('#info').button();
 
-      var inResize = false;
       $(window).on('resize', function () {
-         console.log('resize!!!', inResize);
+         console.log('resize!!!');
          adjustLayout(0);
       });
 

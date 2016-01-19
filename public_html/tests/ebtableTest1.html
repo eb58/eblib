@@ -63,9 +63,6 @@
             , groupingCols: {groupid: 1, groupsort: 0, grouphead: 'GA'}
          };
          var grid;
-         function toggle(groupName) {
-            grid.toggleGroupIsOpen(groupName);
-         }
          $().ready(function () {
             grid = $('#grid').ebtable(opts, basketTestdata);
          });

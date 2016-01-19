@@ -5,10 +5,13 @@
       var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '');
       var util = {
          indexOfCol: function indexOfCol(colname) {
-            for (var c = 0; c < myopts.columns.length; c++)
-               if (myopts.columns[c].name === colname)
-                  return c;
-            return -1;
+            return _.findIndex(myopts.columns, function (o) {
+               return o.name === colname;
+            });
+//            for (var c = 0; c < myopts.columns.length; c++)
+//               if (myopts.columns[c].name === colname)
+//                  return c;
+//            return -1;
          },
          colIsInvisible: function colIsInvisible(colname) {
             return myopts.columns[util.indexOfCol(colname)].invisible;
@@ -45,8 +48,9 @@
          },
          getVisibleCols: function getVisibleCols() {
             var res = [];
-            $.each(myopts.columns, function(i,o){
-               if( o.invisible ) res.push(i);
+            $.each(myopts.columns, function (i, o) {
+               if (o.invisible)
+                  res.push(i);
             });
             return res;
          }
@@ -188,21 +192,22 @@
 
       function sorting(event) { // sorting
          var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
-         console.log('sorting', event.currentTarget.id);
-         if (event.currentTarget.id) {
-            var idx = util.indexOfCol(event.currentTarget.id);
-            var col = myopts.columns[idx];
+         var colname = event.currentTarget.id;
+         if (colname) {
+            console.log('sorting', colname);
+            var colidx = util.indexOfCol(colname);
+            var coldef = myopts.columns[colidx];
             var coldefs = $.extend([], myopts.sortmaster);
-            coldefs.push({col: idx, format: col.format, order: col.order});
+            coldefs.push({col: colidx, format: coldef.format, order: coldef.order});
             $.each(coldefs, function (idx, o) {
                var c = myopts.columns[o.col];
                o.order = c.order || 'desc';
                c.order = c.order ? sortToggle[c.order] : 'asc';
             });
             tblData = tblData.sort(tblData.rowCmpCols(coldefs));
-            var cls1 = col.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
+            var cls1 = coldef.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
             $('thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
-            $('thead #' + event.currentTarget.id + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+            $('thead #' + colname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
             pageCur = 0;
             redraw(pageCur);
          }
@@ -380,7 +385,7 @@
          util.checkConfig();
          filterData();
          var tableTemplate = _.template(
-            "<div class='ebtable'>\n\
+                 "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
@@ -397,9 +402,9 @@
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
                </div>"
-            );
+                 );
          var tableTemplateXXX = _.template(
-            "<div class='ebtable'>\n\
+                 "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
@@ -422,7 +427,7 @@
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
                </div>"
-            );
+                 );
          a.html(tableTemplate({
             head: tableHead(),
             data: tableData(pageCur),
@@ -442,15 +447,15 @@
       // #################################################################
 
       $('#lenctrl').css('width', '60px')
-         .selectmenu({change: function (event, data) {
-               console.log('change rowsPerPage', event, data.item.value);
-               myopts.rowsPerPage = Number(data.item.value);
-               pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-               pageCur = 0;
-               redraw(pageCur);
-               myopts.saveState();
-            }
-         });
+              .selectmenu({change: function (event, data) {
+                    console.log('change rowsPerPage', event, data.item.value);
+                    myopts.rowsPerPage = Number(data.item.value);
+                    pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+                    pageCur = 0;
+                    redraw(pageCur);
+                    myopts.saveState();
+                 }
+              });
       $('#configBtn').button().on('click', function () {
          $("#selectable").sortable();
          $("#configDlg").dialog("open");

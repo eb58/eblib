@@ -8,10 +8,6 @@
             return _.findIndex(myopts.columns, function (o) {
                return o.name === colname;
             });
-//            for (var c = 0; c < myopts.columns.length; c++)
-//               if (myopts.columns[c].name === colname)
-//                  return c;
-//            return -1;
          },
          colIsInvisible: function colIsInvisible(colname) {
             return myopts.columns[util.indexOfCol(colname)].invisible;
@@ -19,15 +15,21 @@
          colIsTechnical: function colIsTechnical(colname) {
             return myopts.columns[util.indexOfCol(colname)].technical;
          },
+         getVisibleCols: function getVisibleCols() {
+            return _.filter(myopts.columns, function (o) {
+               return !o.invisible;
+            });
+         },
+         // saving/loading state
          saveState: function saveState() {
-            localStorage[localStorageKey] = JSON.stringify({rowsPerPage: myopts.rowsPerPage, colorder: myopts.colorder, invisible: _.pluck(myopts.columns, 'invisible')});
+            localStorage[localStorageKey] = JSON.stringify({
+               rowsPerPage: myopts.rowsPerPage,
+               colorder: myopts.colorder,
+               invisible: _.pluck(myopts.columns, 'invisible')
+            });
          },
          loadState: function loadState() {
-            var state = localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
-            _.each(state.invisible, function (o, idx) {
-               opts.columns[idx].invisible = !!o;
-            });
-            return state;
+            return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
          },
          checkConfig: function checkConfig() {
             $.each(myopts.columns, function (idx, coldef) { // set reasonable defaults for coldefs
@@ -45,30 +47,22 @@
                if (coldef.technical && !coldef.invisible)
                   alert(coldef.name + ": technical column must be invisble!");
             });
-         },
-         getVisibleCols: function getVisibleCols() {
-            var res = [];
-            $.each(myopts.columns, function (i, o) {
-               if (o.invisible)
-                  res.push(i);
-            });
-            return res;
          }
       };
 // ##############################################################################
 
       var defopts = {
-         columns: []
-         , bodyheight: Math.max(200, $(window).height() - 100)
-         , rowsPerPageSelectValues: [10, 25, 50, 100]
-         , rowsPerPage: 10
-         , colorder: _.range(opts.columns.length) // [0,1,2,... ]
-         , selection: false
-         , saveState: util.saveState
-         , loadState: util.loadState
-         , sortmaster: [] //[{col:1,order:asc,format:fct1},{col:2,order:asc-fix}]
-         , groupingCols: {} //{groupid:1,groupsort:0,grouphead:'GA'}
-         , groups: []
+         columns: [],
+         bodyHeight: Math.max(200, $(window).height() - 100),
+         bodyWidth: Math.max(200, $(window).width() - 10),
+         rowsPerPageSelectValues: [10, 25, 50, 100],
+         rowsPerPage: 10,
+         colorder: _.range(opts.columns.length), // [0,1,2,... ]
+         selection: false,
+         saveState: util.saveState,
+         loadState: util.loadState,
+         sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
+         groupingCols: {}, //{groupid:1,groupsort:0,grouphead:'GA'}
       };
       var myopts = $.extend({}, defopts, opts, defopts.loadState());
       var origData = mx(data);
@@ -100,9 +94,9 @@
                      <div class="sort_wrapper">\
                         <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
                      </div>\
-                     <input type="text" id="<%=colname%>" />\
+                     <input type="text" id="<%=colname%>" title="<%=tooltip%>"/>\
                   </th>';
-               res += _.template(t)({colname: col.name});
+               res += _.template(t)({colname: col.name, tooltip:col.tooltip});
             }
          }
          return res;
@@ -198,7 +192,7 @@
             var colidx = util.indexOfCol(colname);
             var coldef = myopts.columns[colidx];
             var coldefs = $.extend([], myopts.sortmaster);
-            coldefs.push({col: colidx, format: coldef.format, order: coldef.order});
+            coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
             $.each(coldefs, function (idx, o) {
                var c = myopts.columns[o.col];
                o.order = c.order || 'desc';
@@ -385,13 +379,13 @@
          util.checkConfig();
          filterData();
          var tableTemplate = _.template(
-                 "<div class='ebtable'>\n\
+            "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
                      <th id='ctrlPage1' ><%= browseBtns %></th>\n\
                   </table>\n\
-                  <div id='divdata' max-height:<%= bodyheight %>px;'>\n\
+                  <div id='divdata' max-height:<%= bodyHeight %>px;'>\n\
                      <table id='data'>\n\
                         <thead><tr><%= head %></tr></thead>\n\
                         <tbody><%= data %></tbody>\n\
@@ -402,9 +396,9 @@
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
                </div>"
-                 );
+            );
          var tableTemplateXXX = _.template(
-                 "<div class='ebtable'>\n\
+            "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
@@ -416,7 +410,7 @@
                            <thead><tr><%= head %></tr></thead>\n\
                         </table>\n\
                      </div>\n\
-                     <div id='divdata' style='overflow-y:auto;overflow-x:hidden;max-height:<%= bodyheight %>px;'>\n\
+                     <div id='divdata' style='overflow-y:auto;overflow-x:hidden;max-height:<%= bodyHeight %>px;'>\n\
                         <table id='data'>\n\
                            <tbody><%= data %></tbody>\n\
                         </table>\n\
@@ -427,7 +421,7 @@
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
                </div>"
-                 );
+            );
          a.html(tableTemplate({
             head: tableHead(),
             data: tableData(pageCur),
@@ -435,7 +429,7 @@
             configBtn: configBtn(),
             browseBtns: pageBrowseCtrl(),
             infoCtrl: infoCtrl(),
-            bodyheight: myopts.bodyheight
+            bodyHeight: myopts.bodyHeight
          }));
          adjustLayout();
       }
@@ -447,15 +441,15 @@
       // #################################################################
 
       $('#lenctrl').css('width', '60px')
-              .selectmenu({change: function (event, data) {
-                    console.log('change rowsPerPage', event, data.item.value);
-                    myopts.rowsPerPage = Number(data.item.value);
-                    pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-                    pageCur = 0;
-                    redraw(pageCur);
-                    myopts.saveState();
-                 }
-              });
+         .selectmenu({change: function (event, data) {
+               console.log('change rowsPerPage', event, data.item.value);
+               myopts.rowsPerPage = Number(data.item.value);
+               pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+               pageCur = 0;
+               redraw(pageCur);
+               myopts.saveState();
+            }
+         });
       $('#configBtn').button().on('click', function () {
          $("#selectable").sortable();
          $("#configDlg").dialog("open");
@@ -520,15 +514,18 @@
          adjustLayout(0);
       });
 
-// ##########  Exports ############           
-      this.toggleGroupIsOpen = function (groupName) {
-         myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
-         filterData();
-         redraw(pageCur);
-      };
-      this.groupIsOpen = function (groupName) {
-         return _.property('isOpen')(myopts.groups[groupName]);
-      };
-      return this;
+// ##########  Exports ############  
+      $.extend(this, {
+         toggleGroupIsOpen: function (groupName) {
+            myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
+            filterData();
+            redraw(pageCur);
+         },
+         groupIsOpen: function (groupName) {
+            return _.property('isOpen')(myopts.groups[groupName]);
+         },
+         sortformats: tblData.sortformats
+      });
+      return this.tooltip();
    };
 })(jQuery);

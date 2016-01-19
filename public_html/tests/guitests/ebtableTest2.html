@@ -22,28 +22,33 @@
       <script>
          /* global basketTestdata */
          'use strict';
+
+         var renderers = {
+            myrender: function (data, row) {
+               return data + ' -- ' + row[0];
+            }
+         };
+
          var opts = {
             columns: [
-               {name: "Paket", invisible:false}
-               , {name: 'xx', invisible:false}
-               , {name: "Datum"}
-               , {name: "Name",  render: function (data, row) {
-                     return data + ' -- ' + row[0];
-                  }}
-               , {name: "Fälligkeit"}
-               , {name: "Auftragspaket"}
-               , {name: "Frage des AG"}
-               , {name: "Produkt"}
-               , {name: "Bearbeiter"}
-               , {name: "Eingang"}
-               , {name: "DTA Nummern"}
+               {name: "Paket", invisible: false},
+               {name: 'xx', invisible: false},
+               {name: "Datum"},
+               {name: "Name", render: renderers.myrender},
+               {name: "Fälligkeit"},
+               {name: "Auftragspaket"},
+               {name: "Frage des AG"},
+               {name: "Produkt"},
+               {name: "Bearbeiter"},
+               {name: "Eingang"},
+               {name: "DTA Nummern"}
             ]
             , selection: true
             , rowsPerPage: 10
          };
          var grid;
          $().ready(function () {
-            grid = $('#grid').ebtable(opts,basketTestdata);
+            grid = $('#grid').ebtable(opts, basketTestdata);
          });
       </script>
    </head>

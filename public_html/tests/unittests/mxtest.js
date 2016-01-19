@@ -52,10 +52,10 @@ QUnit.test('testset2 Array filtering functions', function (assert) {
 
 });
 
-QUnit.test('testset3 Array util functions', function (assert) {
-   var m = mx([['', ''],  ['testA', '01.01.2001']]);
-   assert.deepEqual(m.aggrLine, ['testA', '01.01.2001']);
-   var m = mx([['test', 's111111 111'], ['', '01.01.2015'], ['', '01.01.2013'], ['testA', '01.01.2001']]);
-   assert.deepEqual(m.aggrLine, ['testA', 's111111 111']);
-});
+//QUnit.test('testset3 Array util functions', function (assert) {
+//   var m = mx([['', ''],  ['testA', '01.01.2001']]);
+//   assert.deepEqual(m.aggrLine, ['testA', '01.01.2001']);
+//   var m = mx([['test', 's111111 111'], ['', '01.01.2015'], ['', '01.01.2013'], ['testA', '01.01.2001']]);
+//   assert.deepEqual(m.aggrLine, ['testA', 's111111 111']);
+//});
 

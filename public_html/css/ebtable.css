@@ -3,7 +3,7 @@
 }
 
 .ebtable #data th{ 
-   background-color:#abc; 
+   background-color:#bcbcbc; 
    padding: 5px 2px 5px 2px;
 }
 
@@ -23,14 +23,14 @@
 }
 
 .ebtable #data td{ 
-   background-color:white;
+   background-color:#ccc;
    padding: 5px 2px 5px 2px;
 }
 .ebtable #data td.group{
-   background-color: #fffde0;
+   background-color: #c1afaf;
 }
 .ebtable #data td.groupheader{
-   background-color: #fff5a8;
+   background-color: #bda3a3;
 }
 
 .ebtable #data input[type=checkbox] {

@@ -15,7 +15,7 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
 
 // ###################################################################
 
-   data.formats = {
+   data.sortformats = {
       'date-de': function (a) { // '01.01.2013' -->   '20130101' 
          var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
          return d ? (d[3] + d[2] + d[1]) : '';
@@ -26,21 +26,18 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       },
       'scientific': function (a) { // '1e+3'  -->  '1000' 
          return parseFloat(a);
+      },
+      'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
+         var flgs = '!*pfgksc';
+         var s = '';
+         for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
+            s += (data & j) ? flgs[i] : '';
+         }
+         return s;
       }
    };
 
 // ###################################################################
-
-//   data.fill = function (val) {
-//      val = val || 0;
-//      var n = 0;
-//      for (var r = 0; r < data.length; r++) {
-//         for (var c = 0; c < row.length; c++) {
-//            data[r][c] = _.isArray(val) ? val[n++] : val;
-//         }
-//      }
-//      return this;
-//   };
 
    data.zero = function () {
       return data.fill(0);
@@ -87,7 +84,7 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       }
       return res;
    };
-   
+
    data.withoutCols = function (arr) {
       var res = [];
       for (var r = 0; r < data.length; r++) {
@@ -103,15 +100,15 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
    };
 
 //####################################  sorting #######################
-   data.rowCmpCols = function (coldefs) { // [ {col:1,order:asc,format:fmtfct1},{col:3, order:desc, format:fmtfct2},... ]  
+   data.rowCmpCols = function (coldefs) { // [ {col:1,order:asc,sortformat:fmtfct1},{col:3, order:desc, sortformat:fmtfct2},... ]  
       coldefs = _.isArray(coldefs) ? coldefs : [coldefs];
       return function (r1, r2) {
          for (var i = 0; i < coldefs.length; i++) {
             var cdef = coldefs[i];
             var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
-            var x = data.util.toLower(r1[cdef.col]);
-            var y = data.util.toLower(r2[cdef.col]);
-            var fmt = cdef.format ? data.formats[cdef.format] : undefined;
+            var x = r1[cdef.col] ? data.util.toLower(r1[cdef.col]) : '';
+            var y = r2[cdef.col] ? data.util.toLower(r2[cdef.col]) : '';
+            var fmt = cdef.sortformat ? data.sortformats[cdef.sortformat] : undefined;
             x = fmt ? fmt(x) : x;
             y = fmt ? fmt(y) : y;
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
@@ -137,12 +134,23 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       return b;
    };
 
+   data.filterData = function filterData(filters) { // filters [{col: col,searchtext: text, render:myrenderer},...]
+      var d = [];
+      for (var r = 0; r < this.length; r++) {
+         if (this.rowMatch(this[r], filters)) {
+            d.push(this[r]);
+         }
+      }
+      return d;
+   };
+
+//####################################  grouping #######################
    data.isGroupingHeader = function isGroupingHeader(row, myopts) {
       return row[myopts.groupingCols.groupsort] === myopts.groupingCols.grouphead;
    };
 
-
    data.initGroups = function initGroups(myopts) { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
+      myopts.groups = [];
       var gc = myopts.groupingCols;
       for (var r = 0; gc && r < this.length; r++) {
          var row = this[r];
@@ -155,19 +163,7 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       return this;
    };
 
-
-   data.filterData = function filterData(filters, myopts) { // filters [{col: col,searchtext: text},...]
-      var d = [];
-      for (var r = 0; r < this.length; r++) {
-//         if (this.rowMatch(this[r], filters) || this.isGroupingHeader(this[r], myopts)) {
-         if (this.rowMatch(this[r], filters)) {
-            d.push(this[r]);
-         }
-      }
-      return d;
-   };
-
-   data.filterGroups = function filterGroups(myopts) { // filters [{col: col,searchtext: text},...]
+   data.filterGroups = function filterGroups(myopts) {
       var d = [];
       var colNrGroupId = myopts.groupingCols.groupid;
       for (var r = 0; r < this.length; r++) {
@@ -179,21 +175,21 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       return d;
    };
 
-   data.aggregateLongestRow = function () {
-      if (this.length === 0)
-         return [];
-      var res = [];
-      for (var r = 0; r < this.length; r++) {
-         var row = this[r];
-         for (var c = 0; c < row.length; c++) {
-            var s1 = '' + row[c];
-            var s2 = res[c] ? res[c] : '';
-            res[c] = s1.length > s2.length ? s1 : s2;
-         }
-      }
-      this.aggrLine = res;
-      console.log('aggr', res);
-   };
-   ///data.aggregateLongestRow();
+//   data.aggregateLongestRow = function () {
+//      if (this.length === 0)
+//         return [];
+//      var res = [];
+//      for (var r = 0; r < this.length; r++) {
+//         var row = this[r];
+//         for (var c = 0; c < row.length; c++) {
+//            var s1 = '' + row[c];
+//            var s2 = res[c] ? res[c] : '';
+//            res[c] = s1.length > s2.length ? s1 : s2;
+//         }
+//      }
+//      this.aggrLine = res;
+//      console.log('aggr', res);
+//   };
+//   data.aggregateLongestRow();
    return data;
 };

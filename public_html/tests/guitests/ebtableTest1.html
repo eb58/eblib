@@ -40,19 +40,6 @@
          ];
 //#######################################################################
 
-         var mysortformats = {
-            'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
-               var flgs = '!*pfgksc';
-               var s = '';
-               for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
-                  s += (data & j) ? flgs[i] : '';
-               }
-               return s;
-            }
-         };
-
-         $.extend($.fn.ebtable.sortformats, mysortformats);
-
          var renderer = {
             renderAuftrag: function (data, row, type) {
                if (type === 'filter') {
@@ -84,6 +71,13 @@
                      s += "<img src='/images/" + o.img + "' alt='" + o.alt + "' title='" + o.alt + "' />";
                }
                return s;
+            },
+            renderSelect: function (data, row, type) {
+               if (row[0] === 'GA') {
+                  return '<input type="checkbox"/>';
+               } else {
+                  return '<input type="checkbox"/>';
+               }
             }
          };
          var opts = {
@@ -93,9 +87,12 @@
                {name: "Tierart"},
                {name: "Datum", sortformat: 'date-de'},
                {name: "Welcher Name", render: renderer.renderAuftrag},
-               {name: "Flag", render: renderer.renderFlags, sortformat: 'flags',tooltip: 'Mögliche Werte:!*pfgksc'}
+               {name: "Flag", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*pfgksc'}
             ],
-            selection: true,
+            selection: 
+            {
+               render: renderer.renderSelect
+            },
             colorder: [0, 1, 2, 3, 4, 5],
             rowsPerPageSelectValues: [2, 4, 5, 10, 15],
             rowsPerPage: 15,

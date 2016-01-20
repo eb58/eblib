@@ -26,6 +26,14 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       },
       'scientific': function (a) { // '1e+3'  -->  '1000' 
          return parseFloat(a);
+      },
+      'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
+         var flgs = '!*pfgksc';
+         var s = '';
+         for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
+            s += (data & j) ? flgs[i] : '';
+         }
+         return s;
       }
    };
 

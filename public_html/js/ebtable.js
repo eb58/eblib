@@ -96,7 +96,7 @@
                      </div>\
                      <input type="text" id="<%=colname%>" title="<%=tooltip%>"/>\
                   </th>';
-               res += _.template(t)({colname: col.name, tooltip:col.tooltip});
+               res += _.template(t)({colname: col.name, tooltip: col.tooltip});
             }
          }
          return res;
@@ -109,28 +109,32 @@
 
          var res = '';
          var startRow = myopts.rowsPerPage * pageNr;
-         var order = myopts.colorder;
          for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
             var gc = myopts.groupingCols;
             var row = tblData[r];
+
             if (gc && row.isGroupElement && !myopts.groups[tblData[r][gc.groupid]].isOpen)
                continue
-            var cls = row.isGroupElement ? ' class="group" ' : '';
-            cls = row.isGroupHeader ? ' class="groupheader" ' : cls;
+
+            var cls = row.isGroupElement ? 'group' : '';
+            cls = row.isGroupHeader ? 'groupheader' : cls;
             res += '<tr>';
-            if (myopts.selection) {
-               var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
-               res += '\
-                  <td' + cls + '>\
-                     <input type="checkbox" class="checkRow"' + checked + 'id="check' + r + '"/>\
-                  </td>';
+
+            var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
+            if (myopts.selection && myopts.selection.render) {
+               var x = '<td class="' + cls + '">' + myopts.selection.render(origData, row, checked) + '</td>';
+               res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
+            } else if (myopts.selection) {
+               res += '<td class="' + cls + '"><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
             }
+
+            var order = myopts.colorder;
             for (var c = 0; c < myopts.columns.length; c++) {
                if (!myopts.columns[order[c]].invisible) {
                   var val = tblData[r][order[c]] || '';
                   var render = myopts.columns[order[c]].render;
                   val = render ? render(val, row) : val;
-                  res += '<td' + cls + '>' + val + '</td>';
+                  res += '<td class="' + cls + '">' + val + '</td>';
                }
             }
             res += '</tr>\n';
@@ -168,17 +172,19 @@
       function selectRows(event) { // select row
          var rowNr = event.target.id.replace('check', '');
          var row = tblData[rowNr];
-         row.selected = $(event.target).prop('checked');
-         console.log('change !', event.target.id, rowNr, row, row.selected);
-         // Grouping
-         var gc = myopts.groupingCols;
-         if (gc && row[gc.groupid] && row[gc.groupsort] === gc.grouphead) {
-            var groupId = row[gc.groupid];
-            console.log('Group', row[gc.groupid], row[gc.groupsort]);
-            for (var i = 0; i < tblData.length; i++) {
-               if (tblData[i][gc.groupid] === groupId) {
-                  tblData[i].selected = row.selected;
-                  $('#check' + i).prop('checked', row.selected);
+         if (row) {
+            row.selected = $(event.target).prop('checked');
+            console.log('change !', event.target.id, rowNr, row, row.selected);
+            // Grouping
+            var gc = myopts.groupingCols;
+            if (gc && row[gc.groupid] && row[gc.groupsort] === gc.grouphead) {
+               var groupId = row[gc.groupid];
+               console.log('Group', row[gc.groupid], row[gc.groupsort]);
+               for (var i = 0; i < tblData.length; i++) {
+                  if (tblData[i][gc.groupid] === groupId) {
+                     tblData[i].selected = row.selected;
+                     $('#check' + i).prop('checked', row.selected);
+                  }
                }
             }
          }
@@ -347,6 +353,8 @@
          $('#ctrlPage2').css('position', 'absolute').css('right', "5px");
       }
 
+// ##############################################################################
+
       function filterData() {
          var filters = [];
          $('thead th input[type=text]').each(function (idx, o) {
@@ -385,7 +393,7 @@
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
                      <th id='ctrlPage1' ><%= browseBtns %></th>\n\
                   </table>\n\
-                  <div id='divdata' style='overflow:auto' max-height:<%= bodyHeight %>px;'>\n\
+                  <div id='divdata' style='overflow:auto; max-height:<%= bodyHeight %>px;'>\n\
                      <table id='data'>\n\
                         <thead><tr><%= head %></tr></thead>\n\
                         <tbody><%= data %></tbody>\n\
@@ -440,7 +448,7 @@
       // Actions
       // #################################################################
 
-      $('#lenctrl').css('width', '60px')
+      $('#lenctrl').css('width', '70px')
          .selectmenu({change: function (event, data) {
                console.log('change rowsPerPage', event, data.item.value);
                myopts.rowsPerPage = Number(data.item.value);

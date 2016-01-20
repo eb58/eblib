@@ -43,6 +43,11 @@
                localStorage[localStorageKey] = '';
                myopts = $.extend({}, defopts, opts);
             }
+            if (localStorage[localStorageKey] && $.parseJSON(localStorage[localStorageKey])['colorder'].length !== myopts.columns.length) {
+               alert('Column definition and LocalStorage don\'t match!');
+               localStorage[localStorageKey] = '';
+               myopts = $.extend({}, defopts, opts);
+            }
             $.each(myopts.columns, function (idx, coldef) {
                if (coldef.technical && !coldef.invisible)
                   alert(coldef.name + ": technical column must be invisble!");

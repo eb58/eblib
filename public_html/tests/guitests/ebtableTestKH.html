@@ -30,7 +30,7 @@
             renderAuftrag: function (data, row) {
                var chargeId = row[2];
                if (chargeId < 0)
-                  return row[10] + data;
+                  return row[11] + data;
                ;
                var isOpen = grid ? grid.groupIsOpen(chargeId) : false;
                var imgsrc = !isOpen ? '/images/group_opened.png' : '/images/group_closed.png';
@@ -38,7 +38,7 @@
                   <img src="<%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<%=chargeId%>\')" />\n\
                   <b>&nbsp;<%=chargeName%>&nbsp;</b>\
                   (<%=cnt%> Aufträge)';
-               var link = _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: row[10], cnt: row[1]});
+               var link = _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: row[11], cnt: row[1]});
                return row[0] === 'C' ? link : data;
             },
             renderFlags: function (data, row, type) {
@@ -117,30 +117,30 @@
 
          var opts = {
             columns: [
-               {name: "Grouping", technical: true, invisible: true, order: 'asc-fix'},
-               {name: "GroupCount", technical: true, invisible: true},
-               {name: "GroupId", technical: true, invisible: true},
-               {name: "WorkorderId", technical: true, invisible: true},
-               {name: "StatusId", technical: true, invisible: true},
-               {name: "Performer", technical: true, invisible: true},
-               //{name: "ChargeType",  technical: true, invisible: true},
-               {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*PFGKSC'},
-               {name: "Frist", render: renderer.renderFrist},
+               {name: "Grouping",     technical: true, invisible: true, order: 'asc-fix'},
+               {name: "GroupCount",   technical: true, invisible: true},
+               {name: "GroupId",      technical: true, invisible: true},
+               {name: "WorkorderId",  technical: true, invisible: true},
+               {name: "StatusId",     technical: true, invisible: true},
+               {name: "Performer",    technical: true, invisible: true},
+               {name: "ChargeType",   technical: true, invisible: true},
+               {name: "Flags",        render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*PFGKSC'},
+               {name: "Frist",        render: renderer.renderFrist},
                {name: "Status"},
                {name: "Kürzel"},
-               {name: "Auftrag", render: renderer.renderAuftrag},
+               {name: "Auftrag",      render: renderer.renderAuftrag},
                {name: "Krankenhaus"},
                {name: "Abteilung"},
                {name: "Fachlichkeit"},
                {name: "Besonderheit"},
                {name: "Krankenkasse"},
                {name: "Einlieferung", sortformat: 'date-de'},
-               {name: "Entlassung", sortformat: 'date-de'},
+               {name: "Entlassung",   sortformat: 'date-de'},
                {name: "DRG"},
                {name: "GArt"},
                {name: "Produkt"},
                {name: "FAG"},
-               {name: "DTANummern", render: renderer.renderDTA},
+               {name: "DTANummern",   render: renderer.renderDTA},
                {name: "Vorg.VGA"},
                {name: "KHFrist"}
             ],
@@ -150,9 +150,10 @@
          };
 
          function preprocessData(data) {
+            // 0                      1     2                3                4         5          6        7      8             9           10                              11
             // charge                 #  chargeid  workorderid  ProcessStatusId Performer chargeType (X)flags  frist
-            // ["C",                  3, 7971,     50000005209,               ,                'DIS',      4,    '', "problemtest",         ... ]
-            // ["W",                  1, 7971,     50000005209,               ,                'BGL',      0, -1247, "Zur Sachbearbeitung", '', "Schwarzz, Stephan, 12.12.1980", ...]
+            // ["C",                  3, 7971,     50000005209,               ,         ,      'DIS',       4,    '', "problemtest",         ... ]
+            // ["W",                  1, 7971,     50000005209,               ,         ,      'BGL',       0, -1247, "Zur Sachbearbeitung", '', "Schwarzz, Stephan, 12.12.1980", ...]
             // ... 
             var groups = {};
             for (var r = 0; r < data.length; r++) {
@@ -161,11 +162,11 @@
                if (chargeId < 0)
                   continue;
                var wid = row[3];
-               var chargeName = row[10];
+               var chargeName = row[11];
                if (row[0] === 'C') {
                   groups[chargeId] = {
                      groupname: chargeName, isOpen: false, isSelected: false,
-                     fristmin: row[7], fristmax: row[7],
+                     fristmin: row[8], fristmax: row[8],
                      wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
                      pids: [], // Liste ProcessStatusIds: [50000004850_524288,50000005018_524288,50000005204_1048576]
                      pers: [], // Liste preformers: 50000004850_50000000000015,50000005018_50000000000015,50000005204_50000000000015
@@ -173,10 +174,10 @@
                   };
                } else if (row[0] === 'W' && chargeId >= 0) {
                   var g = groups[chargeId];
-                  if (row[7] < g.fristmin)
-                     g.fristmin = row[7];
-                  if (row[7] > g.fristmax)
-                     g.fristmax = row[7];
+                  if (row[8] < g.fristmin)
+                     g.fristmin = row[8];
+                  if (row[8] > g.fristmax)
+                     g.fristmax = row[8];
                   g.wids.push(wid);
                   g.pids.push(wid + '_' + row[4]);
                   g.pers.push(wid + '_' + row[5]);

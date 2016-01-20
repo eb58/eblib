@@ -38,9 +38,24 @@
             ['', '', 'Einhorn', '04.11.2017', '', 63],
             ['', '', 'Lindwurm', '31.12.2018', '', 255]
          ];
+//#######################################################################
+
+         var mysortformats = {
+            'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
+               var flgs = '!*pfgksc';
+               var s = '';
+               for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
+                  s += (data & j) ? flgs[i] : '';
+               }
+               return s;
+            }
+         };
+
+         $.extend($.fn.ebtable.sortformats, mysortformats);
+
          var renderer = {
             renderAuftrag: function (data, row, type) {
-               if ( type === 'filter') {
+               if (type === 'filter') {
                   return row[1] + data;
                }
                var isOpen = grid ? grid.groupIsOpen(row[1]) : false;
@@ -49,7 +64,7 @@
                return data || !row[1] ? data : link;
             },
             renderFlags: function (data, row, type) {
-               if ( type === 'filter') {// || type === 'display') 
+               if (type === 'filter') {// || type === 'display') 
                   return grid.sortformats.flags(data);
                }
                var imgmap = [
@@ -78,7 +93,7 @@
                {name: "Tierart"},
                {name: "Datum", sortformat: 'date-de'},
                {name: "Welcher Name", render: renderer.renderAuftrag},
-               {name: "Flag", render: renderer.renderFlags, tooltip:'Mögliche Werte:!*pfgksc'}
+               {name: "Flag", render: renderer.renderFlags, sortformat: 'flags',tooltip: 'Mögliche Werte:!*pfgksc'}
             ],
             selection: true,
             colorder: [0, 1, 2, 3, 4, 5],

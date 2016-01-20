@@ -26,14 +26,6 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       },
       'scientific': function (a) { // '1e+3'  -->  '1000' 
          return parseFloat(a);
-      },
-      'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
-         var flgs = '!*pfgksc';
-         var s = '';
-         for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
-            s += (data & j) ? flgs[i] : '';
-         }
-         return s;
       }
    };
 
@@ -175,21 +167,5 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       return d;
    };
 
-//   data.aggregateLongestRow = function () {
-//      if (this.length === 0)
-//         return [];
-//      var res = [];
-//      for (var r = 0; r < this.length; r++) {
-//         var row = this[r];
-//         for (var c = 0; c < row.length; c++) {
-//            var s1 = '' + row[c];
-//            var s2 = res[c] ? res[c] : '';
-//            res[c] = s1.length > s2.length ? s1 : s2;
-//         }
-//      }
-//      this.aggrLine = res;
-//      console.log('aggr', res);
-//   };
-//   data.aggregateLongestRow();
    return data;
 };

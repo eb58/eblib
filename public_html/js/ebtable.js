@@ -341,8 +341,8 @@
          console.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
 
          //adjust();
-         $('#head,#data').width(Math.floor($(window).width() - 30));
-         $('#divdata').width($('#data').width() + 14);
+         //$('#head,#data').width(Math.floor($(window).width() - 30));
+         //$('#divdata').width($('#data').width() + 14);
          $('#ctrlPage1').css('position', 'absolute').css('right', "5px");
          $('#ctrlPage2').css('position', 'absolute').css('right', "5px");
       }
@@ -385,7 +385,7 @@
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
                      <th id='ctrlPage1' ><%= browseBtns %></th>\n\
                   </table>\n\
-                  <div id='divdata' max-height:<%= bodyHeight %>px;'>\n\
+                  <div id='divdata' style='overflow:auto' max-height:<%= bodyHeight %>px;'>\n\
                      <table id='data'>\n\
                         <thead><tr><%= head %></tr></thead>\n\
                         <tbody><%= data %></tbody>\n\

@@ -4,7 +4,7 @@
       <title>Beispiel 4 Nur ein TEST</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <!--<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />-->
+      <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
 
       <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
       <link rel="stylesheet" href="/css/ebtable.css">
@@ -36,7 +36,7 @@
                var t = '\
                   <img src="<%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<%=chargeId%>\')" />\n\
                   <b>&nbsp;<%=chargeName%>&nbsp;</b>\
-                  (<%=cnt%> Aufträge )';
+                  (<%=cnt%> Aufträge)';
                var link =  _.template(t)({imgsrc:imgsrc, chargeId: chargeId,chargeName:row[10], cnt:row[1]});
                return row[0] === 'C' ? link : data;
             },

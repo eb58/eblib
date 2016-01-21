@@ -195,11 +195,12 @@
          }
       }
 
-      function sorting(event) { // sorting
+        function sorting(event) { // sorting
          var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
          var colname = event.currentTarget.id;
          if (colname) {
-            console.log('sorting', colname);
+            console.log('sorting', myopts.sortcolname);
+            myopts.sortcolname = colname
             var colidx = util.indexOfCol(colname);
             var coldef = myopts.columns[colidx];
             var coldefs = $.extend([], myopts.sortmaster);
@@ -209,10 +210,20 @@
                o.order = c.order || 'desc';
                c.order = c.order ? sortToggle[c.order] : 'asc';
             });
-            tblData = tblData.sort(tblData.rowCmpCols(coldefs));
             var cls1 = coldef.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
             $('thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
-            $('thead #' + colname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+            $('thead #' + myopts.sortcolname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+            doSort();
+         }
+      }
+
+      function doSort() { // sorting
+         if (myopts.sortcolname) {
+            var colidx = util.indexOfCol(myopts.sortcolname);
+            var coldef = myopts.columns[colidx];
+            var coldefs = $.extend([], myopts.sortmaster);
+            coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+            tblData = tblData.sort(tblData.rowCmpCols(coldefs, myopts.groups));
             pageCur = 0;
             redraw(pageCur);
          }
@@ -532,13 +543,40 @@
          toggleGroupIsOpen: function (groupName) {
             myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
             filterData();
+            doSort();
             redraw(pageCur);
          },
          groupIsOpen: function (groupName) {
             return _.property('isOpen')(myopts.groups[groupName]);
          },
-         sortformats: tblData.sortformats
       });
       return this.tooltip();
    };
+
+   $.fn.ebtable.sortformats = {
+      'date-de': function (a) { // '01.01.2013' -->   '20130101' 
+         var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+         return d ? (d[3] + d[2] + d[1]) : '';
+      },
+      'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
+         var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
+         return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
+      },
+      'scientific': function (a) { // '1e+3'  -->  '1000' 
+         return parseFloat(a);
+      },
+      'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
+         var flgs = '!*pfgksc';
+         var s = '';
+         for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
+            s += (data & j) ? flgs[i] : '';
+         }
+         return s;
+      },
+      'withgroup': function (data, row) {
+         return row[2] + row[0] + data;
+      }
+   };
+
+
 })(jQuery);

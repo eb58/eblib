@@ -31,7 +31,6 @@
                var chargeId = row[2];
                if (chargeId < 0)
                   return row[11] + data;
-               ;
                var isOpen = grid ? grid.groupIsOpen(chargeId) : false;
                var imgsrc = !isOpen ? '/images/group_opened.png' : '/images/group_closed.png';
                var t = '\
@@ -117,36 +116,36 @@
 
          var opts = {
             columns: [
-               {name: "Grouping",     technical: true, invisible: true, order: 'asc-fix'},
-               {name: "GroupCount",   technical: true, invisible: true},
-               {name: "GroupId",      technical: true, invisible: true},
-               {name: "WorkorderId",  technical: true, invisible: true},
-               {name: "StatusId",     technical: true, invisible: true},
-               {name: "Performer",    technical: true, invisible: true},
-               {name: "ChargeType",   technical: true, invisible: true},
-               {name: "Flags",        render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*PFGKSC'},
-               {name: "Frist",        render: renderer.renderFrist},
+               {name: "Grouping", technical: true, invisible: true, order: 'asc-fix'},
+               {name: "GroupCount", technical: true, invisible: true},
+               {name: "GroupId", technical: true, invisible: true},
+               {name: "WorkorderId", technical: true, invisible: true},
+               {name: "StatusId", technical: true, invisible: true},
+               {name: "Performer", technical: true, invisible: true},
+               {name: "ChargeType", technical: true, invisible: true},
+               {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*PFGKSC'},
+               {name: "Frist", render: renderer.renderFrist},
                {name: "Status"},
                {name: "Kürzel"},
-               {name: "Auftrag",      render: renderer.renderAuftrag},
+               {name: "Auftrag", render: renderer.renderAuftrag},
                {name: "Krankenhaus"},
                {name: "Abteilung"},
                {name: "Fachlichkeit"},
                {name: "Besonderheit"},
                {name: "Krankenkasse"},
                {name: "Einlieferung", sortformat: 'date-de'},
-               {name: "Entlassung",   sortformat: 'date-de'},
+               {name: "Entlassung", sortformat: 'date-de'},
                {name: "DRG"},
                {name: "GArt"},
                {name: "Produkt"},
                {name: "FAG"},
-               {name: "DTANummern",   render: renderer.renderDTA},
+               {name: "DTANummern", render: renderer.renderDTA},
                {name: "Vorg.VGA"},
                {name: "KHFrist"}
             ],
             selection: {render: renderer.renderSelect},
-            sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
-            groupingCols: {groupid: 2, groupsort: 0, grouphead: 'C'}
+            sortmaster: [{col: 11}, {col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+            groupingCols: {groupid: 2, groupsort: 0, grouphead: 'C', groupname:11}
          };
 
          function preprocessData(data) {

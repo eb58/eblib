@@ -9,31 +9,7 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
          return  $.type(o) === "string" ? o.toLowerCase() : o;
       },
       normalizeGroupId: function (id) {
-         return _.isString(id) ? id : (id <= 0 ? 0 : id);
-      }
-   };
-
-// ###################################################################
-
-   data.sortformats = {
-      'date-de': function (a) { // '01.01.2013' -->   '20130101' 
-         var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-         return d ? (d[3] + d[2] + d[1]) : '';
-      },
-      'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
-         var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
-         return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
-      },
-      'scientific': function (a) { // '1e+3'  -->  '1000' 
-         return parseFloat(a);
-      },
-      'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
-         var flgs = '!*pfgksc';
-         var s = '';
-         for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
-            s += (data & j) ? flgs[i] : '';
-         }
-         return s;
+         return id <= 0 ? 0 : id;
       }
    };
 
@@ -100,17 +76,18 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
    };
 
 //####################################  sorting #######################
-   data.rowCmpCols = function (coldefs) { // [ {col:1,order:asc,sortformat:fmtfct1},{col:3, order:desc, sortformat:fmtfct2},... ]  
-      coldefs = _.isArray(coldefs) ? coldefs : [coldefs];
+   data.rowCmpCols = function (coldefs, groups) {
+      coldefs = _.isArray(coldefs) ? coldefs : [coldefs];  // [ {col:1,order:asc,sortformat:fmtfct1},{col:3, order:desc, sortformat:fmtfct2},... ]  
       return function (r1, r2) {
          for (var i = 0; i < coldefs.length; i++) {
             var cdef = coldefs[i];
             var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
-            var x = r1[cdef.col] ? data.util.toLower(r1[cdef.col]) : '';
-            var y = r2[cdef.col] ? data.util.toLower(r2[cdef.col]) : '';
-            var fmt = cdef.sortformat ? data.sortformats[cdef.sortformat] : undefined;
-            x = fmt ? fmt(x) : x;
-            y = fmt ? fmt(y) : y;
+            var x = r1[cdef.col] ? r1[cdef.col] : '';
+            var y = r2[cdef.col] ? r2[cdef.col] : '';
+            var fmt = cdef.sortformat ? $.fn.ebtable.sortformats[cdef.sortformat] : undefined;
+            x = data.util.toLower(fmt ? fmt(x, r1, groups) : x);
+            y = data.util.toLower(fmt ? fmt(y, r2, groups) : y);
+            console.log(i, "x:", x, " y:", y);
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
             if (ret !== 0) {
                return bAsc ? ret : -ret;
@@ -149,17 +126,24 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
       return row[myopts.groupingCols.groupsort] === myopts.groupingCols.grouphead;
    };
 
-   data.initGroups = function initGroups(myopts) { // groupingCols: {groupid:1,groupsort:0,grouphead:'HEAD'}
-      myopts.groups = [];
-      var gc = myopts.groupingCols;
+   data.initGroups = function initGroups(myopts) {
+      myopts.groups = {};
+      var gc = myopts.groupingCols;// groupingCols: {groupsort: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'}
       for (var r = 0; gc && r < this.length; r++) {
          var row = this[r];
          var groupId = data.util.normalizeGroupId(row[gc.groupid]);
          row.isGroupHeader = row[gc.groupsort] === gc.grouphead;
          row.isGroupElement = groupId && !row.isGroupHeader;
-         if (groupId)
-            myopts.groups[groupId] = {isOpen: false};
+         if (groupId && !myopts.groups[groupId]) {
+            myopts.groups[groupId] = {isOpen: false, name: row[gc.groupname]};
+         }
       }
+      for (var r = 0; gc && r < this.length; r++) {
+         var row = this[r];
+         var groupId = data.util.normalizeGroupId(row[gc.groupid]);
+         row[gc.groupsortstring] = groupId ? (myopts.groups[groupId].name + ' ' + groupId) : row[gc.groupname];
+      }
+
       return this;
    };
 

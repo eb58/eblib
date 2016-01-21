@@ -41,9 +41,9 @@ QUnit.test('testset2 Array sorting functions', function (assert) {
    assert.deepEqual(m.sort(m.rowCmpCols({col: 1, order: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
    assert.deepEqual(m.sort(m.rowCmpCols({col: 3, order: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
 
-   var m = mx([['01.01.2011'], ['01.01.2015'], ['01.01.2013'], ['01.01.2001']]);
-   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', format: 'date-de'})), [['01.01.2001'], ['01.01.2011'], ['01.01.2013'], ['01.01.2015']]);
-   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', format: 'date-de'})), [['01.01.2015'], ['01.01.2013'], ['01.01.2011'], ['01.01.2001']]);
+   var m = mx([['04.01.2011'], ['01.01.2015'], ['03.01.2013'], ['17.01.2001']]);
+   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc',  sortformat: 'date-de'})), [['17.01.2001'], ['04.01.2011'], ['03.01.2013'], ['01.01.2015']]);
+   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'date-de'})), [['01.01.2015'], ['03.01.2013'], ['04.01.2011'], ['17.01.2001']]);
 });
 
 QUnit.test('testset2 Array filtering functions', function (assert) {

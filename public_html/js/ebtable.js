@@ -29,7 +29,11 @@
             });
          },
          loadState: function loadState() {
-            return localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
+            var state = localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
+            _.each(state.invisible, function (o, idx) {
+               opts.columns[idx].invisible = !!o;
+            });
+            return state;
          },
          checkConfig: function checkConfig() {
             $.each(myopts.columns, function (idx, coldef) { // set reasonable defaults for coldefs
@@ -195,7 +199,7 @@
          }
       }
 
-        function sorting(event) { // sorting
+      function sorting(event) { // sorting
          var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
          var colname = event.currentTarget.id;
          if (colname) {
@@ -544,6 +548,8 @@
             myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
             filterData();
             doSort();
+            pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+            redraw(0);
             redraw(pageCur);
          },
          groupIsOpen: function (groupName) {
@@ -564,17 +570,6 @@
       },
       'scientific': function (a) { // '1e+3'  -->  '1000' 
          return parseFloat(a);
-      },
-      'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
-         var flgs = '!*pfgksc';
-         var s = '';
-         for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
-            s += (data & j) ? flgs[i] : '';
-         }
-         return s;
-      },
-      'withgroup': function (data, row) {
-         return row[2] + row[0] + data;
       }
    };
 

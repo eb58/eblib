@@ -87,7 +87,7 @@ var mx = function mx(m) { //  2-dimensional array -- m(atri)x
             var fmt = cdef.sortformat ? $.fn.ebtable.sortformats[cdef.sortformat] : undefined;
             x = data.util.toLower(fmt ? fmt(x, r1, groups) : x);
             y = data.util.toLower(fmt ? fmt(y, r2, groups) : y);
-            console.log(i, "x:", x, " y:", y);
+            //console.log(i, "x:", x, " y:", y);
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
             if (ret !== 0) {
                return bAsc ? ret : -ret;

@@ -42,10 +42,8 @@
 /* ConfigDlg */
 #configDlg #selectable { list-style-type: none; padding: 0px; width: 100%; }
 #configDlg #selectable li.visible{ 
-   margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:lightgray;
+   margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;
 }
 #configDlg #selectable li.invisible{ 
-   margin: 5px 0 0 0;  padding: 5px;font-size: 10px; font-weight: bold; background-color:#eee;
+   margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef; background:#efefef 
 }
-
-

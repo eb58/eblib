@@ -71,11 +71,11 @@
          saveState: util.saveState,
          loadState: util.loadState,
          sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
-         groupingCols: {}, //{groupid:1,groupsort:0,grouphead:'GA'}
+         groupdefs: {} // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       };
       var myopts = $.extend({}, defopts, opts, defopts.loadState());
-      var origData = mx(data);
-      var tblData = mx($.extend([], origData)).initGroups(myopts);
+      var origData = mx(data, myopts.groupdefs);
+      var tblData = mx(origData.slice(), myopts.groupdefs);
       var pageCur = 0;
       var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
 
@@ -118,11 +118,11 @@
 
          var res = '';
          var startRow = myopts.rowsPerPage * pageNr;
+         var gc = myopts.groupdefs;
          for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
-            var gc = myopts.groupingCols;
             var row = tblData[r];
 
-            if (gc && row.isGroupElement && !myopts.groups[tblData[r][gc.groupid]].isOpen)
+            if (gc && row.isGroupElement && !origData.groups[tblData[r][gc.groupid]].isOpen)
                continue
 
             var cls = row.isGroupElement ? 'group' : '';
@@ -185,10 +185,10 @@
             row.selected = $(event.target).prop('checked');
             console.log('change !', event.target.id, rowNr, row, row.selected);
             // Grouping
-            var gc = myopts.groupingCols;
-            if (gc && row[gc.groupid] && row[gc.groupsort] === gc.grouphead) {
+            var gc = myopts.groupdefs;
+            if (gc && row[gc.groupid] && row[gc.grouplabel] === gc.grouphead) {
                var groupId = row[gc.groupid];
-               console.log('Group', row[gc.groupid], row[gc.groupsort]);
+               console.log('Group', row[gc.groupid], row[gc.grouplabel]);
                for (var i = 0; i < tblData.length; i++) {
                   if (tblData[i][gc.groupid] === groupId) {
                      tblData[i].selected = row.selected;
@@ -200,14 +200,20 @@
       }
 
       function sorting(event) { // sorting
-         var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
          var colname = event.currentTarget.id;
          if (colname) {
             console.log('sorting', myopts.sortcolname);
-            myopts.sortcolname = colname
-            var colidx = util.indexOfCol(colname);
+            myopts.sortcolname = colname;
+            doSort();
+         }
+      }
+
+      function doSort() { // sorting
+         var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+         if (myopts.sortcolname) {
+            var colidx = util.indexOfCol(myopts.sortcolname);
             var coldef = myopts.columns[colidx];
-            var coldefs = coldef.nosortmaster ? [] : $.extend([], myopts.sortmaster);
+            var coldefs =  $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
             coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
             $.each(coldefs, function (idx, o) {
                var c = myopts.columns[o.col];
@@ -217,17 +223,7 @@
             var cls1 = coldef.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
             $('thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
             $('thead #' + myopts.sortcolname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
-            doSort();
-         }
-      }
-
-      function doSort() { // sorting
-         if (myopts.sortcolname) {
-            var colidx = util.indexOfCol(myopts.sortcolname);
-            var coldef = myopts.columns[colidx];
-            var coldefs = coldef.nosortmaster ? [] : $.extend([], myopts.sortmaster);
-            coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
-            tblData = tblData.sort(tblData.rowCmpCols(coldefs, myopts.groups));
+            tblData = tblData.sort(tblData.rowCmpCols(coldefs,origData.groups));
             pageCur = 0;
             redraw(pageCur);
          }
@@ -269,8 +265,8 @@
                filters.push({col: col, searchtext: $(o).val(), render: render});
             }
          });
-         tblData = mx(origData.filterGroups(myopts));
-         tblData = filters.length === 0 ? tblData : mx(tblData.filterData(filters, myopts));
+         tblData = mx(origData.filterGroups(myopts.groupdefs,origData.groups));
+         tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
       }
 
       function redraw(pageCur, withHeader) {
@@ -292,7 +288,7 @@
          filterData();
          doSort();
          var tableTemplate = _.template(
-            "<div class='ebtable'>\n\
+                 "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
@@ -309,7 +305,7 @@
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
                </div>"
-            );
+                 );
 
          a.html(tableTemplate({
             head: tableHead(),
@@ -330,15 +326,15 @@
       // #################################################################
 
       $('#lenctrl').css('width', '70px')
-         .selectmenu({change: function (event, data) {
-               console.log('change rowsPerPage', event, data.item.value);
-               myopts.rowsPerPage = Number(data.item.value);
-               pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-               pageCur = 0;
-               redraw(pageCur);
-               myopts.saveState();
-            }
-         });
+              .selectmenu({change: function (event, data) {
+                    console.log('change rowsPerPage', event, data.item.value);
+                    myopts.rowsPerPage = Number(data.item.value);
+                    pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+                    pageCur = 0;
+                    redraw(pageCur);
+                    myopts.saveState();
+                 }
+              });
       $('#configBtn').button().on('click', function () {
          $("#selectable").sortable();
          $("#configDlg").dialog("open");
@@ -405,8 +401,8 @@
 
 // ##########  Exports ############  
       $.extend(this, {
-         toggleGroupIsOpen: function (groupName) {
-            myopts.groups[groupName].isOpen = !myopts.groups[groupName].isOpen;
+         toggleGroupIsOpen: function (groupid) {
+            origData.groups[groupid].isOpen = !origData.groups[groupid].isOpen;
             filterData();
             doSort();
             pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -414,8 +410,8 @@
             redraw(pageCur);
          },
          groupIsOpen: function (groupName) {
-            return _.property('isOpen')(myopts.groups[groupName]);
-         },
+            return _.property('isOpen')(origData.groups[groupName]);
+         }
       });
       return this.tooltip();
    };

@@ -57,11 +57,6 @@
                }
                return s;
             },
-            'withgroup': function (data, row, groups) {
-               var groupId = row[2] > 0 ? row[2] : 0;
-               var g = groupId ? groups[groupId] : null;
-               return g ? g['name'] + row[0] + data : data;
-            }
          });
 
          var renderer = {
@@ -106,14 +101,14 @@
                {name: "GroupCnt", invisible: true, technical: true},
                {name: "GroupIds", invisible: true, technical: true},
                {name: "GroupSort", invisible: true, technical: true},
-               {name: "Tierart", render: renderer.renderTierart, sortformat: 'withgroup', nosortmaster: true},
+               {name: "Tierart", render: renderer.renderTierart, sortmaster: [{col: 3}, {col: 0}]},
                {name: "Datum", sortformat: 'date-de'},
                {name: "Welcher Name"},
                {name: "Flag", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*pfgksc'}
             ],
             selection: {render: renderer.renderSelect},
             sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
-            groupingCols: {groupsort: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
+            groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
             sortcolname: 'Tierart'
          };
          var grid;

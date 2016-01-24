@@ -8,9 +8,10 @@ var logtor = function () {
 
    function apply(f) {
       var logf = function () {
+         var start = new Date().getTime();
          console.log(indent(lev++), '>', f.name, 'args=', [].slice.call(arguments, 0).toString());
          var ret = f.apply(this, [].slice.call(arguments, 0));
-         console.log(indent(--lev), '<', f.name, 'ret=', ret);
+         console.log(indent(--lev), '<', f.name, 'ret=', ret, 'time', Date().getTime() - start);
          return ret;
       };
       logf.name = f.name;

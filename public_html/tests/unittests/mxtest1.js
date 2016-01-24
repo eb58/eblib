@@ -1,5 +1,5 @@
 /* global QUnit, mx */
-$.fn.ebtable ={};
+$.fn.ebtable = {};
 $.fn.ebtable.sortformats = {
    'date-de': function (a) { // '01.01.2013' -->   '20130101' 
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
@@ -60,16 +60,9 @@ QUnit.test('testset2 Array sorting functions', function (assert) {
    assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'date-de'})), [['01.01.2015'], ['03.01.2013'], ['04.01.2011'], ['17.01.2001']]);
 });
 
-QUnit.test('testset2 Array filtering functions', function (assert) {
+QUnit.test('testset3 Array filtering functions', function (assert) {
    var m = mx([['test', '01.01.2011'], ['', '01.01.2015'], ['', '01.01.2013'], ['testA', '01.01.2001']]);
    assert.deepEqual(m.filterData({col: 0, searchtext: 'te'}), [['test', '01.01.2011'], ['testA', '01.01.2001']]);
 
 });
-
-//QUnit.test('testset3 Array util functions', function (assert) {
-//   var m = mx([['', ''],  ['testA', '01.01.2001']]);
-//   assert.deepEqual(m.aggrLine, ['testA', '01.01.2001']);
-//   var m = mx([['test', 's111111 111'], ['', '01.01.2015'], ['', '01.01.2013'], ['testA', '01.01.2001']]);
-//   assert.deepEqual(m.aggrLine, ['testA', 's111111 111']);
-//});
 

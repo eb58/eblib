@@ -73,7 +73,7 @@
                }
             }
             console.log('Grouping', groups);
-            data.groups = groups;
+            data.groupsdata = groups;
          }
 
 
@@ -139,7 +139,7 @@
                var cty = row[idxCty]; // chargeType
                if (row[0] === 'C') {
                   var chargename = row[idxWnm];
-                  var g = origData.groups[cid];
+                  var g = origData.groupsdata[cid];
                   var wids = g.wids.join(',');
                   var pids = g.pids.join(',');
                   var pers = g.pers.join(',');
@@ -186,7 +186,7 @@
                {name: "Frist", render: renderer.renderFrist},
                {name: "Status"},
                {name: "Kürzel"},
-               {name: "Auftrag", render: renderer.renderAuftrag},
+               {name: "Auftrag", render: renderer.renderAuftrag, sortmaster: [{col: 3}, {col: 0}]},
                {name: "Krankenhaus"},
                {name: "Abteilung"},
                {name: "Fachlichkeit"},
@@ -203,8 +203,8 @@
                {name: "KHFrist"}
             ],
             selection: {render: renderer.renderSelect},
-            sortmaster: [{col: 3}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
-            groupingCols: {groupsort: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idxWnm, grouphead: 'C', groupelem: 'W'}
+            sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+            groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idxWnm, grouphead: 'C', groupelem: 'W'}
 
          };
 

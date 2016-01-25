@@ -64,7 +64,7 @@ var mx = function mx(m,groupdef) {
                var b = true;
                for (var i = 0; i < filters.length && b; i++) {
                   var f = filters[i];
-                  var cellData = row[f.col].trim().toLowerCase();
+                  var cellData = $.trim(row[f.col]).toLowerCase();
                   cellData = f.render ? f.render(cellData, row, 'filter') : cellData;
                   var searchText = f.searchtext.toLowerCase();
                   b = b && cellData.indexOf(searchText) >= 0;

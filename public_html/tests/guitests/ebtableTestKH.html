@@ -41,7 +41,7 @@
             // ["C",                  3, 7971,        , 50000005209,                  ,         ,      'DIS',       4,    '',     "Zur Disposition",     '', "AAAA", ... ]
             // ["W",                  1, 7971,        , 50000005209,                  ,         ,      'BGL',       0, -1247, "Zur Sachbearbeitung",     '', "Schwarz..", ...]
             // ... 
-            var groups = {};
+            var groupsdata = {};
             for (var r = 0; r < data.length; r++) {
                var row = data[r];
                row.splice(3, 0, 'XXX');
@@ -52,7 +52,7 @@
                var wid = row[idxWid];
                var chargeName = row[idxWnm];
                if (row[0] === 'C') {
-                  groups[chargeId] = {
+                  groupsdata[chargeId] = {
                      groupname: chargeName, isOpen: false, isSelected: false,
                      fristmin: row[idxFrs], fristmax: row[idxFrs],
                      wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
@@ -61,7 +61,7 @@
                      spc: 0   //  Mindestens ein Auftrag in der Charge ist 'special'
                   };
                } else if (row[0] === 'W' && chargeId >= 0) {
-                  var g = groups[chargeId];
+                  var g = groupsdata[chargeId];
                   if (row[idxFrs] < g.fristmin)
                      g.fristmin = row[idxFrs];
                   if (row[idxFrs] > g.fristmax)
@@ -72,10 +72,9 @@
                   g.spc = g.spc || (row[idxFlg] & 2);
                }
             }
-            console.log('Grouping', groups);
-            data.groupsdata = groups;
+            console.log('Grouping', groupsdata);
+            data.groupsdata = groupsdata;
          }
-
 
          var renderer = {
             renderAuftrag: function (data, row) {
@@ -145,13 +144,14 @@
                   var pers = g.pers.join(',');
                   var spc = g.spc + '';
                   var t = _.template("\
-                     <input title='charge_<\%=wids%>'\
+                     <input \
+                       title='charge_<\%=wids%>'\
                        type='checkbox'\
                        id='cb_<\%=cid%>' \
                        name='cb_<\%=name%>' \
-                       onclick=\"selectCharge('<\%=cid%>', '<\%=wids%>', '<\%=pids%>', '<\%=pers%>','<\%=spc%>', '<\%=cty%>' );\"\
                        value='<\%=cid%>'\
                        specialcase='<\%=spc%>'\
+                       onclick=\"selectCharge('<\%=cid%>', '<\%=wids%>', '<\%=pids%>', '<\%=pers%>','<\%=spc%>', '<\%=cty%>' );\"\
                    />");
                   ret = t({name: chargename, cid: cid, wids: wids, pids: pids, pers: pers, spc: spc, cty: cty});
                } else {
@@ -159,11 +159,12 @@
                   var per = row[idxPer]; // performer
                   var spc = row[idxFlg] & 2; // specialcase (from flags)
                   var t = _.template("\
-                     <input type=checkbox\
+                     <input \
+                       type=checkbox\
                        id='cb_<\%=wid%>'\
                        name='cb_<\%=wid%>'\
-                       specialcase='<\%=spc%>'\
                        value='<\%=wid%>'\
+                       specialcase='<\%=spc%>'\
                        onclick=\"selectOrder('<\%=wid%>','<\%=wid%>_<\%=pid%>','<\%=wid%>_<\%=per%>',null,'<\%=spc%>',null);\"\
                      />");
                   ret = t({wid: wid, pid: pid, per: per, cid: cid, spc: spc, cty: cty});

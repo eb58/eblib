@@ -75,7 +75,7 @@
       };
       var myopts = $.extend({}, defopts, opts, defopts.loadState());
       var origData = mx(data, myopts.groupdefs);
-      var tblData = mx(origData.slice(), myopts.groupdefs);
+      var tblData = mx(origData.slice());
       var pageCur = 0;
       var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
 
@@ -200,20 +200,14 @@
       }
 
       function sorting(event) { // sorting
+         var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
          var colname = event.currentTarget.id;
          if (colname) {
             console.log('sorting', myopts.sortcolname);
             myopts.sortcolname = colname;
-            doSort();
-         }
-      }
-
-      function doSort() { // sorting
-         var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
-         if (myopts.sortcolname) {
             var colidx = util.indexOfCol(myopts.sortcolname);
             var coldef = myopts.columns[colidx];
-            var coldefs =  $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
+            var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
             coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
             $.each(coldefs, function (idx, o) {
                var c = myopts.columns[o.col];
@@ -223,7 +217,17 @@
             var cls1 = coldef.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
             $('thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
             $('thead #' + myopts.sortcolname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
-            tblData = tblData.sort(tblData.rowCmpCols(coldefs,origData.groups));
+            doSort();
+         }
+      }
+
+      function doSort() { // sorting
+         if (myopts.sortcolname) {
+            var colidx = util.indexOfCol(myopts.sortcolname);
+            var coldef = myopts.columns[colidx];
+            var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
+            coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+            tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groups));
             pageCur = 0;
             redraw(pageCur);
          }
@@ -231,9 +235,14 @@
 
       function filtering(event) { // filtering
          console.log('filtering', event);
-         filterData();
-         pageCur = 0;
-         redraw(pageCur);
+         if (event.which === 13 && myopts.reloadData ) {
+             myopts.reloadData();
+         }
+         else{
+            filterData();
+            pageCur = 0;
+            redraw(pageCur);
+         }
       }
 
       function ignoreSorting(event) {
@@ -288,7 +297,7 @@
          filterData();
          doSort();
          var tableTemplate = _.template(
-                 "<div class='ebtable'>\n\
+            "<div class='ebtable'>\n\
                   <table>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
@@ -305,7 +314,7 @@
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
                </div>"
-                 );
+            );
 
          a.html(tableTemplate({
             head: tableHead(),
@@ -326,15 +335,15 @@
       // #################################################################
 
       $('#lenctrl').css('width', '70px')
-              .selectmenu({change: function (event, data) {
-                    console.log('change rowsPerPage', event, data.item.value);
-                    myopts.rowsPerPage = Number(data.item.value);
-                    pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-                    pageCur = 0;
-                    redraw(pageCur);
-                    myopts.saveState();
-                 }
-              });
+         .selectmenu({change: function (event, data) {
+               console.log('change rowsPerPage', event, data.item.value);
+               myopts.rowsPerPage = Number(data.item.value);
+               pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+               pageCur = 0;
+               redraw(pageCur);
+               myopts.saveState();
+            }
+         });
       $('#configBtn').button().on('click', function () {
          $("#selectable").sortable();
          $("#configDlg").dialog("open");

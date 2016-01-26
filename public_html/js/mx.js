@@ -1,8 +1,8 @@
 /* global _ */
 //  2-dimensional array -- m(atri)x
 
-var mx = function mx(m,groupdef) {   
-   //groupdef ~ {groupsort: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
+var mx = function mx(m, groupdef) {
+//groupdef ~ {groupsort: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
 
    var basicapi = {
       zero: function zero() {
@@ -77,7 +77,7 @@ var mx = function mx(m,groupdef) {
          }
       };
       return {
-         filterData:fcts.filterData
+         filterData: fcts.filterData
       };
    }();
 
@@ -88,12 +88,13 @@ var mx = function mx(m,groupdef) {
          normalizeGroupId: function (id) {
             return id <= 0 ? 0 : id;
          },
-         isGroupingHeader: function isGroupingHeader(row, groupdefs) { 
+         isGroupingHeader: function isGroupingHeader(row, groupdefs) {
             return row[groupdefs.grouplabel] === groupdefs.grouphead;
          },
          initGroups: function initGroups(groupdefs) {
-            if( !groupdefs ) return;
-            var groups= {};
+            if (!groupdefs)
+               return;
+            var groups = {};
             for (var r = 0; r < this.length; r++) {
                var row = this[r];
                var groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
@@ -103,7 +104,7 @@ var mx = function mx(m,groupdef) {
                   groups[groupId] = {isOpen: false, name: row[groupdefs.groupname].trim()};
                }
             }
-            for (var r = 0;  r < this.length; r++) {
+            for (var r = 0; r < this.length; r++) {
                var row = this[r];
                var groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
                row[groupdefs.groupsortstring] = groupId ? (groups[groupId].name + ' ' + groupId) : row[groupdefs.groupname];
@@ -111,10 +112,10 @@ var mx = function mx(m,groupdef) {
             this.groups = groups;
             return this;
          },
-         filterGroups: function filterGroups(groupdefs,groups) {
-            return _.filter(this, function(row){
+         filterGroups: function filterGroups(groupdefs, groups) {
+            return _.filter(this, function (row) {
                var groupId = fcts.normalizeGroupId((row[groupdefs.groupid]));
-               return( !groupId || fcts.isGroupingHeader(row,groupdefs) || groups[groupId].isOpen);
+               return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groups[groupId].isOpen);
             });
          }
       };
@@ -135,7 +136,7 @@ var mx = function mx(m,groupdef) {
             return fcts.toLower(fmt ? fmt(v, row, groups) : v);
          },
          rowCmpCols: function rowCmpCols(coldefs, groups) {
-            coldefs = _.isArray(coldefs) ? coldefs : [coldefs];  // [ {col:1,order:asc,sortformat:fmtfct1},{col:3, order:desc, sortformat:fmtfct2},... ]  
+            coldefs = _.isArray(coldefs) ? coldefs : [coldefs]; // [ {col:1,order:asc,sortformat:fmtfct1},{col:3, order:desc, sortformat:fmtfct2},... ]  
             return function (r1, r2) {
                for (var i = 0; i < coldefs.length; i++) {
                   var cdef = coldefs[i];
@@ -157,8 +158,36 @@ var mx = function mx(m,groupdef) {
          rowCmpCols: fcts.rowCmpCols
       };
    }();
+   //####################################  pageing #######################
+   var pageing = function () {
+      var page = 0;
+      var pageSize = fcts.setPageSize(10);
 
-   var res =  _.extend(m, basicapi, sorting, filtering, grouping);
-   res.initGroups(groupdef);
+      var fcts = {
+         setPageSize: function (n) {
+            page = 0;
+            return {pageSize: n, pageMax: Math.floor((this.length - 1) / n)};
+         },
+         getCurPageData: function () { }
+      };
+      return {
+         pageFirst: function pageFirst() {
+            page = 0;
+         },
+         pagePrev: function pagePrev() {
+            page = Math.max(0,  - 1);
+         },
+         pageNext: function pageNext() {
+            page = Math.min( + 1, Max);
+         },
+         pageLast: function pageLast() {
+         },
+      };
+   }();
+   //#####################################################################
+
+   var res = _.extend(m, basicapi, sorting, filtering, grouping);
+   if (groupdef)
+      res.initGroups(groupdef);
    return res;
 };

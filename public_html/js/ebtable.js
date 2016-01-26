@@ -235,14 +235,13 @@
 
       function filtering(event) { // filtering
          console.log('filtering', event);
-         if (event.which === 13 && myopts.reloadData ) {
-             myopts.reloadData();
-         }
-         else{
+         if (event.which === 13 && myopts.reloadData) {
+            myopts.reloadData();
+         } else {
             filterData();
-            pageCur = 0;
-            redraw(pageCur);
          }
+         pageCur = 0;
+         redraw(pageCur);
       }
 
       function ignoreSorting(event) {
@@ -274,7 +273,7 @@
                filters.push({col: col, searchtext: $(o).val(), render: render});
             }
          });
-         tblData = mx(origData.filterGroups(myopts.groupdefs,origData.groups));
+         tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
          tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
       }
 
@@ -420,6 +419,22 @@
          },
          groupIsOpen: function (groupName) {
             return _.property('isOpen')(origData.groups[groupName]);
+         },
+         getFilterValues: function getFilterValues() {
+            var filter = {};
+            $('thead th input[type="text"').each(function (idx, elem) {
+               var val = $(elem).val().trim();
+               if (val) {
+                  filter[elem.id] = val;
+               }
+            });
+            return filter;
+         },
+         setFilterValues: function setFilterValues(filter) {
+            $('thead th input[type="text"').each(function (i, o) {
+               $('#' + o.id + ' input').val(filter[o.id]);
+            });
+            return this;
          }
       });
       return this.tooltip();

@@ -2,6 +2,10 @@
 (function ($) {
    "use strict";
    $.fn.ebtable = function (opts, data) {
+      var lang = function lang(s) {
+         var x = $.fn.ebtable.lang[opts.lang || 'de'][s];
+         return x || s;
+      };
       var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '');
       var util = {
          indexOfCol: function indexOfCol(colname) {
@@ -86,7 +90,7 @@
             var cls = col.invisible ? 'invisible' : 'visible';
             return res + (col.technical ? '' : _.template(t)({name: col.name, cls: cls}));
          }, '');
-         var t = '<button id="configBtn">Anpassen</button>\n\
+         var t = '<button id="configBtn">' + lang('Anpassen') + '</button>\n\
                <div id="configDlg">\n\
                   <ol id="selectable"><%=list%></ol>\n\
                </div>';
@@ -96,16 +100,18 @@
       function tableHead() {
          var res = myopts.selection ? '<th></th>' : '';
          for (var c = 0; c < myopts.columns.length; c++) {
-            var col = myopts.columns[myopts.colorder[c]];
-            if (!col.invisible) {
+            var coldef = myopts.columns[myopts.colorder[c]];
+            if (!coldef.invisible) {
+               var w = coldef.width || 0;
+               var style = w ? 'style="width:' + w + 'px"' : '';
                var t = '\
-                  <th id="<%=colname%>">\
+                  <th id="<%=colname%>" <%=style%>>\
                      <div class="sort_wrapper">\
                         <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
                      </div>\
                      <input type="text" id="<%=colname%>" title="<%=tooltip%>"/>\
                   </th>';
-               res += _.template(t)({colname: col.name, tooltip: col.tooltip});
+               res += _.template(t)({style: style, colname: coldef.name, tooltip: coldef.tooltip});
             }
          }
          return res;
@@ -139,11 +145,16 @@
 
             var order = myopts.colorder;
             for (var c = 0; c < myopts.columns.length; c++) {
-               if (!myopts.columns[order[c]].invisible) {
+               var coldef = myopts.columns[order[c]];
+               var w = coldef.width || 0;
+               var style = w ? ' style="width:' + w + 'px" ' : '';
+               if (!coldef.invisible) {
                   var val = tblData[r][order[c]] || '';
-                  var render = myopts.columns[order[c]].render;
+                  var render = coldef.render;
                   val = render ? render(val, row) : val;
-                  res += '<td class="' + cls + '">' + val + '</td>';
+                  var w = myopts.columns[order[c]].width || 0;
+                  var ww = w ? " width='" + w + "px'" : "";
+                  res += '<td class="' + cls + '"' + style + '>' + val + '</td>';
                }
             }
             res += '</tr>\n';
@@ -171,8 +182,8 @@
       function infoCtrl() {
          var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
          var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
-         var filtered = origData.length === tblData.length ? '' : ' (gefiltert von ' + origData.length + ' Einträgen)';
-         var templ = _.template("<%=start%> bis <%=end%> von <%=count%> Einträgen <%= filtered %>");
+         var filtered = origData.length === tblData.length ? '' : _.template(lang('(gefiltert von <%=len%> Eintr\u00e4gen)'))({len: origData.length});
+         var templ = _.template(lang("<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>"));
          var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
          //return '<button id="info">' + label + '</button>';
          return label;
@@ -234,14 +245,20 @@
       }
 
       function filtering(event) { // filtering
-         console.log('filtering', event);
-         if (event.which === 13 && myopts.reloadData) {
-            myopts.reloadData();
-         } else {
-            filterData();
-         }
+         console.log('filtering', event, event.which );
+         filterData();
          pageCur = 0;
          redraw(pageCur);
+      }
+
+      function reloading(event) { // reloading
+         if (event.which === 13 && myopts.reloadData) {
+            console.log('reloading', event, event.which);
+            myopts.reloadData();
+            pageCur = 0;
+            redraw(pageCur);
+            event.preventDefault();
+         }
       }
 
       function ignoreSorting(event) {
@@ -284,7 +301,7 @@
          if (withHeader) {
             $('thead tr').html(tableHead());
             $('thead th:gt(0)').on('click', sorting);
-            $('thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
+            $('thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
          }
          adjustLayout();
       }
@@ -356,11 +373,12 @@
       $("#configDlg").dialog({
          create: function (event, ui) {
             $(".ui-widget-header").hide();
+            $('button span:contains(Abbrechen)').text(lang('Abbrechen'))
          },
          position: {my: "left top", at: "left bottom", of: '#configBtn'},
          autoOpen: false,
          height: myopts.columns.length * 20 + 10,
-         width: 100,
+         width: 150,
          modal: true,
          resizable: true,
          buttons: {
@@ -375,8 +393,8 @@
                myopts.saveState();
                redraw(pageCur, true);
                $(this).dialog("close");
-            }
-            , 'Abbrechen': function () {
+            },
+            'Abbrechen': function () {
                $(this).dialog("close");
             }
          }
@@ -398,7 +416,7 @@
          redraw(pageCur);
       });
       $('thead th:gt(0)').on('click', sorting);
-      $('thead input[type=text]').on('keyup', filtering).on('click', ignoreSorting);
+      $('thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       $('#data input[type=checkbox]').on('change', selectRows);
       $('#info').button();
 
@@ -454,5 +472,19 @@
       }
    };
 
+   $.fn.ebtable.lang = {
+      'de': {
+      },
+      'en': {
+         '(gefiltert von <%=len%> Eintr\u00e4gen)':
+            '(filters from <%=len%> entries)',
+         '<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>':
+            '<%=start%> to <%=end%> of <%=count%> entries <%= filtered %>',
+         'Anpassen':
+            'Configuration',
+         'Abbrechen':
+            'Cancel'
+      }
+   };
 
 })(jQuery);

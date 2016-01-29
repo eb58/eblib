@@ -17,6 +17,7 @@
       <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
       <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
       <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+      <script src="/js/polyfills.js"></script>
       <script src="/js/mx.js"></script>
       <script src="/js/ebtable.js"></script>
       <script>
@@ -43,20 +44,6 @@
          ];
          for (var i = 0; i < basketTestdata.length; i++) {
             basketTestdata[i].splice(3, 0, 'XXX');
-         }
-         var xxx = [
-            ['GA', 5, 10, 'Säugetiere  ', '', '', 0],
-            ['GB', 1, 10, 'Esel        ', '05.08.2011', 'Liebig, Ellen,', 1],
-            ['GB', 1, 10, 'Hase        ', '15.09.2014', 'Liebig, Gustav', 8],
-            ['GB', 1, 10, 'Hund        ', '31.08.2015', 'Mann, Heinrich Gustav Friedhelm', 16],
-            ['GA', 4, 20, 'Insekten    ', '', '', 0],
-            ['GB', 1, 20, 'Fliege      ', '31.08.2009', 'Mann, Thomas', 0],
-            ['GB', 1, 20, 'Wespe       ', '31.06.1900', 'Storm, Theodor', 0],
-            ['GA', 2, 30, 'Fische      ', '', '', 0],
-            ['GB', 1, 30, 'Karpfen     ', '31.08.2009', 'Mann, Thomas', 0],
-         ];
-         for (var i = 0; i < xxx.length; i++) {
-            xxx[i].splice(3, 0, 'XXX');
          }
 
          //#######################################################################
@@ -90,7 +77,7 @@
                var imgmap = [
                   {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
                   {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
-                  {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
+                  {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'}
                ];
                var s = '';
                for (var i = 0; i < imgmap.length; i++) {
@@ -125,23 +112,17 @@
             sortcolname: 'Tierart',
             reloadData: function () {
                console.log('HIER!!!');
-                basketTestdata = xxx;
                grid = $('#grid').ebtable(opts, basketTestdata);
-            }
+            },
+            lang:'en'
          };
          var grid;
          $().ready(function () {
             grid = $('#grid').ebtable(opts, basketTestdata);
-            $('#xxx').button().click(function (event) {
-               basketTestdata = xxx;
-               grid = $('#grid').ebtable(opts, basketTestdata);
-               event.preventDefault();
-            });
          });
       </script>
    </head>
    <body>
       <div id="grid"></div>
-      <button id="xxx">Neu laden</button>
    </body>
 </html>

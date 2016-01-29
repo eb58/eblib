@@ -1,5 +1,4 @@
 /* global QUnit, mx */
-$.fn.ebtable = {};
 $.fn.ebtable.sortformats = {
    'date-de': function (a) { // '01.01.2013' -->   '20130101' 
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);

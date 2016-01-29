@@ -161,27 +161,35 @@ var mx = function mx(m, groupdef) {
    //####################################  pageing #######################
    var pageing = function () {
       var page = 0;
-      var pageSize = fcts.setPageSize(10);
+      var pageSize = 10; // fcts.setPageSize(10);
+      var pageMax = Math.floor((this.length - 1) / pageSize);
 
       var fcts = {
          setPageSize: function (n) {
-            page = 0;
-            return {pageSize: n, pageMax: Math.floor((this.length - 1) / n)};
+            pageNr = 0;
+            pageSize = n;
+            pageMax = Math.floor((this.length - 1) / n);
          },
-         getCurPageData: function () { }
+         getCurPageData: function () {
+            var startRow = pageSize * pageNr;
+            return this.rows(_range(startRow, startRow + pageSize));
+         }
       };
       return {
          pageFirst: function pageFirst() {
             page = 0;
          },
          pagePrev: function pagePrev() {
-            page = Math.max(0,  - 1);
+            page = Math.max(0, page - 1);
          },
          pageNext: function pageNext() {
-            page = Math.min( + 1, Max);
+            page = Math.min(pageCur + 1, pageMax);
          },
          pageLast: function pageLast() {
+            page = pageMax;
          },
+         setPageSize: fcts.setPageSize,
+         getCurPageData: fcts.getCurPageData
       };
    }();
    //#####################################################################

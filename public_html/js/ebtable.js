@@ -398,13 +398,12 @@
     });
     $('#' + gridid + 'configDlg').dialog({
       create: function () {
-        $('.ui-widget-header').hide();
         $('button span:contains(Abbrechen)').text(translate('Abbrechen'));
       },
       position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
       autoOpen: false,
-      height: myopts.columns.length * 20 + 85,
-      width: 150,
+      height: _.where(myopts.columns, {invisible:false}).length * 22 + 90,
+      width: 250,
       modal: true,
       resizable: true,
       buttons: {
@@ -424,7 +423,7 @@
           $(this).dialog("close");
         }
       }
-    });
+    }).parent().find('.ui-widget-header').hide();
 
     $(window).on('resize', function () {
       console.log('resize!!!');

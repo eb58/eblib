@@ -2,9 +2,11 @@
 (function ($) {
    "use strict";
    $.fn.ebtable = function (opts, data) {
-      var lang = function lang(s) {
-         var x = $.fn.ebtable.lang[opts.lang || 'de'][s];
-         return x || s;
+      var gridid =  this[0].id;
+      var selgridid = '#' + gridid + ' ';
+      var translate = function translate(str) {
+         var translation = $.fn.ebtable.lang[opts.lang || 'de'][str];
+         return translation || str;
       };
       var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '');
       var util = {
@@ -14,10 +16,10 @@
             });
          },
          colIsInvisible: function colIsInvisible(colname) {
-            return myopts.columns[util.indexOfCol(colname)].invisible;
+            return _.findWhere(myopts.columns, {name: colname}).invisible;
          },
          colIsTechnical: function colIsTechnical(colname) {
-            return myopts.columns[util.indexOfCol(colname)].technical;
+            return _.findWhere(myopts.columns, {name: colname}).technical;
          },
          getVisibleCols: function getVisibleCols() {
             return _.filter(myopts.columns, function (o) {
@@ -66,6 +68,7 @@
 
       var defopts = {
          columns: [],
+         flags: {filter: true, pagelenctrl: true, config: true},
          bodyHeight: Math.max(200, $(window).height() - 100),
          bodyWidth: Math.max(200, $(window).width() - 10),
          rowsPerPageSelectValues: [10, 25, 50, 100],
@@ -84,15 +87,17 @@
       var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
 
       function configBtn() {
+         if (!myopts.flags.config)
+            return '';
          var list = _.reduce(myopts.colorder, function (res, idx) {
             var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
             var col = myopts.columns[idx];
             var cls = col.invisible ? 'invisible' : 'visible';
             return res + (col.technical ? '' : _.template(t)({name: col.name, cls: cls}));
          }, '');
-         var t = '<button id="configBtn">' + lang('Anpassen') + '</button>\n\
-               <div id="configDlg">\n\
-                  <ol id="selectable"><%=list%></ol>\n\
+         var t = '<button id="configBtn">' + translate('Anpassen') + '</button>\n\
+               <div id="' + gridid + 'configDlg">\n\
+                  <ol id="' + gridid + 'selectable" class="selectable"><%=list%></ol>\n\
                </div>';
          return _.template(t)({list: list});
       }
@@ -108,9 +113,9 @@
                   <th id="<%=colname%>" <%=style%>>\
                      <div class="sort_wrapper">\
                         <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
-                     </div>\
-                     <input type="text" id="<%=colname%>" title="<%=tooltip%>"/>\
-                  </th>';
+                     </div>'
+                  + (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '')
+                  + '</th>';
                res += _.template(t)({style: style, colname: coldef.name, tooltip: coldef.tooltip});
             }
          }
@@ -163,6 +168,8 @@
       }
 
       function selectLenCtrl() {
+         if (!myopts.flags.pagelenctrl)
+            return;
          var options = '';
          $.each(myopts.rowsPerPageSelectValues, function (idx, o) {
             var selected = o === myopts.rowsPerPage ? 'selected' : '';
@@ -182,8 +189,8 @@
       function infoCtrl() {
          var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
          var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
-         var filtered = origData.length === tblData.length ? '' : _.template(lang('(gefiltert von <%=len%> Eintr\u00e4gen)'))({len: origData.length});
-         var templ = _.template(lang("<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>"));
+         var filtered = origData.length === tblData.length ? '' : _.template(translate('(gefiltert von <%=len%> Eintr\u00e4gen)'))({len: origData.length});
+         var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>"));
          var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
          //return '<button id="info">' + label + '</button>';
          return label;
@@ -203,7 +210,7 @@
                for (var i = 0; i < tblData.length; i++) {
                   if (tblData[i][gc.groupid] === groupId) {
                      tblData[i].selected = row.selected;
-                     $('#check' + i).prop('checked', row.selected);
+                     $(selgridid + '#check' + i).prop('checked', row.selected);
                   }
                }
             }
@@ -226,8 +233,8 @@
                c.order = c.order ? sortToggle[c.order] : 'asc';
             });
             var cls1 = coldef.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
-            $('thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
-            $('thead #' + myopts.sortcolname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
+            $(selgridid + 'thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
+            $(selgridid + 'thead #' + myopts.sortcolname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
             doSort();
          }
       }
@@ -245,7 +252,7 @@
       }
 
       function filtering(event) { // filtering
-         console.log('filtering', event, event.which );
+         console.log('filtering', event, event.which);
          filterData();
          pageCur = 0;
          redraw(pageCur);
@@ -272,17 +279,17 @@
          console.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
 
          //adjust();
-         //$('#head,#data').width(Math.floor($(window).width() - 30));
-         //$('#divdata').width($('#data').width() + 14);
-         $('#ctrlPage1').css('position', 'absolute').css('right', "5px");
-         $('#ctrlPage2').css('position', 'absolute').css('right', "5px");
+         //$(selgridid+'#head,#data').width(Math.floor($(window).width() - 30));
+         //$(selgridid+'#divdata').width($(selgridid+'#data').width() + 14);
+         $(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
+         $(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
       }
 
 // ##############################################################################
 
       function filterData() {
          var filters = [];
-         $('thead th input[type=text]').each(function (idx, o) {
+         $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
             if ($(o).val()) {
                var colname = $(o).attr('id');
                var col = util.indexOfCol(colname);
@@ -295,13 +302,13 @@
       }
 
       function redraw(pageCur, withHeader) {
-         $('#ctrlInfo').html(infoCtrl());
-         $('#data tbody').html(tableData(pageCur));
-         $('#data input[type=checkbox]').on('change', selectRows);
+         $(selgridid + '#ctrlInfo').html(infoCtrl());
+         $(selgridid + '#data tbody').html(tableData(pageCur));
+         $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
          if (withHeader) {
-            $('thead tr').html(tableHead());
-            $('thead th:gt(0)').on('click', sorting);
-            $('thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
+            $(selgridid + 'thead tr').html(tableHead());
+            $(selgridid + 'thead th:gt(0)').on('click', sorting);
+            $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
          }
          adjustLayout();
       }
@@ -314,7 +321,7 @@
          doSort();
          var tableTemplate = _.template(
             "<div class='ebtable'>\n\
-                  <table>\n\
+                  <table class='ctrl'>\n\
                      <th id='ctrlLength'><%= selectLen  %></th>\n\
                      <th id='ctrlConfig'><%= configBtn  %></th>\n\
                      <th id='ctrlPage1' ><%= browseBtns %></th>\n\
@@ -325,7 +332,7 @@
                         <tbody><%= data %></tbody>\n\
                      </table>\n\
                   </div>\n\
-                  <table>\n\
+                  <table class='ctrl'>\n\
                      <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
                      <th id='ctrlPage2'><%= browseBtns %></th>\n\
                   </table>\n\
@@ -350,32 +357,51 @@
       // Actions
       // #################################################################
 
-      $('#lenctrl').css('width', '70px')
-         .selectmenu({change: function (event, data) {
-               console.log('change rowsPerPage', event, data.item.value);
-               myopts.rowsPerPage = Number(data.item.value);
-               pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-               pageCur = 0;
-               redraw(pageCur);
-               myopts.saveState();
-            }
-         });
-      $('#configBtn').button().on('click', function () {
-         $("#selectable").sortable();
-         $("#configDlg").dialog("open");
-         $("#configDlg li").off('click').on("click", function (event) {
+      $(selgridid + '#info').button();
+      $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
+            console.log('change rowsPerPage', event, data.item.value);
+            myopts.rowsPerPage = Number(data.item.value);
+            pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+            pageCur = 0;
+            redraw(pageCur);
+            myopts.saveState();
+         }
+      });
+      $(selgridid + '.firstBtn').button().on('click', function () {
+         pageCur = 0;
+         redraw(pageCur);
+      });
+      $(selgridid + '.backBtn').button().on('click', function () {
+         pageCur = Math.max(0, pageCur - 1);
+         redraw(pageCur);
+      });
+      $(selgridid + '.nextBtn').button().on('click', function () {
+         pageCur = Math.min(pageCur + 1, pageCurMax);
+         redraw(pageCur);
+      });
+      $(selgridid + '.lastBtn').button().on('click', function () {
+         pageCur = pageCurMax;
+         redraw(pageCur);
+      });
+      $(selgridid + 'thead th:gt(0)').on('click', sorting);
+      $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
+      $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
+      $(selgridid + '#configBtn').button().on('click', function () {
+         $('#' + gridid + 'selectable').sortable();
+         $('#' + gridid + 'configDlg').dialog('open');
+         $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
             var col = myopts.columns[util.indexOfCol(event.target.id)];
             col.invisible = !col.invisible;
-            $('#configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
+            $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
             console.log('change visibility', event.target.id, 'now visible:', !col.invisible);
          });
       });
-      $("#configDlg").dialog({
-         create: function (event, ui) {
-            $(".ui-widget-header").hide();
-            $('button span:contains(Abbrechen)').text(lang('Abbrechen'))
+      $('#' + gridid + 'configDlg').dialog({
+         create: function () {
+            $('.ui-widget-header').hide();
+            $('button span:contains(Abbrechen)').text(translate('Abbrechen'));
          },
-         position: {my: "left top", at: "left bottom", of: '#configBtn'},
+         //position: {my: "left top", at: "left bottom", of: '#' + gridid + 'configDlg'},
          autoOpen: false,
          height: myopts.columns.length * 20 + 10,
          width: 150,
@@ -384,7 +410,7 @@
          buttons: {
             "OK": function () {
                var colnames = [];
-               $('#configDlg li').each(function (idx, o) {
+               $('#' + gridid + 'configDlg li').each(function (idx, o) {
                   colnames.push($(o).prop('id'));
                });
                myopts.colorder = _.map(myopts.columns, function (col, idx) {
@@ -399,26 +425,6 @@
             }
          }
       });
-      $('.firstBtn').button().on('click', function () {
-         pageCur = 0;
-         redraw(pageCur);
-      });
-      $('.backBtn').button().on('click', function () {
-         pageCur = Math.max(0, pageCur - 1);
-         redraw(pageCur);
-      });
-      $('.nextBtn').button().on('click', function () {
-         pageCur = Math.min(pageCur + 1, pageCurMax);
-         redraw(pageCur);
-      });
-      $('.lastBtn').button().on('click', function () {
-         pageCur = pageCurMax;
-         redraw(pageCur);
-      });
-      $('thead th:gt(0)').on('click', sorting);
-      $('thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
-      $('#data input[type=checkbox]').on('change', selectRows);
-      $('#info').button();
 
       $(window).on('resize', function () {
          console.log('resize!!!');
@@ -440,7 +446,7 @@
          },
          getFilterValues: function getFilterValues() {
             var filter = {};
-            $('thead th input[type="text"').each(function (idx, elem) {
+            $(selgridid + 'thead th input[type="text"').each(function (idx, elem) {
                var val = $(elem).val().trim();
                if (val) {
                   filter[elem.id] = val;
@@ -449,8 +455,8 @@
             return filter;
          },
          setFilterValues: function setFilterValues(filter) {
-            $('thead th input[type="text"').each(function (i, o) {
-               $('#' + o.id + ' input').val(filter[o.id]);
+            $(selgridid + 'thead th input[type="text"').each(function (i, o) {
+               $(selgridid + '#' + o.id + ' input').val(filter[o.id]);
             });
             return this;
          }

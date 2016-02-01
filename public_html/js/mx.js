@@ -92,7 +92,7 @@ var mx = function mx(m, groupdef) {
             return row[groupdefs.grouplabel] === groupdefs.grouphead;
          },
          initGroups: function initGroups(groupdefs) {
-            if (!groupdefs)
+            if (!groupdefs.groupid)
                return;
             var groups = {};
             for (var r = 0; r < this.length; r++) {

@@ -1,9 +1,21 @@
+.ebtable .ctrl{ 
+   height: 40px;
+}
+
+.ebtable #lenctrl{ 
+   width: 60px;
+}
+
+.ebtable #data{ 
+   width: 100%;
+}
+
 .ebtable #head, .ebtable #data { 
    background-color:#eee;
 }
 
 .ebtable #data th{ 
-   background-color:#ddd; 
+   background-color:#a0a0b0; 
    padding: 5px 2px 5px 2px;
 }
 
@@ -32,7 +44,6 @@
 .ebtable #data td.groupheader{
    background-color: #a3a3a3;
 }
-
 .ebtable #data input[type=checkbox] {
    width: 15px;
    padding: 0px;
@@ -40,10 +51,7 @@
 }
 
 /* ConfigDlg */
-#configDlg #selectable { list-style-type: none; padding: 0px; width: 100%; }
-#configDlg #selectable li.visible{ 
-   margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;
-}
-#configDlg #selectable li.invisible{ 
-   margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef; background:#efefef 
+.selectable { list-style-type: none; padding: 0px; width: 100%; }
+.selectable li.visible  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
+.selectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef 
 }

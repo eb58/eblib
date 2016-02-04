@@ -1,31 +1,32 @@
 .ebtable .ctrl{ 
-   height: 40px;
+  height: 40px;
 }
 
-.ebtable .ctrl th{ 
-   border : 0
+.ebtable .ctrl div{ 
+  border : 0;
+  margin : 5px 3px;
 }
 
 .ebtable #lenctrl{ 
-   width: 70px;
+  width: 70px;
 }
 
 .ebtable #data{ 
-   width: 100%;
+  width: 100%;
 }
 
 .ebtable #head, .ebtable #data { 
-   background-color:#eee;
+  background-color:#eee;
 }
 
 .ebtable #data th{ 
-   background-color:#a0a0b0; 
-   padding: 5px 2px 5px 2px;
+  background-color:#a0a0b0; 
+  padding: 5px 2px 5px 2px;
 }
 
 .ebtable #data th input {
-   width: 70%;
-   box-sizing: border-box;
+  width: 70%;
+  box-sizing: border-box;
 }
 
 .ebtable #data th div.sort_wrapper {
@@ -33,25 +34,25 @@
 }
 
 .ebtable #data th div.sort_wrapper span {
-   position: absolute;
-   margin-top: 10px;
-   right: -6px;
+  position: absolute;
+  margin-top: 10px;
+  right: -6px;
 }
 
 .ebtable #data td{ 
-   background-color:#dfdfdf;
-   padding: 5px 2px 5px 2px;
+  background-color:#dfdfdf;
+  padding: 5px 2px 5px 2px;
 }
 .ebtable #data td.group{
-   background-color: #afafaf;
+  background-color: #afafaf;
 }
 .ebtable #data td.groupheader{
-   background-color: #a3a3a3;
+  background-color: #a3a3a3;
 }
 .ebtable #data input[type=checkbox] {
-   width: 15px;
-   padding: 0px;
-   margin:0px;
+  width: 15px;
+  padding: 0px;
+  margin:0px;
 }
 
 /* ConfigDlg */

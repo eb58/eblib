@@ -275,8 +275,8 @@
     function adjustLayout() {
       //console.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
       //adjust();
-      //$(selgridid+'#head,#data').width(Math.floor($(window).width() - 30));
-      //$(selgridid+'#divdata').width($(selgridid+'#data').width() + 14);
+      //$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
+      //$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
       //$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
       //$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
     }
@@ -298,7 +298,7 @@
     }
 
     function redraw(pageCur, withHeader) {
-      $(selgridid + '#ctrlInfo').html(infoCtrl());
+      $(selgridid + '#infoCtrl').html(infoCtrl());
       $(selgridid + '#data tbody').html(tableData(pageCur));
       $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
       if (withHeader) {
@@ -317,24 +317,24 @@
       doSort();
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template(
-         "<div class='ebtable'>\n\
-                  <div class='ctrl'>\n\
-                     <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
-                     <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
-                     <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
-                  </div>\n\
-                  <div id='divdata' style='overflow:auto; max-height:<%= bodyHeight %>px;'>\n\
-                     <table id='data'>\n\
-                        <thead><tr><%= head %></tr></thead>\n\
-                        <tbody><%= data %></tbody>\n\
-                     </table>\n\
-                  </div>\n\
-                  <div class='ctrl'>\n\
-                     <div id='ctrlInfo'  style='float: left;' class='ui-widget-content'><%= infoCtrl %></div>\n\
-                     <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
-                  </div>\n\
-               </div>"
-         );
+        "<div class='ebtable'>\n\
+          <div class='ctrl'>\n\
+             <div style='float: left;' ><%= selectLen  %></div>\n\
+             <div style='float: left;' ><%= configBtn  %></div>\n\
+             <div style='float: right;'><%= browseBtns %></div>\n\
+          </div>\n\
+          <div style='overflow:auto; max-height:<%= bodyHeight %>px;'>\n\
+             <table id='data'>\n\
+                <thead><tr><%= head %></tr></thead>\n\
+                <tbody><%= data %></tbody>\n\
+             </table>\n\
+          </div>\n\
+          <div class='ctrl'>\n\
+             <div id='infoCtrl'  style='float: left;' ><%= infoCtrl %></div>\n\
+             <div style='float: right;'><%= browseBtns %></div>\n\
+          </div>\n\
+        </div>"
+        );
 
       a.html(tableTemplate({
         head: tableHead(),

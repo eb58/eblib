@@ -8,6 +8,7 @@
       var translation = $.fn.ebtable.lang[opts.lang || 'de'][str];
       return translation || str;
     };
+    var ctrlHeight = '23px';
     var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid;
     var util = {
       indexOfCol: function indexOfCol(colname) {
@@ -177,11 +178,10 @@
     }
 
     function pageBrowseCtrl() {
-      return '\
-            <button class="firstBtn"><span class="ui-icon ui-icon-seek-first"></button>\n\
-            <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" ></button>\n\
-            <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" ></button>\n\
-            <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  ></button>';
+      return '<button class="firstBtn"><span class="ui-icon ui-icon-seek-first"></button>\
+              <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" ></button>\
+              <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" ></button>\
+              <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  ></button>';
     }
 
     function infoCtrl() {
@@ -190,7 +190,6 @@
       var filtered = origData.length === tblData.length ? '' : _.template(translate('(gefiltert von <%=len%> Eintr\u00e4gen)'))({len: origData.length});
       var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
-      //return '<button id="info">' + label + '</button>';
       return label;
     }
 
@@ -319,21 +318,21 @@
       doSort();
       var tableTemplate = _.template(
          "<div class='ebtable'>\n\
-                  <table class='ctrl'>\n\
-                     <th id='ctrlLength'><%= selectLen  %></th>\n\
-                     <th id='ctrlConfig'><%= configBtn  %></th>\n\
-                     <th id='ctrlPage1' ><%= browseBtns %></th>\n\
-                  </table>\n\
+                  <div class='ctrl'>\n\
+                     <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
+                     <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
+                     <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
+                  </div>\n\
                   <div id='divdata' style='overflow:auto; max-height:<%= bodyHeight %>px;'>\n\
                      <table id='data'>\n\
                         <thead><tr><%= head %></tr></thead>\n\
                         <tbody><%= data %></tbody>\n\
                      </table>\n\
                   </div>\n\
-                  <table class='ctrl'>\n\
-                     <th class='ui-widget-content' id='ctrlInfo'><%= infoCtrl %></th>\n\
-                     <th id='ctrlPage2'><%= browseBtns %></th>\n\
-                  </table>\n\
+                  <div class='ctrl'>\n\
+                     <div id='ctrlInfo'  style='float: left;' class='ui-widget-content'><%= infoCtrl %></div>\n\
+                     <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
+                  </div>\n\
                </div>"
          );
 
@@ -355,8 +354,7 @@
     // Actions
     // #################################################################
 
-    $(selgridid + '#info').button();
-    $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
+    $(selgridid + '#lenctrl').css('height',ctrlHeight).selectmenu({change: function (event, data) {
         console.log('change rowsPerPage', event, data.item.value);
         myopts.rowsPerPage = Number(data.item.value);
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -365,26 +363,26 @@
         myopts.saveState();
       }
     });
-    $(selgridid + '.firstBtn').button().on('click', function () {
+    $(selgridid + '.firstBtn').css('height',ctrlHeight).button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);
     });
-    $(selgridid + '.backBtn').button().on('click', function () {
+    $(selgridid + '.backBtn').css('height',ctrlHeight).button().on('click', function () {
       pageCur = Math.max(0, pageCur - 1);
       redraw(pageCur);
     });
-    $(selgridid + '.nextBtn').button().on('click', function () {
+    $(selgridid + '.nextBtn').css('height',ctrlHeight).button().on('click', function () {
       pageCur = Math.min(pageCur + 1, pageCurMax);
       redraw(pageCur);
     });
-    $(selgridid + '.lastBtn').button().on('click', function () {
+    $(selgridid + '.lastBtn').css('height',ctrlHeight).button().on('click', function () {
       pageCur = pageCurMax;
       redraw(pageCur);
     });
     $(selgridid + 'thead th:gt(0)').on('click', sorting);
     $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
     $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
-    $(selgridid + '#configBtn').button().on('click', function () {
+    $(selgridid + '#configBtn').button().css('height',ctrlHeight).on('click', function () {
       $('#' + gridid + 'selectable').sortable();
       $('#' + gridid + 'configDlg').dialog('open');
       $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {

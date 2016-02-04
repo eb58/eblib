@@ -273,13 +273,12 @@
 // ##############################################################################
 
     function adjustLayout() {
-      console.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
-
+      //console.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
       //adjust();
       //$(selgridid+'#head,#data').width(Math.floor($(window).width() - 30));
       //$(selgridid+'#divdata').width($(selgridid+'#data').width() + 14);
-      $(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
-      $(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
+      //$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
+      //$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
     }
 
 // ##############################################################################
@@ -307,7 +306,7 @@
         $(selgridid + 'thead th:gt(0)').on('click', sorting);
         $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
-      adjustLayout();
+      //adjustLayout();
     }
 
     // ##############################################################################
@@ -316,6 +315,7 @@
       util.checkConfig();
       filterData();
       doSort();
+      pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template(
          "<div class='ebtable'>\n\
                   <div class='ctrl'>\n\
@@ -345,7 +345,7 @@
         infoCtrl: infoCtrl(),
         bodyHeight: myopts.bodyHeight
       }));
-      adjustLayout();
+      //adjustLayout();
     }
 
     initGrid(this);
@@ -354,7 +354,7 @@
     // Actions
     // #################################################################
 
-    $(selgridid + '#lenctrl').css('height',ctrlHeight).selectmenu({change: function (event, data) {
+    $(selgridid + '#lenctrl').css('height', ctrlHeight).selectmenu({change: function (event, data) {
         console.log('change rowsPerPage', event, data.item.value);
         myopts.rowsPerPage = Number(data.item.value);
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -363,26 +363,26 @@
         myopts.saveState();
       }
     });
-    $(selgridid + '.firstBtn').css('height',ctrlHeight).button().on('click', function () {
+    $(selgridid + '.firstBtn').css('height', ctrlHeight).button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);
     });
-    $(selgridid + '.backBtn').css('height',ctrlHeight).button().on('click', function () {
+    $(selgridid + '.backBtn').css('height', ctrlHeight).button().on('click', function () {
       pageCur = Math.max(0, pageCur - 1);
       redraw(pageCur);
     });
-    $(selgridid + '.nextBtn').css('height',ctrlHeight).button().on('click', function () {
+    $(selgridid + '.nextBtn').css('height', ctrlHeight).button().on('click', function () {
       pageCur = Math.min(pageCur + 1, pageCurMax);
       redraw(pageCur);
     });
-    $(selgridid + '.lastBtn').css('height',ctrlHeight).button().on('click', function () {
+    $(selgridid + '.lastBtn').css('height', ctrlHeight).button().on('click', function () {
       pageCur = pageCurMax;
       redraw(pageCur);
     });
     $(selgridid + 'thead th:gt(0)').on('click', sorting);
     $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
     $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
-    $(selgridid + '#configBtn').button().css('height',ctrlHeight).on('click', function () {
+    $(selgridid + '#configBtn').button().css('height', ctrlHeight).on('click', function () {
       $('#' + gridid + 'selectable').sortable();
       $('#' + gridid + 'configDlg').dialog('open');
       $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
@@ -423,7 +423,7 @@
 
     $(window).on('resize', function () {
       console.log('resize!!!');
-      adjustLayout(0);
+      //adjustLayout();
     });
 
 // ##########  Exports ############  

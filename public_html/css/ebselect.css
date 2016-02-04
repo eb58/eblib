@@ -1,0 +1,14 @@
+.ebselect{
+  height: 50px;
+  overflow-y: auto;
+  border: solid black;
+  border-width: 1px;
+}
+.ebselect ul {
+  padding: 0;
+  margin: 3px;
+}
+.ebselect li {
+  list-style-type: none;  
+  text-align: left;
+}

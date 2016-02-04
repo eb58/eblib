@@ -107,16 +107,14 @@
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
-          var w = coldef.width || 0;
-          var style = w ? 'style="width:' + w + 'px"' : '';
-          var t = '\
-                  <th id="<%=colname%>" <%=style%>>\
-                     <div class="sort_wrapper">\
-                        <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
-                     </div>'
-             + (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '')
-             + '</th>';
-          res += _.template(t)({style: style, colname: coldef.name, tooltip: coldef.tooltip});
+          var t =
+             '<th id="<%=colname%>">\
+                <div class="sort_wrapper">\
+                  <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
+                </div>' +
+             (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
+             '</th>';
+          res += _.template(t)({colname: coldef.name, tooltip: coldef.tooltip});
         }
       }
       return res;
@@ -402,7 +400,7 @@
       },
       position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
       autoOpen: false,
-      height: _.where(myopts.columns, {invisible:false}).length * 22 + 90,
+      height: _.where(myopts.columns, {invisible: false}).length * 22 + 90,
       width: 250,
       modal: true,
       resizable: true,

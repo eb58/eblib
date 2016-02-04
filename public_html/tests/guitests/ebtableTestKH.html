@@ -77,24 +77,27 @@
          }
 
          var renderer = {
-            renderAuftrag: function (data, row) {
+            renderAuftrag: function (data, row, type) {
+               if ( type === 'filter'){
+                 return row[3] + data;
+               }
                var sessionId = '<%=session.getId()%>';
                var chargeId = row[2];
+               var name = data.substring(0,30).replace(/ /g, '\u00a0') + data.substring(30);
                if (row[0] !== 'C') {
                   var t = _.template(
-                     '<input name="name_<\%=wid%>" value="<\%=data%>" hidden="true"/>\
-                     <a href="/ISmed/showOrder.do;jsessionid=<\%=sid%>?src=khbasket2&workorderid=<\%=wid%>" title="<\%=wid%>"><\%=data%></a>');
-                  return t({chd: data, wid: row[idxWnm], data: data, sid: sessionId});
+                     '<input name="name_<\%=wid%>" value="<\%=workorderName%>" hidden="true"/>\
+                     <a href="/ISmed/showOrder.do;jsessionid=<\%=sid%>?src=khbasket2&workorderid=<\%=wid%>" title="<\%=wid%>"><\%=workorderName%></a>');
+                  return t({chd: data, wid: row[idxWnm], workorderName:name, sid: sessionId});
                }
 
                var isOpen = grid ? grid.groupIsOpen(chargeId) : false;
                var imgsrc = isOpen ? '/images/details_opened.png' : '/images/details_closed.png';
                var auftrag = row[1] === 1 ? 'Auftrag' : 'Aufträge';
                var t = '\
-               <img src="<\%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<\%=chargeId%>\')" />\n\
-               <b>&nbsp;<\%=chargeName%>&nbsp;</b>\
-                  (<\%=cnt%> <\%=auftrag%>)';
-               var link = _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: data, cnt: row[1], auftrag: auftrag});
+               <img src="<\%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<\%=chargeId%>\')"/>\
+               <b>&nbsp;<\%=chargeName%></b>&nbsp;(<\%=cnt%>&nbsp;<\%=auftrag%>)';
+               var link = _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: name, cnt: row[1], auftrag: auftrag});
                return row[0] === 'C' ? link : data;
             },
             renderFlags: function (data, row, type) {
@@ -102,13 +105,13 @@
                   return grid.sortformats.flags(data);
                }
                var imgmap = [
-                  {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
-                  {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
-                  {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
-                  {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
-                  {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
-                  {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
-                  {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
+                  {key: '!', id: 1,   img: 'important.gif', alt: 'Eilauftrag'},
+                  {key: '*', id: 2,   img: 'blackstar.gif', alt: 'Spezialfall'},
+                  {key: 'P', id: 4,   img: 'problem.gif', alt: 'Problemfall'},
+                  {key: 'F', id: 8,   img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
+                  {key: 'G', id: 16,  img: 'isPrg.gif', alt: 'Prg'},
+                  {key: 'K', id: 32,  img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
+                  {key: 'S', id: 64,  img: 'sperre.gif', alt: 'Sperre'},
                   {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
                ];
                var s = '';
@@ -129,7 +132,7 @@
                return data;// sprintf("%+05d#%+08d", frist, data);// data;
             },
             renderDTA: function (data, row) {
-               return data.replace(/,/g, ', ');
+               return data;//.replace(/,/g, ', ');
             },
             renderSelect: function (origData, row, type) {
                var ret = '';

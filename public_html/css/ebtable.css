@@ -2,8 +2,12 @@
    height: 40px;
 }
 
+.ebtable .ctrl th{ 
+   border : 0
+}
+
 .ebtable #lenctrl{ 
-   width: 60px;
+   width: 70px;
 }
 
 .ebtable #data{ 
@@ -53,5 +57,4 @@
 /* ConfigDlg */
 .selectable { list-style-type: none; padding: 0px; width: 100%; }
 .selectable li.visible  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
-.selectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef 
-}
+.selectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }

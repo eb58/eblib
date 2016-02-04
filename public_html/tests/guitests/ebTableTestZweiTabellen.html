@@ -24,9 +24,9 @@
       <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
       <script src="/js/mx.js"></script>
       <script src="/js/ebtable.js"></script>
-      <script src="/data/auftragsinfoData.js"></script>
+      <script src="/data/infoData.js"></script>
       <script>
-         var tblData1 = mx(_.map(data.workorderComments, function (o) {
+         var tblData1 = mx(_.map(adata.workorderComments, function (o) {
             return _.values(o);
          })).cols([2, 4, 5]);
          var tblData2 = tblData1.slice(0);

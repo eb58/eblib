@@ -22,6 +22,9 @@
       colIsTechnical: function colIsTechnical(colname) {
         return _.findWhere(myopts.columns, {name: colname}).technical;
       },
+      getRender: function getRender(colname) {
+        return _.findWhere(myopts.columns, {name: colname}).render;
+      },
       getVisibleCols: function getVisibleCols() {
         return _.filter(myopts.columns, function (o) {
           return !o.invisible;
@@ -109,12 +112,12 @@
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
           var t =
-             '<th id="<%=colname%>">\
+            '<th id="<%=colname%>">\
                 <div class="sort_wrapper">\
                   <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
                 </div>' +
-             (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
-             '</th>';
+            (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
+            '</th>';
           res += _.template(t)({colname: coldef.name, tooltip: coldef.tooltip});
         }
       }
@@ -286,12 +289,14 @@
     function filterData() {
       var filters = [];
       $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
-        if ($(o).val()) {
+        var val = $(o).val();
+        var vals = val.split(',');
+        _.each(vals, function (v) {
           var colname = $(o).attr('id');
           var col = util.indexOfCol(colname);
-          var render = myopts.columns[col].render;
-          filters.push({col: col, searchtext: $(o).val(), render: render});
-        }
+          var ren = util.getRender(colname);
+          filters.push({col: col, searchtext: $.trim(v), render: ren});
+        });
       });
       tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
       tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
@@ -441,12 +446,13 @@
       },
       getFilterValues: function getFilterValues() {
         var filter = {};
-        $(selgridid + 'thead th input[type="text"').each(function (idx, elem) {
-          var val = $(elem).val().trim();
-          if (val) {
-            filter[elem.id] = val;
-          }
-        });
+        $(selgridid + 'thead th input[type="text"')
+          .filter(function (idx, elem) {
+            return $(elem).val().trim() !== '';
+          })
+          .each(function (idx, elem) {
+            filter[elem.id] = $(elem).val().trim();
+          });
         return filter;
       },
       setFilterValues: function setFilterValues(filter) {
@@ -478,13 +484,13 @@
     },
     'en': {
       '(gefiltert von <%=len%> Eintr\u00e4gen)':
-         '(filters from <%=len%> entries)',
+        '(filters from <%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>':
-         '<%=start%> to <%=end%> of <%=count%> entries <%= filtered %>',
+        '<%=start%> to <%=end%> of <%=count%> entries <%= filtered %>',
       'Anpassen':
-         'Configuration',
+        'Configuration',
       'Abbrechen':
-         'Cancel'
+        'Cancel'
     }
   };
 

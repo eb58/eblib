@@ -25,6 +25,16 @@
 
       <script>
          'use strict';
+         $.extend($.fn.ebtable.sortformats, {
+            'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
+               var flgs = '!*pfgksc';
+               var s = '';
+               for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
+                  s += (data & j) ? flgs[i] : '';
+               }
+               return s;
+            },
+         });
          var grid;
 
          var idxWid = 4;
@@ -102,7 +112,7 @@
             },
             renderFlags: function (data, row, type) {
                if (type === 'filter') {// || type === 'display') 
-                  return grid.sortformats.flags(data);
+                  return $.fn.ebtable.sortformats.flags(data);
                }
                var imgmap = [
                   {key: '!', id: 1,   img: 'important.gif', alt: 'Eilauftrag'},

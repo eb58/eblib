@@ -289,14 +289,16 @@
     function filterData() {
       var filters = [];
       $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
-        var val = $(o).val();
-        var vals = val.split(',');
-        _.each(vals, function (v) {
-          var colname = $(o).attr('id');
-          var col = util.indexOfCol(colname);
-          var ren = util.getRender(colname);
-          filters.push({col: col, searchtext: $.trim(v), render: ren});
-        });
+        var val = $(o).val().trim();
+        if (val) {
+          var vals = val.split(',');
+          _.each(vals, function (v) {
+            var colname = $(o).attr('id');
+            var col = util.indexOfCol(colname);
+            var ren = util.getRender(colname);
+            filters.push({col: col, searchtext: $.trim(v), render: ren});
+          });
+        }
       });
       tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
       tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));

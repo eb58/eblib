@@ -33,7 +33,7 @@
                   s += (data & j) ? flgs[i] : '';
                }
                return s;
-            },
+            }
          });
          var grid;
 
@@ -196,7 +196,7 @@
                {name: "StatusId", technical: true, invisible: true},
                {name: "Performer", technical: true, invisible: true},
                {name: "ChargeType", technical: true, invisible: true},
-               {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*PFGKSC'},
+               {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte: !*PFGKSC; mehrere Werte durch Komma trennen.'},
                {name: "Frist", render: renderer.renderFrist},
                {name: "Status"},
                {name: "Kürzel"},

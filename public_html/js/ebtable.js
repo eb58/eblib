@@ -8,7 +8,7 @@
       var translation = $.fn.ebtable.lang[opts.lang || 'de'][str];
       return translation || str;
     };
-    var ctrlHeight = '23px';
+    var ctrlHeight = '24px';
     var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid;
     var util = {
       indexOfCol: function indexOfCol(colname) {
@@ -280,8 +280,8 @@
       //adjust();
       //$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
       //$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
-      //$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
-      //$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
+      $(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
+      $(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
     }
 
 // ##############################################################################
@@ -305,7 +305,7 @@
     }
 
     function redraw(pageCur, withHeader) {
-      $(selgridid + '#infoCtrl').html(infoCtrl());
+      $(selgridid + '#ctrlInfo').html(infoCtrl());
       $(selgridid + '#data tbody').html(tableData(pageCur));
       $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
       if (withHeader) {
@@ -313,7 +313,7 @@
         $(selgridid + 'thead th:gt(0)').on('click', sorting);
         $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
-      //adjustLayout();
+      adjustLayout();
     }
 
     // ##############################################################################
@@ -325,21 +325,21 @@
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template(
         "<div class='ebtable'>\n\
-          <div class='ctrl'>\n\
-             <div style='float: left;' ><%= selectLen  %></div>\n\
-             <div style='float: left;' ><%= configBtn  %></div>\n\
-             <div style='float: right;'><%= browseBtns %></div>\n\
-          </div>\n\
+          <table class='ctrl'>\n\
+            <th id='ctrlLength'><%= selectLen  %></th>\n\
+            <th id='ctrlConfig'><%= configBtn  %></th>\n\
+            <th id='ctrlPage1' ><%= browseBtns %></th>\n\
+          </table>\n\
           <div style='overflow:auto; max-height:<%= bodyHeight %>px;'>\n\
-             <table id='data'>\n\
-                <thead><tr><%= head %></tr></thead>\n\
-                <tbody><%= data %></tbody>\n\
-             </table>\n\
+            <table id='data'>\n\
+              <thead><tr><%= head %></tr></thead>\n\
+              <tbody><%= data %></tbody>\n\
+            </table>\n\
           </div>\n\
-          <div class='ctrl'>\n\
-             <div id='infoCtrl'  style='float: left;' ><%= infoCtrl %></div>\n\
-             <div style='float: right;'><%= browseBtns %></div>\n\
-          </div>\n\
+          <table class='ctrl'>\n\
+            <th id='ctrlInfo'><%= info %></th>\n\
+            <th id='ctrlPage2'><%= browseBtns %></th>\n\
+          </table>\n\
         </div>"
         );
 
@@ -349,10 +349,10 @@
         selectLen: selectLenCtrl(),
         configBtn: configBtn(),
         browseBtns: pageBrowseCtrl(),
-        infoCtrl: infoCtrl(),
+        info: infoCtrl(),
         bodyHeight: myopts.bodyHeight
       }));
-      //adjustLayout();
+      adjustLayout();
     }
 
     initGrid(this);
@@ -361,7 +361,7 @@
     // Actions
     // #################################################################
 
-    $(selgridid + '#lenctrl').css('height', ctrlHeight).selectmenu({change: function (event, data) {
+    $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
         console.log('change rowsPerPage', event, data.item.value);
         myopts.rowsPerPage = Number(data.item.value);
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -370,6 +370,7 @@
         myopts.saveState();
       }
     });
+    $(selgridid + '#lenctrl~span').css('height','21px');
     $(selgridid + '.firstBtn').css('height', ctrlHeight).button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);

@@ -13,3 +13,7 @@
   text-align: left;
   font-size: 10px;
 }
+
+.selectable { list-style-type: none; padding: 0px; }
+.selectable li.selected  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
+.selectable li.notselected{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }

@@ -1,5 +1,5 @@
 test('testset0 QUnit setup ok!', function () {
-   ok(true);
+  ok(true);
 //   function isEven(val) {return val % 2 === 0;   }
 //   ok(isEven(0), 'Zero is an even number');
 //   ok(isEven(2), 'So is two');
@@ -9,25 +9,25 @@ test('testset0 QUnit setup ok!', function () {
 });
 
 var switchProto = {
-   isOn: function isOn() {
-      return this.state;
-   },
-   toggle: function toggle() {
-      this.state = !this.state;
-      return this;
-   },
-   state: false
+  isOn: function isOn() {
+    return this.state;
+  },
+  toggle: function toggle() {
+    this.state = !this.state;
+    return this;
+  },
+  state: false
 };
 var switch1 = Object.create(switchProto);
 var switch2 = Object.create(switchProto);
 
 test('Object.create', function () {
-   ok(switch1.toggle().isOn(),
-      '.toggle() works.'
-      );
-   ok(!switch2.isOn(),
-      'instance safe.'
-      );
+  ok(switch1.toggle().isOn(),
+    '.toggle() works.'
+    );
+  ok(!switch2.isOn(),
+    'instance safe.'
+    );
 });
 
 

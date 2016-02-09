@@ -44,11 +44,11 @@
   padding: 5px 2px 5px 2px;
 }
 .ebtable #data td.group{
-   background-color: #bfbfbf;
+  background-color: #bfbfbf;
 }
 .ebtable #data td.groupheader{
   background-color: #a3a3a3;
-  
+
 }
 .ebtable #data input[type=checkbox] {
   width: 15px;

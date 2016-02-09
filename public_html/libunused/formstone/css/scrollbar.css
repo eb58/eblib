@@ -1,71 +1,71 @@
 /*! formstone v0.8.35 [scrollbar.css] 2015-12-28 | MIT License | formstone.it */
 
 /**
-	 * @class
-	 * @name .fs-scrollbar-element
-	 * @type element
-	 * @description Target elmement
-	 */
+   * @class
+   * @name .fs-scrollbar-element
+   * @type element
+   * @description Target elmement
+   */
 /**
-	 * @class
-	 * @name .fs-scrollbar
-	 * @type element
-	 * @description Base widget class
-	 */
+   * @class
+   * @name .fs-scrollbar
+   * @type element
+   * @description Base widget class
+   */
 /**
-	 * @class
-	 * @name .fs-scrollbar.fs-scrollbar-horizontal
-	 * @type modifier
-	 * @description Indicates horizontal scrolling
-	 */
+   * @class
+   * @name .fs-scrollbar.fs-scrollbar-horizontal
+   * @type modifier
+   * @description Indicates horizontal scrolling
+   */
 /**
-	 * @class
-	 * @name .fs-scrollbar.fs-scrollbar-setup
-	 * @type modifier
-	 * @description Indicates setup state
-	 */
+   * @class
+   * @name .fs-scrollbar.fs-scrollbar-setup
+   * @type modifier
+   * @description Indicates setup state
+   */
 /**
-	 * @class
-	 * @name .fs-scrollbar.fs-scrollbar-active
-	 * @type modifier
-	 * @description Indicates active state
-	 */
+   * @class
+   * @name .fs-scrollbar.fs-scrollbar-active
+   * @type modifier
+   * @description Indicates active state
+   */
 .fs-scrollbar {
   overflow: hidden;
   overflow-x: hidden;
   overflow-y: hidden;
   position: relative;
   /**
-		 * @class
-		 * @name .fs-scrollbar-content
-		 * @type element
-		 * @description Scrolling content
-		 */
+     * @class
+     * @name .fs-scrollbar-content
+     * @type element
+     * @description Scrolling content
+     */
   /**
-		 * @class
-		 * @name .fs-scrollbar-bar
-		 * @type element
-		 * @description Scrollbar container
-		 */
+     * @class
+     * @name .fs-scrollbar-bar
+     * @type element
+     * @description Scrollbar container
+     */
   /**
-		 * @class
-		 * @name .fs-scrollbar-track
-		 * @type element
-		 * @description Scrollbar track container
-		 */
+     * @class
+     * @name .fs-scrollbar-track
+     * @type element
+     * @description Scrollbar track container
+     */
   /**
-		 * @class
-		 * @name .fs-scrollbar-handle
-		 * @type element
-		 * @description Scrollbar handle
-		 */
+     * @class
+     * @name .fs-scrollbar-handle
+     * @type element
+     * @description Scrollbar handle
+     */
 }
 .fs-scrollbar,
 .fs-scrollbar * {
   -webkit-user-select: none !important;
-     -moz-user-select: none !important;
-      -ms-user-select: none !important;
-          user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
 }
 .fs-scrollbar,
 .fs-scrollbar-content,

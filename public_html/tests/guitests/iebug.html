@@ -5,51 +5,51 @@ To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
 <html>
-   <head>
-      <title>TODO supply a title</title>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
-      <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+  <head>
+    <title>TODO supply a title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
+    <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
 
-   </head>
-   <body>
-      <div id="iddiv"></div>
-      <button id="btnA">A</button>
-      <button id="btnB">B</button>
-      <script>
-         //var keycode = event.keyCode || event.which;
-         var n = 0;
+  </head>
+  <body>
+    <div id="iddiv"></div>
+    <button id="btnA">A</button>
+    <button id="btnB">B</button>
+    <script>
+      //var keycode = event.keyCode || event.which;
+      var n = 0;
 
-         var filtering = function f(event) {
-            console.log('filtering', event, event.which);
-            if (event.which === 13) {
-               //event.preventDefault();
-               //event.stopPropagation();
-            }
-         };
+      var filtering = function f(event) {
+        console.log('filtering', event, event.which);
+        if (event.which === 13) {
+          //event.preventDefault();
+          //event.stopPropagation();
+        }
+      };
 
-         var reloading = function f(event) {
-            //console.log('f2', event, keycode, $('#idtxt').val());
-            if (event.which === 13) {
-               console.log('reloading', event, event.which);
-               createTextField('');
-               event.preventDefault();
-            }
-         };
+      var reloading = function f(event) {
+        //console.log('f2', event, keycode, $('#idtxt').val());
+        if (event.which === 13) {
+          console.log('reloading', event, event.which);
+          createTextField('');
+          event.preventDefault();
+        }
+      };
 
-         function createTextField() {
-            $('#iddiv').html('<input type="text" id="idtxt" value="' + n++ + '" />');
-            $('#idtxt').on('keypress', reloading).on('keyup', filtering).focus();
-            //$('#idtxt').on('keyup', fkeyup).focus();
-         }
+      function createTextField() {
+        $('#iddiv').html('<input type="text" id="idtxt" value="' + n++ + '" />');
+        $('#idtxt').on('keypress', reloading).on('keyup', filtering).focus();
+        //$('#idtxt').on('keyup', fkeyup).focus();
+      }
 
-         $(document).ready(function () {
-            $('#btnA').button().on('click', function () {
-               console.log('Button A pressed');
-            });
-            createTextField();
-         });
-      </script>
-   </body>
+      $(document).ready(function () {
+        $('#btnA').button().on('click', function () {
+          console.log('Button A pressed');
+        });
+        createTextField();
+      });
+    </script>
+  </body>
 </html>

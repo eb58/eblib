@@ -33,15 +33,19 @@
     <script src="/js/ebtable.js"></script>
     <script src="/data/infoData.js"></script>
     <script>
-      var atblData = mx(_.map(adata.workorderComments, function (o) {return _.values(o);})).cols([2, 4, 5]);
-      var itblData = mx(_.map(idata.insurantComments,  function (o) {return _.values(o);})).cols([2, 4, 5]);
+      var atblData = mx(_.map(adata.workorderComments, function (o) {
+        return _.values(o);
+      })).cols([2, 4, 5]);
+      var itblData = mx(_.map(idata.insurantComments, function (o) {
+        return _.values(o);
+      })).cols([2, 4, 5]);
 
       $(function () {
         var opts1 = {
           columns: [{name: "Datum"}, {name: "Verfasser"}, {name: "Kommentar"}],
           bodyHeight: 200,
           rowsPerPage: 100,
-          flags: {filter: false, config: false }
+          flags: {filter: false, config: false}
         };
         $('#workorderComments1').ebtable(opts1, atblData);
         $('#workorderComments1 .ctrl').hide();
@@ -49,17 +53,17 @@
         $('#resulttext').text(adata.resulttext);
 
         $("#dlgAuftragsInfo").dialog({
-            title: 'Info Auftrag - Fritzer, Ieva, 07.05.1974 (50000005988)',
-            autoOpen: false,
-            height: 600,
-            width: 600,
-          });
+          title: 'Info Auftrag - Fritzer, Ieva, 07.05.1974 (50000005988)',
+          autoOpen: false,
+          height: 600,
+          width: 600,
+        });
 
         var opts2 = {
           columns: [{name: "Datum"}, {name: "Verfasser"}, {name: "Kommentar"}],
           bodyHeight: 200,
           rowsPerPage: 100,
-          flags: {filter: false, config: false }
+          flags: {filter: false, config: false}
         };
         $('#workorderComments2').ebtable(opts2, itblData);
         $('#workorderComments2 .ctrl').hide();
@@ -87,7 +91,7 @@
       <h1>Ergebnis</h1>
       <div id="resulttext"> </div>
     </div>
-    
+
     <div id="dlgVersichertenInfo">
       <div id="workorderComments2"></div>
     </div>

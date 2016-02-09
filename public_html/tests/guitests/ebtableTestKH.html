@@ -1,234 +1,237 @@
 <!DOCTYPE html>
 <html>
-   <head>
-      <title>Beispiel 4 Nur ein TEST</title>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+  <head>
+    <title>Beispiel 4 Nur ein TEST</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
 
-      <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
-      <link rel="stylesheet" href="/css/ebtable.css">
-      <style>
-         * {
-            font-family:Arial;
-            color: black;
-            font-size: 10px;
-         }
-      </style>
+    <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
+    <link rel="stylesheet" href="/css/ebtable.css">
+    <style>
+      * {
+        font-family:Arial;
+        color: black;
+        font-size: 10px;
+      }
+    </style>
 
-      <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
-      <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
-      <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
-      <script src="/js/mx.js"></script>
-      <script src="/js/ebtable.js"></script>
-      <script src="/data/ebTableTestDataKhbasket.js"></script>
+    <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
+    <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
+    <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+    <script src="/js/mx.js"></script>
+    <script src="/js/ebtable.js"></script>
+    <script src="/data/ebTableTestDataKhbasket.js"></script>
 
-      <script>
-         'use strict';
-         $.extend($.fn.ebtable.sortformats, {
-            'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*P'
-               var flgs = '!*pfgksc';
-               var s = '';
-               for (var i = 0, j = 1; i < flgs.length; i++, j *= 2) {
-                  s += (data & j) ? flgs[i] : '';
-               }
-               return s;
-            }
-         });
-         var grid;
+    <script>
+      'use strict';
+      var flagsdef = [
+        {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
+        {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
+        {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
+        {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
+        {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
+        {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
+        {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
+        {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
+      ];
+      var flags = _.pluck(flagsdef,'key').join('');
 
-         var idxWid = 4;
-         var idxPid = 5;
-         var idxPer = 6;
-         var idxCty = 7;
-         var idxFlg = 8;
-         var idxFrs = 9;
-         var idxWnm = 12;
 
-         function preprocessData(data) {
-            // 0                      1     2        3             4                  5         6          7        8      9                    10       11               12
-            // charge                 #  chargeid  xxx  workorderid     ProcessStatusId Performer chargeType (X)flags  frist                status   kürzel   Auftrag/Charge 
-            // ["C",                  3, 7971,        , 50000005209,                  ,         ,      'DIS',       4,    '',     "Zur Disposition",     '', "AAAA", ... ]
-            // ["W",                  1, 7971,        , 50000005209,                  ,         ,      'BGL',       0, -1247, "Zur Sachbearbeitung",     '', "Schwarz..", ...]
-            // ... 
-            var groupsdata = {};
-            for (var r = 0; r < data.length; r++) {
-               var row = data[r];
-               row.splice(3, 0, 'XXX');
+      $.extend($.fn.ebtable.sortformats, {
+        'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*p'
+          return _.reduce(Number(data).toString(2).split('').reverse(), function (acc, o, i) {
+            return acc += (o === '1' && flags[i] ? flags[i] : '');
+          }, '');
+        }
+      });
+      var grid;
 
-               var chargeId = row[2];
-               if (chargeId < 0)
-                  continue;
-               var wid = row[idxWid];
-               var chargeName = row[idxWnm];
-               if (row[0] === 'C') {
-                  groupsdata[chargeId] = {
-                     groupname: chargeName, isOpen: false, isSelected: false,
-                     fristmin: row[idxFrs], fristmax: row[idxFrs],
-                     wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
-                     pids: [], // Liste ProcessStatusIds: [50000004850_524288,50000005018_524288,50000005204_1048576]
-                     pers: [], // Liste preformers: 50000004850_50000000000015,50000005018_50000000000015,50000005204_50000000000015
-                     spc: 0   //  Mindestens ein Auftrag in der Charge ist 'special'
-                  };
-               } else if (row[0] === 'W' && chargeId >= 0) {
-                  var g = groupsdata[chargeId];
-                  if (row[idxFrs] < g.fristmin)
-                     g.fristmin = row[idxFrs];
-                  if (row[idxFrs] > g.fristmax)
-                     g.fristmax = row[idxFrs];
-                  g.wids.push(wid);
-                  g.pids.push(wid + '_' + row[idxPid]);
-                  g.pers.push(wid + '_' + row[idxPer]);
-                  g.spc = g.spc || (row[idxFlg] & 2);
-               }
-            }
-            console.log('Grouping', groupsdata);
-            data.groupsdata = groupsdata;
-         }
+      var idxWid = 4;
+      var idxPid = 5;
+      var idxPer = 6;
+      var idxCty = 7;
+      var idxFlg = 8;
+      var idxFrs = 9;
+      var idxWnm = 12;
 
-         var renderer = {
-            renderAuftrag: function (data, row, type) {
-               if ( type === 'filter'){
-                 return row[3] + data;
-               }
-               var sessionId = '<%=session.getId()%>';
-               var chargeId = row[2];
-               var name = data.substring(0,30).replace(/ /g, '\u00a0') + data.substring(30);
-               if (row[0] !== 'C') {
-                  var t = _.template(
-                     '<input name="name_<\%=wid%>" value="<\%=workorderName%>" hidden="true"/>\
-                     <a href="/ISmed/showOrder.do;jsessionid=<\%=sid%>?src=khbasket2&workorderid=<\%=wid%>" title="<\%=wid%>"><\%=workorderName%></a>');
-                  return t({chd: data, wid: row[idxWnm], workorderName:name, sid: sessionId});
-               }
+      function preprocessData(data) {
+        // 0                      1     2        3             4                  5         6          7        8      9                    10       11               12
+        // charge                 #  chargeid  xxx  workorderid     ProcessStatusId Performer chargeType (X)flags  frist                status   kürzel   Auftrag/Charge 
+        // ["C",                  3, 7971,        , 50000005209,                  ,         ,      'DIS',       4,    '',     "Zur Disposition",     '', "AAAA", ... ]
+        // ["W",                  1, 7971,        , 50000005209,                  ,         ,      'BGL',       0, -1247, "Zur Sachbearbeitung",     '', "Schwarz..", ...]
+        // ... 
+        var groupsdata = {};
+        for (var r = 0; r < data.length; r++) {
+          var row = data[r];
+          row.splice(3, 0, 'XXX');
 
-               var isOpen = grid ? grid.groupIsOpen(chargeId) : false;
-               var imgsrc = isOpen ? '/images/details_opened.png' : '/images/details_closed.png';
-               var auftrag = row[1] === 1 ? 'Auftrag' : 'Aufträge';
-               var t = '\
-               <img src="<\%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<\%=chargeId%>\')"/>\
-               <b>&nbsp;<\%=chargeName%></b>&nbsp;(<\%=cnt%>&nbsp;<\%=auftrag%>)';
-               var link = _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: name, cnt: row[1], auftrag: auftrag});
-               return row[0] === 'C' ? link : data;
-            },
-            renderFlags: function (data, row, type) {
-               if (type === 'filter') {// || type === 'display') 
-                  return $.fn.ebtable.sortformats.flags(data);
-               }
-               var imgmap = [
-                  {key: '!', id: 1,   img: 'important.gif', alt: 'Eilauftrag'},
-                  {key: '*', id: 2,   img: 'blackstar.gif', alt: 'Spezialfall'},
-                  {key: 'P', id: 4,   img: 'problem.gif', alt: 'Problemfall'},
-                  {key: 'F', id: 8,   img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
-                  {key: 'G', id: 16,  img: 'isPrg.gif', alt: 'Prg'},
-                  {key: 'K', id: 32,  img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
-                  {key: 'S', id: 64,  img: 'sperre.gif', alt: 'Sperre'},
-                  {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
-               ];
-               var s = '';
-               for (var i = 0; i < imgmap.length; i++) {
-                  var o = imgmap[i];
-                  if (data & o.id)
-                     s += "<img src='/images/" + o.img + "' alt='" + o.alt + "' title='" + o.alt + "' />";
-               }
-               return s;
-            },
-            renderFrist: function (data, row, type) {
-               //var chargeId = _.isNumber(row[2]) ? row[2].toString() : row[2];
-               //var g = grid.getGroup(chargeId);
-               //var frist = g ? g.fristmin : data;
+          var chargeId = row[2];
+          if (chargeId < 0)
+            continue;
+          var wid = row[idxWid];
+          var chargeName = row[idxWnm];
+          if (row[0] === 'C') {
+            groupsdata[chargeId] = {
+              groupname: chargeName, isOpen: false, isSelected: false,
+              fristmin: row[idxFrs], fristmax: row[idxFrs],
+              wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
+              pids: [], // Liste ProcessStatusIds: [50000004850_524288,50000005018_524288,50000005204_1048576]
+              pers: [], // Liste preformers: 50000004850_50000000000015,50000005018_50000000000015,50000005204_50000000000015
+              spc: 0   //  Mindestens ein Auftrag in der Charge ist 'special'
+            };
+          } else if (row[0] === 'W' && chargeId >= 0) {
+            var g = groupsdata[chargeId];
+            if (row[idxFrs] < g.fristmin)
+              g.fristmin = row[idxFrs];
+            if (row[idxFrs] > g.fristmax)
+              g.fristmax = row[idxFrs];
+            g.wids.push(wid);
+            g.pids.push(wid + '_' + row[idxPid]);
+            g.pers.push(wid + '_' + row[idxPer]);
+            g.spc = g.spc || (row[idxFlg] & 2);
+          }
+        }
+        console.log('Grouping', groupsdata);
+        data.groupsdata = groupsdata;
+      }
+
+      var renderer = {
+        renderAuftrag: function (data, row, type) {
+          if (type === 'filter') {
+            return row[3] + data;
+          }
+          var sessionId = '<%=session.getId()%>';
+          var chargeId = row[2];
+          var name = data.substring(0, 30).replace(/ /g, '\u00a0') + data.substring(30);
+          if (row[0] !== 'C') {
+            var t = _.template(
+              '<input name="name_<\%=wid%>" value="<\%=workorderName%>" hidden="true"/>\
+                   <a href="/ISmed/showOrder.do;jsessionid=<\%=sid%>?src=khbasket2&workorderid=<\%=wid%>" title="<\%=wid%>"><\%=workorderName%></a>');
+            return t({chd: data, wid: row[idxWnm], workorderName: name, sid: sessionId});
+          }
+
+          var isOpen = grid ? grid.groupIsOpen(chargeId) : false;
+          var imgsrc = isOpen ? '/images/details_opened.png' : '/images/details_closed.png';
+          var auftrag = row[1] === 1 ? 'Auftrag' : 'Aufträge';
+          var t = '\
+             <img src="<\%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<\%=chargeId%>\')"/>\
+             <b>&nbsp;<\%=chargeName%></b>&nbsp;(<\%=cnt%>&nbsp;<\%=auftrag%>)';
+          var link = _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: name, cnt: row[1], auftrag: auftrag});
+          return row[0] === 'C' ? link : data;
+        },
+        renderFlags: function (data, row, type) {
+          if (type === 'filter') {// || type === 'display') 
+            return $.fn.ebtable.sortformats.flags(data);
+          }
+          return _.reduce(flagsdef, function (acc, o) {
+            return acc += (data & o.id) ? _.template("<img src='/images/<\%=img%>' alt='<\%=alt%>' title='<\%=alt%>' height='10px'/>")({img: o.img, alt: o.alt}) : '';
+          }, '');
+        },
+        renderFrist: function (data, row, type) {
+          //var chargeId = _.isNumber(row[2]) ? row[2].toString() : row[2];
+          //var g = grid.getGroup(chargeId);
+          //var frist = g ? g.fristmin : data;
 //               if ( type === 'filter') {// || type === 'display') {
 //                  return sprintf("%+05d#%+08s", frist, data);
 //               }
-               return data;// sprintf("%+05d#%+08d", frist, data);// data;
-            },
-            renderDTA: function (data, row) {
-               return data;//.replace(/,/g, ', ');
-            },
-            renderSelect: function (origData, row, type) {
-               var ret = '';
-               var cid = row[2] > 0 ? row[2] : null; // chargeid
-               var wid = row[idxWid]; // workorderid
-               var cty = row[idxCty]; // chargeType
-               if (row[0] === 'C') {
-                  var chargename = row[idxWnm];
-                  var g = origData.groupsdata[cid];
-                  var wids = g.wids.join(',');
-                  var pids = g.pids.join(',');
-                  var pers = g.pers.join(',');
-                  var spc = g.spc + '';
-                  var t = _.template("\
-                     <input \
-                       title='charge_<\%=wids%>'\
-                       type='checkbox'\
-                       id='cb_<\%=cid%>' \
-                       name='cb_<\%=name%>' \
-                       value='<\%=cid%>'\
-                       specialcase='<\%=spc%>'\
-                       onclick=\"selectCharge('<\%=cid%>', '<\%=wids%>', '<\%=pids%>', '<\%=pers%>','<\%=spc%>', '<\%=cty%>' );\"\
+          return data;// sprintf("%+05d#%+08d", frist, data);// data;
+        },
+        renderDTA: function (data, row) {
+          return data;//.replace(/,/g, ', ');
+        },
+        renderSelect: function (origData, row, type) {
+          var ret = '';
+          var cid = row[2] > 0 ? row[2] : null; // chargeid
+          var wid = row[idxWid]; // workorderid
+          var cty = row[idxCty]; // chargeType
+          if (row[0] === 'C') {
+            var chargename = row[idxWnm];
+            var g = origData.groupsdata[cid];
+            var wids = g.wids.join(',');
+            var pids = g.pids.join(',');
+            var pers = g.pers.join(',');
+            var spc = g.spc + '';
+            var t = _.template("\
+                   <input \
+                     title='charge_<\%=wids%>'\
+                     type='checkbox'\
+                     id='cb_<\%=cid%>' \
+                     name='cb_<\%=name%>' \
+                     value='<\%=cid%>'\
+                     specialcase='<\%=spc%>'\
+                     onclick=\"selectCharge('<\%=cid%>', '<\%=wids%>', '<\%=pids%>', '<\%=pers%>','<\%=spc%>', '<\%=cty%>' );\"\
+                 />");
+            ret = t({name: chargename, cid: cid, wids: wids, pids: pids, pers: pers, spc: spc, cty: cty});
+          } else {
+            var pid = row[idxPid]; // processstatusid
+            var per = row[idxPer]; // performer
+            var spc = row[idxFlg] & 2; // specialcase (from flags)
+            var t = _.template("\
+                   <input \
+                     type=checkbox\
+                     id='cb_<\%=wid%>'\
+                     name='cb_<\%=wid%>'\
+                     value='<\%=wid%>'\
+                     specialcase='<\%=spc%>'\
+                     onclick=\"selectOrder('<\%=wid%>','<\%=wid%>_<\%=pid%>','<\%=wid%>_<\%=per%>',null,'<\%=spc%>',null);\"\
                    />");
-                  ret = t({name: chargename, cid: cid, wids: wids, pids: pids, pers: pers, spc: spc, cty: cty});
-               } else {
-                  var pid = row[idxPid]; // processstatusid
-                  var per = row[idxPer]; // performer
-                  var spc = row[idxFlg] & 2; // specialcase (from flags)
-                  var t = _.template("\
-                     <input \
-                       type=checkbox\
-                       id='cb_<\%=wid%>'\
-                       name='cb_<\%=wid%>'\
-                       value='<\%=wid%>'\
-                       specialcase='<\%=spc%>'\
-                       onclick=\"selectOrder('<\%=wid%>','<\%=wid%>_<\%=pid%>','<\%=wid%>_<\%=per%>',null,'<\%=spc%>',null);\"\
-                     />");
-                  ret = t({wid: wid, pid: pid, per: per, cid: cid, spc: spc, cty: cty});
-               }
-               return ret;
-            }
-         };
+            ret = t({wid: wid, pid: pid, per: per, cid: cid, spc: spc, cty: cty});
+          }
+          return ret;
+        }
+      };
 
-         var opts = {
-            columns: [
-               {name: "Grouping", invisible: true, technical: true, order: 'asc-fix'},
-               {name: "GroupCnt", invisible: true, technical: true},
-               {name: "GroupIds", invisible: true, technical: true},
-               {name: "GroupSort", invisible: true, technical: true},
-               {name: "WorkorderId", technical: true, invisible: true},
-               {name: "StatusId", technical: true, invisible: true},
-               {name: "Performer", technical: true, invisible: true},
-               {name: "ChargeType", technical: true, invisible: true},
-               {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte: !*PFGKSC; mehrere Werte durch Komma trennen.'},
-               {name: "Frist", render: renderer.renderFrist},
-               {name: "Status"},
-               {name: "Kürzel"},
-               {name: "Auftrag", render: renderer.renderAuftrag, sortmaster: [{col: 3}, {col: 0}], width:200},
-               {name: "Krankenhaus"},
-               {name: "Abteilung"},
-               {name: "Fachlichkeit"},
-               {name: "Besonderheit"},
-               {name: "Krankenkasse"},
-               {name: "Einlieferung", sortformat: 'date-de'},
-               {name: "Entlassung", sortformat: 'date-de'},
-               {name: "DRG"},
-               {name: "GArt"},
-               {name: "Produkt"},
-               {name: "FAG"},
-               {name: "DTANummern", render: renderer.renderDTA},
-               {name: "Vorg.VGA"},
-               {name: "KHFrist"}
-            ],
-            selection: {render: renderer.renderSelect},
-            sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
-            groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idxWnm, grouphead: 'C', groupelem: 'W'}
+      var opts = {
+        columns: [
+          {name: "Grouping", invisible: true, technical: true, order: 'asc-fix'},
+          {name: "GroupCnt", invisible: true, technical: true},
+          {name: "GroupIds", invisible: true, technical: true},
+          {name: "GroupSort", invisible: true, technical: true},
+          {name: "WorkorderId", technical: true, invisible: true},
+          {name: "StatusId", technical: true, invisible: true},
+          {name: "Performer", technical: true, invisible: true},
+          {name: "ChargeType", technical: true, invisible: true},
+          {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte: !*pfgksc -- mehrere Werte durch Komma trennen.'},
+          {name: "Frist", render: renderer.renderFrist},
+          {name: "Status"},
+          {name: "Kürzel"},
+          {name: "Auftrag", render: renderer.renderAuftrag, sortmaster: [{col: 3}, {col: 0}], width: 200},
+          {name: "Krankenhaus"},
+          {name: "Abteilung"},
+          {name: "Fachlichkeit"},
+          {name: "Besonderheit"},
+          {name: "Krankenkasse"},
+          {name: "Einlieferung", sortformat: 'date-de'},
+          {name: "Entlassung", sortformat: 'date-de'},
+          {name: "DRG"},
+          {name: "GArt"},
+          {name: "Produkt"},
+          {name: "FAG"},
+          {name: "DTANummern", render: renderer.renderDTA},
+          {name: "Vorg.VGA"},
+          {name: "KHFrist"}
+        ],
+        selection: {render: renderer.renderSelect},
+        sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+        groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idxWnm, grouphead: 'C', groupelem: 'W'}
 
-         };
+      };
 
-         $().ready(function () {
-            preprocessData(basketTestdataKH);
-            grid = $('#grid').ebtable(opts, basketTestdataKH);
-         });
-      </script>
-   </head>
-   <body>
-      <div id="grid"></div>
-   </body>
+      $().ready(function () {
+        preprocessData(basketTestdataKH);
+        grid = $('#grid').ebtable(opts, basketTestdataKH);
+      });
+    </script>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <th>AAAAAAAAAAA</th>         
+        <th>BBBBBBB</th>
+        <th>CCCCCCC</th>
+      </tr>
+    </table>
+    <div id="grid"></div>
+  </body>
 </html>

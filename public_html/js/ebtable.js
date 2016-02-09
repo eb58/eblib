@@ -289,7 +289,7 @@
     function filterData() {
       var filters = [];
       $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
-        var val = $(o).val().trim();
+        var val = $(o).val().trim().replace(/\*/g,''); // ignore '*'
         if (val) {
           var vals = val.split(',');
           _.each(vals, function (v) {
@@ -370,7 +370,7 @@
         myopts.saveState();
       }
     });
-    $(selgridid + '#lenctrl~span').css('height','21px');
+    $(selgridid + '#lenctrl~span').css('height', '21px');
     $(selgridid + '.firstBtn').css('height', ctrlHeight).button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);

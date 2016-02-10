@@ -25,6 +25,9 @@
       getRender: function getRender(colname) {
         return _.findWhere(myopts.columns, {name: colname}).render;
       },
+      getMatch: function getMatch(colname) {
+        return _.findWhere(myopts.columns, {name: colname}).match;
+      },
       getVisibleCols: function getVisibleCols() {
         return _.filter(myopts.columns, function (o) {
           return !o.invisible;
@@ -289,14 +292,15 @@
     function filterData() {
       var filters = [];
       $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
-        var val = $(o).val().trim().replace(/\*/g,''); // ignore '*'
+        var val = $(o).val().trim();
         if (val) {
           var vals = val.split(',');
           _.each(vals, function (v) {
             var colname = $(o).attr('id');
             var col = util.indexOfCol(colname);
             var ren = util.getRender(colname);
-            filters.push({col: col, searchtext: $.trim(v), render: ren});
+            var mat = util.getMatch(colname);
+            filters.push({col: col, searchtext: $.trim(v), render: ren, match: mat});
           });
         }
       });

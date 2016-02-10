@@ -37,23 +37,29 @@
       ];
       var flags = _.pluck(flagsdef,'key').join('');
 
-
-      $.extend($.fn.ebtable.sortformats, {
-        'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*p'
-          return _.reduce(Number(data).toString(2).split('').reverse(), function (acc, o, i) {
+      var flagutils = {
+        fromBitNumber: function (bits) { // 5 (101)  -->  '!P' # 7 (111) -> '!*p' # 8 (1000) -> F
+          return _.reduce(Number(bits).toString(2).split('').reverse(), function (acc, o, i) {
             return acc += (o === '1' && flags[i] ? flags[i] : '');
           }, '');
+        },
+        toBitNumber: function (str) { // '!P' -> 5 (101), '!PG' -> 21
+          return _.reduce(str.toUpperCase().split(''), function (acc, c) {
+            var x = _.findWhere(flagsdef, {key: c});
+            return acc += x ? x.id : 0;
+          }, 0);
+        },
+        match: function (cellData, search) {
+          return ! (flagutils.toBitNumber(search) & (~flagutils.toBitNumber(cellData)));
         }
+      };
+
+      $.extend($.fn.ebtable.sortformats, {
+        'flags': flagutils.fromBitNumber
       });
       var grid;
 
-      var idxWid = 4;
-      var idxPid = 5;
-      var idxPer = 6;
-      var idxCty = 7;
-      var idxFlg = 8;
-      var idxFrs = 9;
-      var idxWnm = 12;
+      var idx = { gtyp:0, gcnt: 1, gid:2, gss:3, wid:4, pid:5, per:6, cty:7, flg:8, frs: 9, wnm:12 };
 
       function preprocessData(data) {
         // 0                      1     2        3             4                  5         6          7        8      9                    10       11               12
@@ -69,12 +75,12 @@
           var chargeId = row[2];
           if (chargeId < 0)
             continue;
-          var wid = row[idxWid];
-          var chargeName = row[idxWnm];
+          var wid = row[idx.wid];
+          var chargeName = row[idx.wnm];
           if (row[0] === 'C') {
             groupsdata[chargeId] = {
               groupname: chargeName, isOpen: false, isSelected: false,
-              fristmin: row[idxFrs], fristmax: row[idxFrs],
+              fristmin: row[idx.frs], fristmax: row[idx.frs],
               wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
               pids: [], // Liste ProcessStatusIds: [50000004850_524288,50000005018_524288,50000005204_1048576]
               pers: [], // Liste preformers: 50000004850_50000000000015,50000005018_50000000000015,50000005204_50000000000015
@@ -82,14 +88,14 @@
             };
           } else if (row[0] === 'W' && chargeId >= 0) {
             var g = groupsdata[chargeId];
-            if (row[idxFrs] < g.fristmin)
-              g.fristmin = row[idxFrs];
-            if (row[idxFrs] > g.fristmax)
-              g.fristmax = row[idxFrs];
+            if (row[idx.frs] < g.fristmin)
+              g.fristmin = row[idx.frs];
+            if (row[idx.frs] > g.fristmax)
+              g.fristmax = row[idx.frs];
             g.wids.push(wid);
-            g.pids.push(wid + '_' + row[idxPid]);
-            g.pers.push(wid + '_' + row[idxPer]);
-            g.spc = g.spc || (row[idxFlg] & 2);
+            g.pids.push(wid + '_' + row[idx.pid]);
+            g.pers.push(wid + '_' + row[idx.per]);
+            g.spc = g.spc || (row[idx.flg] & 2);
           }
         }
         console.log('Grouping', groupsdata);
@@ -108,7 +114,7 @@
             var t = _.template(
               '<input name="name_<\%=wid%>" value="<\%=workorderName%>" hidden="true"/>\
                    <a href="/ISmed/showOrder.do;jsessionid=<\%=sid%>?src=khbasket2&workorderid=<\%=wid%>" title="<\%=wid%>"><\%=workorderName%></a>');
-            return t({chd: data, wid: row[idxWnm], workorderName: name, sid: sessionId});
+            return t({chd: data, wid: row[idx.wnm], workorderName: name, sid: sessionId});
           }
 
           var isOpen = grid ? grid.groupIsOpen(chargeId) : false;
@@ -122,7 +128,7 @@
         },
         renderFlags: function (data, row, type) {
           if (type === 'filter') {// || type === 'display') 
-            return $.fn.ebtable.sortformats.flags(data);
+            return flagutils.fromBitNumber(data);
           }
           return _.reduce(flagsdef, function (acc, o) {
             return acc += (data & o.id) ? _.template("<img src='/images/<\%=img%>' alt='<\%=alt%>' title='<\%=alt%>' height='10px'/>")({img: o.img, alt: o.alt}) : '';
@@ -143,10 +149,10 @@
         renderSelect: function (origData, row, type) {
           var ret = '';
           var cid = row[2] > 0 ? row[2] : null; // chargeid
-          var wid = row[idxWid]; // workorderid
-          var cty = row[idxCty]; // chargeType
+          var wid = row[idx.wid]; // workorderid
+          var cty = row[idx.cty]; // chargeType
           if (row[0] === 'C') {
-            var chargename = row[idxWnm];
+            var chargename = row[idx.wnm];
             var g = origData.groupsdata[cid];
             var wids = g.wids.join(',');
             var pids = g.pids.join(',');
@@ -164,9 +170,9 @@
                  />");
             ret = t({name: chargename, cid: cid, wids: wids, pids: pids, pers: pers, spc: spc, cty: cty});
           } else {
-            var pid = row[idxPid]; // processstatusid
-            var per = row[idxPer]; // performer
-            var spc = row[idxFlg] & 2; // specialcase (from flags)
+            var pid = row[idx.pid]; // processstatusid
+            var per = row[idx.per]; // performer
+            var spc = row[idx.flg] & 2; // specialcase (from flags)
             var t = _.template("\
                    <input \
                      type=checkbox\
@@ -192,7 +198,7 @@
           {name: "StatusId", technical: true, invisible: true},
           {name: "Performer", technical: true, invisible: true},
           {name: "ChargeType", technical: true, invisible: true},
-          {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte: !*pfgksc -- mehrere Werte durch Komma trennen.'},
+          {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', match: flagutils.match, tooltip: 'Mögliche Werte: !*pfgksc -- mehrere Werte durch Komma trennen.'},
           {name: "Frist", render: renderer.renderFrist},
           {name: "Status"},
           {name: "Kürzel"},
@@ -214,7 +220,7 @@
         ],
         selection: {render: renderer.renderSelect},
         sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
-        groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idxWnm, grouphead: 'C', groupelem: 'W'}
+        groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idx.wnm, grouphead: 'C', groupelem: 'W'}
 
       };
 

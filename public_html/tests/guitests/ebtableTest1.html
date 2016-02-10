@@ -59,12 +59,25 @@
       ];
       var flags = _.pluck(flagsdef, 'key').join('');
 
-      $.extend($.fn.ebtable.sortformats, {
-        'flags': function (data) { // 5 (101)  -->  '!P' | 7 (111) -> '!*p'
-          return _.reduce(Number(data).toString(2).split('').reverse(), function (acc, o, i) {
+      var flagutils = {
+        fromBitNumber: function (bits) { // 5 (101)  -->  '!P' # 7 (111) -> '!*p' # 8 (1000) -> F
+          return _.reduce(Number(bits).toString(2).split('').reverse(), function (acc, o, i) {
             return acc += (o === '1' && flags[i] ? flags[i] : '');
           }, '');
+        },
+        toBitNumber: function (str) { // '!P' -> 5 (101), '!PG' -> 21
+          return _.reduce(str.toUpperCase().split(''), function (acc, c) {
+            var x = _.findWhere(flagsdef, {key: c});
+            return acc += x ? x.id : 0;
+          }, 0);
+        },
+        match: function (cellData, search) {
+          return ! (flagutils.toBitNumber(search) & (~flagutils.toBitNumber(cellData)));
         }
+      };
+
+      $.extend($.fn.ebtable.sortformats, {
+        'flags': flagutils.fromBitNumber
       });
 
       var renderer = {
@@ -79,18 +92,8 @@
           return row[0] === 'GA' ? link : data;
         },
         renderFlags: function (data, row, type) {
-          var flagsdef = [
-            {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
-            {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
-            {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
-            {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
-            {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
-            {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
-            {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
-            {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
-          ];
           if (type === 'filter') {
-            return $.fn.ebtable.sortformats.flags(data);
+            return flagutils.fromBitNumber(data);
           }
           return _.reduce(flagsdef, function (acc, o) {
             return acc + ((data & o.id) ? _.template("<img src='/images/<\%=img%>' alt='<\%=alt%>' title='<\%=alt%>' height='10px'/>")({img: o.img, alt: o.alt}) : '');
@@ -101,19 +104,21 @@
         }
       };
 
+      var idx = {gtyp: 0, gcnt: 1, gid: 2, gss: 3};
+
       var opts = {
         columns: [
           {name: "Grouping", invisible: true, technical: true, order: 'asc-fix'},
           {name: "GroupCnt", invisible: true, technical: true},
           {name: "GroupIds", invisible: true, technical: true},
           {name: "GroupSort", invisible: true, technical: true},
-          {name: "Tierart", render: renderer.renderTierart, sortmaster: [{col: 3}, {col: 0}]},
+          {name: "Tierart", render: renderer.renderTierart, sortmaster: [{col: idx.gss}, {col: idx.gtyp}]},
           {name: "Datum", sortformat: 'date-de'},
           {name: "Welcher Name"},
-          {name: "Flag", render: renderer.renderFlags, sortformat: 'flags', tooltip: 'Mögliche Werte:!*pfgksc'}
+          {name: "Flag", render: renderer.renderFlags, sortformat: 'flags', match: flagutils.match, tooltip: 'Mögliche Werte:!*pfgksc'}
         ],
         selection: {render: renderer.renderSelect},
-        sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+        sortmaster: [{col: idx.gid}, {col: idx.gtyp}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
         sortcolname: 'Tierart',
         reloadData: function () {

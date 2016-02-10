@@ -60,19 +60,22 @@ var mx = function mx(m, groupdef) {
     var fcts = {
       rowMatch: function rowMatch(filters) {
         return function (row) {
+          var match = function (cellData, searchtext) { // default matcher
+            var t = f.searchtext.replace(/\*/g, '.*');
+            return cellData.match(new RegExp('^' + t, 'i'));
+          };
           filters = _.isArray(filters) ? filters : [filters];
           var b = true;
           for (var i = 0; i < filters.length && b; i++) {
             var f = filters[i];
-            var cellData = $.trim(row[f.col]).toLowerCase();
-            cellData = f.render ? f.render(cellData, row, 'filter') : cellData;
-            var searchText = f.searchtext.toLowerCase();
-            b = b && cellData.toLowerCase().indexOf(searchText) >= 0;
+            var cellData = f.render ? f.render($.trim(row[f.col]), row, 'filter') : $.trim(row[f.col]);
+            var matcher = f.match || match;
+            b = b && matcher(cellData, f.searchtext);
           }
           return b;
         };
       },
-      filterData: function filterData(filters) { // filters [{col: col,searchtext: text, render:myrenderer},...]
+      filterData: function filterData(filters) { // filters [{col: col, searchtext: text, render:myrenderer},...]
         return _.filter(this, fcts.rowMatch(filters));
       }
     };

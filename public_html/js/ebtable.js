@@ -141,16 +141,16 @@
         if (gc && row.isGroupElement && !origData.groups[tblData[r][gc.groupid]].isOpen)
           continue
 
-        var cls = row.isGroupElement ? 'group' : '';
-        cls = row.isGroupHeader ? 'groupheader' : cls;
+        var cls = row.isGroupElement ? 'class="group"' : '';
+        cls = row.isGroupHeader ? 'class="groupheader"' : cls;
         res += '<tr>';
 
         var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
         if (myopts.selection && myopts.selection.render) {
-          var x = '<td class="' + cls + '">' + myopts.selection.render(origData, row, checked) + '</td>';
+          var x = '<td ' + cls + '">' + myopts.selection.render(origData, row, checked) + '</td>';
           res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
         } else if (myopts.selection) {
-          res += '<td class="' + cls + '"><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
+          res += '<td ' + cls + '"><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
         }
 
         var order = myopts.colorder;
@@ -159,12 +159,9 @@
           var w = coldef.width || 0;
           var style = w ? ' style="width:' + w + 'px" ' : '';
           if (!coldef.invisible) {
-            var val = tblData[r][order[c]] || '';
-            var render = coldef.render;
-            val = render ? render(val, row) : val;
-            var w = myopts.columns[order[c]].width || 0;
-            var ww = w ? " width='" + w + "px'" : "";
-            res += '<td class="' + cls + '"' + style + '>' + val + '</td>';
+            var v = tblData[r][order[c]] || '';
+            var val = coldef.render ? coldef.render(v, row) : v;
+            res += '<td ' + cls + '"' + style + '>' + val + '</td>';
           }
         }
         res += '</tr>\n';

@@ -51,7 +51,8 @@
               wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
               pids: [], // Liste ProcessStatusIds: [50000004850_524288,50000005018_524288,50000005204_1048576]
               pers: [], // Liste preformers: 50000004850_50000000000015,50000005018_50000000000015,50000005204_50000000000015
-              spc: 0   //  Mindestens ein Auftrag in der Charge ist 'special'
+              spc: 0, //  Mindestens ein Auftrag in der Charge ist 'special'
+              flg: row[idx.flg]
             };
           } else if (row[0] === 'W' && chargeId >= 0) {
             var g = groupsdata[chargeId];
@@ -100,7 +101,7 @@
           var rexp = new RegExp('^' + searchtxt.replace(/\*/g, '.*'), 'i')
           if (row[idx.gtyp] === 'C')
             return cellData.match(rexp);
-          if (row[idx.gtyp] === 'W' && row[idx.gid] < 0) 
+          if (row[idx.gtyp] === 'W' && row[idx.gid] < 0)
             return cellData.match(rexp);
           if (row[idx.gtyp] === 'W' && row[idx.gid] >= 0)
             return row[idx.gss].match(rexp)
@@ -201,7 +202,9 @@
       };
 
       $.extend($.fn.ebtable.sortformats, {
-        'flags': flagutils.fromBitNumber
+        'flags': function fmtflags(v, row, groups) {
+          return  row[idx.gid] < 0 ? flagutils.fromBitNumber(v) : flagutils.fromBitNumber(groups[row[idx.gid]].flg);
+        }
       });
 
       var grid;
@@ -216,11 +219,11 @@
           {name: "StatusId", technical: true, invisible: true},
           {name: "Performer", technical: true, invisible: true},
           {name: "ChargeType", technical: true, invisible: true},
-          {name: "Flags", render: renderer.flags, match: matcher.flags, tooltip: 'Mögliche Werte: !*pfgksc'},
+          {name: "Flags", render: renderer.flags, match: matcher.flags, sortmaster: [{col: idx.flg, sortformat:'flags'}, {col: idx.gid}, {col: idx.gtyp}], tooltip: 'Mögliche Werte: !*pfgksc'},
           {name: "Frist", render: renderer.frist},
           {name: "Status"},
           {name: "Kürzel"},
-          {name: "Auftrag", render: renderer.auftrag, match: matcher.auftrag, sortmaster: [{col: 3}, {col: 0}], width: 200},
+          {name: "Auftrag", render: renderer.auftrag, match: matcher.auftrag, sortmaster: [{col: idx.gss}, {col: idx.gtyp}]},
           {name: "Krankenhaus"},
           {name: "Abteilung"},
           {name: "Fachlichkeit"},

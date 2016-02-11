@@ -229,7 +229,9 @@
         var colidx = util.indexOfCol(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
         var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+        if( _(_(coldef.sortmaster).pluck( 'col' )).indexOf(colidx) <0 ){
+          coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+        }
         $.each(coldefs, function (idx, o) {
           var c = myopts.columns[o.col];
           o.order = c.order || 'desc';
@@ -247,8 +249,10 @@
         var colidx = util.indexOfCol(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
         var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
-        tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groups));
+        if( _(_(coldef.sortmaster).pluck( 'col' )).indexOf(colidx) <0 ){
+          coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+        }
+        tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
         pageCur = 0;
         redraw(pageCur);
       }

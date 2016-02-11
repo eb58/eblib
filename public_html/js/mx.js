@@ -1,9 +1,6 @@
 /* global _ */
 //  2-dimensional array -- m(atri)x
-
-var mx = function mx(m, groupdef) {
-//groupdef ~ {groupsort: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
-
+var mx = function mx(m, groupdef) {  //groupdef see below 
   var basicapi = {
     zero: function zero() {
       return m.fill(0);
@@ -85,7 +82,7 @@ var mx = function mx(m, groupdef) {
 
 //####################################  grouping #######################
   var grouping = function () {
-    // // groupdefs={grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'}
+    // // groupdefs  ~ {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'}
     var fcts = {
       normalizeGroupId: function (id) {
         return id <= 0 ? 0 : id;

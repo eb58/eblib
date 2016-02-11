@@ -60,17 +60,16 @@ var mx = function mx(m, groupdef) {
     var fcts = {
       rowMatch: function rowMatch(filters) {
         return function (row) {
-          var match = function (cellData, searchtext) { // default matcher
-            var t = f.searchtext.replace(/\*/g, '.*');
+          var defmatch = function (cellData, searchtext) { // default matcher
+            var t = searchtext.replace(/\*/g, '.*');
             return cellData.match(new RegExp('^' + t, 'i'));
           };
           filters = _.isArray(filters) ? filters : [filters];
           var b = true;
           for (var i = 0; i < filters.length && b; i++) {
             var f = filters[i];
-            var cellData = f.render ? f.render($.trim(row[f.col]), row, 'filter') : $.trim(row[f.col]);
-            var matcher = f.match || match;
-            b = b && matcher(cellData, f.searchtext);
+            var cellData = $.trim(row[f.col]);
+            b = b && (f.match || defmatch)(cellData, f.searchtext, row);
           }
           return b;
         };

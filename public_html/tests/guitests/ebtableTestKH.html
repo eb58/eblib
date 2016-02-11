@@ -19,47 +19,14 @@
     <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
     <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
     <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+    <script src="/js/polyfills.js"></script>
     <script src="/js/mx.js"></script>
     <script src="/js/ebtable.js"></script>
     <script src="/data/ebTableTestDataKhbasket.js"></script>
 
     <script>
       'use strict';
-      var flagsdef = [
-        {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
-        {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
-        {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
-        {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
-        {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
-        {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
-        {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
-        {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
-      ];
-      var flags = _.pluck(flagsdef,'key').join('');
-
-      var flagutils = {
-        fromBitNumber: function (bits) { // 5 (101)  -->  '!P' # 7 (111) -> '!*p' # 8 (1000) -> F
-          return _.reduce(Number(bits).toString(2).split('').reverse(), function (acc, o, i) {
-            return acc += (o === '1' && flags[i] ? flags[i] : '');
-          }, '');
-        },
-        toBitNumber: function (str) { // '!P' -> 5 (101), '!PG' -> 21
-          return _.reduce(str.toUpperCase().split(''), function (acc, c) {
-            var x = _.findWhere(flagsdef, {key: c});
-            return acc += x ? x.id : 0;
-          }, 0);
-        },
-        match: function (cellData, search) {
-          return ! (flagutils.toBitNumber(search) & (~flagutils.toBitNumber(cellData)));
-        }
-      };
-
-      $.extend($.fn.ebtable.sortformats, {
-        'flags': flagutils.fromBitNumber
-      });
-      var grid;
-
-      var idx = { gtyp:0, gcnt: 1, gid:2, gss:3, wid:4, pid:5, per:6, cty:7, flg:8, frs: 9, wnm:12 };
+      var idx = {gtyp: 0, gcnt: 1, gid: 2, gss: 3, wid: 4, pid: 5, per: 6, cty: 7, flg: 8, frs: 9, wnm: 12};
 
       function preprocessData(data) {
         // 0                      1     2        3             4                  5         6          7        8      9                    10       11               12
@@ -102,15 +69,63 @@
         data.groupsdata = groupsdata;
       }
 
+      var flagsdef = [
+        {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
+        {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
+        {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
+        {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
+        {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
+        {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
+        {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
+        {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
+      ];
+      var flags = _.pluck(flagsdef, 'key').join('');
+
+      var flagutils = {
+        fromBitNumber: function (bits) { // 5 (101)  -->  '!P' # 7 (111) -> '!*p' # 8 (1000) -> F
+          return _.reduce(Number(bits).toString(2).split('').reverse(), function (acc, o, i) {
+            return acc += (o === '1' && flags[i] ? flags[i] : '');
+          }, '');
+        },
+        toBitNumber: function (str) { // '!P' -> 5 (101), '!PG' -> 21
+          return _.reduce(str.toUpperCase().split(''), function (acc, c) {
+            var x = _.findWhere(flagsdef, {key: c});
+            return acc += x ? x.id : 0;
+          }, 0);
+        }
+      };
+
+      var matcher = {
+        auftrag: function (cellData, searchtxt, row) {
+          var rexp = new RegExp('^' + searchtxt.replace(/\*/g, '.*'), 'i')
+          if (row[idx.gtyp] === 'C')
+            return cellData.match(rexp);
+          if (row[idx.gtyp] === 'W' && row[idx.gid] < 0) 
+            return cellData.match(rexp);
+          if (row[idx.gtyp] === 'W' && row[idx.gid] >= 0)
+            return row[idx.gss].match(rexp)
+        },
+        flags: function (cellData, searchtxt) {
+          return !(flagutils.toBitNumber(searchtxt) & ~cellData);
+        },
+        dta: function (cellData, searchtxt) {
+          return _.every(searchtxt.split(','), function (v) {
+            return cellData.contains(v);
+          });
+        },
+        besonderheit: function (cellData, searchtxt) {
+          return _.every(searchtxt.split(','), function (v) {
+            return cellData.match(new RegExp(v.replace(/\*/g, '.*'), 'i'));
+          });
+        }
+      };
+
       var renderer = {
-        renderAuftrag: function (data, row, type) {
-          if (type === 'filter') {
-            return row[3] + data;
-          }
+        auftrag: function (data, row, type) {
           var sessionId = '<%=session.getId()%>';
-          var chargeId = row[2];
+          var chargeId = row[idx.gid];
           var name = data.substring(0, 30).replace(/ /g, '\u00a0') + data.substring(30);
-          if (row[0] !== 'C') {
+          if (row[idx.gtyp] !== 'C') {
             var t = _.template(
               '<input name="name_<\%=wid%>" value="<\%=workorderName%>" hidden="true"/>\
                    <a href="/ISmed/showOrder.do;jsessionid=<\%=sid%>?src=khbasket2&workorderid=<\%=wid%>" title="<\%=wid%>"><\%=workorderName%></a>');
@@ -119,22 +134,19 @@
 
           var isOpen = grid ? grid.groupIsOpen(chargeId) : false;
           var imgsrc = isOpen ? '/images/details_opened.png' : '/images/details_closed.png';
-          var auftrag = row[1] === 1 ? 'Auftrag' : 'Aufträge';
+          var auftrag = row[idx.gcnt] === 1 ? 'Auftrag' : 'Aufträge';
           var t = '\
              <img src="<\%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<\%=chargeId%>\')"/>\
              <b>&nbsp;<\%=chargeName%></b>&nbsp;(<\%=cnt%>&nbsp;<\%=auftrag%>)';
-          var link = _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: name, cnt: row[1], auftrag: auftrag});
-          return row[0] === 'C' ? link : data;
+          return _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: name, cnt: row[1], auftrag: auftrag});
         },
-        renderFlags: function (data, row, type) {
-          if (type === 'filter') {// || type === 'display') 
-            return flagutils.fromBitNumber(data);
-          }
+        flags: function (data, row, type) {
+          return flagutils.fromBitNumber(data);
           return _.reduce(flagsdef, function (acc, o) {
             return acc += (data & o.id) ? _.template("<img src='/images/<\%=img%>' alt='<\%=alt%>' title='<\%=alt%>' height='10px'/>")({img: o.img, alt: o.alt}) : '';
           }, '');
         },
-        renderFrist: function (data, row, type) {
+        frist: function (data, row, type) {
           //var chargeId = _.isNumber(row[2]) ? row[2].toString() : row[2];
           //var g = grid.getGroup(chargeId);
           //var frist = g ? g.fristmin : data;
@@ -143,10 +155,10 @@
 //               }
           return data;// sprintf("%+05d#%+08d", frist, data);// data;
         },
-        renderDTA: function (data, row) {
-          return data;//.replace(/,/g, ', ');
+        dta: function (data, row) {
+          return data.replace(/,/g, ', ');
         },
-        renderSelect: function (origData, row, type) {
+        select: function (origData, row, type) {
           var ret = '';
           var cid = row[2] > 0 ? row[2] : null; // chargeid
           var wid = row[idx.wid]; // workorderid
@@ -188,6 +200,12 @@
         }
       };
 
+      $.extend($.fn.ebtable.sortformats, {
+        'flags': flagutils.fromBitNumber
+      });
+
+      var grid;
+
       var opts = {
         columns: [
           {name: "Grouping", invisible: true, technical: true, order: 'asc-fix'},
@@ -198,15 +216,15 @@
           {name: "StatusId", technical: true, invisible: true},
           {name: "Performer", technical: true, invisible: true},
           {name: "ChargeType", technical: true, invisible: true},
-          {name: "Flags", render: renderer.renderFlags, sortformat: 'flags', match: flagutils.match, tooltip: 'Mögliche Werte: !*pfgksc -- mehrere Werte durch Komma trennen.'},
-          {name: "Frist", render: renderer.renderFrist},
+          {name: "Flags", render: renderer.flags, match: matcher.flags, tooltip: 'Mögliche Werte: !*pfgksc'},
+          {name: "Frist", render: renderer.frist},
           {name: "Status"},
           {name: "Kürzel"},
-          {name: "Auftrag", render: renderer.renderAuftrag, sortmaster: [{col: 3}, {col: 0}], width: 200},
+          {name: "Auftrag", render: renderer.auftrag, match: matcher.auftrag, sortmaster: [{col: 3}, {col: 0}], width: 200},
           {name: "Krankenhaus"},
           {name: "Abteilung"},
           {name: "Fachlichkeit"},
-          {name: "Besonderheit"},
+          {name: "Besonderheit", match: matcher.besonderheit},
           {name: "Krankenkasse"},
           {name: "Einlieferung", sortformat: 'date-de'},
           {name: "Entlassung", sortformat: 'date-de'},
@@ -214,11 +232,11 @@
           {name: "GArt"},
           {name: "Produkt"},
           {name: "FAG"},
-          {name: "DTANummern", render: renderer.renderDTA},
+          {name: "DTANummern", render: renderer.dta, match: matcher.dta},
           {name: "Vorg.VGA"},
           {name: "KHFrist"}
         ],
-        selection: {render: renderer.renderSelect},
+        selection: {render: renderer.select},
         sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idx.wnm, grouphead: 'C', groupelem: 'W'}
 

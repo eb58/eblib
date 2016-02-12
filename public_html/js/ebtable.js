@@ -207,6 +207,11 @@
         if (gc && row[gc.groupid] && row[gc.grouplabel] === gc.grouphead) {
           var groupId = row[gc.groupid];
           console.log('Group', row[gc.groupid], row[gc.grouplabel]);
+          for (var i = 0; i < origData.length; i++) {
+            if (origData[i][gc.groupid] === groupId) {
+              origData[i].selected = row.selected;
+            }
+          }
           for (var i = 0; i < tblData.length; i++) {
             if (tblData[i][gc.groupid] === groupId) {
               tblData[i].selected = row.selected;
@@ -214,6 +219,7 @@
             }
           }
         }
+        myopts.onSelection && myopts.onSelection( rowNr, row, origData );
       }
     }
 

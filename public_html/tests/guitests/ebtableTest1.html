@@ -70,18 +70,19 @@
             var x = _.findWhere(flagsdef, {key: c});
             return acc += x ? x.id : 0;
           }, 0);
-        },
-        match: function (cellData, search) {
-          return ! (flagutils.toBitNumber(search) & (~flagutils.toBitNumber(cellData)));
         }
       };
 
       $.extend($.fn.ebtable.sortformats, {
-        'flags': flagutils.fromBitNumber
+        flags: flagutils.fromBitNumber
       });
 
+      var matcher = {
+        flags: flagutils.fromBitNumber
+      };
+
       var renderer = {
-        renderTierart: function (data, row, type) {
+        tierart: function (data, row, type) {
           var groupid = row[2];
           if (groupid < 0)
             return data;
@@ -91,16 +92,10 @@
           var link = '<img src="' + imgsrc + '" onclick="grid.toggleGroupIsOpen(\'' + groupid + '\')" /><b>&nbsp;' + data + '</b>';
           return row[0] === 'GA' ? link : data;
         },
-        renderFlags: function (data, row, type) {
-          if (type === 'filter') {
-            return flagutils.fromBitNumber(data);
-          }
+        flags: function (data, row, type) {
           return _.reduce(flagsdef, function (acc, o) {
-            return acc + ((data & o.id) ? _.template("<img src='/images/<\%=img%>' alt='<\%=alt%>' title='<\%=alt%>' height='10px'/>")({img: o.img, alt: o.alt}) : '');
+            return acc + ((data & o.id) ? _.template("<img src='/images/<\%=img%>' title='<\%=title%>' height='10px'/>")({img: o.img, title: o.alt}) : '');
           }, '');
-        },
-        renderSelect: function (data, row, type) {
-          return '<input type="checkbox"/>';
         }
       };
 
@@ -112,12 +107,15 @@
           {name: "GroupCnt", invisible: true, technical: true},
           {name: "GroupIds", invisible: true, technical: true},
           {name: "GroupSort", invisible: true, technical: true},
-          {name: "Tierart", render: renderer.renderTierart, sortmaster: [{col: idx.gss}, {col: idx.gtyp}]},
+          {name: "Tierart", render: renderer.tierart, sortmaster: [{col: idx.gss}, {col: idx.gtyp}]},
           {name: "Datum", sortformat: 'date-de'},
-          {name: "Welcher Name"},
-          {name: "Flag", render: renderer.renderFlags, sortformat: 'flags', match: flagutils.match, tooltip: 'Mögliche Werte:!*pfgksc'}
+          {name: "Name"},
+          {name: "Flag", render: renderer.renderFlags, sortformat: 'flags', match: matcher.flags, tooltip: 'Mögliche Werte:!*pfgksc'}
         ],
-        selection: {render: renderer.renderSelect},
+        selection: true, // {render: renderer.renderSelect},
+        onSelection: function (rowNr, row, origData) {
+          console.log('onSelection', rowNr, row, origData);
+        },
         sortmaster: [{col: idx.gid}, {col: idx.gtyp}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
         sortcolname: 'Tierart',

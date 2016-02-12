@@ -116,11 +116,17 @@ var mx = function mx(m, groupdef) {  //groupdef see below
           var groupId = fcts.normalizeGroupId((row[groupdefs.groupid]));
           return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groups[groupId].isOpen);
         });
+      },
+      getGroupRows: function getGroupRows(groupdefs, groupid) {
+        return _.filter(this, function (row) {
+          return row[groupdefs.groupid] === groupid;
+        });
       }
     };
     return {
       initGroups: fcts.initGroups,
-      filterGroups: fcts.filterGroups
+      filterGroups: fcts.filterGroups,
+      getGroupRows: fcts.getGroupRows
     };
   }();
 

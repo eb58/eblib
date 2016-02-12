@@ -204,23 +204,28 @@
         console.log('change !', event.target.id, rowNr, row, row.selected);
         // Grouping
         var gc = myopts.groupdefs;
-        if (gc && row[gc.groupid] && row[gc.grouplabel] === gc.grouphead) {
-          var groupId = row[gc.groupid];
-          console.log('Group', row[gc.groupid], row[gc.grouplabel]);
-          for (var i = 0; i < origData.length; i++) {
-            if (origData[i][gc.groupid] === groupId) {
-              origData[i].selected = row.selected;
-            }
-          }
+        var groupid = row[gc.groupid]
+        if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
+          console.log('Groupheader selected!', groupid, row[gc.grouplabel]);
+          _.each(origData.getGroupRows(gc, groupid), function (o) {
+            o.selected = row.selected;
+          });
           for (var i = 0; i < tblData.length; i++) {
-            if (tblData[i][gc.groupid] === groupId) {
-              tblData[i].selected = row.selected;
+            if (tblData[i][gc.groupid] === groupid) {
               $(selgridid + '#check' + i).prop('checked', row.selected);
             }
           }
         }
-        myopts.onSelection && myopts.onSelection( rowNr, row, origData );
       }
+      myopts.onSelection && myopts.onSelection(rowNr, row, origData);
+    }
+
+    function deselectRows() {
+      _.each(origData, function (row, rowNr) {
+        if (row.selected && myopts.onSelection)
+          myopts.onSelection(rowNr, row, origData);
+        row.selected = false;
+      });
     }
 
     function sorting(event) { // sorting
@@ -228,11 +233,12 @@
       var colname = event.currentTarget.id;
       if (colname) {
         console.log('sorting', myopts.sortcolname);
+        deselectRows();
         myopts.sortcolname = colname;
         var colidx = util.indexOfCol(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
         var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        if( _(_(coldef.sortmaster).pluck( 'col' )).indexOf(colidx) <0 ){
+        if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
           coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
         }
         $.each(coldefs, function (idx, o) {
@@ -252,7 +258,7 @@
         var colidx = util.indexOfCol(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
         var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        if( _(_(coldef.sortmaster).pluck( 'col' )).indexOf(colidx) <0 ){
+        if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
           coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
         }
         tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
@@ -263,6 +269,7 @@
 
     function filtering(event) { // filtering
       console.log('filtering', event, event.which);
+      deselectRows();
       filterData();
       pageCur = 0;
       redraw(pageCur);

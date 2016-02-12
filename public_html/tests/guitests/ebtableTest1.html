@@ -57,7 +57,7 @@
         {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
         {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
       ];
-      var flags = _.pluck(flagsdef, 'key').join('');
+      var flags = _.pluck(flagsdef, 'key').join(''); // -> '!*PFGKSC'
 
       var flagutils = {
         fromBitNumber: function (bits) { // 5 (101)  -->  '!P' # 7 (111) -> '!*p' # 8 (1000) -> F
@@ -82,17 +82,17 @@
       };
 
       var renderer = {
-        tierart: function (data, row, type) {
-          var groupid = row[2];
+        tierart: function (data, row) {
+          var groupid = row[idx.gid];
           if (groupid < 0)
             return data;
 
           var isOpen = grid ? grid.groupIsOpen(groupid) : false;
           var imgsrc = '/images/details_' + (isOpen ? 'opened' : 'closed') + '.png';
           var link = '<img src="' + imgsrc + '" onclick="grid.toggleGroupIsOpen(\'' + groupid + '\')" /><b>&nbsp;' + data + '</b>';
-          return row[0] === 'GA' ? link : data;
+          return row[idx.gtyp] === 'GA' ? link : data;
         },
-        flags: function (data, row, type) {
+        flags: function (data) {
           return _.reduce(flagsdef, function (acc, o) {
             return acc + ((data & o.id) ? _.template("<img src='/images/<\%=img%>' title='<\%=title%>' height='10px'/>")({img: o.img, title: o.alt}) : '');
           }, '');

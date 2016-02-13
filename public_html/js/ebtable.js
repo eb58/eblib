@@ -328,7 +328,7 @@
       $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
       if (withHeader) {
         $(selgridid + 'thead tr').html(tableHead());
-        $(selgridid + 'thead th:gt(0)').on('click', sorting);
+        $(selgridid + 'thead th').on('click', sorting);
         $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
       adjustLayout();
@@ -348,8 +348,8 @@
             <th id='ctrlConfig'><%= configBtn  %></th>\n\
             <th id='ctrlPage1' ><%= browseBtns %></th>\n\
           </table>\n\
-          <div style='overflow:auto; max-height:<%= bodyHeight %>px;'>\n\
-            <table id='data'>\n\
+          <div style='overflow-y:auto;overflow-x:hidden; max-height:<%= bodyHeight %>px;'>\n\
+            <table id='data' >\n\
               <thead><tr><%= head %></tr></thead>\n\
               <tbody><%= data %></tbody>\n\
             </table>\n\
@@ -405,7 +405,7 @@
       pageCur = pageCurMax;
       redraw(pageCur);
     });
-    $(selgridid + 'thead th:gt(0)').on('click', sorting);
+    $(selgridid + 'thead th').on('click', sorting);
     $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
     $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
     $(selgridid + '#configBtn').button().css('height', ctrlHeight).on('click', function () {

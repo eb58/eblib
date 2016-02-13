@@ -112,6 +112,7 @@
           {name: "Name"},
           {name: "Flag", render: renderer.renderFlags, sortformat: 'flags', match: matcher.flags, tooltip: 'Mögliche Werte:!*pfgksc'}
         ],
+        bodyHeight:300,
         selection: true, // {render: renderer.renderSelect},
         onSelection: function (rowNr, row, origData) {
           console.log('onSelection', rowNr, row, origData);

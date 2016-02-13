@@ -41,54 +41,16 @@
       ];
 
       //#######################################################################
-      var flagsdef = [
-        {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
-        {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
-        {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
-        {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
-        {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
-        {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
-        {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
-        {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
-      ];
-      var flags = _.pluck(flagsdef, 'key').join(''); // -> '!*PFGKSC'
-
-      var flagutils = {
-        fromBitNumber: function (bits) { // 5 (101)  -->  '!P' # 7 (111) -> '!*p' # 8 (1000) -> F
-          return _.reduce(Number(bits).toString(2).split('').reverse(), function (acc, o, i) {
-            return acc += (o === '1' && flags[i] ? flags[i] : '');
-          }, '');
-        }
-      };
-
-      $.extend($.fn.ebtable.sortformats, {
-        flags: flagutils.fromBitNumber
-      });
-
-      var matcher = {
-        flags: flagutils.fromBitNumber
-      };
-
-      var renderer = {
-        flags: function (data) {
-          return _.reduce(flagsdef, function (acc, o) {
-            return acc + ((data & o.id) ? _.template("<img src='/images/<\%=img%>' title='<\%=title%>' height='10px'/>")({img: o.img, title: o.alt}) : '');
-          }, '');
-        }
-      };
-
+      
       var opts = {
         columns: [
           {name: "Tierart"},
           {name: "Datum", sortformat: 'date-de'},
           {name: "Name"},
-          {name: "Flag", render: renderer.flags, sortformat: 'flags', match: matcher.flags, tooltip: 'Mögliche Werte:!*pfgksc'}
+          {name: "Flag"}
         ],
-        sortcolname: 'Tierart',
+        //sortcolname: 'Tierart',
         selection: true
-        //onSelection: function (rowNr, row, origData) {console.log('onSelection', rowNr, row, origData);},
-        //sortmaster: [{col: idx.gid}, {col: idx.gtyp}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
-        //lang: 'en'
       };
       var grid;
       $().ready(function () {

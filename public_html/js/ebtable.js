@@ -52,6 +52,7 @@
         $.each(myopts.columns, function (idx, coldef) { // set reasonable defaults for coldefs
           coldef.technical = coldef.technical || false;
           coldef.invisible = coldef.invisible || false;
+          coldef.mandatory = coldef.mandatory || false;
           coldef.order = coldef.order || 'asc';
         });
 
@@ -100,7 +101,7 @@
         var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
         var col = myopts.columns[idx];
         var cls = col.invisible ? 'invisible' : 'visible';
-        return res + (col.technical ? '' : _.template(t)({name: col.name, cls: cls}));
+        return res + ( col.technical || col.mandatory  ? '' : _.template(t)({name: col.name, cls: cls}));
       }, '');
       var t = '<button id="configBtn">' + translate('Anpassen') + '</button>\n\
                <div id="' + gridid + 'configDlg">\n\
@@ -115,12 +116,12 @@
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
           var t =
-            '<th id="<%=colname%>">\
+              '<th id="<%=colname%>">\
                 <div class="sort_wrapper">\
                   <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
                 </div>' +
-            (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
-            '</th>';
+                  (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
+              '</th>';
           res += _.template(t)({colname: coldef.name, tooltip: coldef.tooltip});
         }
       }
@@ -196,36 +197,40 @@
       return label;
     }
 
-    function selectRows(event) { // select row
-      var rowNr = event.target.id.replace('check', '');
-      var row = tblData[rowNr];
-      if (row) {
-        row.selected = $(event.target).prop('checked');
-        console.log('change !', event.target.id, rowNr, row, row.selected);
-        // Grouping
-        var gc = myopts.groupdefs;
-        var groupid = row[gc.groupid]
-        if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
-          console.log('Groupheader selected!', groupid, row[gc.grouplabel]);
-          _.each(origData.getGroupRows(gc, groupid), function (o) {
-            o.selected = row.selected;
-          });
-          for (var i = 0; i < tblData.length; i++) {
-            if (tblData[i][gc.groupid] === groupid) {
-              $(selgridid + '#check' + i).prop('checked', row.selected);
-            }
+    function selectRow(rowNr, row, b) { // b = true/false ~ on/off
+      if (!row)
+        return;
+      row.selected = b;
+      var gc = myopts.groupdefs;
+      var groupid = row[gc.groupid];
+      if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
+        console.log('Groupheader selected!', groupid, row[gc.grouplabel]);
+        _.each(origData.getGroupRows(gc, groupid), function (o) {
+          o.selected = b;
+        });
+        for (var i = 0; i < tblData.length; i++) {
+          if (tblData[i][gc.groupid] === groupid) {
+            $(selgridid + '#check' + i).prop('checked', b);
           }
         }
       }
       myopts.onSelection && myopts.onSelection(rowNr, row, origData);
     }
 
+    function selectRows(event) { // select row
+      var rowNr = event.target.id.replace('check', '');
+      selectRow(rowNr, tblData[rowNr], $(event.target).prop('checked'));
+    }
+
     function deselectRows() {
-      _.each(origData, function (row, rowNr) {
-        if (row.selected && myopts.onSelection)
-          myopts.onSelection(rowNr, row, origData);
-        row.selected = false;
-      });
+      $(selgridid + '#data input[type=checkbox]').prop('checked', false);
+      if (myopts.onSelection) {
+        _.each(origData, function (row, rowNr) {
+          if (row.selected) {
+            selectRow(rowNr, row, false);
+          }
+        });
+      }
     }
 
     function sorting(event) { // sorting
@@ -297,8 +302,8 @@
       //adjust();
       //$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
       //$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
-      $(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
-      $(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
+      //$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
+      //$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
     }
 
 // ##############################################################################
@@ -308,14 +313,11 @@
       $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
         var val = $(o).val().trim();
         if (val) {
-          var vals = val.split(',');
-          _.each(vals, function (v) {
             var colname = $(o).attr('id');
             var col = util.indexOfCol(colname);
             var ren = util.getRender(colname);
             var mat = util.getMatch(colname);
-            filters.push({col: col, searchtext: $.trim(v), render: ren, match: mat});
-          });
+          filters.push({col: col, searchtext: $.trim(val), render: ren, match: mat});
         }
       });
       tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
@@ -331,7 +333,7 @@
         $(selgridid + 'thead th').on('click', sorting);
         $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
-      adjustLayout();
+      //adjustLayout();
     }
 
     // ##############################################################################
@@ -343,23 +345,23 @@
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template(
         "<div class='ebtable'>\n\
-          <table class='ctrl'>\n\
-            <th id='ctrlLength'><%= selectLen  %></th>\n\
-            <th id='ctrlConfig'><%= configBtn  %></th>\n\
-            <th id='ctrlPage1' ><%= browseBtns %></th>\n\
-          </table>\n\
-          <div style='overflow-y:auto;overflow-x:hidden; max-height:<%= bodyHeight %>px;'>\n\
-            <table id='data' >\n\
+          <div class='ctrl'>\n\
+            <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
+            <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
+            <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
+          </div>\n\
+          <div id='data' style='overflow-y:auto;overflow-x:hidden; max-height:<%= bodyHeight %>px; width:100%'>\n\
+            <table>\n\
               <thead><tr><%= head %></tr></thead>\n\
               <tbody><%= data %></tbody>\n\
             </table>\n\
           </div>\n\
-          <table class='ctrl'>\n\
-            <th id='ctrlInfo'><%= info %></th>\n\
-            <th id='ctrlPage2'><%= browseBtns %></th>\n\
-          </table>\n\
+          <div class='ctrl'>\n\
+            <div id='ctrlInfo'  style='float: left;' class='ui-widget-content'><%= info %></div>\n\
+            <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
+          </div>\n\
         </div>"
-        );
+      );
 
       a.html(tableTemplate({
         head: tableHead(),
@@ -370,7 +372,7 @@
         info: infoCtrl(),
         bodyHeight: myopts.bodyHeight
       }));
-      adjustLayout();
+      //adjustLayout();
     }
 
     initGrid(this);
@@ -435,7 +437,7 @@
             colnames.push($(o).prop('id'));
           });
           myopts.colorder = _.map(myopts.columns, function (col, idx) {
-            return col.technical ? idx : util.indexOfCol(colnames.shift());
+            return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
           });
           myopts.saveState();
           redraw(pageCur, true);
@@ -468,12 +470,12 @@
       getFilterValues: function getFilterValues() {
         var filter = {};
         $(selgridid + 'thead th input[type="text"')
-          .filter(function (idx, elem) {
-            return $(elem).val().trim() !== '';
-          })
-          .each(function (idx, elem) {
-            filter[elem.id] = $(elem).val().trim();
-          });
+                .filter(function (idx, elem) {
+                  return $(elem).val().trim() !== '';
+                })
+                .each(function (idx, elem) {
+                  filter[elem.id] = $(elem).val().trim();
+                });
         return filter;
       },
       setFilterValues: function setFilterValues(filter) {
@@ -505,13 +507,13 @@
     },
     'en': {
       '(gefiltert von <%=len%> Eintr\u00e4gen)':
-        '(filters from <%=len%> entries)',
+              '(filters from <%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>':
-        '<%=start%> to <%=end%> of <%=count%> entries <%= filtered %>',
+              '<%=start%> to <%=end%> of <%=count%> entries <%= filtered %>',
       'Anpassen':
-        'Configuration',
+              'Configuration',
       'Abbrechen':
-        'Cancel'
+              'Cancel'
     }
   };
 

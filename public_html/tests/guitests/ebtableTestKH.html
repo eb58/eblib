@@ -98,13 +98,12 @@
 
       var matcher = {
         auftrag: function (cellData, searchtxt, row) {
-          var rexp = new RegExp('^' + searchtxt.replace(/\*/g, '.*'), 'i')
-          if (row[idx.gtyp] === 'C')
-            return cellData.match(rexp);
+          var rexp = new RegExp('^' + searchtxt.replace(/\*/g, '.*'), 'i');
+          return cellData.match(rexp);
           if (row[idx.gtyp] === 'W' && row[idx.gid] < 0)
             return cellData.match(rexp);
           if (row[idx.gtyp] === 'W' && row[idx.gid] >= 0)
-            return row[idx.gss].match(rexp)
+            return row[idx.gss].match(rexp);
         },
         flags: function (cellData, searchtxt) {
           return !(flagutils.toBitNumber(searchtxt) & ~cellData);
@@ -211,19 +210,19 @@
 
       var opts = {
         columns: [
-          {name: "Grouping", invisible: true, technical: true, order: 'asc-fix'},
-          {name: "GroupCnt", invisible: true, technical: true},
-          {name: "GroupIds", invisible: true, technical: true},
-          {name: "GroupSort", invisible: true, technical: true},
+          {name: "Grouping", technical: true, invisible: true, order: 'asc-fix'},
+          {name: "GroupCnt", technical: true, invisible: true},
+          {name: "GroupIds", technical: true, invisible: true},
+          {name: "GroupSort", technical: true, invisible: true},
           {name: "WorkorderId", technical: true, invisible: true},
           {name: "StatusId", technical: true, invisible: true},
           {name: "Performer", technical: true, invisible: true},
           {name: "ChargeType", technical: true, invisible: true},
-          {name: "Flags", render: renderer.flags, match: matcher.flags, sortmaster: [{col: idx.flg, sortformat:'flags'}, {col: idx.gid}, {col: idx.gtyp}], tooltip: 'Mögliche Werte: !*pfgksc'},
-          {name: "Frist", render: renderer.frist},
-          {name: "Status"},
-          {name: "Kürzel"},
-          {name: "Auftrag", render: renderer.auftrag, match: matcher.auftrag, sortmaster: [{col: idx.gss}, {col: idx.gtyp}]},
+          {name: "Flags", mandatory: true, render: renderer.flags, match: matcher.flags, sortmaster: [{col: idx.flg, sortformat: 'flags'}, {col: idx.gid}, {col: idx.gtyp}], tooltip: 'Mögliche Werte: !*pfgksc'},
+          {name: "Frist", mandatory: true, render: renderer.frist},
+          {name: "Status", mandatory: true},
+          {name: "Kürzel", mandatory: true},
+          {name: "Auftrag", mandatory: true, render: renderer.auftrag, match: matcher.auftrag, sortmaster: [{col: idx.gss}, {col: idx.gtyp}]},
           {name: "Krankenhaus"},
           {name: "Abteilung"},
           {name: "Fachlichkeit"},

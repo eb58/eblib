@@ -38,6 +38,8 @@
         localStorage[localStorageKey] = JSON.stringify({
           rowsPerPage: myopts.rowsPerPage,
           colorder: myopts.colorder,
+          xxx: _.map(myopts.colorder, function(o,i){ var res = {}; res[myopts.columns[i].name] = o; return res; }),
+          yyy: _.map(myopts.columns, function(o,i){ console.log(o,i); var res = {}; res[o.name] = o.invisible; return res; }),
           invisible: _.pluck(myopts.columns, 'invisible')
         });
       },

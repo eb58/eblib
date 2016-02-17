@@ -249,7 +249,8 @@
           sortcrit[coldef.dbcol] = coldef.order;
           myopts.reloadData(sortcrit);
         }
-        doSort();
+        else
+          doSort();
       }
     }
 

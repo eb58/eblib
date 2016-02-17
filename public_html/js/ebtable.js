@@ -10,6 +10,25 @@
     };
     var ctrlHeight = '24px';
     var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid;
+    var state = {// saving/loading state
+      getStateAsJSON: function () {
+        return JSON.stringify({
+          rowsPerPage: myopts.rowsPerPage,
+          colorder: myopts.colorder,
+          invisible: _.pluck(myopts.columns, 'invisible')
+        });
+      },
+      saveState: function saveState(s) {
+        localStorage[localStorageKey] = s;
+      },
+      loadState: function loadState(s) {
+        var state = s ? $.parseJSON(s) : {};
+        _.each(state.invisible, function (o, idx) {
+          opts.columns[idx].invisible = !!o;
+        });
+        return state;
+      }
+    };
     var util = {
       indexOfCol: function indexOfCol(colname) {
         return _.findIndex(myopts.columns, function (o) {
@@ -32,21 +51,6 @@
         return _.filter(myopts.columns, function (o) {
           return !o.invisible;
         });
-      },
-      // saving/loading state
-      saveState: function saveState() {
-        localStorage[localStorageKey] = JSON.stringify({
-          rowsPerPage: myopts.rowsPerPage,
-          colorder: myopts.colorder,
-          invisible: _.pluck(myopts.columns, 'invisible')
-        });
-      },
-      loadState: function loadState() {
-        var state = localStorage[localStorageKey] ? $.parseJSON(localStorage[localStorageKey]) : {};
-        _.each(state.invisible, function (o, idx) {
-          opts.columns[idx].invisible = !!o;
-        });
-        return state;
       },
       checkConfig: function checkConfig() {
         $.each(myopts.columns, function (idx, coldef) { // set reasonable defaults for coldefs
@@ -86,13 +90,13 @@
       rowsPerPage: 10,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
       selection: false,
-      saveState: util.saveState,
-      loadState: util.loadState,
+      saveState: state.saveState,
+      loadState: state.loadState,
       sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       hasMoreResults: hasMoreResults
     };
-    var myopts = $.extend({}, defopts, opts, defopts.loadState());
+    var myopts = $.extend({}, defopts, opts, state.loadState(localStorage[localStorageKey]), state.loadState(opts.getState ? opts.getState() : ''));
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
     var pageCur = 0;
@@ -120,12 +124,12 @@
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
           var t =
-            '<th id="<%=colname%>">\
+                  '<th id="<%=colname%>">\
                 <div class="sort_wrapper">\
                   <span/><%=colname%>\
                 </div>' +
-            (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
-            '</th>';
+                  (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
+                  '</th>';
           res += _.template(t)({colname: coldef.name, tooltip: coldef.tooltip});
         }
       }
@@ -248,9 +252,9 @@
           var sortcrit = {};
           sortcrit[coldef.dbcol] = coldef.order;
           myopts.reloadData(sortcrit);
-        }
-        else
+        } else {
           doSort();
+        }
       }
     }
 
@@ -274,7 +278,7 @@
         redraw(pageCur);
         $(selgridid + 'thead div span').removeClass();
         $(selgridid + 'thead #' + myopts.sortcolname + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
-        console.log('sorting', myopts.sortcolname, bAsc ? 'aufsteigend': 'absteigend');
+        console.log('sorting', myopts.sortcolname, bAsc ? 'aufsteigend' : 'absteigend');
       }
     }
 
@@ -349,7 +353,7 @@
       filterData();
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template(
-        "<div class='ebtable'>\n\
+              "<div class='ebtable'>\n\
           <div class='ctrl'>\n\
             <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
             <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
@@ -366,7 +370,7 @@
             <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
         </div>"
-        );
+              );
 
       a.html(tableTemplate({
         head: tableHead(),
@@ -393,7 +397,7 @@
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         pageCur = 0;
         redraw(pageCur);
-        myopts.saveState();
+        myopts.saveState(state.getStateAsJSON());
       }
     });
     $(selgridid + '#lenctrl~span').css('height', '21px');
@@ -445,7 +449,7 @@
           myopts.colorder = _.map(myopts.columns, function (col, idx) {
             return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
           });
-          myopts.saveState();
+          myopts.saveState(state.getStateAsJSON());
           redraw(pageCur, true);
           $(this).dialog("close");
         },
@@ -476,12 +480,12 @@
       getFilterValues: function getFilterValues() {
         var filter = {};
         $(selgridid + 'thead th input[type="text"')
-          .filter(function (idx, elem) {
-            return $(elem).val().trim() !== '';
-          })
-          .each(function (idx, elem) {
-            filter[elem.id] = $(elem).val().trim();
-          });
+                .filter(function (idx, elem) {
+                  return $(elem).val().trim() !== '';
+                })
+                .each(function (idx, elem) {
+                  filter[elem.id] = $(elem).val().trim();
+                });
         return filter;
       },
       setFilterValues: function setFilterValues(filter) {
@@ -489,7 +493,8 @@
           $(selgridid + '#' + o.id + ' input').val(filter[o.id]);
         });
         return this;
-      }
+      },
+      loadState: state.loadState
     });
     return this.tooltip();
   };
@@ -513,13 +518,13 @@
     },
     'en': {
       '(<%=len%> Eintr\u00e4ge insgesamt)':
-        '(<%=len%> entries)',
+              '(<%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>':
-        '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
+              '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen':
-        'Configuration',
+              'Configuration',
       'Abbrechen':
-        'Cancel'
+              'Cancel'
     }
   };
 

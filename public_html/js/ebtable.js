@@ -1,7 +1,7 @@
 /* global _ */
 (function ($) {
   "use strict";
-  $.fn.ebtable = function (opts, data) {
+  $.fn.ebtable = function (opts, data, hasMoreResults) {
     var gridid = this[0].id;
     var selgridid = '#' + gridid + ' ';
     var translate = function translate(str) {
@@ -38,8 +38,6 @@
         localStorage[localStorageKey] = JSON.stringify({
           rowsPerPage: myopts.rowsPerPage,
           colorder: myopts.colorder,
-          xxx: _.map(myopts.colorder, function(o,i){ var res = {}; res[myopts.columns[i].name] = o; return res; }),
-          yyy: _.map(myopts.columns, function(o,i){ console.log(o,i); var res = {}; res[o.name] = o.invisible; return res; }),
           invisible: _.pluck(myopts.columns, 'invisible')
         });
       },
@@ -63,7 +61,8 @@
           localStorage[localStorageKey] = '';
           myopts = $.extend({}, defopts, opts);
         }
-        if (localStorage[localStorageKey] && $.parseJSON(localStorage[localStorageKey])['colorder'].length !== myopts.columns.length) {
+        var ls = localStorage[localStorageKey];
+        if (ls && ls['colorder'] && ls['colorder'].length !== myopts.columns.length) {
           alert('Column definition and LocalStorage don\'t match!');
           localStorage[localStorageKey] = '';
           myopts = $.extend({}, defopts, opts);
@@ -71,6 +70,8 @@
         $.each(myopts.columns, function (idx, coldef) {
           if (coldef.technical && !coldef.invisible)
             alert(coldef.name + ": technical column must be invisble!");
+          if (coldef.mandatory && coldef.invisible)
+            alert(coldef.name + ": mandatory column must be visble!");
         });
       }
     };
@@ -88,7 +89,8 @@
       saveState: util.saveState,
       loadState: util.loadState,
       sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
-      groupdefs: {} // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
+      groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
+      hasMoreResults: hasMoreResults
     };
     var myopts = $.extend({}, defopts, opts, defopts.loadState());
     var origData = mx(data, myopts.groupdefs);
@@ -103,7 +105,7 @@
         var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
         var col = myopts.columns[idx];
         var cls = col.invisible ? 'invisible' : 'visible';
-        return res + ( col.technical || col.mandatory  ? '' : _.template(t)({name: col.name, cls: cls}));
+        return res + (col.technical || col.mandatory ? '' : _.template(t)({name: col.name, cls: cls}));
       }, '');
       var t = '<button id="configBtn">' + translate('Anpassen') + '</button>\n\
                <div id="' + gridid + 'configDlg">\n\
@@ -118,12 +120,12 @@
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
           var t =
-              '<th id="<%=colname%>">\
+            '<th id="<%=colname%>">\
                 <div class="sort_wrapper">\
-                  <span class="ui-icon ui-icon-triangle-2-n-s"/><%=colname%>\
+                  <span/><%=colname%>\
                 </div>' +
-                  (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
-              '</th>';
+            (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
+            '</th>';
           res += _.template(t)({colname: coldef.name, tooltip: coldef.tooltip});
         }
       }
@@ -132,6 +134,7 @@
 
     function tableData(pageNr) {
       if (origData[0] && origData[0].length !== myopts.columns.length) {
+        console.log('Definition and Data dont match!');
         return '';
       }
 
@@ -193,8 +196,8 @@
     function infoCtrl() {
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
-      var filtered = origData.length === tblData.length ? '' : _.template(translate('(gefiltert von <%=len%> Eintr\u00e4gen)'))({len: origData.length});
-      var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>"));
+      var filtered = origData.length === tblData.length ? '' : _.template(translate('( <%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
+      var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
       return label;
     }
@@ -236,15 +239,27 @@
     }
 
     function sorting(event) { // sorting
-      var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
       var colname = event.currentTarget.id;
       if (colname) {
-        console.log('sorting', myopts.sortcolname);
         deselectRows();
         myopts.sortcolname = colname;
+        if (myopts.hasMoreResults) {
+          var coldef = myopts.columns[util.indexOfCol(colname)];
+          var sortcrit = {};
+          sortcrit[coldef.dbcol] = coldef.order;
+          myopts.reloadData(sortcrit);
+        }
+        doSort();
+      }
+    }
+
+    function doSort() { // sorting
+      var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+      if (myopts.sortcolname) {
         var colidx = util.indexOfCol(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
         var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
+        var bAsc = coldef.order === 'asc';
         if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
           coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
         }
@@ -253,24 +268,12 @@
           o.order = c.order || 'desc';
           c.order = c.order ? sortToggle[c.order] : 'asc';
         });
-        var cls1 = coldef.order === 'asc' ? 'ui-icon-triangle-1-s' : 'ui-icon-triangle-1-n';
-        $(selgridid + 'thead div span').removeClass('ui-icon-triangle-1-n').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-2-n-s');
-        $(selgridid + 'thead #' + myopts.sortcolname + ' div span').removeClass('ui-icon-triangle-2-n-s').addClass(cls1);
-        doSort();
-      }
-    }
-
-    function doSort() { // sorting
-      if (myopts.sortcolname) {
-        var colidx = util.indexOfCol(myopts.sortcolname);
-        var coldef = myopts.columns[colidx];
-        var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
-          coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
-        }
         tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
         pageCur = 0;
         redraw(pageCur);
+        $(selgridid + 'thead div span').removeClass();
+        $(selgridid + 'thead #' + myopts.sortcolname + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
+        console.log('sorting', myopts.sortcolname, bAsc ? 'aufsteigend': 'absteigend');
       }
     }
 
@@ -315,10 +318,10 @@
       $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
         var val = $(o).val().trim();
         if (val) {
-            var colname = $(o).attr('id');
-            var col = util.indexOfCol(colname);
-            var ren = util.getRender(colname);
-            var mat = util.getMatch(colname);
+          var colname = $(o).attr('id');
+          var col = util.indexOfCol(colname);
+          var ren = util.getRender(colname);
+          var mat = util.getMatch(colname);
           filters.push({col: col, searchtext: $.trim(val), render: ren, match: mat});
         }
       });
@@ -343,7 +346,6 @@
     function initGrid(a) {
       util.checkConfig();
       filterData();
-      doSort();
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template(
         "<div class='ebtable'>\n\
@@ -352,7 +354,7 @@
             <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
             <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
           </div>\n\
-          <div id='data' style='overflow-y:auto;overflow-x:hidden; max-height:<%= bodyHeight %>px; width:100%'>\n\
+          <div id='data' style='overflow-y:auto;overflow-x:auto; max-height:<%= bodyHeight %>px; width:100%'>\n\
             <table>\n\
               <thead><tr><%= head %></tr></thead>\n\
               <tbody><%= data %></tbody>\n\
@@ -363,7 +365,7 @@
             <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
         </div>"
-      );
+        );
 
       a.html(tableTemplate({
         head: tableHead(),
@@ -374,6 +376,7 @@
         info: infoCtrl(),
         bodyHeight: myopts.bodyHeight
       }));
+      doSort();
       //adjustLayout();
     }
 
@@ -428,7 +431,7 @@
       },
       position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
       autoOpen: false,
-      height: _.where(myopts.columns, {invisible: false}).length * 22 + 90,
+      height: _.where(myopts.columns, {invisible: false, mandatory: false}).length * 23 + 90,
       width: 250,
       modal: true,
       resizable: true,
@@ -472,12 +475,12 @@
       getFilterValues: function getFilterValues() {
         var filter = {};
         $(selgridid + 'thead th input[type="text"')
-                .filter(function (idx, elem) {
-                  return $(elem).val().trim() !== '';
-                })
-                .each(function (idx, elem) {
-                  filter[elem.id] = $(elem).val().trim();
-                });
+          .filter(function (idx, elem) {
+            return $(elem).val().trim() !== '';
+          })
+          .each(function (idx, elem) {
+            filter[elem.id] = $(elem).val().trim();
+          });
         return filter;
       },
       setFilterValues: function setFilterValues(filter) {
@@ -508,14 +511,14 @@
     'de': {
     },
     'en': {
-      '(gefiltert von <%=len%> Eintr\u00e4gen)':
-              '(filters from <%=len%> entries)',
-      '<%=start%> bis <%=end%> von <%=count%> Eintr\u00e4gen <%= filtered %>':
-              '<%=start%> to <%=end%> of <%=count%> entries <%= filtered %>',
+      '(<%=len%> Eintr\u00e4ge insgesamt)':
+        '(<%=len%> entries)',
+      '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>':
+        '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen':
-              'Configuration',
+        'Configuration',
       'Abbrechen':
-              'Cancel'
+        'Cancel'
     }
   };
 

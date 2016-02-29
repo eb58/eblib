@@ -22,10 +22,7 @@
         localStorage[localStorageKey] = s;
       },
       loadState: function loadState(s) {
-        var state = s ? $.parseJSON(s) : {};
-        _.each(state.invisible, function (o, idx) {
-          opts.columns[idx].invisible = !!o;
-        });
+        return s ? $.parseJSON(s) : {};
         return state;
       }
     };
@@ -34,6 +31,12 @@
         return _.findIndex(myopts.columns, function (o) {
           return o.name === colname;
         });
+      },
+      colNameFromColid: function colNameFromColid(colid){
+        return  _.findWhere(myopts.columns, {id: colid}).name;
+      },
+      colColIdFromName: function colNameFromColid(colname){
+        return  _.findWhere(myopts.columns, {name: colname}).id;
       },
       colIsInvisible: function colIsInvisible(colname) {
         return _.findWhere(myopts.columns, {name: colname}).invisible;
@@ -123,14 +126,15 @@
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
-          var t =
-                  '<th id="<%=colname%>">\
-                <div class="sort_wrapper">\
-                  <span/><%=colname%>\
-                </div>' +
-                  (myopts.flags.filter ? '<input type="text" id="<%=colname%>" title="<%=tooltip%>"/>' : '') +
-                  '</th>';
-          res += _.template(t)({colname: coldef.name, tooltip: coldef.tooltip});
+          var t = '\
+            <th id="<%=colid%>">\
+              <div class="sort_wrapper">\
+                <span/><%=colname%>\
+              </div>' 
+              + (myopts.flags.filter ? '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>' : '') +
+            '</th>';
+          // &#8209; = non breakable hyphen
+          res += _.template(t)({colname: coldef.name.replace('-', '&#8209;'), colid: coldef.id, tooltip: coldef.tooltip});
         }
       }
       return res;
@@ -243,10 +247,10 @@
     }
 
     function sorting(event) { // sorting
-      var colname = event.currentTarget.id;
-      if (colname) {
+      var colid = event.currentTarget.id;
+      if (colid) {
         deselectRows();
-        myopts.sortcolname = colname;
+        myopts.sortcolname = util.colNameFromColid(colid);
         if (myopts.hasMoreResults) {
           var coldef = myopts.columns[util.indexOfCol(colname)];
           var sortcrit = {};
@@ -277,7 +281,7 @@
         pageCur = 0;
         redraw(pageCur);
         $(selgridid + 'thead div span').removeClass();
-        $(selgridid + 'thead #' + myopts.sortcolname + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
+        $(selgridid + 'thead #' + util.colColIdFromName(myopts.sortcolname) + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
         console.log('sorting', myopts.sortcolname, bAsc ? 'aufsteigend' : 'absteigend');
       }
     }
@@ -323,7 +327,8 @@
       $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
         var val = $(o).val().trim();
         if (val) {
-          var colname = $(o).attr('id');
+          var colid = $(o).attr('id');
+          var colname = util.colNameFromColid(colid);
           var col = util.indexOfCol(colname);
           var ren = util.getRender(colname);
           var mat = util.getMatch(colname);
@@ -350,10 +355,13 @@
 
     function initGrid(a) {
       util.checkConfig();
+      _.each(myopts.columns, function (cdef) {
+        cdef.id = cdef.name.replace(/[^\d\w]/g, '');
+      });
       filterData();
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-      var tableTemplate = _.template(
-              "<div class='ebtable'>\n\
+      var tableTemplate = _.template("\
+        <div class='ebtable'>\n\
           <div class='ctrl'>\n\
             <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
             <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
@@ -369,8 +377,7 @@
             <div id='ctrlInfo'  style='float: left;' class='ui-widget-content'><%= info %></div>\n\
             <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
-        </div>"
-              );
+        </div>");
 
       a.html(tableTemplate({
         head: tableHead(),
@@ -480,12 +487,12 @@
       getFilterValues: function getFilterValues() {
         var filter = {};
         $(selgridid + 'thead th input[type="text"')
-                .filter(function (idx, elem) {
-                  return $(elem).val().trim() !== '';
-                })
-                .each(function (idx, elem) {
-                  filter[elem.id] = $(elem).val().trim();
-                });
+          .filter(function (idx, elem) {
+            return $(elem).val().trim() !== '';
+          })
+          .each(function (idx, elem) {
+            filter[elem.id] = $(elem).val().trim();
+          });
         return filter;
       },
       setFilterValues: function setFilterValues(filter) {
@@ -518,13 +525,13 @@
     },
     'en': {
       '(<%=len%> Eintr\u00e4ge insgesamt)':
-              '(<%=len%> entries)',
+        '(<%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>':
-              '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
+        '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen':
-              'Configuration',
+        'Configuration',
       'Abbrechen':
-              'Cancel'
+        'Cancel'
     }
   };
 

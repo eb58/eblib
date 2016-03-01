@@ -27,9 +27,10 @@
       saveState: function saveState(s) {
         localStorage[localStorageKey] = s;
       },
-      loadState: function loadState(opts, s) {
+      loadState: function loadState(s) {
         var state = s ? $.parseJSON(s) : {};
-        opts.colorder = [];
+        myopts.rowsPerPage = state.rowsPerPage;
+        myopts.colorder = [];
         if (state.colorderByName)
           for (var i = 0; i < state.colorderByName.length; i++) {
             var n = util.indexOfCol(state.colorderByName[i]);
@@ -37,15 +38,15 @@
               opts.colorder.push(n);
             }
           }
-        for (var i = 0; i < opts.columns.length; i++) {
-          if (!_.contains(state.colorderByName, opts.columns[i].name))
+        for (var i = 0; i < myopts.columns.length; i++) {
+          if (!_.contains(state.colorderByName, myopts.columns[i].name))
             opts.colorder.push(i);
         }
 
         _.each(state.invisibleColnames, function (o, idx) {
           var n = util.indexOfCol(o);
           if (n >= 0) {
-            opts.columns[ n].invisible = true;
+            myopts.columns[n].invisible = true;
           }
         });
       }
@@ -228,7 +229,7 @@
     function infoCtrl() {
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
-      var filtered = origData.length === tblData.length ? '' : _.template(translate('( <%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
+      var filtered = origData.length === tblData.length ? '' : _.template(translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
       var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
       return label;
@@ -379,8 +380,8 @@
     // ##############################################################################
 
     function initGrid(a) {
-      state.loadState(myopts, localStorage[localStorageKey]);
-      if(opts.getState) state.loadState(myopts, opts.getState());
+      state.loadState(localStorage[localStorageKey]);
+      if(opts.getState) state.loadState(opts.getState());
       util.checkConfig();
 
       _.each(myopts.columns, function (cdef) {
@@ -504,8 +505,10 @@
       toggleGroupIsOpen: function (groupid) {
         origData.groups[groupid].isOpen = !origData.groups[groupid].isOpen;
         filterData();
+        var pc = pageCur;
         doSort(false);
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+        pageCur = Math.min(pc, pageCurMax);
         redraw(0);
         redraw(pageCur);
       },

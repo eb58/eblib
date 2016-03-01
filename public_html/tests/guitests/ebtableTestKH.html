@@ -54,7 +54,7 @@
               spc: 0, //  Mindestens ein Auftrag in der Charge ist 'special'
               flg: row[idx.flg]
             };
-          } else if (row[0] === 'W' && chargeId >= 0) {
+          } else if (row[0] === 'W' && chargeId >= 0 && groupsdata[chargeId] ) {
             var g = groupsdata[chargeId];
             if (row[idx.frs] < g.fristmin)
               g.fristmin = row[idx.frs];

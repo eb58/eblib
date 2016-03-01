@@ -9,21 +9,45 @@
       return translation || str;
     };
     var ctrlHeight = '24px';
-    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid;
+    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
     var state = {// saving/loading state
       getStateAsJSON: function () {
         return JSON.stringify({
           rowsPerPage: myopts.rowsPerPage,
-          colorder: myopts.colorder,
-          invisible: _.pluck(myopts.columns, 'invisible')
+          colorderByName: _.map(myopts.colorder, function (idx) {
+            return myopts.columns[idx].name;
+          }),
+          invisibleColnames: _.reduce(myopts.columns, function (acc, o) {
+            if (o.invisible && !o.technical)
+              acc.push(o.name);
+            return acc;
+          }, [])
         });
       },
       saveState: function saveState(s) {
         localStorage[localStorageKey] = s;
       },
-      loadState: function loadState(s) {
-        return s ? $.parseJSON(s) : {};
-        return state;
+      loadState: function loadState(opts, s) {
+        var state = s ? $.parseJSON(s) : {};
+        opts.colorder = [];
+        if (state.colorderByName)
+          for (var i = 0; i < state.colorderByName.length; i++) {
+            var n = util.indexOfCol(state.colorderByName[i]);
+            if (n >= 0) {
+              opts.colorder.push(n);
+            }
+          }
+        for (var i = 0; i < opts.columns.length; i++) {
+          if (!_.contains(state.colorderByName, opts.columns[i].name))
+            opts.colorder.push(i);
+        }
+
+        _.each(state.invisibleColnames, function (o, idx) {
+          var n = util.indexOfCol(o);
+          if (n >= 0) {
+            opts.columns[ n].invisible = true;
+          }
+        });
       }
     };
     var util = {
@@ -32,10 +56,10 @@
           return o.name === colname;
         });
       },
-      colNameFromColid: function colNameFromColid(colid){
+      colNameFromColid: function colNameFromColid(colid) {
         return  _.findWhere(myopts.columns, {id: colid}).name;
       },
-      colColIdFromName: function colNameFromColid(colname){
+      colColIdFromName: function colNameFromColid(colname) {
         return  _.findWhere(myopts.columns, {name: colname}).id;
       },
       colIsInvisible: function colIsInvisible(colname) {
@@ -99,7 +123,7 @@
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       hasMoreResults: hasMoreResults
     };
-    var myopts = $.extend({}, defopts, opts, state.loadState(localStorage[localStorageKey]), state.loadState(opts.getState ? opts.getState() : ''));
+    var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
     var pageCur = 0;
@@ -130,8 +154,8 @@
             <th id="<%=colid%>">\
               <div class="sort_wrapper">\
                 <span/><%=colname%>\
-              </div>' 
-              + (myopts.flags.filter ? '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>' : '') +
+              </div>'
+            + (myopts.flags.filter ? '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>' : '') +
             '</th>';
           // &#8209; = non breakable hyphen
           res += _.template(t)({colname: coldef.name.replace('-', '&#8209;'), colid: coldef.id, tooltip: coldef.tooltip});
@@ -257,12 +281,12 @@
           sortcrit[coldef.dbcol] = coldef.order;
           myopts.reloadData(sortcrit);
         } else {
-          doSort();
+          doSort(true);
         }
       }
     }
 
-    function doSort() { // sorting
+    function doSort(b) { // sorting
       var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
       if (myopts.sortcolname) {
         var colidx = util.indexOfCol(myopts.sortcolname);
@@ -272,11 +296,12 @@
         if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
           coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
         }
-        $.each(coldefs, function (idx, o) {
-          var c = myopts.columns[o.col];
-          o.order = c.order || 'desc';
-          c.order = c.order ? sortToggle[c.order] : 'asc';
-        });
+        if (b)
+          $.each(coldefs, function (idx, o) {
+            var c = myopts.columns[o.col];
+            o.order = c.order || 'desc';
+            c.order = c.order ? sortToggle[c.order] : 'asc';
+          });
         tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
         pageCur = 0;
         redraw(pageCur);
@@ -354,7 +379,10 @@
     // ##############################################################################
 
     function initGrid(a) {
+      state.loadState(myopts, localStorage[localStorageKey]);
+      if(opts.getState) state.loadState(myopts, opts.getState());
       util.checkConfig();
+
       _.each(myopts.columns, function (cdef) {
         cdef.id = cdef.name.replace(/[^\d\w]/g, '');
       });
@@ -388,7 +416,7 @@
         info: infoCtrl(),
         bodyHeight: myopts.bodyHeight
       }));
-      doSort();
+      doSort(true);
       //adjustLayout();
     }
 
@@ -476,7 +504,7 @@
       toggleGroupIsOpen: function (groupid) {
         origData.groups[groupid].isOpen = !origData.groups[groupid].isOpen;
         filterData();
-        doSort();
+        doSort(false);
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         redraw(0);
         redraw(pageCur);
@@ -501,6 +529,7 @@
         });
         return this;
       },
+      getStateAsJSON: state.getStateAsJSON,
       loadState: state.loadState
     });
     return this.tooltip();

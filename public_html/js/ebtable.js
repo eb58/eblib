@@ -28,23 +28,23 @@
         localStorage[localStorageKey] = s;
       },
       loadState: function loadState(s) {
-        var state = s ? $.parseJSON(s) : {};
+        var state = JSON.parse(s?s:'{}');
+        if( !s || !state ) return;
+
         myopts.rowsPerPage = state.rowsPerPage;
         myopts.colorder = [];
-        if (state.colorderByName)
-          for (var i = 0; i < state.colorderByName.length; i++) {
-            var n = util.indexOfCol(state.colorderByName[i]);
-            if (n >= 0) {
-              opts.colorder.push(n);
-            }
+        _.each(state.colorderByName, function (colname) {
+          var n = util.indexOfCol(colname);
+          if (n >= 0) {
+            myopts.colorder.push(n);
           }
-        for (var i = 0; i < myopts.columns.length; i++) {
-          if (!_.contains(state.colorderByName, myopts.columns[i].name))
-            opts.colorder.push(i);
-        }
-
-        _.each(state.invisibleColnames, function (o, idx) {
-          var n = util.indexOfCol(o);
+        });
+        _.each(myopts.columns, function (coldef, idx) {
+          if (!_.contains(state.colorderByName, coldef.name))
+            myopts.colorder.push(idx);
+        });
+        _.each(state.invisibleColnames, function (colname) {
+          var n = util.indexOfCol(colname);
           if (n >= 0) {
             myopts.columns[n].invisible = true;
           }
@@ -381,7 +381,8 @@
 
     function initGrid(a) {
       state.loadState(localStorage[localStorageKey]);
-      if(opts.getState) state.loadState(opts.getState());
+      if (opts.getState)
+        state.loadState(opts.getState());
       util.checkConfig();
 
       _.each(myopts.columns, function (cdef) {
@@ -472,7 +473,7 @@
       },
       position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
       autoOpen: false,
-      height: _.where(myopts.columns, {invisible: false, mandatory: false}).length * 23 + 90,
+      height: _.where(myopts.columns, {technical: false, mandatory: false}).length * 23 + 90,
       width: 250,
       modal: true,
       resizable: true,

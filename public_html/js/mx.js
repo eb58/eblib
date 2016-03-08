@@ -12,7 +12,6 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       return _.filter(m, function (r, idx) {
         return _.isFunction(p) ? p(m[r]) : _.indexOf(p, idx) >= 0;
       });
-      return d;
     },
     withoutRows: function withoutRows(p) { // p = predicate-function or arr
       return _.filter(m, function (r, idx) {

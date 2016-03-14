@@ -28,8 +28,9 @@
         localStorage[localStorageKey] = s;
       },
       loadState: function loadState(s) {
-        var state = JSON.parse(s?s:'{}');
-        if( !s || !state ) return;
+        var state = JSON.parse(s ? s : '{}');
+        if (!s || !state)
+          return;
 
         myopts.rowsPerPage = state.rowsPerPage;
         myopts.colorder = [];
@@ -186,10 +187,10 @@
 
         var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
         if (myopts.selection && myopts.selection.render) {
-          var x = '<td ' + cls + '">' + myopts.selection.render(origData, row, checked) + '</td>';
+          var x = '<td ' + cls + '>' + myopts.selection.render(origData, row, checked) + '</td>';
           res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
         } else if (myopts.selection) {
-          res += '<td ' + cls + '"><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
+          res += '<td ' + cls + '><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
         }
 
         var order = myopts.colorder;
@@ -200,7 +201,7 @@
           if (!coldef.invisible) {
             var v = tblData[r][order[c]] || '';
             var val = coldef.render ? coldef.render(v, row) : v;
-            res += '<td ' + cls + '"' + style + '>' + val + '</td>';
+            res += '<td ' + cls + style + '>' + val + '</td>';
           }
         }
         res += '</tr>\n';
@@ -271,44 +272,61 @@
       }
     }
 
+    function showSortingIndicators() {
+      var colid = util.colColIdFromName(myopts.sortcolname);
+      var colidx = util.indexOfCol(myopts.sortcolname);
+      var coldef = myopts.columns[colidx];
+      var bAsc = coldef.order === 'asc';
+      $(selgridid + 'thead div span').removeClass();
+      $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
+    }
+    
+    function sortToggle() {
+      var sortToggleS = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+      var colidx = util.indexOfCol(myopts.sortcolname);
+      var coldef = myopts.columns[colidx];
+      var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
+      if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
+        coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+      }
+      $.each(coldefs, function (idx, o) {
+        myopts.columns[o.col].order = sortToggleS[myopts.columns[o.col].order] || 'asc';
+      });
+    }
+
     function sorting(event) { // sorting
       var colid = event.currentTarget.id;
       if (colid) {
         deselectRows();
         myopts.sortcolname = util.colNameFromColid(colid);
+        sortToggle();
         if (myopts.hasMoreResults) {
-          var coldef = myopts.columns[util.indexOfCol(colname)];
+          var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
           var sortcrit = {};
           sortcrit[coldef.dbcol] = coldef.order;
           myopts.reloadData(sortcrit);
         } else {
-          doSort(true);
+          doSort();
         }
       }
     }
 
-    function doSort(b) { // sorting
-      var sortToggle = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+    function doSort() { // sorting
       if (myopts.sortcolname) {
+        showSortingIndicators();
         var colidx = util.indexOfCol(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
         var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        var bAsc = coldef.order === 'asc';
         if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
           coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
         }
-        if (b)
-          $.each(coldefs, function (idx, o) {
-            var c = myopts.columns[o.col];
-            o.order = c.order || 'desc';
-            c.order = c.order ? sortToggle[c.order] : 'asc';
-          });
+        $.each(coldefs, function (idx, o) {
+          o.order = myopts.columns[o.col].order || 'desc';
+        });
         tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
         pageCur = 0;
         redraw(pageCur);
-        $(selgridid + 'thead div span').removeClass();
-        $(selgridid + 'thead #' + util.colColIdFromName(myopts.sortcolname) + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
-        console.log('sorting', myopts.sortcolname, bAsc ? 'aufsteigend' : 'absteigend');
+        console.log('sorting', myopts.sortcolname);
       }
     }
 
@@ -323,7 +341,10 @@
     function reloading(event) { // reloading
       if (event.which === 13 && myopts.reloadData) {
         console.log('reloading', event, event.which);
-        myopts.reloadData();
+        var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
+        var sortcrit = {};
+        sortcrit[coldef.dbcol] = coldef.order;
+        myopts.reloadData(sortcrit);
         pageCur = 0;
         redraw(pageCur);
         event.preventDefault();
@@ -363,6 +384,7 @@
       });
       tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
       tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
+      doSort();
     }
 
     function redraw(pageCur, withHeader) {
@@ -418,8 +440,7 @@
         info: infoCtrl(),
         bodyHeight: myopts.bodyHeight
       }));
-      doSort(true);
-      //adjustLayout();
+      doSort();
     }
 
     initGrid(this);
@@ -507,7 +528,7 @@
         origData.groups[groupid].isOpen = !origData.groups[groupid].isOpen;
         filterData();
         var pc = pageCur;
-        doSort(false);
+        doSort();
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         pageCur = Math.min(pc, pageCurMax);
         redraw(0);

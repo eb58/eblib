@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TODO supply a title</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <link rel='stylesheet' href='/lib/jQueryUI-1.11.4/jquery-ui.css'>
+    <style>
+      * {font-family:Arial;color: black;font-size: 10px;}
+      body{ margin: 20px 20px 20px 20px; }
+
+      .textfield{ margin: 15px 1px 15px 1px; width:600px;}
+      .ui-selectmenu-button {width:300px;}
+      textarea{ width:500px;}
+      #dlgQas textarea{ width:450px;}
+
+      #orderresponse { width:500px; }
+      #himilist{ margin: 5px 1px 5px 1px; width:500px;}
+      #orderattr{ margin: 5px 1px 5px 1px; width:500px;}
+
+      table, td { border: 1px solid lightgrey; border-collapse: collapse;padding: 5px 3px ;}
+      #himilist table td:first-child { width: 500px;}
+    </style>
+    <script src='/lib/underscore-1.8.3/underscore-1.8.3.js'></script>
+    <script src='/lib/jquery-1.11.3/jquery-1.11.3.js'></script>
+    <script src='/lib/jQueryUI-1.11.4/jquery-ui.js'></script>
+    <script src="/data/himidata.js"></script>
+    <script src="/js/mx.js"></script>
+    <script src="/js/ebtable.js"></script>
+    <script src="/js/himi.js"></script>
+
+    <script>
+      // Himitabelle
+      var rendererHimi = {
+        edit: function (data, row) {
+          return "<span id='himi" + row[1] + "' class='ui-icon ui-icon-pencil'></span>";
+        },
+        del: function (data, row) {
+          return "<span id='himi" + row[1] + "' class='ui-icon ui-icon-trash'></span>";
+        }
+      };
+      var himilistopts = {
+        columns: [
+          {name: ''},
+          {render: rendererHimi.edit},
+          {render: rendererHimi.del}
+        ]
+      };
+      // QAS-Tabelle
+      var rendererQas = {
+        id: function (data, row) {
+          return row[0];
+        },
+        edit: function (data, row) {
+          return "<span id='qas" + row[0] + "' class='ui-icon ui-icon-pencil'></span>";
+        },
+        del: function (data, row) {
+          return "<span id='qas" + row[0] + "' class='ui-icon ui-icon-trash'></span>";
+        },
+        motivation: function (data, row) {
+          return data.substring(0, 300) + '...';
+        }
+      };
+      var qaslistopts = {
+        columns: [
+          {name: "", render: rendererQas.id},
+          {name: "Frage"},
+          {name: "Antwort"},
+          {name: "Begründung", render: rendererQas.motivation},
+          {name: '', render: rendererQas.edit},
+          {name: '', render: rendererQas.del}
+        ]
+      };
+
+      function selectVal(id, val) {
+        var x = '#' + id;
+        $(x + " option[val='" + val + "']").attr('selected', true);
+        $(x).selectmenu('refresh');
+      }
+      function selectBox(id, opts) {
+        return  _.template("<select id='<%=id%>' class='selectmenu'><%=opts%></select>")({opts: himiutils.opts(opts), id: id});
+      }
+      // Actions for Qaslist
+      function initQaslist(qas) {
+        $('#qastable .ui-icon-pencil').on('click', function (ev) {
+          var id = ev.target.id.replace('qas', '');
+
+          $('#quests').html(selectBox('quests', quests));
+          $('#quests option[val=' + qas[id - 1]['question-number'] + ']').attr('selected', true);
+
+          $('#answs').html(selectBox('answs', answs));
+          $('#answs  option[val=' + qas[id - 1]['answer-number'] + ']').attr('selected', true);
+
+          $('#dlgQas .selectmenu').selectmenu();
+          $('#dlgQas .ui-selectmenu-button').width(450);
+          $('#dlgQas textarea').val(qas[id - 1]['motivation']);
+
+          $('#dlgQas').dialog('option', 'title', 'QAS ' + id).dialog('open');
+        });
+        $('#qastable .ui-icon-trash').on('click', function (ev) {
+          console.log(ev.target.id);
+          $('#' + ev.target.id).parent().parent().remove();
+        });
+        $('#dlgHimi #addQas').on('click', function () {
+          var nqasentry = {"id": qas.length + 1, "question-id": 1, "question-number": "01", "question-text": "Ist das beantragte Hilfsmittel medizinisch notwendig?", "answer-id": 3, "answer-number": "3", "answer-text": "Andere Antwort", "motivation": ""};
+          qas.push(nqasentry);
+          $('#quests').html(selectBox('quests', quests));
+          $('#answs').html(selectBox('answs', answs));
+          $('#dlgQas .selectmenu').selectmenu();
+          $('#dlgQas .ui-selectmenu-button').width(450);
+          $('#dlgQas').dialog('option', 'title', 'Neue QAS').dialog('open');
+        });
+      }
+
+      $(document).ready(function () {
+        var himidata = jsonresult.himi;
+        var himis = jsonresult.himi.himis;
+        var himidata = _.zip(_.pluck(himis, 'text'), _.pluck(himis, 'id'), _.pluck(himi.himis, 'id'));
+
+        $('#grid').himitable(himilistopts, himidata);
+
+        // Select Auftrags-Antwort
+        $('#answers').html(selectBox('orderresponse', answs));
+        $('#orderresponse').selectmenu();
+
+        // Textareas
+        $('#medical-base').val(himidata['medical-base']);
+        $('#anamnesis').val(himidata['anamnesis']);
+        $('#indication').val(himidata['indication']);
+        $('#evaluation').val(himidata['evaluation']);
+        $('#suggestion').val(himidata['suggestion']);
+
+
+        // Actions for Himilist
+        $('#himilist .ui-icon-pencil').on('click', function (ev) {
+          var id = ev.target.id.replace('himi', '');
+          var himiname = himis[id].text;
+          console.log(id, himiname);
+          var qas = himis[id].qas;
+          var qasdata = _.zip(_.pluck(qas, 'id'), _.pluck(qas, 'question-text'), _.pluck(qas, 'answer-text'), _.pluck(qas, 'motivation'), _.pluck(qas, 'answer-id'), _.pluck(qas, 'answer-id'));
+          $('#qastable').himitable(qaslistopts, qasdata);
+
+          $('#dlgHimi').dialog('option', 'title', 'Hilfmittel ' + himiname).dialog('open');
+          $('#dlgHimi input').val(himiname);
+          $('#dlgHimi .selectmenu').selectmenu();
+          $('#dlgHimi .ui-selectmenu-button').width(600);
+          $('#dlgHimi textarea').width(600);
+          initQaslist(qas);
+        });
+        $('#himilist .ui-icon-trash').on('click', function (ev) {
+          $('#' + ev.target.id).parent().parent().remove();
+        });
+        $('#himilist #addHimi').on('click', function () {
+          $('#dlgHimi input').val('');
+          $('#dlgHimi').dialog('option', 'title', 'Neues Hilfmittel').dialog('open');
+        });
+
+        // HIMI-Dialog
+        $('#dlgHimi').dialog({
+          title: 'Hilfsmittel',
+          autoOpen: false,
+          height: 400,
+          width: 700,
+          buttons: {
+            Ok: function () {
+              $(this).dialog("close");
+            },
+            Abbrechen: function () {
+              $(this).dialog("close");
+            }
+          }
+        });
+
+        // Qas-Dialog
+        $('#dlgQas').dialog({
+          title: 'Frage',
+          autoOpen: false,
+          height: 300,
+          width: 500,
+          buttons: {
+            Ok: function () {
+              $(this).dialog("close");
+            },
+            Abbrechen: function () {
+              $(this).dialog("close");
+            }
+          }
+        });
+
+      });
+    </script>
+  </head>
+  <body>
+    <div id='himilist'>
+      <h1>Hilfsmittel:</h1>
+      <div id='grid'></div>
+      <span id='addHimi' class='ui-icon ui-icon-circle-plus'></span>
+      <br>
+    </div>
+    <div id='orderattr'>
+      <h1>Auftrags-Antwort:</h1>
+      <div id='answers'></div>
+      <div class='textfield'><h1>Medizinische Unterlagen:</h1><textarea id='medical-base' rows='3' cols='80'></textarea></div>
+      <div class='textfield'><h1>Anamnese:</h1><textarea id='anamnesis' rows='3' cols='80'></textarea></div>
+      <div class='textfield'><h1>Befund:</h1><textarea id='indication' rows='3' cols='80'></textarea></div>
+      <div class='textfield'><h1>Antwort mit Begründung:</h1><textarea id='evaluation' rows='3' cols='80'></textarea></div>
+      <div class='textfield'><h1>Empfehlung:</h1><textarea id='suggestion' rows='3' cols='80'></textarea></div>
+    </div>
+
+    <div id='dlgHimi'>
+      <h1>Hilfsmittel:</h1>
+      <input id='himi' style='width:100%' type='text'/>
+      <h1>Fragen:</h1>
+      <div id="qastable"></div>
+      <span id='addQas' class='ui-icon ui-icon-circle-plus'></span>
+    </div>
+
+    <div id='dlgQas'>
+      <div id='quests'></div>
+      <div id='answs'></div>
+      <h1>Begründung:</h1>
+      <textarea id="reason" rows=5 cols=80></textarea>
+    </div>
+  </body>
+</html>

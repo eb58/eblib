@@ -15,25 +15,25 @@
 
     <script>
       $(document).ready(function () {
-        var onselchange = function onselchange(select) {
-          $("#for" + select.id).val(select.getSelectedValues().join());
-        };
-        var opts1 = {
-          values: [
-            {value: '1', label: 'Besonderheit1'},
-            {value: '2', label: 'Besonderheit2'},
-            {value: '3', label: 'Besonderheit3'},
-            {value: '4', label: 'Besonderheit4'},
-            {value: '5', label: 'Besonderheit5'}
-          ],
-          //height: 80,
-          //width: 200,
-          onselchange: onselchange
-        };
-        var data1 = $("#forselect1").val().split(',');
-        $("#select1").ebselect(opts1, data1);
-        var opts2 = {values: ['test1', 'test2', 'test3', 'test4'], onselchange: onselchange};
-        $("#select2").ebselect(opts2, [1, 3]);
+      var onselchange = function onselchange(select) {
+      $("#for" + select.id).val(select.getSelectedValues().join());
+      };
+      var opts1 = {
+      values: [
+      {value: '1', label: 'Besonderheit1'},
+      {value: '2', label: 'Besonderheit2'},
+      {value: '3', label: 'Besonderheit3'},
+      {value: '4', label: 'Besonderheit4'},
+      {value: '5', label: 'Besonderheit5'}
+      ],
+        //height: 80,
+        //width: 200,
+        onselchange: onselchange
+      };
+      var data1 = $("#forselect1").val().split(',');
+      $("#select1").ebselect(opts1, data1);
+      var opts2 = {values: ['test1', 'test2', 'test3', 'test4'], onselchange: onselchange};
+      $("#select2").ebselect(opts2, [1, 3]);
       });
     </script>
   </head>

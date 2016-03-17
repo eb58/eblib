@@ -4,66 +4,82 @@
     <title>TODO supply a title</title>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <link rel='stylesheet' href='/lib/jQueryUI-1.11.4/jquery-ui.css'>
-    <style>
-      * {font-family:Arial;color: black;font-size: 10px;}
-      body{ margin: 20px 20px 20px 20px; }
+    <link rel="stylesheet" href="../../lib/jQueryUI-1.11.4/jquery-ui.css" type="text/css"/>
 
+    <style>
+      * {font-family:Arial;color: black;font-size: 12px;}
+      body{ margin: 20px 20px 20px 20px; }
+      table, td { border: 1px solid lightgrey; border-collapse: collapse;padding: 5px 3px ;}
+      textarea{ width:500px;}
       .textfield{ margin: 15px 1px 15px 1px; width:600px;}
       .ui-selectmenu-button {width:300px;}
-      textarea{ width:500px;}
-      #dlgQas textarea{ width:450px;}
 
       #orderresponse { width:500px; }
       #himilist{ margin: 5px 1px 5px 1px; width:500px;}
       #orderattr{ margin: 5px 1px 5px 1px; width:500px;}
-
-      table, td { border: 1px solid lightgrey; border-collapse: collapse;padding: 5px 3px ;}
-      #himilist table td:first-child { width: 500px;}
+      #himilist table td:nth-child(2) { width: 500px;}
+      #dlgQas textarea{ width:450px;}
     </style>
     <script src='/lib/underscore-1.8.3/underscore-1.8.3.js'></script>
     <script src='/lib/jquery-1.11.3/jquery-1.11.3.js'></script>
     <script src='/lib/jQueryUI-1.11.4/jquery-ui.js'></script>
-    <script src="/data/himidata.js"></script>
-    <script src="/js/mx.js"></script>
-    <script src="/js/ebtable.js"></script>
     <script src="/js/himi.js"></script>
-
     <script>
+      var
+        himis,
+        acthimirow,
+        actqasrow;
+      // ##########################################################################################################
       // Himitabelle
+      // ##########################################################################################################
       var rendererHimi = {
-        edit: function (data, row) {
-          return "<span id='himi" + row[1] + "' class='ui-icon ui-icon-pencil'></span>";
+        lfdnr: function (data, row, r) {
+          //return row[3] ? row[0] : '';
+          return r + 1;
         },
-        del: function (data, row) {
-          return "<span id='himi" + row[1] + "' class='ui-icon ui-icon-trash'></span>";
+        item: function (data, row) {
+          return data;
+        },
+        edit: function (data, row, r) {
+          return "<span id='himi" + r + "' class='ui-icon ui-icon-pencil'></span>";
+        },
+        del: function (data, row, r) {
+          var isdigital = row[3];
+          return isdigital ? "" : "<span id='himi" + r + "' class='ui-icon ui-icon-trash'></span>";
         }
       };
       var himilistopts = {
         columns: [
-          {name: ''},
+          {render: rendererHimi.lfdnr},
+          {render: rendererHimi.item},
           {render: rendererHimi.edit},
           {render: rendererHimi.del}
         ]
       };
+      // ##########################################################################################################
       // QAS-Tabelle
+      // ##########################################################################################################
       var rendererQas = {
-        id: function (data, row) {
-          return row[0];
-        },
-        edit: function (data, row) {
-          return "<span id='qas" + row[0] + "' class='ui-icon ui-icon-pencil'></span>";
-        },
-        del: function (data, row) {
-          return "<span id='qas" + row[0] + "' class='ui-icon ui-icon-trash'></span>";
+        lfdnr: function (data, row, r) {
+          return r + 1;
         },
         motivation: function (data, row) {
-          return data.substring(0, 300) + '...';
+          return row[6].substring(0, 500) + (row[6].length > 500 ? '...' : '');
+        },
+        edit: function (data, row, r) {
+          return "<span id='qas" + r + "' class='ui-icon ui-icon-pencil'></span>";
+        },
+        del: function (data, row, r) {
+          var isdigital = row[0];
+          return isdigital ? "" : "<span id='qas" + r + "' class='ui-icon ui-icon-trash'></span>";
         }
       };
       var qaslistopts = {
         columns: [
-          {name: "", render: rendererQas.id},
+          {name: "Digital", invisible: true},
+          {name: "Fragenummer", invisible: true},
+          {name: "Antwortnummer", invisible: true},
+          {name: "", render: rendererQas.lfdnr},
           {name: "Frage"},
           {name: "Antwort"},
           {name: "Begründung", render: rendererQas.motivation},
@@ -72,144 +88,185 @@
         ]
       };
 
-      function selectVal(id, val) {
-        var x = '#' + id;
-        $(x + " option[val='" + val + "']").attr('selected', true);
-        $(x).selectmenu('refresh');
-      }
-      function selectBox(id, opts) {
-        return  _.template("<select id='<%=id%>' class='selectmenu'><%=opts%></select>")({opts: himiutils.opts(opts), id: id});
-      }
-      // Actions for Qaslist
-      function initQaslist(qas) {
-        $('#qastable .ui-icon-pencil').on('click', function (ev) {
-          var id = ev.target.id.replace('qas', '');
+      // ##########################################################################################################
 
-          $('#quests').html(selectBox('quests', quests));
-          $('#quests option[val=' + qas[id - 1]['question-number'] + ']').attr('selected', true);
-
-          $('#answs').html(selectBox('answs', answs));
-          $('#answs  option[val=' + qas[id - 1]['answer-number'] + ']').attr('selected', true);
-
-          $('#dlgQas .selectmenu').selectmenu();
-          $('#dlgQas .ui-selectmenu-button').width(450);
-          $('#dlgQas textarea').val(qas[id - 1]['motivation']);
-
-          $('#dlgQas').dialog('option', 'title', 'QAS ' + id).dialog('open');
+      function initHimiTable(himis) {
+        var himidata = _.map(himis, function (h) {
+          return ['', h.number + ' ' + h.text, '', h.digital];
         });
-        $('#qastable .ui-icon-trash').on('click', function (ev) {
-          console.log(ev.target.id);
-          $('#' + ev.target.id).parent().parent().remove();
-        });
-        $('#dlgHimi #addQas').on('click', function () {
-          var nqasentry = {"id": qas.length + 1, "question-id": 1, "question-number": "01", "question-text": "Ist das beantragte Hilfsmittel medizinisch notwendig?", "answer-id": 3, "answer-number": "3", "answer-text": "Andere Antwort", "motivation": ""};
-          qas.push(nqasentry);
-          $('#quests').html(selectBox('quests', quests));
-          $('#answs').html(selectBox('answs', answs));
-          $('#dlgQas .selectmenu').selectmenu();
-          $('#dlgQas .ui-selectmenu-button').width(450);
-          $('#dlgQas').dialog('option', 'title', 'Neue QAS').dialog('open');
-        });
-      }
-
-      $(document).ready(function () {
-        var himidata = jsonresult.himi;
-        var himis = jsonresult.himi.himis;
-        var himidata = _.zip(_.pluck(himis, 'text'), _.pluck(himis, 'id'), _.pluck(himi.himis, 'id'));
-
         $('#grid').himitable(himilistopts, himidata);
+        initActionsForHimilist();
+      }
+
+      function initQasTable(qas) {
+        var qasdata = _.map(qas, function (qa) {
+          return [qa.digital, qa['question-number'], qa['answer-number'], '', qa['question-text'], qa['answer-text'], qa['motivation']];
+        });
+        $('#qastable').himitable(qaslistopts, qasdata);
+        initActionsForQaslist(qas);
+      }
+
+      // ##########################################################################################################
+
+      function initActionsForHimilist() { // Actions for Himilist
+        $('#himilist .ui-icon-trash').off().on('click', function (ev) { // delete himi
+          var r = parseInt(ev.target.id.replace('himi', ''));
+          himis.splice(r, 1);
+          initHimiTable(himis);
+        });
+        $('#himilist .ui-icon-pencil').off().on('click', function (ev) { // edit himi
+          var r = parseInt(ev.target.id.replace('himi', ''));
+          $('#dlgHimi').dialog('option', 'title', 'Hilfsmittel ' + himis[r].text).dialog('open');
+          $('#dlgHimi input#himinumber').val(himis[r].number);
+          $('#dlgHimi input#himiname').val(himis[r].text);
+          initQasTable(himis[r].qas);
+          acthimirow = r;
+        });
+        $('#himilist #addHimi').off().on('click', function () { // add himi
+          var nhimi = himiutils.createHimi('', '');
+          nhimi.isnew = true;
+          himis.push(nhimi);
+          //$('#dlgHimi .himitable').remove();
+          $('#dlgHimi').dialog('option', 'title', 'Neues Hilfsmittel').dialog('open');
+          $('#dlgHimi input#himinumber').val('');
+          $('#dlgHimi input#himiname').val('');
+          var r = himis.length - 1;
+          initQasTable(himis[r].qas);
+          acthimirow = r;
+        });
+      }
+
+      function initActionsForQaslist(qas) {   // Actions for Qaslist
+        $('#qastable .ui-icon-trash').off().on('click', function (ev) { // delete qas
+          var r = parseInt(ev.target.id.replace('qas', ''));
+          var qas = himis[acthimirow].qas;
+          qas.splice(r, 1);
+          initQasTable(qas);
+        });
+        $('#qastable .ui-icon-pencil').off().on('click', function (ev) { // edit qas
+          var r = parseInt(ev.target.id.replace('qas', ''));
+          var actqas = qas[r];
+          actqasrow = r;
+          $('#quests').html(himiutils.selectBox('quests', quests));
+          $('#quests option[val=' + actqas['question-number'] + ']').attr('selected', true);
+          $('#answs').html(himiutils.selectBox('answs', answs));
+          $('#answs  option[val=' + actqas['answer-number'] + ']').attr('selected', true);
+          $('#dlgQas .selectmenu').selectmenu().selectmenu('enable');
+          $('#dlgQas select#quests').selectmenu().selectmenu(actqas.digital ? 'disable' : 'enable');
+          $('#dlgQas .ui-selectmenu-button').width(450);
+          $('#dlgQas textarea').val(actqas['motivation']);
+          $('#dlgQas').dialog('option', 'title', 'Frage ' + (r + 1)).dialog('open');
+        });
+        $('#addQas').off().on('click', function () {  // add qas
+          var nqa = himiutils.createQas(-1, $('#dlgQas #reason').val(), quests[0], answs[0]);
+          nqa.isnew = true;
+          himis[acthimirow].qas.push(nqa);
+          $('#quests').html(himiutils.selectBox('quests', quests));
+          $('#answs').html(himiutils.selectBox('answs', answs));
+          $('#dlgQas .selectmenu').selectmenu();
+          $('#dlgQas .ui-selectmenu-button').width(450);
+          $('#dlgQas textarea').val('');
+          $('#dlgQas').dialog('option', 'title', 'Neue Frage').dialog('open');
+          actqasrow = himis[acthimirow].qas.length - 1;
+        });
+      }
+
+      function initDialog(data) {
+        initHimiTable(data.himis);
 
         // Select Auftrags-Antwort
-        $('#answers').html(selectBox('orderresponse', answs));
-        $('#orderresponse').selectmenu();
+        $('#answers').html(himiutils.selectBox('orderresponse', answs));
+        $('#orderresponse').selectmenu({
+          change: function (event, ui) {
+            data['global-answer-id'] = ui.item.index;
+          }
+        });
 
         // Textareas
-        $('#medical-base').val(himidata['medical-base']);
-        $('#anamnesis').val(himidata['anamnesis']);
-        $('#indication').val(himidata['indication']);
-        $('#evaluation').val(himidata['evaluation']);
-        $('#suggestion').val(himidata['suggestion']);
-
-
-        // Actions for Himilist
-        $('#himilist .ui-icon-pencil').on('click', function (ev) {
-          var id = ev.target.id.replace('himi', '');
-          var himiname = himis[id].text;
-          console.log(id, himiname);
-          var qas = himis[id].qas;
-          var qasdata = _.zip(_.pluck(qas, 'id'), _.pluck(qas, 'question-text'), _.pluck(qas, 'answer-text'), _.pluck(qas, 'motivation'), _.pluck(qas, 'answer-id'), _.pluck(qas, 'answer-id'));
-          $('#qastable').himitable(qaslistopts, qasdata);
-
-          $('#dlgHimi').dialog('option', 'title', 'Hilfmittel ' + himiname).dialog('open');
-          $('#dlgHimi input').val(himiname);
-          $('#dlgHimi .selectmenu').selectmenu();
-          $('#dlgHimi .ui-selectmenu-button').width(600);
-          $('#dlgHimi textarea').width(600);
-          initQaslist(qas);
-        });
-        $('#himilist .ui-icon-trash').on('click', function (ev) {
-          $('#' + ev.target.id).parent().parent().remove();
-        });
-        $('#himilist #addHimi').on('click', function () {
-          $('#dlgHimi input').val('');
-          $('#dlgHimi').dialog('option', 'title', 'Neues Hilfmittel').dialog('open');
+        $('#medical-base').val(data['medical-base']);
+        $('#anamnesis').val(data['anamnesis']);
+        $('#indication').val(data['indication']);
+        $('#evaluation').val(data['evaluation']);
+        $('#suggestion').val(data['suggestion']);
+        $('#medical-base,#anamnesis,#indication,#evaluation,#suggestion').on("change", function (ev) {
+          console.log('change', ev.target.id, $('#' + ev.target.id).val());
+          data[ev.target.id] = $('#' + ev.target.id).val();
         });
 
         // HIMI-Dialog
-        $('#dlgHimi').dialog({
-          title: 'Hilfsmittel',
-          autoOpen: false,
-          height: 400,
-          width: 700,
+        $('#dlgHimi').dialog({title: 'Hilfsmittel', autoOpen: false, height: 400, width: 700,
           buttons: {
             Ok: function () {
+              himis[acthimirow].text = $('#dlgHimi input#himiname').val();
+              himis[acthimirow].number = $('#dlgHimi input#himinumber').val();
+              delete himis[acthimirow].isnew;
+              initHimiTable(himis);
               $(this).dialog("close");
             },
             Abbrechen: function () {
+              if (_.last(himis).isnew) {
+                himis.pop();
+              }
               $(this).dialog("close");
             }
           }
         });
 
         // Qas-Dialog
-        $('#dlgQas').dialog({
-          title: 'Frage',
-          autoOpen: false,
-          height: 300,
-          width: 500,
+        $('#dlgQas').dialog({title: 'Frage', autoOpen: false, height: 300, width: 500,
           buttons: {
             Ok: function () {
+              himis[acthimirow].qas[actqasrow].motivation = $('#dlgQas #reason').val();
+              _.extend(himis[acthimirow].qas[actqasrow], _.findWhere(quests, {'question-number': $('#dlgQas select#quests option:selected').attr('val')})),
+                _.extend(himis[acthimirow].qas[actqasrow], _.findWhere(answs, {'answer-number': $('#dlgQas select#answs  option:selected').attr('val')}));
+              initQasTable(himis[acthimirow].qas);
               $(this).dialog("close");
             },
             Abbrechen: function () {
+              if (_.last(himis[acthimirow].qas).isnew) {
+                himis[acthimirow].qas.pop();
+              }
               $(this).dialog("close");
             }
           }
         });
+      }
 
+      $(document).ready(function () {
+        $.ajax({
+          url: "/data/himidata.js",
+          success: function () {
+             //console.log( data );
+            himis = result.data.himis;
+            initDialog(result.data);
+          }
+        });
       });
+
     </script>
   </head>
   <body>
+
     <div id='himilist'>
       <h1>Hilfsmittel:</h1>
       <div id='grid'></div>
       <span id='addHimi' class='ui-icon ui-icon-circle-plus'></span>
       <br>
     </div>
+
     <div id='orderattr'>
       <h1>Auftrags-Antwort:</h1>
       <div id='answers'></div>
-      <div class='textfield'><h1>Medizinische Unterlagen:</h1><textarea id='medical-base' rows='3' cols='80'></textarea></div>
-      <div class='textfield'><h1>Anamnese:</h1><textarea id='anamnesis' rows='3' cols='80'></textarea></div>
-      <div class='textfield'><h1>Befund:</h1><textarea id='indication' rows='3' cols='80'></textarea></div>
-      <div class='textfield'><h1>Antwort mit Begründung:</h1><textarea id='evaluation' rows='3' cols='80'></textarea></div>
-      <div class='textfield'><h1>Empfehlung:</h1><textarea id='suggestion' rows='3' cols='80'></textarea></div>
+      <div class='textfield'><h1>Medizinische Unterlagen:  </h1><textarea id='medical-base' rows='4' cols='80'></textarea></div>
+      <div class='textfield'><h1>Anamnese:                 </h1><textarea id='anamnesis'    rows='4' cols='80'></textarea></div>
+      <div class='textfield'><h1>Befund:                   </h1><textarea id='indication'   rows='4' cols='80'></textarea></div>
+      <div class='textfield'><h1>Antwort mit Begründung:   </h1><textarea id='evaluation'   rows='4' cols='80'></textarea></div>
+      <div class='textfield'><h1>Empfehlung:               </h1><textarea id='suggestion'   rows='4' cols='80'></textarea></div>
     </div>
 
     <div id='dlgHimi'>
-      <h1>Hilfsmittel:</h1>
-      <input id='himi' style='width:100%' type='text'/>
+      <h2>Nummer:</h2><input id='himinumber' style='width:100%' type='text'/>
+      <h2>Bezeichnung:</h2><input id='himiname' style='width:100%' type='text'/>
       <h1>Fragen:</h1>
       <div id="qastable"></div>
       <span id='addQas' class='ui-icon ui-icon-circle-plus'></span>
@@ -221,5 +278,6 @@
       <h1>Begründung:</h1>
       <textarea id="reason" rows=5 cols=80></textarea>
     </div>
+
   </body>
 </html>

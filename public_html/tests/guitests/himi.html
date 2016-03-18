@@ -7,12 +7,16 @@
     <link rel="stylesheet" href="../../lib/jQueryUI-1.11.4/jquery-ui.css" type="text/css"/>
 
     <style>
-      * {font-family:Arial;color: black;font-size: 12px;}
+      * {font-family:Arial;color: black; font-size: 12px;}
       body{ margin: 20px 20px 20px 20px; }
       table, td { border: 1px solid lightgrey; border-collapse: collapse;padding: 5px 3px ;}
       textarea{ width:500px;}
+      label { display: inline-block; vertical-align: baseline; width: 80px;  margin: 5px 2px; font-weight: bold}
+      input { display: inline-block; vertical-align: baseline; width: 550px; margin: 5px 2px;}
+
       .textfield{ margin: 15px 1px 15px 1px; width:600px;}
       .ui-selectmenu-button {width:300px;}
+      .ui-selectmenu-menu {height:250px; overflow:auto}
 
       #orderresponse { width:500px; }
       #himilist{ margin: 5px 1px 5px 1px; width:500px;}
@@ -28,14 +32,14 @@
       var
         himis,
         acthimirow,
-        actqasrow;
+        actqasrow,
+        readonly = false;
       // ##########################################################################################################
       // Himitabelle
       // ##########################################################################################################
       var rendererHimi = {
         lfdnr: function (data, row, r) {
-          //return row[3] ? row[0] : '';
-          return r + 1;
+          return data;
         },
         item: function (data, row) {
           return data;
@@ -43,43 +47,60 @@
         edit: function (data, row, r) {
           return "<span id='himi" + r + "' class='ui-icon ui-icon-pencil'></span>";
         },
+        info: function (data, row, r) {
+          return "<span id='himi" + r + "' class='ui-icon ui-icon-info'></span>";
+        },
         del: function (data, row, r) {
-          var isdigital = row[3];
+          var isdigital = row[0];
           return isdigital ? "" : "<span id='himi" + r + "' class='ui-icon ui-icon-trash'></span>";
         }
       };
-      var himilistopts = {
+
+      var himilistopts_edit = {
         columns: [
+          {name: "Digital", invisible: true},
           {render: rendererHimi.lfdnr},
           {render: rendererHimi.item},
           {render: rendererHimi.edit},
           {render: rendererHimi.del}
         ]
       };
+      var himilistopts_readonly = {
+        columns: [
+          {name: "Digital", invisible: true},
+          {render: rendererHimi.lfdnr},
+          {render: rendererHimi.item},
+          {render: rendererHimi.info}
+        ]
+      };
+
+      var himilistopts = readonly ? himilistopts_readonly : himilistopts_edit
+
       // ##########################################################################################################
       // QAS-Tabelle
       // ##########################################################################################################
       var rendererQas = {
-        lfdnr: function (data, row, r) {
-          return r + 1;
-        },
+//        lfdnr: function (data, row, r) {
+//          return data;
+//        },
         motivation: function (data, row) {
-          return row[6].substring(0, 500) + (row[6].length > 500 ? '...' : '');
+          return data.substring(0, 500) + (data.length > 500 ? '...' : '');
         },
         edit: function (data, row, r) {
           return "<span id='qas" + r + "' class='ui-icon ui-icon-pencil'></span>";
+        },
+        info: function (data, row, r) {
+          return "<span id='qas" + r + "' class='ui-icon ui-icon-info'></span>";
         },
         del: function (data, row, r) {
           var isdigital = row[0];
           return isdigital ? "" : "<span id='qas" + r + "' class='ui-icon ui-icon-trash'></span>";
         }
       };
-      var qaslistopts = {
+      var qaslistopts_edit = {
         columns: [
           {name: "Digital", invisible: true},
-          {name: "Fragenummer", invisible: true},
-          {name: "Antwortnummer", invisible: true},
-          {name: "", render: rendererQas.lfdnr},
+          //{name: "", render: rendererQas.lfdnr},
           {name: "Frage"},
           {name: "Antwort"},
           {name: "Begründung", render: rendererQas.motivation},
@@ -87,12 +108,23 @@
           {name: '', render: rendererQas.del}
         ]
       };
+      var qaslistopts_readonly =
+        {columns: [
+            {name: "Digital", invisible: true},
+            //{name: "", render: rendererQas.lfdnr},
+            {name: "Frage"},
+            {name: "Antwort"},
+            {name: "Begründung", render: rendererQas.motivation},
+            {name: '', render: rendererQas.info}
+          ]
+        };
+      var qaslistopts = readonly ? qaslistopts_readonly : qaslistopts_edit;
 
       // ##########################################################################################################
 
       function initHimiTable(himis) {
         var himidata = _.map(himis, function (h) {
-          return ['', h.number + ' ' + h.text, '', h.digital];
+          return [h.digital, h['lfd-nr'], h.number + ' ' + h.text];
         });
         $('#grid').himitable(himilistopts, himidata);
         initActionsForHimilist();
@@ -100,7 +132,7 @@
 
       function initQasTable(qas) {
         var qasdata = _.map(qas, function (qa) {
-          return [qa.digital, qa['question-number'], qa['answer-number'], '', qa['question-text'], qa['answer-text'], qa['motivation']];
+          return [qa.digital, qa['question-text'], qa['answer-text'], qa['motivation']];
         });
         $('#qastable').himitable(qaslistopts, qasdata);
         initActionsForQaslist(qas);
@@ -114,7 +146,7 @@
           himis.splice(r, 1);
           initHimiTable(himis);
         });
-        $('#himilist .ui-icon-pencil').off().on('click', function (ev) { // edit himi
+        $('#himilist .ui-icon-pencil, #himilist .ui-icon-info').off().on('click', function (ev) { // edit himi
           var r = parseInt(ev.target.id.replace('himi', ''));
           $('#dlgHimi').dialog('option', 'title', 'Hilfsmittel ' + himis[r].text).dialog('open');
           $('#dlgHimi input#himinumber').val(himis[r].number);
@@ -143,19 +175,27 @@
           qas.splice(r, 1);
           initQasTable(qas);
         });
-        $('#qastable .ui-icon-pencil').off().on('click', function (ev) { // edit qas
+        $('#qastable .ui-icon-pencil, #qastable .ui-icon-info').off().on('click', function (ev) { // edit qas
           var r = parseInt(ev.target.id.replace('qas', ''));
           var actqas = qas[r];
           actqasrow = r;
           $('#quests').html(himiutils.selectBox('quests', quests));
-          $('#quests option[val=' + actqas['question-number'] + ']').attr('selected', true);
           $('#answs').html(himiutils.selectBox('answs', answs));
+          $('#quests option[val=' + actqas['question-number'] + ']').attr('selected', true);
           $('#answs  option[val=' + actqas['answer-number'] + ']').attr('selected', true);
-          $('#dlgQas .selectmenu').selectmenu().selectmenu('enable');
-          $('#dlgQas select#quests').selectmenu().selectmenu(actqas.digital ? 'disable' : 'enable');
+
+          $('#dlgQas .selectmenu').selectmenu();
+          //$('#dlgQas select#quests').selectmenu().selectmenu(actqas.digital ? 'disable' : 'enable');
+          $('#dlgQas select#quests option:not(:selected)').attr('disabled', actqas.digital);
+
           $('#dlgQas .ui-selectmenu-button').width(450);
           $('#dlgQas textarea').val(actqas['motivation']);
+          if (readonly) {
+            $('option:not(:selected)').attr('disabled', true);
+          }
           $('#dlgQas').dialog('option', 'title', 'Frage ' + (r + 1)).dialog('open');
+
+
         });
         $('#addQas').off().on('click', function () {  // add qas
           var nqa = himiutils.createQas(-1, $('#dlgQas #reason').val(), quests[0], answs[0]);
@@ -194,7 +234,10 @@
         });
 
         // HIMI-Dialog
-        $('#dlgHimi').dialog({title: 'Hilfsmittel', autoOpen: false, height: 400, width: 700,
+        $('#dlgHimi').dialog({title: 'Hilfsmittel', autoOpen: false, height: 500, width: 700,
+          close: function (event, ui) {
+            himis = _.reject(himis, {isnew: true});
+          },
           buttons: {
             Ok: function () {
               himis[acthimirow].text = $('#dlgHimi input#himiname').val();
@@ -204,9 +247,6 @@
               $(this).dialog("close");
             },
             Abbrechen: function () {
-              if (_.last(himis).isnew) {
-                himis.pop();
-              }
               $(this).dialog("close");
             }
           }
@@ -214,29 +254,37 @@
 
         // Qas-Dialog
         $('#dlgQas').dialog({title: 'Frage', autoOpen: false, height: 300, width: 500,
+          close: function (event, ui) {
+            himis[acthimirow].qas = _.reject(himis[acthimirow].qas, {isnew: true});
+          },
           buttons: {
             Ok: function () {
               himis[acthimirow].qas[actqasrow].motivation = $('#dlgQas #reason').val();
-              _.extend(himis[acthimirow].qas[actqasrow], _.findWhere(quests, {'question-number': $('#dlgQas select#quests option:selected').attr('val')})),
-                _.extend(himis[acthimirow].qas[actqasrow], _.findWhere(answs, {'answer-number': $('#dlgQas select#answs  option:selected').attr('val')}));
+              _.extend(himis[acthimirow].qas[actqasrow],
+                _.findWhere(quests, {'question-number': $('#dlgQas select#quests option:selected').attr('val')}),
+                _.findWhere(answs, {'answer-number': $('#dlgQas select#answs  option:selected').attr('val')})
+                );
+              delete himis[acthimirow].qas[actqasrow].isnew
               initQasTable(himis[acthimirow].qas);
               $(this).dialog("close");
             },
             Abbrechen: function () {
-              if (_.last(himis[acthimirow].qas).isnew) {
-                himis[acthimirow].qas.pop();
-              }
               $(this).dialog("close");
             }
           }
         });
+
+        if (readonly) {
+          $("textarea, input").attr("readonly", "readonly");
+          $('option:not(:selected)').attr('disabled', true);
+          $('.ui-icon-circle-plus').hide();
+        }
       }
 
       $(document).ready(function () {
         $.ajax({
           url: "/data/himidata.js",
           success: function () {
-             //console.log( data );
             himis = result.data.himis;
             initDialog(result.data);
           }
@@ -265,8 +313,8 @@
     </div>
 
     <div id='dlgHimi'>
-      <h2>Nummer:</h2><input id='himinumber' style='width:100%' type='text'/>
-      <h2>Bezeichnung:</h2><input id='himiname' style='width:100%' type='text'/>
+      <label for="himinumber">Nummer:</label><input id='himinumber' type='text'/><br/>
+      <label for="himiname">Bezeichnung: </label><input id='himiname' type='text'/>
       <h1>Fragen:</h1>
       <div id="qastable"></div>
       <span id='addQas' class='ui-icon ui-icon-circle-plus'></span>

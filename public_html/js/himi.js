@@ -42,7 +42,7 @@ var himiutils = {
           var coldef = myopts.columns[c];
           if (coldef.invisible)
             continue;
-          var v = tblData[r][c] || '';
+          var v = tblData[r][c];
           var val = coldef.render ? coldef.render(v, row, r) : v;
           res += _.template('<td><%=val%></td>')({val: val});
         }

@@ -1,7 +1,7 @@
 /* global _ */
 
 var quests = [
-  {"question-id": 1, "question-number": "01", "question-text": "Ist das beantragte Hilfsmittel medizinisch notwendig?"},
+  //{"question-id": 1, "question-number": "01", "question-text": "Ist das beantragte Hilfsmittel medizinisch notwendig?"},
   {"question-id": 2, "question-number": "02", "question-text": "Ist das beantragte Hilfsmittel notwendig um eine drohende Behinderung vorzubeugen bzw. eine bestehende Behinderung auszugleichen?"},
   {"question-id": 3, "question-number": "03", "question-text": "Wird durch das Hilfsmittel die Pflege erleichtert oder Beschwerden gelindert und / oder eine selbständige Lebensführung ermöglicht?"},
   {"question-id": 4, "question-number": "04", "question-text": "Ist die Versorgung wirtschaftlich?"},
@@ -43,7 +43,7 @@ var result = {
   "data": {
     "himis": [{
         "id": 0,
-        "lfd-nr": 0,
+        "lfd-nr": 1,
         "number": '71',
         "text": 'Rollstuhl',
         "digital": true,
@@ -54,7 +54,7 @@ var result = {
       },
       {
         "id": 1,
-        "lfd-nr": 1,
+        "lfd-nr": 2,
         "number": '12',
         "text": 'Pflegebett',
         "digital": true,

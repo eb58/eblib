@@ -33,7 +33,7 @@
         himis,
         acthimirow,
         actqasrow,
-        readonly = false;
+        readonly = true;
       // ##########################################################################################################
       // Himitabelle
       // ##########################################################################################################
@@ -80,9 +80,6 @@
       // QAS-Tabelle
       // ##########################################################################################################
       var rendererQas = {
-//        lfdnr: function (data, row, r) {
-//          return data;
-//        },
         motivation: function (data, row) {
           return data.substring(0, 500) + (data.length > 500 ? '...' : '');
         },
@@ -100,7 +97,6 @@
       var qaslistopts_edit = {
         columns: [
           {name: "Digital", invisible: true},
-          //{name: "", render: rendererQas.lfdnr},
           {name: "Frage"},
           {name: "Antwort"},
           {name: "Begründung", render: rendererQas.motivation},
@@ -111,7 +107,6 @@
       var qaslistopts_readonly =
         {columns: [
             {name: "Digital", invisible: true},
-            //{name: "", render: rendererQas.lfdnr},
             {name: "Frage"},
             {name: "Antwort"},
             {name: "Begründung", render: rendererQas.motivation},
@@ -194,8 +189,6 @@
             $('option:not(:selected)').attr('disabled', true);
           }
           $('#dlgQas').dialog('option', 'title', 'Frage ' + (r + 1)).dialog('open');
-
-
         });
         $('#addQas').off().on('click', function () {  // add qas
           var nqa = himiutils.createQas(-1, $('#dlgQas #reason').val(), quests[0], answs[0]);
@@ -264,7 +257,7 @@
                 _.findWhere(quests, {'question-number': $('#dlgQas select#quests option:selected').attr('val')}),
                 _.findWhere(answs, {'answer-number': $('#dlgQas select#answs  option:selected').attr('val')})
                 );
-              delete himis[acthimirow].qas[actqasrow].isnew
+              delete himis[acthimirow].qas[actqasrow].isnew;
               initQasTable(himis[acthimirow].qas);
               $(this).dialog("close");
             },

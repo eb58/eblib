@@ -209,6 +209,7 @@
 
         // Select Auftrags-Antwort
         $('#answers').html(himiutils.selectBox('orderresponse', answs));
+        $('#orderresponse option[val=' + data['global-answer-id'] + ']').attr('selected', true);
         $('#orderresponse').selectmenu({
           change: function (event, ui) {
             data['global-answer-id'] = ui.item.index;
@@ -268,7 +269,7 @@
         });
 
         if (readonly) {
-          $("textarea, input").attr("readonly", "readonly");
+          $("textarea, input").prop('disabled', true);
           $('option:not(:selected)').attr('disabled', true);
           $('.ui-icon-circle-plus').hide();
         }

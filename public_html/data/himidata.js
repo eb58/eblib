@@ -1,7 +1,7 @@
 /* global _ */
 
 var quests = [
-  //{"question-id": 1, "question-number": "01", "question-text": "Ist das beantragte Hilfsmittel medizinisch notwendig?"},
+  {"question-id": 1, "question-number": "01", "question-text": "Ist das beantragte Hilfsmittel medizinisch notwendig?"},
   {"question-id": 2, "question-number": "02", "question-text": "Ist das beantragte Hilfsmittel notwendig um eine drohende Behinderung vorzubeugen bzw. eine bestehende Behinderung auszugleichen?"},
   {"question-id": 3, "question-number": "03", "question-text": "Wird durch das Hilfsmittel die Pflege erleichtert oder Beschwerden gelindert und / oder eine selbständige Lebensführung ermöglicht?"},
   {"question-id": 4, "question-number": "04", "question-text": "Ist die Versorgung wirtschaftlich?"},
@@ -33,10 +33,10 @@ var quests = [
 ];
 
 var answs = [
-  {"answer-id": 1, "answer-number": "1", "answer-text": "ja"},
-  {"answer-id": 2, "answer-number": "2", "answer-text": "nein"},
-  {"answer-id": 3, "answer-number": "3", "answer-text": "Andere Antwort"},
-  {"answer-id": 4, "answer-number": "4", "answer-text": "Begutachtung empfohlen"}
+  {"answer-id": 0, "answer-number": "1", "answer-text": "ja"},
+  {"answer-id": 1, "answer-number": "2", "answer-text": "nein"},
+  {"answer-id": 2, "answer-number": "3", "answer-text": "Andere Antwort"},
+  {"answer-id": 3, "answer-number": "4", "answer-text": "Begutachtung empfohlen"}
 ];
 
 var result = {
@@ -76,7 +76,7 @@ var result = {
         ]
       }
     ],
-    "global-answer-id": '1',
+    "global-answer-id": '2',
     "medical-base": 'Der Hauptwahlvorstand stellt fest, ob die nach Absatz 1 aus der Wählerliste eines Betriebs zu streichenden Arbeitnehmerinnen und Arbeitnehmer für die Wahl der Delegierten nach § 11 Abs. 3 und 4 des Gesetzes als Arbeitnehmerinnen und Arbeitnehmer des Betriebs der Hauptniederlassung des Unternehmens oder als Arbeitnehmerinnen und Arbeitnehmer des nach der Zahl der Wahlberechtigten größten Betriebs des Unternehmens gelten',
     "anamnesis": 'Für jeden Wahlvorschlag soll eine oder einer der Unterzeichnenden als Vorschlagsvertreter bezeichnet werden. Dieser ist berechtigt und verpflichtet, dem Betriebswahlvorstand die zur Beseitigung von Beanstandungen erforderlichen Erklärungen abzugeben sowie Erklärungen und Entscheidungen des Betriebswahlvorstands entgegenzunehmen.',
     "indication": 'Eine wunderbare Heiterkeit hat meine ganze Seele eingenommen, gleich den süßen Frühlingsmorgen, die ich mit ganzem Herzen genieße. Ich bin allein und freue mich meines Lebens in dieser Gegend, die für solche Seelen geschaffen ist wie die meine. Ich bin so glücklich, mein Bester, so ganz in dem Gefühle von ruhigem Dasein versunken,',

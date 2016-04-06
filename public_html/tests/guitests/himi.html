@@ -19,21 +19,23 @@
       .ui-selectmenu-menu {height:250px; overflow:auto}
 
       #orderresponse { width:500px; }
-      #himilist{ margin: 5px 1px 5px 1px; width:500px;}
-      #orderattr{ margin: 5px 1px 5px 1px; width:500px;}
+      #himilist{ margin: 5px 1px 5px 1px; width:500px;  float:left;}
+      #orderattr{ margin: 5px 10px 5px 10px; width:500px; float:left; }
       #himilist table td:nth-child(2) { width: 500px;}
       #dlgQas textarea{ width:450px;}
     </style>
     <script src='/lib/underscore-1.8.3/underscore-1.8.3.js'></script>
     <script src='/lib/jquery-1.11.3/jquery-1.11.3.js'></script>
     <script src='/lib/jQueryUI-1.11.4/jquery-ui.js'></script>
+    <script src='/lib/numeric.js'></script>
+    <script src='/numeric.js'></script>
     <script src="/js/himi.js"></script>
     <script>
       var
         himis,
         acthimirow,
         actqasrow,
-        readonly = true;
+        readonly = false;
       // ##########################################################################################################
       // Himitabelle
       // ##########################################################################################################
@@ -123,6 +125,10 @@
         });
         $('#grid').himitable(himilistopts, himidata);
         initActionsForHimilist();
+        if( himis.length>=3  )  // max. 10 HiMis
+          $('#addHimi .ui-icon-circle-plus').hide();
+        else  
+          $('#addHimi.ui-icon-circle-plus').show()
       }
 
       function initQasTable(qas) {
@@ -131,6 +137,11 @@
         });
         $('#qastable').himitable(qaslistopts, qasdata);
         initActionsForQaslist(qas);
+        if( qas.length>=3 )  // max. 14 Qas
+          $('#addQas .ui-icon-circle-plus').hide();
+        else  
+          $('#addQas.ui-icon-circle-plus').show()
+
       }
 
       // ##########################################################################################################
@@ -276,6 +287,17 @@
       }
 
       $(document).ready(function () {
+        $(".positive-integer").numeric({decimal: false, negative: false}, function () {
+          alert("Nur Ziffern erlaubt!");
+          this.value = "";
+          this.focus();
+        });
+        $('textarea[maxlength]').bind("keyup change",function () {
+          var maxlen = $(this).attr('maxlength');
+          if ($(this).val().length > maxlen) {
+            $(this).val($(this).val().substr(0, maxlen));
+          }
+        });
         $.ajax({
           url: "/data/himidata.js",
           success: function () {
@@ -299,15 +321,15 @@
     <div id='orderattr'>
       <h1>Auftrags-Antwort:</h1>
       <div id='answers'></div>
-      <div class='textfield'><h1>Medizinische Unterlagen:  </h1><textarea id='medical-base' rows='4' cols='80'></textarea></div>
-      <div class='textfield'><h1>Anamnese:                 </h1><textarea id='anamnesis'    rows='4' cols='80'></textarea></div>
-      <div class='textfield'><h1>Befund:                   </h1><textarea id='indication'   rows='4' cols='80'></textarea></div>
-      <div class='textfield'><h1>Antwort mit Begründung:   </h1><textarea id='evaluation'   rows='4' cols='80'></textarea></div>
-      <div class='textfield'><h1>Empfehlung:               </h1><textarea id='suggestion'   rows='4' cols='80'></textarea></div>
+      <div class='textfield'><h1>Medizinische Unterlagen:  </h1><textarea id='medical-base' rows='4' cols='80' maxlength='100'></textarea></div>
+      <div class='textfield'><h1>Anamnese:                 </h1><textarea id='anamnesis'    rows='4' cols='80' maxlength='100'></textarea></div>
+      <div class='textfield'><h1>Befund:                   </h1><textarea id='indication'   rows='4' cols='80' maxlength='100'></textarea></div>
+      <div class='textfield'><h1>Antwort mit Begründung:   </h1><textarea id='evaluation'   rows='4' cols='80' maxlength='100'></textarea></div>
+      <div class='textfield'><h1>Empfehlung:               </h1><textarea id='suggestion'   rows='4' cols='80' maxlength='100'></textarea></div>
     </div>
 
     <div id='dlgHimi'>
-      <label for="himinumber">Nummer:</label><input id='himinumber' type='text'/><br/>
+      <label for="himinumber">Nummer:</label><input id='himinumber' class="positive-integer" type='text'/><br/>
       <label for="himiname">Bezeichnung: </label><input id='himiname' type='text'/>
       <h1>Fragen:</h1>
       <div id="qastable"></div>
@@ -318,7 +340,7 @@
       <div id='quests'></div>
       <div id='answs'></div>
       <h1>Begründung:</h1>
-      <textarea id="reason" rows=5 cols=80></textarea>
+      <textarea id="reason" rows=5 cols=80 maxlength='100'></textarea>
     </div>
 
   </body>

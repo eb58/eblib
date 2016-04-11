@@ -7,6 +7,15 @@ var himiutils = {
       return acc + '<option val="' + v[1] + '">' + v[1] + ' ' + v[2] + '</option>';
     }, '');
   },
+  qasTable: function qasTable( qas ){
+    return '\
+      <table class="qastbl">\n' + 
+        _.reduce(qas, function( res, qa ) { 
+          return res + '<tr><td>' + qa['question-text'] + '</td><td>' + qa['answer-text'] + '</td><td hidden=true>' + qa['motivation'] + '</td></tr>\n';
+        }, '' ) +
+      '</table>\n';
+
+  },
   createHimi: function createHimi(number, name) {
     return {id: -1, number: number, text: name, digital: false, qas: []};
   },
@@ -25,13 +34,12 @@ var himiutils = {
 
 (function ($) {
   "use strict";
-  $.fn.himitable = function (opts, data) {
+  $.fn.himitable = function (opts, tblData) {
     var defopts = {
       columns: [],
       bodyHeight: Math.max(200, $(window).height() - 100)
     };
     var myopts = $.extend({}, defopts, opts);
-    var tblData = data;
 
     function tableData() {
       var res = '';
@@ -67,3 +75,21 @@ var himiutils = {
     return this;
   };
 })(jQuery);
+
+if (typeof $ !== 'undefined') {
+  $.extend({
+    alert: function (title, message) {
+      $("<div></div>").dialog({
+        buttons: {"Ok": function () {
+            $(this).dialog("close");
+          }},
+        close: function () {
+          $(this).remove();
+        },
+        title: title,
+        modal: true,
+        closeText: 'Schlie\u00dfen'
+      }).html('<br>' + message.replace('\n', '<br>'));
+    }
+  });
+}

@@ -39,6 +39,18 @@ var answs = [
   {"answer-id": 3, "answer-number": "4", "answer-text": "Begutachtung empfohlen"}
 ];
 
+var sugg = [
+  {'himi_suggestion_id': 2, 'himi_suggestion_number': '1', 'himi_suggestion_text': 'Empfehlung_1'},
+  {'himi_suggestion_id': 3, 'himi_suggestion_number': '2', 'himi_suggestion_text': 'Empfehlung_2'}
+];
+
+var delivery = [
+  {'himi_delivery_config_id': 1, 'himi_delivery_config_text': 'Eingeschränkt', 'himi_delivery_recipient': '5'},
+  {'himi_delivery_config_id': 2, 'himi_delivery_config_text': 'Ergebnis', 'himi_delivery_recipient': '7'},
+  {'himi_delivery_config_id': 3, 'himi_delivery_config_text': 'Nichts', 'himi_delivery_recipient': '3'},
+  {'himi_delivery_config_id': 4, 'himi_delivery_config_text': 'Alles', 'himi_delivery_recipient': '7'}
+];
+
 var result = {
   "data": {
     "himis": [{
@@ -81,7 +93,8 @@ var result = {
     "anamnesis": 'Für jeden Wahlvorschlag soll eine oder einer der Unterzeichnenden als Vorschlagsvertreter bezeichnet werden. Dieser ist berechtigt und verpflichtet, dem Betriebswahlvorstand die zur Beseitigung von Beanstandungen erforderlichen Erklärungen abzugeben sowie Erklärungen und Entscheidungen des Betriebswahlvorstands entgegenzunehmen.',
     "indication": 'Eine wunderbare Heiterkeit hat meine ganze Seele eingenommen, gleich den süßen Frühlingsmorgen, die ich mit ganzem Herzen genieße. Ich bin allein und freue mich meines Lebens in dieser Gegend, die für solche Seelen geschaffen ist wie die meine. Ich bin so glücklich, mein Bester, so ganz in dem Gefühle von ruhigem Dasein versunken,',
     "evaluation": 'Es gibt im Moment in diese Mannschaft, oh, einige Spieler vergessen ihnen Profi was sie sind. Ich lese nicht sehr viele Zeitungen, aber ich habe gehört viele Situationen. Erstens: wir haben nicht offensiv gespielt. Es gibt keine deutsche Mannschaft spielt offensiv und die Name offensiv wie Bayern. Letzte Spiel hatten wir in Platz drei Spitzen: Elber, jancka und dann Zickler. Wir müssen nicht vergessen Zickler. Zickler ist eine Spitzen mehr, Mehmet eh mehr Basler. Ist klar diese Wörter, ist möglich verstehen, was ich hab gesagt? Danke. Offensiv, offensiv ist wie machen wir in Platz. Zweitens: ich habe erklärt mit diese zwei Spieler: nach Dortmund brauchen vielleicht Halbzeit Pause. Ich habe auch andere Mannschaften gesehen in Europa nach diese Mittwoch. Ich habe gesehen auch zwei Tage die Training. Ein Trainer ist nicht ein Idiot! Ein Trainer sei sehen was passieren in Platz. In diese Spiel es waren zwei, drei diese Spieler waren schwach wie eine Flasche leer! Haben Sie gesehen Mittwoch, welche Mannschaft hat gespielt Mittwoch?',
-    "suggestion": 'Er hörte leise Schritte hinter sich. Das bedeutete nichts Gutes. Wer würde ihm schon folgen, spät in der Nacht und dazu noch in dieser engen Gasse mitten im übel beleumundeten Hafenviertel? Gerade jetzt, wo er das Ding seines Lebens gedreht hatte und mit der Beute verschwinden wollte! Hatte einer seiner zahllosen Kollegen dieselbe Idee gehabt, ihn beobachtet und abgewartet, um ihn nun um die Früchte seiner Arbeit zu erleichtern? Oder gehörten die Schritte hinter ihm zu einem der unzähligen Gesetzeshüter dieser Stadt, und die stählerne Acht um seine Handgelenke würde gleich zuschnappen? Er konnte die Aufforderung stehen zu bleiben schon hören. Gehetzt sah er sich um.'
+    "suggestion-add": 'Er hörte leise Schritte hinter sich. Das bedeutete nichts Gutes. Wer würde ihm schon folgen, spät in der Nacht und dazu noch in dieser engen Gasse mitten im übel beleumundeten Hafenviertel? Gerade jetzt, wo er das Ding seines Lebens gedreht hatte und mit der Beute verschwinden wollte! Hatte einer seiner zahllosen Kollegen dieselbe Idee gehabt, ihn beobachtet und abgewartet, um ihn nun um die Früchte seiner Arbeit zu erleichtern? Oder gehörten die Schritte hinter ihm zu einem der unzähligen Gesetzeshüter dieser Stadt, und die stählerne Acht um seine Handgelenke würde gleich zuschnappen? Er konnte die Aufforderung stehen zu bleiben schon hören. Gehetzt sah er sich um.',
+    "suggestion-id": 1,
   },
   "error": null,
   "errorCode": null

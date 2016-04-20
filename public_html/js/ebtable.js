@@ -280,7 +280,7 @@
       $(selgridid + 'thead div span').removeClass();
       $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
     }
-    
+
     function sortToggle() {
       var sortToggleS = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
       var colidx = util.indexOfCol(myopts.sortcolname);
@@ -396,7 +396,13 @@
         $(selgridid + 'thead th').on('click', sorting);
         $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
-      //adjustLayout();
+      if (myopts.singleSelection) {
+        $('input[type=checkbox').on('click', function (o) {
+          $('input[type=checkbox').prop('checked', false);
+          $(o.currentTarget).prop('checked', true);
+        });
+      }
+//adjustLayout();
     }
 
     // ##############################################################################
@@ -516,6 +522,12 @@
         }
       }
     }).parent().find('.ui-widget-header').hide();
+    if (myopts.singleSelection) {
+      $('input[type=checkbox').on('click', function (o) {
+        $('input[type=checkbox').prop('checked', false);
+        $(o.currentTarget).prop('checked', true);
+      });
+    }
 
     $(window).on('resize', function () {
       console.log('resize!!!');

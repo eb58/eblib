@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TODO supply a title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
+    <link rel="stylesheet" href="/css/ebtable.css">
+    <style>
+      * {font-family:Arial; color: black; font-size: 10px;}
+      table, td { border: 1px solid lightgrey; border-collapse: collapse; padding: 5px 3px ;}
+      #diagnosen { width: 500px; }
+      #diagnosen td:first-child { width:60px; }
+      #diagnosen input { width: 80%; }
+      td{ align-content: center; }
+
+    </style>
+
+    <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
+    <script src="/lib/jquery-1.11.3/jquery-1.11.3.js"></script>
+    <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+    <script src="/js/polyfills.js"></script>
+    <script src="/js/mx.js"></script>
+    <script src="/js/ebtable.js"></script>  
+    <script src="/data/himidata.js"></script>
+    <script>
+      var opts = {
+        flags: {filter: true, pagelenctrl: false, config: false},
+        columns: [
+          {name: "icdid", invisible: true, technical: true},
+          {name: "Text"},
+          {name: "Code", width: 50}
+        ],
+        selection: true,
+        singleSelection: true,
+        colorder: [0, 2, 1]
+      };
+      $().ready(function () {
+        $('#test').on('click', function () {
+          $('#icddlg').dialog({
+            create: function ( ) {
+              $('#grid').ebtable(opts, icds);
+              $('.ctrl:first').remove();
+              $('table').width('100%');
+            },
+            title: 'ICD-Code wählen',
+            width: 600, height: 380,
+            buttons: {
+              'Übernehmen': function () {
+                console.log($('td:nth-child(2)', $('tr:has(input:checked)')).text(), $('td:nth-child(3)', $('tr:has(input:checked)')).text());
+                $(this).dialog("close");
+              },
+              'Abbrechen': function () {
+                $(this).dialog("close");
+              }
+            }
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id='icddlg'>
+      <div id="grid"></div>
+    </div>
+    <button id="test">TEST</button>
+
+    <h1>Diagnosen:</h1>
+    <div>
+      <table id='diagnosen'>
+        <tr><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td></tr>
+        <tr><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td></tr>
+        <tr><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td></tr>
+        <tr><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td></tr>
+        <tr><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td></tr>
+      </table>
+    </div>
+
+  </body>
+</html>

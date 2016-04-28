@@ -36,6 +36,7 @@
         colorder: [0, 2, 1]
       };
       $().ready(function () {
+        $('#number').selectmenu().selectmenu('disable');
         $('#test').on('click', function () {
           $('#icddlg').dialog({
             create: function ( ) {
@@ -74,7 +75,28 @@
         <tr><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td></tr>
         <tr><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td></tr>
       </table>
-    </div>
 
+    </div>
+    <select name="number" id="number">
+      <option>1</option>
+      <option selected="selected">2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+      <option>6</option>
+      <option>7</option>
+      <option>8</option>
+      <option>9</option>
+      <option>10</option>
+      <option>11</option>
+      <option>12</option>
+      <option>13</option>
+      <option>14</option>
+      <option>15</option>
+      <option>16</option>
+      <option>17</option>
+      <option>18</option>
+      <option>19</option>
+    </select>
   </body>
 </html>

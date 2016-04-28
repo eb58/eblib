@@ -4,17 +4,23 @@ var himiutils = {
   opts: function opts(arr) {
     return _.reduce(arr, function (acc, s) {
       var v = _.values(s);
-      return acc + '<option val="' + v[1] + '">' + v[1] + ' ' + v[2] + '</option>';
+      return acc + '<option val="' + v[0] + '">' + v[1] + ' ' + v[2] + '</option>';
     }, '');
   },
-  qasTable: function qasTable( qas ){
+  qasTable: function qasTable( himi ){
+    var xxx = himi[2].split('-');
+    var himitext = xxx[0].trim() + ' - ' + xxx[1].trim();
+    var himiansw = xxx[2].trim();
+    var qas = himi[3];
     return '\
       <table class="qastbl">\n' + 
+        _.template("<tr><td><b><%=himi%></td><td><b><%=answ%></td></b></tr>")({himi: himitext, answ: himiansw }) +           
         _.reduce(qas, function( res, qa ) { 
-          return res + '<tr><td>' + qa['question-text'] + '</td><td>' + qa['answer-text'] + '</td><td hidden=true>' + qa['motivation'] + '</td></tr>\n';
+          var answ = _.findWhere(answs, {'answer-id': qa['answer-id']});
+          var answtext = answ ? answ['answer-text'] : '';
+          return res + '<tr><td>' + qa['question-text'] + '</td><td>' + answtext + '</td><td hidden=true>' + qa['motivation'] + '</td></tr>\n';
         }, '' ) +
       '</table>\n';
-
   },
   createHimi: function createHimi(number, name) {
     return {id: -1, number: number, text: name, digital: false, qas: []};
@@ -51,7 +57,7 @@ var himiutils = {
           if (coldef.invisible)
             continue;
           var v = tblData[r][c];
-          var val = coldef.render ? coldef.render(v, row, r) : v;
+            var val = coldef.render ? coldef.render(v, row, r) : v;
           res += _.template('<td><%=val%></td>')({val: val});
         }
         res += '</tr>\n';

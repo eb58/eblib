@@ -28,9 +28,10 @@
         localStorage[localStorageKey] = s;
       },
       loadState: function loadState(s) {
-        var state = JSON.parse(s ? s : '{}');
-        if (!s || !state)
+        if (!s)
           return;
+
+        var state = s;
 
         myopts.rowsPerPage = state.rowsPerPage;
         myopts.colorder = [];
@@ -408,7 +409,7 @@
     // ##############################################################################
 
     function initGrid(a) {
-      state.loadState(localStorage[localStorageKey]);
+      state.loadState(localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null);
       if (opts.getState)
         state.loadState(opts.getState());
       util.checkConfig();

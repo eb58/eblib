@@ -8,7 +8,7 @@ var himiutils = {
     }, '');
   },
   qasTable: function qasTable( himi ){
-    var xxx = himi[2].split('-');
+    var xxx = himi[2].split('###');
     var himitext = xxx[0].trim() + ' - ' + xxx[1].trim();
     var himiansw = xxx[2].trim();
     var qas = himi[3];

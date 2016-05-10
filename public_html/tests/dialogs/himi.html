@@ -26,23 +26,34 @@
       #himilist{ margin: 5px 1px 5px 1px; width:500px; float:left;}
       #orderattr{ margin: 5px 10px 5px 10px; width:500px; float:left;}
 
-      #himilist table td:nth-child(2) { width: 500px;}
+      .qastbl td:nth-child(2) { width: 500px;}
       #dlgQas textarea{ width:450px;}
 
       .qastbl td { background-color: #dfdfdf;  }
       .qastbl td:nth-child(1) { width:80%;}
 
       #diagnosen { width: 500px; }
-      #diagnosen td:first-child { width:60px; }
-      #diagnosen input { width: 98%; }
       #diagnosen table, td { border: 1px solid lightgrey; border-collapse: collapse;}
-
+      #diagnosen td:nth-child(1) { width: 10px }   
+      #diagnosen td:nth-child(2) { width: 50px }
+      #diagnosen td:nth-child(2) input { width: 45px }
+      #diagnosen td:nth-child(3) { width: 400px   }
+      #diagnosen td:nth-child(3) input { width: 395px }
+      #diagnosen td:nth-child(4) { width: 10px  }
+      #diagnosen td{ padding: 3px; }
+      #diagnosen input{ border: 0px; }
       #dlgHimi>table td { border-style: none; margin: 0px; padding: 1px 0px 1px 0px;}
 
       #versandeinstellungen td, #versandeinstellungen table{ border: 0px;}
       #auftraggeberX, #leistungserbringerX, #sanitaetshausX { width:100%; }
 
       #suggkeysX { width:500px; }
+
+      #dlgHimi { background-color: #eeeee0; }
+      #dlgQas  { background-color: #eeeee8; }
+      #icddlg  { background-color: #eeeee0; }
+
+      .nebeneinander div {  float: left;  clear: none; }
 
     </style>
     <script src='/lib/underscore-1.8.3/underscore-1.8.3.js'></script>
@@ -136,6 +147,7 @@
       var qaslistopts_edit = {
         columns: [
           {name: "Digital", invisible: true},
+          {name: "Nummer"},
           {name: "Frage"},
           {name: "Antwort"},
           {name: "Begründung", render: rendererQas.motivation},
@@ -143,24 +155,45 @@
           {name: '', render: rendererQas.del}
         ]
       };
-      var qaslistopts_readonly =
-              {columns: [
-                  {name: "Digital", invisible: true},
-                  {name: "Frage"},
-                  {name: "Antwort"},
-                  {name: "Begründung", render: rendererQas.motivation},
-                  {name: '', render: rendererQas.info}
-                ]
-              };
+      var qaslistopts_readonly = {
+        columns: [
+          {name: "Digital", invisible: true},
+          {name: "Nummer"},
+          {name: "Frage"},
+          {name: "Antwort"},
+          {name: "Begründung", render: rendererQas.motivation},
+          {name: '', render: rendererQas.info}
+        ]
+      };
       var qaslistopts = readonly ? qaslistopts_readonly : qaslistopts_edit;
 
       // ##########################################################################################################
+      function initBegruendungToolTips() {
+        $(".qastbl tr").mouseenter(function (e) {
+          var begruendung = $('td:nth-child(3)', e.currentTarget);
+          if (begruendung.length == 0)
+            return;
+          var t = $('td:nth-child(3)', e.currentTarget).text() || '&lt;keine Begründung&gt;';
+
+          $('#tooltipdlg').dialog({
+            title: 'Begründung',
+            closeText: 'Schlie\u00dfen',
+            position: {my: 'right top', at: 'right top', of: event},
+            open: function () {
+              $(".ui-dialog-titlebar-close", $(this).closest('.ui-dialog')).hide();
+            } // hide x in titlebar for closing 
+          }).dialog('open').html(t);
+        });
+        $(".qastbl tr").mouseleave(function () {
+          $('#tooltipdlg').dialog().dialog('close');
+        });
+      }
 
       function initHimiTable(himis) {
         var himidata = _.map(himis, function (h) {
           var answ = _.findWhere(answs, {'answer-id': h['answer-id']});
-          var answtext = answ ? ' - ' + answ['answer-text'] : ' - ';
-          return [h.digital, h['lfd-nr'], h.number + ' - ' + h.text + answtext, h.qas];
+          var answtext = answ ? answ['answer-text'] : '';
+          return [h.digital, h['lfd-nr'], h.number + ' ### ' + h.text  + ' ### ' +  answtext, h.qas];
         });
         $('#grid').himitable(himilistopts, himidata);
         initActionsForHimilist();
@@ -168,13 +201,14 @@
           $('#addHimi.ui-icon-circle-plus').hide();
         else
           $('#addHimi.ui-icon-circle-plus').show();
+        initBegruendungToolTips()
       }
 
       function initQasTable(qas) {
         var qasdata = _.map(qas, function (qa) {
           var answ = _.findWhere(answs, {'answer-id': qa['answer-id']});
           var answtext = answ ? answ['answer-text'] : '';
-          return [qa.digital, qa['question-text'], answtext, qa['motivation']];
+          return [qa.digital, qa['question-number'], qa['question-text'], answtext, qa['motivation']];
         });
         $('#qastable').himitable(qaslistopts, qasdata);
         initActionsForQaslist(qas);
@@ -344,12 +378,14 @@
             $('#icd' + (i + 1)).hide(); // search-icon
           }
           $('#icdcode' + (i + 1)).on('blur', function (event) {
-            var icdtext = getIcdCodeText($(this).val());
+            var icdcode = $(this).val().toUpperCase();
+            var icdtext = getIcdCodeText(icdcode);
             if ($(this).val() && !icdtext) {
               alert('Warnung\nKein gültiger ICD Code!');
               $(event.currentTarget).focus();
             } else {
               var n = $(this).attr('id').replace('icdcode', '');
+              $('#icdcode' + n).val(icdcode);
               $('#icdtext' + n).val($('#icdtext' + n).val() || icdtext);
             }
           });
@@ -425,10 +461,13 @@
           };
 
           $('#icddlg').dialog({
-            create: function ( ) {
+            open: function ( ) {
+              _.each(icds, function (o) {
+                o.selected = false;
+              });
               $('#icdgrid').ebtable(opts, icds);
               $('.ctrl:first').remove();
-              $('table').width('100%');
+              $('#icdgrid table').width('100%');
             },
             title: 'ICD-Code wählen',
             width: 800, height: 430,
@@ -456,29 +495,13 @@
         if (readonly) {
           $("textarea, input").prop('disabled', true);
           $('option:not(:selected)').attr('disabled', true);
-          $('#diagnosen td:nth-child(3)').hide();
+          $('#diagnosen td:nth-child(4)').hide();
           $('#orderresponseX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
           $('#suggkeysX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
           $('#auftraggeberX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
           $('#leistungserbringerX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
           $('#sanitaetshausX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
         }
-
-        $(".qastbl tr").mouseenter(function (e) {
-          var t = $('td:nth-child(3)', e.currentTarget).text();
-          $('#tooltipdlg').dialog({
-            title: 'Begründung',
-            closeText: 'Schlie\u00dfen',
-            position: {my: 'right top', at: 'right top', of: event},
-            open: function () {
-              $(".ui-dialog-titlebar-close", $(this).closest('.ui-dialog')).hide();
-            } // hide x in titlebar for closing 
-          }).dialog('open').html(t);
-        });
-        $(".qastbl tr").mouseleave(function () {
-          $('#tooltipdlg').dialog('close');
-        });
-
       }
 
       function doSave(data) {
@@ -530,19 +553,24 @@
     </script>
 
     <div id='himilist'>
-      <h1>Hilfsmittel:</h1>
+      <table style='border: none;'>
+        <tr>
+          <td style='border: none;'><h1>Hilfsmittel:</h1></td>
+          <td style='border: none;'><span id='addHimi' class='ui-icon ui-icon-circle-plus'></span></td>
+        </tr>
+      </table>
       <div id='grid'></div>
-      <span id='addHimi' class='ui-icon ui-icon-circle-plus'></span>
+
       <br>
       <h1>Diagnosen:</h1>
       <div>
         <table id='diagnosen'>
           <tbody>
-            <tr><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icd1' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icd2' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icd3' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icd4' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icd5' class='ui-icon ui-icon-search'></span></td></tr>
+            <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icd1' class='ui-icon ui-icon-search'></span></td></tr>
+            <tr><td></td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icd2' class='ui-icon ui-icon-search'></span></td></tr>
+            <tr><td></td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icd3' class='ui-icon ui-icon-search'></span></td></tr>
+            <tr><td></td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icd4' class='ui-icon ui-icon-search'></span></td></tr>
+            <tr><td></td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icd5' class='ui-icon ui-icon-search'></span></td></tr>
           </tbody>
         </table>
       </div>
@@ -577,9 +605,14 @@
         <tr><td>Hilfsmittel-Antwort:</td><td><div id='himiresponse'></div></td></tr>
       </table>
       <br>
-      <h1>Fragen:</h1>
+      <table style='border: none;'>
+        <tr>
+          <td style='border: none;'><h1>Fragen:&nbsp;&nbsp;&nbsp;</h1></td>
+          <td style='border: none;'><span id='addQas' class='ui-icon ui-icon-circle-plus'></span></td>
+        </tr>
+      </table>
+
       <div id="qastable"></div>
-      <span id='addQas' class='ui-icon ui-icon-circle-plus'></span>
     </div>
 
     <div id='dlgQas'>

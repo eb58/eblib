@@ -20,7 +20,8 @@
 }
 
 .ebtable #data th{ 
-  background-color:#a0a0b0; 
+	background: #d5d5cd;
+  xbackground-color:#d5d5cd; 
   padding: 5px 2px 5px 2px;
 }
 
@@ -43,12 +44,11 @@
   background-color:#dfdfdf;
   padding: 2px 1px 2px 1px;
 }
-.ebtable #data td.group{
-  background-color: #bfbfbf;
-}
 .ebtable #data td.groupheader{
-  background-color: #a3a3a3;
-
+  background-color: #d3d3e0;
+}
+.ebtable #data td.group{
+  background-color: #d7d7ea;
 }
 .ebtable #data input[type=checkbox] {
   width: 15px;

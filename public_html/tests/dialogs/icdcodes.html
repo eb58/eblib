@@ -23,6 +23,7 @@
     <script src="/js/mx.js"></script>
     <script src="/js/ebtable.js"></script>  
     <script src="/data/himidata.js"></script>
+    <script src="/data/himilists.js"></script>
     <script>
       var opts = {
         flags: {filter: true, pagelenctrl: false, config: false},
@@ -39,7 +40,8 @@
         $('#number').selectmenu().selectmenu('disable');
         $('#test').on('click', function () {
           $('#icddlg').dialog({
-            create: function ( ) {
+            open: function ( ) {
+              _.each(icds, function(x){x.selected= false;});
               $('#grid').ebtable(opts, icds);
               $('.ctrl:first').remove();
               $('table').width('100%');
@@ -49,9 +51,13 @@
             buttons: {
               'Übernehmen': function () {
                 console.log($('td:nth-child(2)', $('tr:has(input:checked)')).text(), $('td:nth-child(3)', $('tr:has(input:checked)')).text());
+                $('#Code, #Text' ).val('');
+                $('#icddlg input:checked' ).prop( "checked", false );
                 $(this).dialog("close");
               },
               'Abbrechen': function () {
+                $('#Code, #Text' ).val('');
+                $('#icddlg input:checked' ).prop( "checked", false );
                 $(this).dialog("close");
               }
             }
@@ -98,5 +104,13 @@
       <option>18</option>
       <option>19</option>
     </select>
+
+    <table>
+      <tr>
+        <td class="attribute_value" colspan="3">AAA
+          <input name="Resultid" type="hidden" value="">
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

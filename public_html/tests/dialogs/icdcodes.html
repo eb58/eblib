@@ -13,7 +13,10 @@
       #diagnosen td:first-child { width:60px; }
       #diagnosen input { width: 80%; }
       td{ align-content: center; }
-
+      #dlgIcd  { background-color: #eeeee0; }
+      #dlgIcd th, #dlgIcd td { border-color: #fff; border-style: solid; border-width: 1px; }
+      #dlgIcd th:nth-child(1){ width:15px; }
+      #dlgIcd th:nth-child(2){ width:40px; }
     </style>
 
     <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
@@ -39,25 +42,25 @@
       $().ready(function () {
         $('#number').selectmenu().selectmenu('disable');
         $('#test').on('click', function () {
-          $('#icddlg').dialog({
+          $('#dlgIcd').dialog({
             open: function ( ) {
               _.each(icds, function(x){x.selected= false;});
               $('#grid').ebtable(opts, icds);
               $('.ctrl:first').remove();
-              $('table').width('100%');
+              $('table').width('99%');
             },
             title: 'ICD-Code wählen',
-            width: 600, height: 380,
+            width: 700, height: 400,
             buttons: {
               'Übernehmen': function () {
                 console.log($('td:nth-child(2)', $('tr:has(input:checked)')).text(), $('td:nth-child(3)', $('tr:has(input:checked)')).text());
                 $('#Code, #Text' ).val('');
-                $('#icddlg input:checked' ).prop( "checked", false );
+                $('#dlgIcd input:checked' ).prop( "checked", false );
                 $(this).dialog("close");
               },
               'Abbrechen': function () {
                 $('#Code, #Text' ).val('');
-                $('#icddlg input:checked' ).prop( "checked", false );
+                $('#dlgIcd input:checked' ).prop( "checked", false );
                 $(this).dialog("close");
               }
             }
@@ -67,7 +70,7 @@
     </script>
   </head>
   <body>
-    <div id='icddlg'>
+    <div id='dlgIcd'>
       <div id="grid"></div>
     </div>
     <button id="test">TEST</button>
@@ -83,28 +86,6 @@
       </table>
 
     </div>
-    <select name="number" id="number">
-      <option>1</option>
-      <option selected="selected">2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-      <option>6</option>
-      <option>7</option>
-      <option>8</option>
-      <option>9</option>
-      <option>10</option>
-      <option>11</option>
-      <option>12</option>
-      <option>13</option>
-      <option>14</option>
-      <option>15</option>
-      <option>16</option>
-      <option>17</option>
-      <option>18</option>
-      <option>19</option>
-    </select>
-
     <table>
       <tr>
         <td class="attribute_value" colspan="3">AAA

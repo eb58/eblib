@@ -336,6 +336,7 @@
       deselectRows();
       filterData();
       pageCur = 0;
+      pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       redraw(pageCur);
     }
 
@@ -347,11 +348,12 @@
         sortcrit[coldef.dbcol] = coldef.order;
         if( myopts.reloadData(sortcrit) ){
           pageCur = 0;
+          pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
           redraw(pageCur);
           event.preventDefault();
         }
       }
-    }
+	}
 
     function ignoreSorting(event) {
       event.target.focus();
@@ -460,8 +462,8 @@
     $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
         console.log('change rowsPerPage', event, data.item.value);
         myopts.rowsPerPage = Number(data.item.value);
-        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         pageCur = 0;
+        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         redraw(pageCur);
         myopts.saveState(state.getStateAsJSON());
       }

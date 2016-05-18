@@ -345,10 +345,11 @@
         var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
         var sortcrit = {};
         sortcrit[coldef.dbcol] = coldef.order;
-        myopts.reloadData(sortcrit);
-        pageCur = 0;
-        redraw(pageCur);
-        event.preventDefault();
+        if( myopts.reloadData(sortcrit) ){
+          pageCur = 0;
+          redraw(pageCur);
+          event.preventDefault();
+        }
       }
     }
 

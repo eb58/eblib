@@ -4,7 +4,7 @@ var himiutils = {
   opts: function opts(arr) {
     return _.reduce(arr, function (acc, s) {
       var v = _.values(s);
-      return acc + '<option val="' + v[0] + '">' + v[1] + ' ' + v[2] + '</option>';
+      return acc + '<option value=' + v[0] + '>' + v[1] + ' ' + v[2] + '</option>';
     }, '');
   },
   qasTable: function qasTable( himi ){
@@ -30,7 +30,7 @@ var himiutils = {
   },
   selectVal: function selectVal(id, val) {
     var x = '#' + id;
-    $(x + " option[val='" + val + "']").attr('selected', true);
+    $(x + " option[value=" + val + "]").attr('selected', true);
     $(x).selectmenu('refresh');
   },
   selectBox: function selectBox(id, opts) {

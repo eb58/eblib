@@ -65,7 +65,56 @@
     <script src='/js/ebtable.js'></script>
     <script src='/data/himilists.js'></script>
     <script>
-      var
+
+  if (typeof $ !== 'undefined') {
+   $.extend({
+      alert: function (title, message) {
+        message = message || '';
+        $("<div id='dlgAlert'></div>").dialog({
+          buttons: {
+            "Ok": function () {
+                 $(this).dialog("close");
+            }
+          },
+          close: function () {
+              $(this).remove();
+          },
+          title: title,
+          modal: true,
+          closeText: 'Schlie\u00dfen' 
+        }).html('<br>' + message.replace('\n', '<br>'));
+      },
+      confirm: function (title, question, callback) {
+        question = question || '';
+         $("<div id='dlgConfirm></div>").dialog({
+            buttons: {
+              "Ja": function () {
+                 $(this).dialog("close");
+                 callback();
+              },
+              "Nein": function () {
+                 $(this).dialog("close");
+              }
+            },
+            close: function () {
+              $(this).remove();
+            },
+            title: title,
+            modal: true,
+            closeText: 'Schlie\u00dfen' 
+         }).html('<br>' + question.replace('\n', '<br>'));
+      }
+   });
+   $(document).ajaxStart(function () {
+      $("body").addClass('wait');
+   });
+   $(document).ajaxStop(function () {
+      $("body").removeClass('wait');
+   });
+}
+
+
+  var
               himis,
               acthimirow,
               actqasrow,
@@ -76,11 +125,9 @@
           return o[2] === code;
         });
       }
-      function getIcdCodeText(code) {
-        var x = _.find(icds, function (o) {
-          return o[2] === code;
-        });
-        return x ? x[1] : '';
+      function getIcdCodeFromNumber(code) {
+        var x = _.find(icds, function (o) {return o[2] === code;});
+        return x ? { id: x[0], text: x[1] } : null;
       }
 
       // ##########################################################################################################
@@ -193,7 +240,7 @@
         var himidata = _.map(himis, function (h) {
           var answ = _.findWhere(answs, {'answer-id': h['answer-id']});
           var answtext = answ ? answ['answer-text'] : '';
-          return [h.digital, h['lfd-nr'], h.number + ' ### ' + h.text  + ' ### ' +  answtext, h.qas];
+          return [h.digital, h['lfd-nr'], h.number + ' ### ' + h.text + ' ### ' + answtext, h.qas];
         });
         $('#grid').himitable(himilistopts, himidata);
         initActionsForHimilist();
@@ -233,10 +280,7 @@
           $('#dlgHimi input#himiname').val(himis[r].text);
 
           $('#dlgHimi #himiresponse').html(himiutils.selectBox('himiresponseX', answs));
-          $('#dlgHimi #himiresponseX option[val=' + himis[r]['answer-id'] + ']').attr('selected', true);
-          $('#dlgHimi #himiresponseX').selectmenu({change: function (event, ui) {
-              himis[r]['answer-id'] = answs[ui.item.index]['answer-id'];
-            }});
+          $('#dlgHimi #himiresponseX option[value=' + himis[r]['answer-id'] + ']').attr('selected', true);
           $('#dlgHimi select#himiresponseX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
 
           initQasTable(himis[r].qas);
@@ -251,9 +295,6 @@
           $('#dlgHimi input#himiname').val('');
           var r = himis.length - 1;
           $('#dlgHimi #himiresponse').html(himiutils.selectBox('himiresponseX', answs));
-          $('#dlgHimi #himiresponseX').selectmenu({change: function (event, ui) {
-              himis[r]['answer-id'] = answs[ui.item.index]['answer-id'];
-            }});
 
           initQasTable(himis[r].qas);
           acthimirow = r;
@@ -273,8 +314,8 @@
           actqasrow = r;
           $('#quests').html(himiutils.selectBox('quests', quests));
           $('#answs').html(himiutils.selectBox('answs', answs));
-          $('#quests option[val=' + actqas['question-id'] + ']').attr('selected', true);
-          $('#answs  option[val=' + actqas['answer-id'] + ']').attr('selected', true);
+          $('#quests option[value=' + actqas['question-id'] + ']').attr('selected', true);
+          $('#answs  option[value=' + actqas['answer-id'] + ']').attr('selected', true);
 
           $('#dlgQas .selectmenu').selectmenu();
           //$('#dlgQas .selectmenu').selectmenu().selectmenu( readonly ? 'disable' : 'enable');
@@ -309,7 +350,7 @@
 
         // Select Auftrags-Antwort
         $('#orderresponse').html(himiutils.selectBox('orderresponseX', answs));
-        $('#orderresponseX option[val=' + data['global-answer-id'] + ']').attr('selected', true);
+        $('#orderresponseX option[value=' + data['global-answer-id'] + ']').attr('selected', true);
         $('#orderresponseX').selectmenu({change: function (event, ui) {
             data['global-answer-id'] = answs[ui.item.index]['answer-id'];
           }});
@@ -320,7 +361,7 @@
         $('#evaluation').val(data['evaluation']);
         $('#suggestion-add').val(data['suggestion-add']);
         $('#suggkeys').html(himiutils.selectBox('suggkeysX', sugg));
-        $('#suggkeysX option[val=' + data['suggestion-id'] + ']').attr('selected', true);
+        $('#suggkeysX option[value=' + data['suggestion-id'] + ']').attr('selected', true);
         $('#suggkeysX').selectmenu({change: function (event, ui) {
             data['suggestion-id'] = sugg[ui.item.index]['himi_suggestion_id'];
           }});
@@ -331,7 +372,7 @@
         });
 
         $('#auftraggeber').html(himiutils.selectBox('auftraggeberX', deliveryAuftraggeber));
-        $('#auftraggeberX option[val=' + data['delivery-config-ag'] + ']').attr('selected', true);
+        $('#auftraggeberX option[value=' + data['delivery-config-ag'] + ']').attr('selected', true);
         $('#auftraggeberX').selectmenu({
           change: function (event, ui) {
             var selval = $(event.currentTarget).text().trim();
@@ -340,7 +381,7 @@
         });
 
         $('#leistungserbringer').html(himiutils.selectBox('leistungserbringerX', deliveryLeistungserbringer));
-        $('#leistungserbringerX option[val=' + data['delivery-config-le'] + ']').attr('selected', true);
+        $('#leistungserbringerX option[value=' + data['delivery-config-le'] + ']').attr('selected', true);
         $('#leistungserbringerX').selectmenu({
           change: function (event, ui) {
             var selval = $(event.currentTarget).text().trim();
@@ -349,7 +390,7 @@
         });
 
         $('#sanitaetshaus').html(himiutils.selectBox('sanitaetshausX', deliverySanitaetshaus));
-        $('#sanitaetshausX option[val=' + data['delivery-config-sa'] + ']').attr('selected', true);
+        $('#sanitaetshausX option[value=' + data['delivery-config-sa'] + ']').attr('selected', true);
         $('#sanitaetshausX').selectmenu({
           change: function (event, ui) {
             var selval = $(event.currentTarget).text().trim();
@@ -360,16 +401,25 @@
         // ICDs
         for (var i = 0; i < 5; i++) {
           var icd = data['icds'][i] || {};
-          $('#icdcode' + (i + 1)).val(icd['icd-code-number']).on('change', function () {
+          $('#icdcode' + (i + 1)).val(icd['icd-code-number']).on('blur', function (event) {
             var n = parseInt(event.target.id.replace('icdcode', '')) - 1;
-            if (!data['icds'][n])
-              data['icds'][n] = {};
-            data['icds'][n]['icd-code-number'] = $('#icdcode' + (n + 1)).val();
+            var icdCodeNumber = $('#icdcode' + (n + 1)).val().trim().toUpperCase();
+            if( !icdCodeNumber ) return;
+            var icdCode = getIcdCodeFromNumber(icdCodeNumber);
+            if ( !icdCode ) {
+              alert('Warnung\nKein gültiger ICD Code!');
+              $(event.currentTarget).focus();
+            } else {
+              data['icds'][n] = data['icds'][n] || { 'icd-code-id':null, 'icd-code-number':null, digital: false };
+              data['icds'][n]['icd-code-id']     = icdCode.id;
+              data['icds'][n]['icd-code-number'] = icdCodeNumber;
+              data['icds'][n]['text']            = $('#icdtext' + (n+1)).val() || icdCode.text;
+              $('#icdtext' + (n + 1)).val( data['icds'][n]['text'] );
+            }
           });
           $('#icdtext' + (i + 1)).val(icd['text']).on('change', function (event) {
             var n = parseInt(event.target.id.replace('icdtext', '')) - 1;
-            if (!data['icds'][n])
-              data['icds'][n] = {};
+            data['icds'][n] = data['icds'][n] || { 'icd-code-id':null, 'icd-code-number':null, digital: false };
             data['icds'][n]['text'] = $('#icdtext' + (n + 1)).val();
           });
           // digitale ICDs -> readonly
@@ -377,18 +427,6 @@
             $('#icdcode' + (i + 1) + ',#icdtext' + (i + 1)).prop('disabled', true);
             $('#icd' + (i + 1)).hide(); // search-icon
           }
-          $('#icdcode' + (i + 1)).on('blur', function (event) {
-            var icdcode = $(this).val().toUpperCase();
-            var icdtext = getIcdCodeText(icdcode);
-            if ($(this).val() && !icdtext) {
-              alert('Warnung\nKein gültiger ICD Code!');
-              $(event.currentTarget).focus();
-            } else {
-              var n = $(this).attr('id').replace('icdcode', '');
-              $('#icdcode' + n).val(icdcode);
-              $('#icdtext' + n).val($('#icdtext' + n).val() || icdtext);
-            }
-          });
         }
 
         // isSFB
@@ -411,8 +449,9 @@
                 return $.alert('Fehler', err);
               }
 
-              himis[acthimirow].text = $('#dlgHimi input#himiname').val();
-              himis[acthimirow].number = $('#dlgHimi input#himinumber').val();
+              himis[acthimirow]['text']      = $('#dlgHimi input#himiname').val();
+              himis[acthimirow]['number']    = $('#dlgHimi input#himinumber').val();
+              himis[acthimirow]['answer-id'] = parseInt($('#dlgHimi :selected').val());
               delete himis[acthimirow].isnew;
               initHimiTable(himis);
               $(this).dialog("close");
@@ -432,8 +471,8 @@
             Ok: function () {
               himis[acthimirow].qas[actqasrow].motivation = $('#dlgQas #reason').val();
               _.extend(himis[acthimirow].qas[actqasrow],
-                      _.findWhere(quests, {'question-id': parseInt($('#dlgQas select#quests option:selected').attr('val'))}),
-                      _.findWhere(answs, {'answer-id': parseInt($('#dlgQas select#answs  option:selected').attr('val'))})
+                      _.findWhere(quests, {'question-id': parseInt($('#dlgQas select#quests option:selected').val())}),
+                      _.findWhere(answs,  {'answer-id':   parseInt($('#dlgQas select#answs  option:selected').val())})
                       );
               delete himis[acthimirow].qas[actqasrow].isnew;
               initQasTable(himis[acthimirow].qas);
@@ -474,14 +513,16 @@
             buttons: {
               'Übernehmen': function () {
                 var n = parseInt(targetNumber) - 1;
-                if (!data['icds'][n])
-                  data['icds'][n] = {};
+                data['icds'][n] = data['icds'][n] || { 'icd-code-id':null, 'icd-code-number':null, digital: false };
                 if (!data['icds'][n].digital) {
                   var $checkedRow = $('tr:has(input:checked)');
-                  $('#icdcode' + targetNumber).val($('td:nth-child(2)', $checkedRow).text());
-                  $('#icdtext' + targetNumber).val($('td:nth-child(3)', $checkedRow).text());
-                  data['icds'][n]['icd-code-number'] = $('#icdcode' + (n + 1)).val();
-                  data['icds'][n]['text'] = $('#icdtext' + (n + 1)).val();
+                  var icdCodeNumber = $('td:nth-child(2)', $checkedRow).text();
+                  var icdCode = getIcdCodeFromNumber(icdCodeNumber);
+                  data['icds'][n]['icd-code-id']     = icdCode.id;
+                  data['icds'][n]['icd-code-number'] = icdCodeNumber;
+                  data['icds'][n]['text']            = $('#icdtext' + (n+1)).val() || icdCode.text;
+                  $('#icdcode' + targetNumber).val(data['icds'][n]['icd-code-number']  );
+                  $('#icdtext' + targetNumber).val(data['icds'][n]['text']  );
                 }
                 $(this).dialog("close");
               },

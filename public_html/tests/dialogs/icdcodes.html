@@ -7,16 +7,7 @@
     <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
     <link rel="stylesheet" href="/css/ebtable.css">
     <style>
-      * {font-family:Arial; color: black; font-size: 10px;}
-      table, td { border: 1px solid lightgrey; border-collapse: collapse; padding: 5px 3px ;}
-      #diagnosen { width: 500px; }
-      #diagnosen td:first-child { width:60px; }
-      #diagnosen input { width: 80%; }
-      td{ align-content: center; }
-      #dlgIcd  { background-color: #eeeee0; }
-      #dlgIcd th, #dlgIcd td { border-color: #fff; border-style: solid; border-width: 1px; }
-      #dlgIcd th:nth-child(1){ width:15px; }
-      #dlgIcd th:nth-child(2){ width:50px; }
+      * {font-family:Arial; color: black; font-size: 12px;}
     </style>
 
     <script src="/lib/underscore-1.8.3/underscore-1.8.3.js"></script>
@@ -25,75 +16,21 @@
     <script src="/js/polyfills.js"></script>
     <script src="/js/mx.js"></script>
     <script src="/js/ebtable.js"></script>  
+    <script src="/js/dlgIcd.js"></script>  
     <script src="/data/himidata.js"></script>
     <script src="/data/himilists.js"></script>
     <script>
-      var opts = {
-        flags: {filter: true, pagelenctrl: false, config: false},
-        columns: [
-          {name: "icdid", invisible: true, technical: true},
-          {name: "Text"},
-          {name: "Code", width: 50}
-        ],
-        selection: true,
-        singleSelection: true,
-        colorder: [0, 2, 1]
-      };
       $().ready(function () {
         $('#number').selectmenu().selectmenu('disable');
         $('#test').on('click', function () {
-          $('#dlgIcd').dialog({
-            open: function ( ) {
-              _.each(icds, function(x){x.selected= false;});
-              $('#icdgrid input#Text,#icdgrid input#Code').text('');
-              $('#grid').ebtable(opts, icds);
-              $('.ctrl:first').remove();
-              $('table').width('99%');
-            },
-            title: 'ICD-Code wählen',
-            width: 700, height: 400,
-            modal: true,
-            buttons: {
-              'Übernehmen': function () {
-                console.log($('td:nth-child(2)', $('tr:has(input:checked)')).text(), $('td:nth-child(3)', $('tr:has(input:checked)')).text());
-                $('#Code, #Text' ).val('');
-                $('#dlgIcd input:checked' ).prop( "checked", false );
-                $(this).dialog("close");
-              },
-              'Abbrechen': function () {
-                $('#Code, #Text' ).val('');
-                $('#dlgIcd input:checked' ).prop( "checked", false );
-                $(this).dialog("close");
-              }
-            }
-          });
+          dlgIcd(icds, function(){
+            return true;
+          }, {icdCode:'A'});
         });
       });
     </script>
   </head>
   <body>
-    <div id='dlgIcd'>
-      <div id="grid"></div>
-    </div>
     <button id="test">TEST</button>
-
-    <h1>Diagnosen:</h1>
-    <div>
-      <table id='diagnosen'>
-        <tr><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td></tr>
-        <tr><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td></tr>
-        <tr><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td></tr>
-        <tr><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td></tr>
-        <tr><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td></tr>
-      </table>
-
-    </div>
-    <table>
-      <tr>
-        <td class="attribute_value" colspan="3">AAA
-          <input name="Resultid" type="hidden" value="">
-        </td>
-      </tr>
-    </table>
   </body>
 </html>

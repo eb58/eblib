@@ -90,6 +90,18 @@ var result = {
                 "icd-code-id": 141968,
                 "icd-code-number": "A48.2",
                 "text": "Legionellose ohne Pneumonie [Pontiac-Fieber]",
+                "digital": false
+            },
+            {
+                "icd-code-id": 141968,
+                "icd-code-number": "A00.9",
+                "text": null,
+                "digital": false
+            },
+            {
+                "icd-code-id": 141968,
+                "icd-code-number": "A00.9",
+                "text": "xxx",
                 "digital": true
             },
             {

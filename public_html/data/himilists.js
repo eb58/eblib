@@ -60,7 +60,7 @@ var deliveryAuftraggeber = _.filter(delivery, function (o) {
     return o.flags & 4;
 });
 
-var icds = [
+var icdlist = [
     [141713, "Keine i.S. der Kodierrichtlinien relevante Diagnose", "---.-"],
     [141714, "Cholera", "A00.-"],
     [141715, "Cholera durch Vibrio cholerae O:1, Biovar cholerae", "A00.0"],

@@ -5,7 +5,7 @@ $.fn.ebtable.sortformats = {
     return d ? (d[3] + d[2] + d[1]) : '';
   },
   'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
-    var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
+    var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/);
     return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
   },
   'scientific': function (a) { // '1e+3'  -->  '1000' 
@@ -57,6 +57,10 @@ QUnit.test('testset2 Array sorting functions', function (assert) {
   var m = mx([['04.01.2011'], ['01.01.2015'], ['03.01.2013'], ['17.01.2001']]);
   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', sortformat: 'date-de'})), [['17.01.2001'], ['04.01.2011'], ['03.01.2013'], ['01.01.2015']]);
   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'date-de'})), [['01.01.2015'], ['03.01.2013'], ['04.01.2011'], ['17.01.2001']]);
+
+  var m = mx([['04.01.2011 12:34'], ['03.01.2013 13:35'], ['01.01.2015 13:34'], ['03.01.2013 13:36'], ['17.01.2001 07:30']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', sortformat: 'datetime-de'})), [['17.01.2001 07:30'], ['04.01.2011 12:34'], ['03.01.2013 13:35'], ['03.01.2013 13:36'], ['01.01.2015 13:34']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'datetime-de'})), [["01.01.2015 13:34"], ["03.01.2013 13:36"], ["03.01.2013 13:35"], ["04.01.2011 12:34"], ["17.01.2001 07:30"]]);
 });
 
 QUnit.test('testset3 Array filtering functions', function (assert) {
@@ -67,6 +71,6 @@ QUnit.test('testset3 Array filtering functions', function (assert) {
   assert.deepEqual(m.filterData({col: 0, searchtext: 'abc'}), [['Abc', '']]);
   assert.deepEqual(m.filterData({col: 0, searchtext: 'ABC'}), [['Abc', '']]);
   assert.deepEqual(m.filterData({col: 0, searchtext: 'A*'}), [['Abc', '']]);
-  assert.deepEqual(m.filterData({col: 0, searchtext: '*b*'}), [['Abc', ''],['bc', '']]);
+  assert.deepEqual(m.filterData({col: 0, searchtext: '*b*'}), [['Abc', ''], ['bc', '']]);
 });
 

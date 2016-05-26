@@ -45,7 +45,7 @@
       var opts = {
         columns: [
           {name: "Tierart"},
-          {name: "Datum", sortformat: 'date-de'},
+          {name: "Datum", sortformat: 'date-de', match: function(cellData, searchtxt){ return cellData.contains(searchtxt); }},
           {name: "Name"},
           {name: "Flag"}
         ],

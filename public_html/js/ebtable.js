@@ -401,11 +401,18 @@
         $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
       if (myopts.singleSelection) {
-        $('input[type=checkbox').on('click', function (o) {
-          $('input[type=checkbox').prop('checked', false);
-          $(o.currentTarget).prop('checked', true);
+        $(selgridid + 'input[type=checkbox').on('click', function (event) {
+          $(selgridid + 'input[type=checkbox').prop('checked', false);
+          $(event.currentTarget).prop('checked', true);
         });
       }
+//      $(selgridid + 'td').on('click', function (event) {
+//        if (myopts.singleSelection){
+//          $(selgridid + '#data input:checkbox').prop('checked', false);
+//        }
+//        $(event.target).parent().find('input:checkbox').prop('checked', true);
+//      });
+
 //adjustLayout();
     }
 
@@ -568,6 +575,10 @@
         $(selgridid + 'thead th input[type="text"').each(function (i, o) {
           $(selgridid + '#' + o.id + ' input').val(filter[o.id]);
         });
+        filterData();
+        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+        pageCur = 0;
+        redraw(pageCur);
         return this;
       },
       getStateAsJSON: state.getStateAsJSON,
@@ -582,7 +593,7 @@
       return d ? (d[3] + d[2] + d[1]) : '';
     },
     'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
-      var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
+      var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/);
       return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
     },
     'scientific': function (a) { // '1e+3'  -->  '1000' 

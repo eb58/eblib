@@ -26,9 +26,8 @@
       #himilist{ margin: 5px 1px 5px 1px; width:500px; float:left;}
       #orderattr{ margin: 5px 10px 5px 10px; width:500px; float:left;}
 
-      .qastbl td:nth-child(2) { width: 500px;}
-      #dlgQas textarea{ width:450px;}
 
+      .qastbl td:nth-child(2) { width: 500px;}
       .qastbl td { background-color: #dfdfdf;  }
       .qastbl td:nth-child(1) { width:80%;}
 
@@ -37,24 +36,26 @@
       #diagnosen td:nth-child(1) { width: 10px }   
       #diagnosen td:nth-child(2) { width: 50px }
       #diagnosen td:nth-child(2) input { width: 45px }
-      #diagnosen td:nth-child(3) { width: 400px   }
-      #diagnosen td:nth-child(3) input { width: 395px }
+      #diagnosen td:nth-child(3) { width: 380px   }
+      #diagnosen td:nth-child(3) input { width: 100% }
       #diagnosen td:nth-child(4) { width: 10px  }
       #diagnosen td{ padding: 3px; }
       #diagnosen input{ border: 0px; }
-      #dlgHimi>table td { border-style: none; margin: 0px; padding: 1px 0px 1px 0px;}
+      
 
       #versandeinstellungen td, #versandeinstellungen table{ border: 0px;}
       #auftraggeberX, #leistungserbringerX, #sanitaetshausX { width:100%; }
 
       #suggkeysX { width:500px; }
 
+      #dlgHimi>table td { border-style: none; margin: 0px; padding: 1px 0px 1px 0px;}
       #dlgHimi { background-color: #eeeee0; }
-      #dlgQas  { background-color: #eeeee8; }
+
       #dlgIcd  { background-color: #eeeee0; }
-      #dlgIcd th, #dlgIcd td { border-color: #fff; border-style: solid; border-width: 1px; }
-      #dlgIcd th:nth-child(1){ width:15px; }
-      #dlgIcd th:nth-child(2){ width:50px; }
+
+      #dlgQas  { background-color: #eeeee8; }
+      #dlgQas textarea{ width:500px;}
+      #dlgQas table, #dlgQas td { border-style:none; }
 
       .nebeneinander div {  float: left;  clear: none; }
 
@@ -66,71 +67,74 @@
     <script src='/js/himi.js'></script>
     <script src='/js/mx.js'></script>
     <script src='/js/ebtable.js'></script>
+    <script src='/js/dlgIcd.js'></script>
     <script src='/data/himilists.js'></script>
     <script>
-
-  if (typeof $ !== 'undefined') {
-   $.extend({
-      alert: function (title, message) {
-        message = message || '';
-        $("<div id='dlgAlert'></div>").dialog({
-          buttons: {
-            "Ok": function () {
-                 $(this).dialog("close");
-            }
-          },
-          close: function () {
-              $(this).remove();
-          },
-          title: title,
-          modal: true,
-          closeText: 'Schlie\u00dfen' 
-        }).html('<br>' + message.replace('\n', '<br>'));
-      },
-      confirm: function (title, question, callback) {
-        question = question || '';
-         $("<div id='dlgConfirm></div>").dialog({
-            buttons: {
-              "Ja": function () {
-                 $(this).dialog("close");
-                 callback();
+      if (typeof $ !== 'undefined') {
+        $.extend({
+          alert: function (title, message) {
+            message = message || '';
+            $("<div id='dlgAlert'></div>").dialog({
+              buttons: {
+                "Ok": function () {
+                  $(this).dialog("close");
+                }
               },
-              "Nein": function () {
-                 $(this).dialog("close");
-              }
-            },
-            close: function () {
-              $(this).remove();
-            },
-            title: title,
-            modal: true,
-            closeText: 'Schlie\u00dfen' 
-         }).html('<br>' + question.replace('\n', '<br>'));
+              close: function () {
+                $(this).remove();
+              },
+              title: title,
+              modal: true,
+              closeText: 'Schlie\u00dfen'
+            }).html('<br>' + message.replace('\n', '<br>'));
+          },
+          confirm: function (title, question, callback) {
+            question = question || '';
+            $("<div id='dlgConfirm></div>").dialog({
+              buttons: {
+                "Ja": function () {
+                  $(this).dialog("close");
+                  callback();
+                },
+                "Nein": function () {
+                  $(this).dialog("close");
+                }
+              },
+              close: function () {
+                $(this).remove();
+              },
+              title: title,
+              modal: true,
+              closeText: 'Schlie\u00dfen'
+            }).html('<br>' + question.replace('\n', '<br>'));
+          }
+        });
+        $(document).ajaxStart(function () {
+          $("body").addClass('wait');
+        });
+        $(document).ajaxStop(function () {
+          $("body").removeClass('wait');
+        });
       }
-   });
-   $(document).ajaxStart(function () {
-      $("body").addClass('wait');
-   });
-   $(document).ajaxStop(function () {
-      $("body").removeClass('wait');
-   });
-}
 
 
-  var
+      var
               himis,
+              icds,
               acthimirow,
               actqasrow,
               readonly = false;
 
       function isValidIcdCode(code) {
-        return _.find(icds, function (o) {
+        return _.find(icdlist, function (o) {
           return o[2] === code;
         });
       }
       function getIcdCodeFromNumber(code) {
-        var x = _.find(icds, function (o) {return o[2] === code;});
-        return x ? { id: x[0], text: x[1] } : null;
+        var x = _.find(icdlist, function (o) {
+          return o[2] === code;
+        });
+        return x ? {id: x[0], text: x[1]} : null;
       }
 
       // ##########################################################################################################
@@ -246,12 +250,9 @@
           return [h.digital, h['lfd-nr'], h.number + ' ### ' + h.text + ' ### ' + answtext, h.qas];
         });
         $('#grid').himitable(himilistopts, himidata);
+        $('#addHimi.ui-icon-circle-plus').toggle( !(readonly || himis.length >= 10));
         initActionsForHimilist();
-        if (readonly || himis.length >= 10)  // max. 10 HiMis
-          $('#addHimi.ui-icon-circle-plus').hide();
-        else
-          $('#addHimi.ui-icon-circle-plus').show();
-        initBegruendungToolTips()
+        initBegruendungToolTips();
       }
 
       function initQasTable(qas) {
@@ -261,17 +262,27 @@
           return [qa.digital, qa['question-number'], qa['question-text'], answtext, qa['motivation']];
         });
         $('#qastable').himitable(qaslistopts, qasdata);
+        $('#addQas.ui-icon-circle-plus').toggle(!(readonly || qas.length >= 14));
         initActionsForQaslist(qas);
-        if (readonly || qas.length >= 14)  // max. 14 Qas
-          $('#addQas.ui-icon-circle-plus').hide();
-        else
-          $('#addQas.ui-icon-circle-plus').show();
       }
 
+      function initIcdTable(icds) {
+        for (var i = 1; i <= 5; i++) {
+          var icd = icds[i-1] || {};
+          var code = $($('#icdcode' + i)).val().trim().toUpperCase();
+          $('#icdcode' + i).val(icd['icd-code-number']);
+          $('#icdtext' + i).val(icd['text']).prop('readonly', code !== '' && code !== '---.-')
+          $('#icdcode' + i).prop('disabled', icd.digital);
+          $('#icdtext' + i).prop('disabled', icd.digital);
+          $('#icdsrch' + i).toggle(!icd.digital);
+          $('#icdtrash' + i).toggle(!icd.digital);
+        }
+        initActionsForIcdlist();
+      }
       // ##########################################################################################################
 
       function initActionsForHimilist() { // Actions for Himilist
-        $('#himilist .ui-icon-trash').off().on('click', function (ev) { // delete himi
+        $('.himitable .ui-icon-trash').off().on('click', function (ev) { // delete himi
           var r = parseInt(ev.target.id.replace('himi', ''));
           himis.splice(r, 1);
           initHimiTable(himis);
@@ -321,8 +332,6 @@
           $('#answs  option[value=' + actqas['answer-id'] + ']').attr('selected', true);
 
           $('#dlgQas .selectmenu').selectmenu();
-          //$('#dlgQas .selectmenu').selectmenu().selectmenu( readonly ? 'disable' : 'enable');
-          //$('#dlgQas select#quests option:not(:selected)').attr('disabled', actqas.digital);
           $('#dlgQas select#quests').selectmenu().selectmenu(readonly || actqas.digital ? 'disable' : 'enable');
           $('#dlgQas select#answs').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
 
@@ -348,8 +357,55 @@
         });
       }
 
+      function initActionsForIcdlist() {   // Actions for Icdlist
+        $('#diagnosen .ui-icon-trash').off().on('click', function (event) { // delete icd
+          var n = event.target.id.replace('icdtrash', '')-1;
+          icds.splice(n, 1);
+          initIcdTable(icds);
+        });
+        $('#diagnosen .ui-icon-search').on('click', function (event) {
+          var n = event.target.id.replace('icdsrch', '');
+          var opts = { icdCode: $('#icdcode' + n ).val() };
+          dlgIcd(icdlist, function (code, text, id) {
+            icds[n-1] = icds[n-1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
+            if (!icds[n-1].digital) {
+              icds[n-1]['icd-code-id'] = id;
+              icds[n-1]['icd-code-number'] = code;
+              icds[n-1]['text'] = code === '---.-' ? $('#icdtext' + n).val() : text;
+              $('#icdcode' + n ).val(icds[n-1]['icd-code-number']);
+              $('#icdtext' + n ).val(icds[n-1]['text']).prop('readonly', code !== '---.-');
+            }
+            return true;
+          }, opts );
+        });
+        for (var i = 1; i <= 5; i++) {
+          $('#diagnosen #icdcode' + i).on('blur', function (event) {
+            var n = event.target.id.replace('icdcode', '');
+            var icdCodeNumber = $('#icdcode' + n).val().trim().toUpperCase();
+            if (!icdCodeNumber)
+              return;
+            var icdCode = getIcdCodeFromNumber(icdCodeNumber);
+            if (icdCode) {
+              icds[n-1] = icds[n-1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
+              icds[n-1]['icd-code-id'] = icdCode.id;
+              icds[n-1]['icd-code-number'] = icdCodeNumber;
+              icds[n-1]['text'] = icdCodeNumber === '---.-' ? $('#icdtext' + n).val() : icdCode.text;
+              $('#icdtext' + n).val(icds[n-1]['text']).prop( 'readonly', icdCodeNumber!=='---.-' );
+            }
+          });
+          $('#icdtext' + i).on('change', function (event) {
+            var n = parseInt(event.target.id.replace('icdtext', ''));
+            icds[n-1] = icds[n-1] || { 'icd-code-id':null, 'icd-code-number':null, digital: false };
+            icds[n-1]['text'] = $('#icdtext' + n).val();
+            var code = $('#icdcode' + n).val().trim().toUpperCase();
+            $('#icdtext' + n).prop( 'readonly', code!==''&& code !=='---.-' );
+          });
+        }
+      }
+
       function initDialog(data) {
         initHimiTable(data.himis);
+        initIcdTable(data.icds);
 
         // Select Auftrags-Antwort
         $('#orderresponse').html(himiutils.selectBox('orderresponseX', answs));
@@ -401,36 +457,6 @@
           }
         });
 
-        // ICDs
-        for (var i = 0; i < 5; i++) {
-          var icd = data['icds'][i] || {};
-          $('#icdcode' + (i + 1)).val(icd['icd-code-number']).on('blur', function (event) {
-            var n = parseInt(event.target.id.replace('icdcode', '')) - 1;
-            var icdCodeNumber = $('#icdcode' + (n + 1)).val().trim().toUpperCase();
-            if( !icdCodeNumber ) return;
-            var icdCode = getIcdCodeFromNumber(icdCodeNumber);
-            if ( !icdCode ) {
-              alert('Warnung\nKein gültiger ICD Code!');
-              $(event.currentTarget).focus();
-            } else {
-              data['icds'][n] = data['icds'][n] || { 'icd-code-id':null, 'icd-code-number':null, digital: false };
-              data['icds'][n]['icd-code-id']     = icdCode.id;
-              data['icds'][n]['icd-code-number'] = icdCodeNumber;
-              data['icds'][n]['text']            = $('#icdtext' + (n+1)).val() || icdCode.text;
-              $('#icdtext' + (n + 1)).val( data['icds'][n]['text'] );
-            }
-          });
-          $('#icdtext' + (i + 1)).val(icd['text']).on('change', function (event) {
-            var n = parseInt(event.target.id.replace('icdtext', '')) - 1;
-            data['icds'][n] = data['icds'][n] || { 'icd-code-id':null, 'icd-code-number':null, digital: false };
-            data['icds'][n]['text'] = $('#icdtext' + (n + 1)).val();
-          });
-          // digitale ICDs -> readonly
-          if (icd.digital) {
-            $('#icdcode' + (i + 1) + ',#icdtext' + (i + 1)).prop('disabled', true);
-            $('#icd' + (i + 1)).hide(); // search-icon
-          }
-        }
 
         // isSFB
         isSFB = 1;
@@ -440,7 +466,6 @@
 
         // HIMI-Dialog
         $('#dlgHimi').dialog({title: 'Hilfsmittel', autoOpen: false, height: 500, width: 700, closeText: 'Schlie\u00dfen', modal: true,
-
           close: function () {
             himis = _.reject(himis, {isnew: true});
           },
@@ -453,8 +478,8 @@
                 return $.alert('Fehler', err);
               }
 
-              himis[acthimirow]['text']      = $('#dlgHimi input#himiname').val();
-              himis[acthimirow]['number']    = $('#dlgHimi input#himinumber').val();
+              himis[acthimirow]['text'] = $('#dlgHimi input#himiname').val();
+              himis[acthimirow]['number'] = $('#dlgHimi input#himinumber').val();
               himis[acthimirow]['answer-id'] = parseInt($('#dlgHimi :selected').val());
               delete himis[acthimirow].isnew;
               initHimiTable(himis);
@@ -467,7 +492,7 @@
         });
 
         // Qas-Dialog
-        $('#dlgQas').dialog({title: 'Frage', autoOpen: false, height: 300, width: 500, closeText: 'Schlie\u00dfen', modal: true,
+        $('#dlgQas').dialog({title: 'Frage', autoOpen: false, height: 300, width: 550, closeText: 'Schlie\u00dfen', modal: true,
           close: function (event, ui) {
             himis[acthimirow].qas = _.reject(himis[acthimirow].qas, {isnew: true});
           },
@@ -476,7 +501,7 @@
               himis[acthimirow].qas[actqasrow].motivation = $('#dlgQas #reason').val();
               _.extend(himis[acthimirow].qas[actqasrow],
                       _.findWhere(quests, {'question-id': parseInt($('#dlgQas select#quests option:selected').val())}),
-                      _.findWhere(answs,  {'answer-id':   parseInt($('#dlgQas select#answs  option:selected').val())})
+                      _.findWhere(answs, {'answer-id': parseInt($('#dlgQas select#answs  option:selected').val())})
                       );
               delete himis[acthimirow].qas[actqasrow].isnew;
               initQasTable(himis[acthimirow].qas);
@@ -486,57 +511,6 @@
               $(this).dialog("close");
             }
           }
-        });
-
-        $('.ui-icon-search').on('click', function (event) {
-          console.log('ID', event.target.id);
-          var targetNumber = event.target.id.replace('icd', '');
-          var opts = {
-            flags: {filter: true, pagelenctrl: false, config: false},
-            columns: [
-              {name: "icdid", invisible: true, technical: true},
-              {name: "Text"},
-              {name: "Code", width: 50}
-            ],
-            selection: true,
-            singleSelection: true,
-            colorder: [0, 2, 1]
-          };
-
-          $('#dlgIcd').dialog({
-            open: function ( ) {
-              _.each(icds, function (o) {
-                o.selected = false;
-              });
-              $('#icdgrid input#Text,#icdgrid input#Code').val('');
-              $('#icdgrid').ebtable(opts, icds);
-              $('.ctrl:first').remove();
-              $('#icdgrid table').width('100%');
-            },
-            title: 'ICD-Code wählen',
-            width: 800, height: 430,
-            modal: true,
-            buttons: {
-              'Übernehmen': function () {
-                var n = parseInt(targetNumber) - 1;
-                data['icds'][n] = data['icds'][n] || { 'icd-code-id':null, 'icd-code-number':null, digital: false };
-                if (!data['icds'][n].digital) {
-                  var $checkedRow = $('tr:has(input:checked)');
-                  var icdCodeNumber = $('td:nth-child(2)', $checkedRow).text();
-                  var icdCode = getIcdCodeFromNumber(icdCodeNumber);
-                  data['icds'][n]['icd-code-id']     = icdCode.id;
-                  data['icds'][n]['icd-code-number'] = icdCodeNumber;
-                  data['icds'][n]['text']            = $('#icdtext' + (n+1)).val() || icdCode.text;
-                  $('#icdcode' + targetNumber).val(data['icds'][n]['icd-code-number']  );
-                  $('#icdtext' + targetNumber).val(data['icds'][n]['text']  );
-                }
-                $(this).dialog("close");
-              },
-              'Abbrechen': function () {
-                $(this).dialog("close");
-              }
-            }
-          });
         });
 
         if (readonly) {
@@ -584,6 +558,7 @@
           url: "/data/himidata.js",
           success: function () {
             himis = result.data.himis;
+            icds = result.data.icds;
             initDialog(result.data);
           }
         });
@@ -613,11 +588,11 @@
       <div>
         <table id='diagnosen'>
           <tbody>
-            <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icd1' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td></td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icd2' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td></td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icd3' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td></td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icd4' class='ui-icon ui-icon-search'></span></td></tr>
-            <tr><td></td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icd5' class='ui-icon ui-icon-search'></span></td></tr>
+            <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icdsrch1' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash1' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icdsrch2' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash2' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icdsrch3' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash3' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icdsrch4' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash4' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icdsrch5' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash5' class='ui-icon ui-icon-trash'></span></td></tr>
           </tbody>
         </table>
       </div>
@@ -663,8 +638,10 @@
     </div>
 
     <div id='dlgQas'>
-      <div id='quests'></div>
-      <div id='answs'></div>
+      <table>
+        <tr><td>Frage:    </td><td><div id='quests'></div></td></tr>
+        <tr><td>Antwort:  </td><td><div id='answs'></div></td></tr>
+      </table>
       <h1>Begründung:</h1>
       <textarea id="reason" rows=5 cols=80 maxlength="1000"></textarea>
     </div>

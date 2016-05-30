@@ -54,7 +54,7 @@
               spc: 0, //  Mindestens ein Auftrag in der Charge ist 'special'
               flg: row[idx.flg]
             };
-          } else if (row[0] === 'W' && chargeId >= 0 && groupsdata[chargeId] ) {
+          } else if (row[0] === 'W' && chargeId >= 0 && groupsdata[chargeId]) {
             var g = groupsdata[chargeId];
             if (row[idx.frs] < g.fristmin)
               g.fristmin = row[idx.frs];
@@ -127,7 +127,7 @@
           var name = data.substring(0, 30).replace(/ /g, '\u00a0') + data.substring(30);
           if (row[idx.gtyp] !== 'C') {
             var t = _.template(
-              '<input name="name_<\%=wid%>" value="<\%=workorderName%>" hidden="true"/>\
+                    '<input name="name_<\%=wid%>" value="<\%=workorderName%>" hidden="true"/>\
                    <a href="/ISmed/showOrder.do;jsessionid=<\%=sid%>?src=khbasket2&workorderid=<\%=wid%>" title="<\%=wid%>"><\%=workorderName%></a>');
             return t({chd: data, wid: row[idx.wnm], workorderName: name, sid: sessionId});
           }
@@ -197,6 +197,15 @@
             ret = t({wid: wid, pid: pid, per: per, cid: cid, spc: spc, cty: cty});
           }
           return ret;
+        },
+        selectAll: function () {
+          return "\
+            <input \
+              type=checkbox\
+              id='select_all'\
+              name='select_all'\
+              onclick=\"select_all();\"\
+            />";
         }
       };
 
@@ -238,7 +247,7 @@
           {name: "Vorg.VGA"},
           {name: "KHFrist"}
         ],
-        selection: {render: renderer.select},
+        selection: true,
         sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idx.wnm, grouphead: 'C', groupelem: 'W'}
 

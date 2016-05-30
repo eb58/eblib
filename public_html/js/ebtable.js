@@ -30,9 +30,7 @@
       loadState: function loadState(s) {
         if (!s)
           return;
-
         var state = s;
-
         myopts.rowsPerPage = state.rowsPerPage;
         myopts.colorder = [];
         _.each(state.colorderByName, function (colname) {
@@ -152,7 +150,7 @@
     }
 
     function tableHead() {
-      var res = myopts.selection ? '<th></th>' : '';
+      var res = myopts.selection ? '<th><input id="checkAll" type="checkbox"></th>' : '';
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
@@ -161,8 +159,8 @@
               <div class="sort_wrapper">\
                 <span/><%=colname%>\
               </div>'
-            + (myopts.flags.filter ? '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>' : '') +
-            '</th>';
+                  + (myopts.flags.filter ? '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>' : '') +
+                  '</th>';
           // &#8209; = non breakable hyphen
           res += _.template(t)({colname: coldef.name.replace('-', '&#8209;'), colid: coldef.id, tooltip: coldef.tooltip});
         }
@@ -247,7 +245,7 @@
       var gc = myopts.groupdefs;
       var groupid = row[gc.groupid];
       if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
-        console.log('Groupheader selected!', groupid, row[gc.grouplabel]);
+        console.log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
         _.each(origData.getGroupRows(gc, groupid), function (o) {
           o.selected = b;
         });
@@ -256,13 +254,23 @@
             $(selgridid + '#check' + i).prop('checked', b);
           }
         }
+      } else {
+        console.log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
+        $(selgridid + '#check' + rowNr).prop('checked', b);
       }
       myopts.onSelection && myopts.onSelection(rowNr, row, origData);
     }
 
     function selectRows(event) { // select row
-      var rowNr = event.target.id.replace('check', '');
-      selectRow(rowNr, tblData[rowNr], $(event.target).prop('checked'));
+      var checked = $(event.target).prop('checked');
+      if (event.target.id === 'checkAll') {
+        _.each(tblData, function (row, rowNr) {
+          selectRow(rowNr, tblData[rowNr], checked);
+        });
+      } else {
+        var rowNr = event.target.id.replace('check', '');
+        selectRow(rowNr, tblData[rowNr], checked);
+      }
     }
 
     function deselectRows() {
@@ -356,7 +364,7 @@
           event.preventDefault();
         }
       }
-	}
+    }
 
     function ignoreSorting(event) {
       event.target.focus();
@@ -397,14 +405,14 @@
     function redraw(pageCur, withHeader) {
       $(selgridid + '#ctrlInfo').html(infoCtrl());
       $(selgridid + '#data tbody').html(tableData(pageCur));
-      $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
+      $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       if (withHeader) {
         $(selgridid + 'thead tr').html(tableHead());
-        $(selgridid + 'thead th').on('click', sorting);
-        $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
+        $(selgridid + 'thead th').off().on('click', sorting);
+        $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
       if (myopts.singleSelection) {
-        $(selgridid + 'input[type=checkbox').on('click', function (event) {
+        $(selgridid + 'input[type=checkbox').off().on('click', function (event) {
           $(selgridid + 'input[type=checkbox').prop('checked', false);
           $(event.currentTarget).prop('checked', true);
         });
@@ -440,6 +448,7 @@
           </div>\n\
           <div class='ctrl'>\n\
             <div id='ctrlInfo'  style='float: left;' class='ui-widget-content'><%= info %></div>\n\
+            <div style='float: left;' class='ui-widget-content' hidden>Anzahl markierter Auftr\u00e4ge: <span id='cntSel'>0</span></div>\n\
             <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
         </div>");
@@ -488,10 +497,10 @@
       pageCur = pageCurMax;
       redraw(pageCur);
     });
-    $(selgridid + 'thead th').on('click', sorting);
-    $(selgridid + 'thead input[type=text]').on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
-    $(selgridid + '#data input[type=checkbox]').on('change', selectRows);
-    $(selgridid + '#configBtn').button().css('height', ctrlHeight).on('click', function () {
+    $(selgridid + 'thead th').off().on('click', sorting);
+    $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
+    $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
+    $(selgridid + '#configBtn').button().css('height', ctrlHeight).off().on('click', function () {
       $('#' + gridid + 'selectable').sortable();
       $('#' + gridid + 'configDlg').dialog('open');
       $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
@@ -559,12 +568,12 @@
       getFilterValues: function getFilterValues() {
         var filter = {};
         $(selgridid + 'thead th input[type="text"')
-          .filter(function (idx, elem) {
-            return $(elem).val().trim() !== '';
-          })
-          .each(function (idx, elem) {
-            filter[elem.id] = $(elem).val().trim();
-          });
+                .filter(function (idx, elem) {
+                  return $(elem).val().trim() !== '';
+                })
+                .each(function (idx, elem) {
+                  filter[elem.id] = $(elem).val().trim();
+                });
         return filter;
       },
       setFilterValues: function setFilterValues(filter) {
@@ -621,14 +630,13 @@
     },
     'en': {
       '(<%=len%> Eintr\u00e4ge insgesamt)':
-        '(<%=len%> entries)',
+              '(<%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>':
-        '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
+              '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen':
-        'Configuration',
+              'Configuration',
       'Abbrechen':
-        'Cancel'
+              'Cancel'
     }
   };
-
 })(jQuery);

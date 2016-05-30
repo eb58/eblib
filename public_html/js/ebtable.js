@@ -75,7 +75,10 @@
         return _.findWhere(myopts.columns, {name: colname}).render;
       },
       getMatch: function getMatch(colname) {
-        return _.findWhere(myopts.columns, {name: colname}).match;
+        var matcher = _.findWhere(myopts.columns, {name: colname}).match;
+        if (!matcher)
+          return $.fn.ebtable.matcher['starts-with-matches'];
+        return _.isString(matcher) ? $.fn.ebtable.matcher[matcher] : matcher;
       },
       getVisibleCols: function getVisibleCols() {
         return _.filter(myopts.columns, function (o) {
@@ -346,7 +349,7 @@
         var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
         var sortcrit = {};
         sortcrit[coldef.dbcol] = coldef.order;
-        if( myopts.reloadData(sortcrit) ){
+        if (myopts.reloadData(sortcrit)) {
           pageCur = 0;
           pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
           redraw(pageCur);
@@ -406,13 +409,6 @@
           $(event.currentTarget).prop('checked', true);
         });
       }
-//      $(selgridid + 'td').on('click', function (event) {
-//        if (myopts.singleSelection){
-//          $(selgridid + '#data input:checkbox').prop('checked', false);
-//        }
-//        $(event.target).parent().find('input:checkbox').prop('checked', true);
-//      });
-
 //adjustLayout();
     }
 
@@ -596,8 +592,27 @@
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/);
       return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
     },
+    'datetime-sec-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
+      var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
+      return d ? (d[3] + d[2] + d[1] + d[4] + d[5] + d[6]) : '';
+    },
     'scientific': function (a) { // '1e+3'  -->  '1000' 
       return parseFloat(a);
+    }
+  };
+
+  $.fn.ebtable.matcher = {
+    'contains': function (cellData, searchTxt) {
+      return cellData.indexOf(searchTxt) >= 0;
+    },
+    'starts-with': function (cellData, searchTxt) {
+      return cellData.indexOf(searchTxt) === 0;
+    },
+    'matches': function (cellData, searchTxt) {
+      return cellData.match(new RegExp('.*' + searchTxt, 'i'));
+    },
+    'starts-with-matches': function (cellData, searchTxt) {
+      return cellData.match(new RegExp('^' + searchTxt.replace(/\*/g, '.*'), 'i'));
     }
   };
 

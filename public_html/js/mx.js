@@ -56,16 +56,12 @@ var mx = function mx(m, groupdef) {  //groupdef see below
     var fcts = {
       rowMatch: function rowMatch(filters) {
         return function (row) {
-          var defmatch = function (cellData, searchtext) { // default matcher
-            var t = searchtext.replace(/\*/g, '.*');
-            return cellData.match(new RegExp('^' + t, 'i'));
-          };
           filters = _.isArray(filters) ? filters : [filters];
           var b = true;
           for (var i = 0; i < filters.length && b; i++) {
             var f = filters[i];
             var cellData = $.trim(row[f.col]);
-            b = b && (f.match || defmatch)(cellData, f.searchtext, row);
+            b = b && f.match(cellData, f.searchtext, row);
           }
           return b;
         };
@@ -135,9 +131,9 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       toLower: function toLower(o) {
         return _.isString(o) ? o.toLowerCase() : o;
       },
-      prepareItem: function prepareItem(row, col, fmt, groups) {
+      prepareItem: function prepareItem(row, col, fmt, groups, order) {
         var v = row[col] || '';
-        return fcts.toLower(fmt ? fmt(v, row, groups) : v);
+        return fcts.toLower(fmt ? fmt(v, row, groups, order) : v);
       },
       rowCmpCols: function rowCmpCols(coldefs, groups) {
         coldefs = _.isArray(coldefs) ? coldefs : [coldefs]; // [ {col:1,order:asc,sortformat:fmtfct1},{col:3, order:desc, sortformat:fmtfct2},... ]  
@@ -145,8 +141,8 @@ var mx = function mx(m, groupdef) {  //groupdef see below
           for (var i = 0; i < coldefs.length; i++) {
             var cdef = coldefs[i];
             var fmt = cdef.sortformat ? $.fn.ebtable.sortformats[cdef.sortformat] : undefined;
-            var x = fcts.prepareItem(r1, cdef.col, fmt, groups);
-            var y = fcts.prepareItem(r2, cdef.col, fmt, groups);
+            var x = fcts.prepareItem(r1, cdef.col, fmt, groups, cdef.order);
+            var y = fcts.prepareItem(r2, cdef.col, fmt, groups, cdef.order);
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
             //console.log(i, 'ret', ret, "x:", x, " y:", y);
             if (ret !== 0) {

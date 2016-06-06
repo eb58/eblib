@@ -480,7 +480,7 @@
 
               himis[acthimirow]['text'] = $('#dlgHimi input#himiname').val();
               himis[acthimirow]['number'] = $('#dlgHimi input#himinumber').val();
-              himis[acthimirow]['answer-id'] = parseInt($('#dlgHimi :selected').val());
+              himis[acthimirow]['answer-id'] = $('#dlgHimi :selected').val()==='null' ? null : parseInt($('#dlgHimi :selected').val());
               delete himis[acthimirow].isnew;
               initHimiTable(himis);
               $(this).dialog("close");

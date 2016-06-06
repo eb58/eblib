@@ -1,0 +1,16 @@
+.eblist{
+  height: 50px;
+  overflow-y: auto;
+  border: solid black;
+  border-width: 1px;
+}
+.eblist ul {
+  padding: 0;
+  margin: 3px;
+}
+.eblist li {
+  list-style-type: none;  
+  text-align: left;
+  font-size: 12px;
+  padding: 2px 4px 2px 4px;
+}

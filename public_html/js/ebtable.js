@@ -198,11 +198,10 @@
         var order = myopts.colorder;
         for (var c = 0; c < myopts.columns.length; c++) {
           var coldef = myopts.columns[order[c]];
-          var w = coldef.width || 0;
-          var style = w ? ' style="width:' + w + 'px" ' : '';
           if (!coldef.invisible) {
             var v = tblData[r][order[c]] || '';
             var val = coldef.render ? coldef.render(v, row) : v;
+            var style = coldef.css ? ' style="' + coldef.css + '"' : '';
             res += '<td ' + cls + style + '>' + val + '</td>';
           }
         }
@@ -270,6 +269,7 @@
       } else {
         var rowNr = event.target.id.replace('check', '');
         selectRow(rowNr, tblData[rowNr], checked);
+        $('#checkAll').prop('checked', false);
       }
     }
 

@@ -417,8 +417,8 @@
           $(event.currentTarget).prop('checked', true);
         });
       }
-     if( myopt.afterRedraw ){
-       myopt.afterRedraw();
+     if( myopts.afterRedraw ){
+       myopts.afterRedraw();
      }
 //adjustLayout();
     }

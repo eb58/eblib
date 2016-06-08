@@ -1,8 +1,6 @@
 var logtor = function () {
   var lev = 0;
-  var blanks = _.range(100).map(function () {
-    return ' ';
-  }).join('');
+  var blanks = _.range(100).map( x => ' ').join('');
 
   function indent(lev) {
     return blanks.substring(0, lev * 3);

@@ -29,11 +29,6 @@
                  <input type="checkbox" id="<%=id%>" value="<%=value%>" <%=isselected%> /><%=label%>\n\
                </li>')({id: o.label, value: o.value, isselected: isselected, label: o.label});
       }, '');
-      var options2 = _.reduce(myopts.values, function (acc, o) {
-        var cls = o.selected ? 'selected' : 'notselected';
-        return acc + _.template('<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>')({name: o.label, cls: cls});
-      }, '');
-
       var s = _.template('\
             <div class="ebselect" style="height:<%=height%>px; width:<%=width%>px;">\n\
               <ul> <%=options%> </ul>\n\

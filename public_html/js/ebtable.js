@@ -114,7 +114,7 @@
 
     var defopts = {
       columns: [],
-      flags: {filter: true, pagelenctrl: true, config: true},
+      flags: {filter: true, pagelenctrl: true, config: true, withsorting: true },
       bodyHeight: Math.max(200, $(window).height() - 100),
       bodyWidth: Math.max(200, $(window).width() - 10),
       rowsPerPageSelectValues: [10, 25, 50, 100],
@@ -127,6 +127,7 @@
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       hasMoreResults: hasMoreResults
     };
+    opts.flags = _.extend( defopts.flags, opts.flags );
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
@@ -200,7 +201,7 @@
           var coldef = myopts.columns[order[c]];
           if (!coldef.invisible) {
             var x = tblData[r][order[c]];
-            var v = _.isNumber(x) ? x : x || '';
+            var v = _.isNumber(x) ? x : (x || '');
             var val = coldef.render ? coldef.render(v, row, r) : v;
             var style = coldef.css ? ' style="' + coldef.css + '"' : '';
             res += '<td ' + cls + style + '>' + val + '</td>';
@@ -309,7 +310,7 @@
 
     function sorting(event) { // sorting
       var colid = event.currentTarget.id;
-      if (colid) {
+      if (colid && myopts.flags.withsorting ) {
         deselectRows();
         myopts.sortcolname = util.colNameFromColid(colid);
         sortToggle();

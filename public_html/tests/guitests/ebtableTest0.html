@@ -41,20 +41,21 @@
       ];
 
       //#######################################################################
-      
+
       var opts = {
         columns: [
           {name: "Tierart", match: 'contains'},
-          {name: "Datum", sortformat: 'date-de', match: 'contains', css: 'text-align: center' },
+          {name: "Datum", sortformat: 'date-de', match: 'contains', css: 'text-align: center'},
           {name: "Name"},
           {name: "Flag"}
         ],
-        sortcolname: 'Tierart',
+        //sortcolname: 'Tierart',
         selection: true,
-        saveState: function(s){
+        flags: { withsorting: false },
+      saveState: function (s) {
           localStorage['AA'] = s;
         },
-        loadState: function(){
+        loadState: function () {
           return JSON.parse(localStorage['AA']);
         }
       };

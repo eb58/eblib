@@ -201,7 +201,7 @@
           if (!coldef.invisible) {
             var x = tblData[r][order[c]];
             var v = _.isNumber(x) ? x : x || '';
-            var val = coldef.render ? coldef.render(v, row) : v;
+            var val = coldef.render ? coldef.render(v, row, r) : v;
             var style = coldef.css ? ' style="' + coldef.css + '"' : '';
             res += '<td ' + cls + style + '>' + val + '</td>';
           }

@@ -199,7 +199,8 @@
         for (var c = 0; c < myopts.columns.length; c++) {
           var coldef = myopts.columns[order[c]];
           if (!coldef.invisible) {
-            var v = tblData[r][order[c]] || '';
+            var x = tblData[r][order[c]];
+            var v = _.isNumber(x) ? x : x || '';
             var val = coldef.render ? coldef.render(v, row) : v;
             var style = coldef.css ? ' style="' + coldef.css + '"' : '';
             res += '<td ' + cls + style + '>' + val + '</td>';
@@ -417,9 +418,9 @@
           $(event.currentTarget).prop('checked', true);
         });
       }
-     if( myopts.afterRedraw ){
-       myopts.afterRedraw();
-     }
+      if (myopts.afterRedraw) {
+        myopts.afterRedraw();
+      }
 //adjustLayout();
     }
 

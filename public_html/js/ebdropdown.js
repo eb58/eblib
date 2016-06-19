@@ -24,8 +24,9 @@
 
     var init = function init(a) {
       var options = _.map(values, function (o) {
-        var value = typeof o.v === 'undefined' ? '' : ' value=' + o.v;
-        return '<option' + value + '>' + o.txt=== 'undefined' ? o : o.txt;
+        var val = typeof o.v === 'undefined' ? '' : ' value=' + o.v;
+        var txt = typeof o.v === 'undefined' ? o : o.txt;
+        return '<option' + val + '>' + txt +'</option>';
       }).join('\n');
       var t = _.template('<select id="<%=id%>" size="1" style="width:<%=w%>"><%= o %> </select>');
       a.html(t({id: id + 'X', w: myopts.width, o: options}));

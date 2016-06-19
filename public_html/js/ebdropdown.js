@@ -15,8 +15,11 @@
 
     var setSelectedValue = function (v) {
       if (v) {
+        var cmp = '' + (v.txt || v.v || v);
         $(idX + ' option').filter(function (i, o) {
-          return $(o).val() === v;
+          if( v.txt ) return $(o).text() === v.txt;
+          else if( v.v ) return  $(o).val() === v.v;
+          else return $(o).text() === cmp ||  $(o).val() === cmp ;
         }).prop("selected", "selected");
         $(idX).selectmenu().selectmenu('refresh');
       }

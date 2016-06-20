@@ -27,8 +27,8 @@
 
     var init = function init(a) {
       var options = _.map(values, function (o) {
-        var val = typeof o.v === 'undefined' ? '' : ' value=' + o.v;
-        var txt = typeof o.v === 'undefined' ? o : o.txt;
+        var val = typeof o.v === 'string' || typeof o.v === 'number' ? ' value=' + o.v || '' : '';
+        var txt = typeof o.v === 'string' || typeof o.v === 'number' ? o.txt || '' : '';
         return '<option' + val + '>' + txt +'</option>';
       }).join('\n');
       var t = _.template('<select id="<%=id%>" size="1" style="width:<%=w%>"><%= o %> </select>');

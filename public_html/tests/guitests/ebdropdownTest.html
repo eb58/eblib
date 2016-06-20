@@ -24,7 +24,8 @@
           {v: 4, txt: 'Besonderheit4'},
           {v: 5, txt: 'Besonderheit5'}
         ];
-        $('#dd2').ebdropdown({width: '400px'}, values2, 'Besonderheit5');
+        var dd2 = $('#dd2').ebdropdown({width: '400px'}, values2, 'Besonderheit5');
+        console.log(dd2.getSelectedValue());
 
       });
     </script>

@@ -17,19 +17,27 @@
       if (v) {
         var cmp = '' + (v.txt || v.v || v);
         $(idX + ' option').filter(function (i, o) {
-          if( v.txt ) return $(o).text() === v.txt;
-          else if( v.v ) return  $(o).val() === v.v;
-          else return $(o).text() === cmp ||  $(o).val() === cmp ;
+          if (v.txt)
+            return $(o).text() === v.txt;
+          else if (v.v)
+            return  $(o).val() === v.v;
+          else
+            return $(o).text() === cmp || $(o).val() === cmp;
         }).prop("selected", "selected");
         $(idX).selectmenu().selectmenu('refresh');
       }
     };
+    var getSelectedValue = function () {
+      var v = $(idX).val();
+      return typeof v === 'string' || typeof v === 'number' ? v : null;
+    };
+
 
     var init = function init(a) {
       var options = _.map(values, function (o) {
         var val = typeof o.v === 'string' || typeof o.v === 'number' ? ' value=' + o.v || '' : '';
         var txt = typeof o.v === 'string' || typeof o.v === 'number' ? o.txt || '' : '';
-        return '<option' + val + '>' + txt +'</option>';
+        return '<option' + val + '>' + txt + '</option>';
       }).join('\n');
       var t = _.template('<select id="<%=id%>" size="1" style="width:<%=w%>"><%= o %> </select>');
       a.html(t({id: id + 'X', w: myopts.width, o: options}));
@@ -38,6 +46,7 @@
     };
     init(this);
     this.setSelectedValue = setSelectedValue;
+    this.getSelectedValue = getSelectedValue;
     return this;
   };
 })(jQuery);

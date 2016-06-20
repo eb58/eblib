@@ -29,14 +29,13 @@
     };
     var getSelectedValue = function () {
       var v = $(idX).val();
-      return typeof v === 'string' || typeof v === 'number' ? v : null;
+      return v && v!=='null'?  v : null;
     };
-
 
     var init = function init(a) {
       var options = _.map(values, function (o) {
-        var val = typeof o.v === 'string' || typeof o.v === 'number' ? ' value=' + o.v || '' : '';
-        var txt = typeof o.v === 'string' || typeof o.v === 'number' ? o.txt || '' : '';
+        var val = typeof o.txt !== 'undefined' ? ' value=' + o.v : '';
+        var txt = typeof o.txt !== 'undefined' ? o.txt : o;
         return '<option' + val + '>' + txt + '</option>';
       }).join('\n');
       var t = _.template('<select id="<%=id%>" size="1" style="width:<%=w%>"><%= o %> </select>');

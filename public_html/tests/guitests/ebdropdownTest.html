@@ -11,20 +11,21 @@
     <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
     <script src="/js/ebdropdown.js"></script>
     <script>
+      var dd1, dd2;
       $(document).ready(function () {
 
-        var values1 = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7'];
-        //$('#dd1').ebdropdown({width: '400px'}, values1, 'test3');
+        var values1 = ['','test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7'];
+        dd1 = $('#dd1').ebdropdown({width: '400px'}, values1, 'test3');
 
         var values2 = [
-          {v: undefined, txt: ''},
+          {v: null, txt: ''},
           {v: 1, txt: 'Besonderheit1'},
           {v: 2, txt: 'Besonderheit2'},
           {v: 3, txt: 'Besonderheit3'},
           {v: 4, txt: 'Besonderheit4'},
           {v: 5, txt: 'Besonderheit5'}
         ];
-        var dd2 = $('#dd2').ebdropdown({width: '400px'}, values2, 'Besonderheit5');
+        dd2 = $('#dd2').ebdropdown({width: '400px'}, values2, 'Besonderheit5');
         console.log(dd2.getSelectedValue());
 
       });

@@ -4,7 +4,7 @@
     // values = ['val1', 'val2', 'val3' ];
     // values = [{v:1, txt:'val1'}, {v:2, txt:'val2'} ];
     var defopts = {
-      width: '200px',
+      width: '100%',
       onchange: function (evt, ui) {
         console.log('changed', ui, evt);
       }

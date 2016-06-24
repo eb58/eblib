@@ -87,11 +87,11 @@
               title: title,
               modal: true,
               closeText: 'Schlie\u00dfen'
-            }).html( '<br>' + message.replace('\n', '<br>'));
+            }).html('<br>' + message.replace('\n', '<br>'));
           },
           confirm: function (title, question, callback) {
             question = question || '';
-            $("<div id='dlgConfirm></div>").dialog({
+            $("<div id='dlgConfirm'></div>").dialog({
               buttons: {
                 "Ja": function () {
                   $(this).dialog("close");
@@ -107,7 +107,7 @@
               title: title,
               modal: true,
               closeText: 'Schlie\u00dfen'
-            }).html( '<br>' +  question.replace('\n', '<br>'));
+            }).html('<br>' + question.replace('\n', '<br>'));
           }
         });
         $(document).ajaxStart(function () {
@@ -119,8 +119,7 @@
       }
 
 
-      var
-              himis,
+      var himis,
               icds,
               acthimirow,
               actqasrow,
@@ -205,7 +204,8 @@
           {name: "Nummer"},
           {name: "Frage"},
           {name: "Antwort"},
-          {name: "Begründung", render: rendererQas.motivation},
+          {name: "Erläuterung Frage", render: rendererQas.motivation},
+          {name: "Begründung Antwort", render: rendererQas.motivation},
           {name: '', render: rendererQas.edit},
           {name: '', render: rendererQas.del}
         ]
@@ -216,7 +216,8 @@
           {name: "Nummer"},
           {name: "Frage"},
           {name: "Antwort"},
-          {name: "Begründung", render: rendererQas.motivation},
+          {name: "Erläuterung Frage", render: rendererQas.motivation},
+          {name: "Begründung Antwort", render: rendererQas.motivation},
           {name: '', render: rendererQas.info}
         ]
       };
@@ -224,14 +225,20 @@
 
       // ##########################################################################################################
       function initBegruendungToolTips() {
-        $(".qastbl tr").mouseenter(function (e) {
-          var begruendung = $('td:nth-child(3)', e.currentTarget);
-          if (begruendung.length == 0)
+        $(".qastbl tr").off().on('mouseenter', function (e) {
+          var erlauterungFrage = $('td:nth-child(3)', e.currentTarget).text().trim();
+          var begruendungAntwort = $('td:nth-child(4)', e.currentTarget).text().trim();
+          console.log('aaa', erlauterungFrage, begruendungAntwort);
+          if (erlauterungFrage === '' && begruendungAntwort === '')
             return;
-          var t = $('td:nth-child(3)', e.currentTarget).text() || '&lt;keine Begründung&gt;';
+          var t = _.template("<b>Erläuterung Frage:</b><br><\%=b1%><br><b>Begründung Antwort:</b><br><\%=b2%>")
+                  ({
+                    b1: erlauterungFrage,
+                    b2: begruendungAntwort
+                  });
 
           $('#tooltipdlg').dialog({
-            title: 'Begründung',
+            title: 'Erläuterung/Begründung',
             closeText: 'Schlie\u00dfen',
             position: {my: 'right top', at: 'right top', of: event},
             open: function () {
@@ -239,7 +246,7 @@
             } // hide x in titlebar for closing 
           }).dialog('open').html(t);
         });
-        $(".qastbl tr").mouseleave(function () {
+        $(".qastbl tr").on('mouseleave', function () {
           $('#tooltipdlg').dialog().dialog('close');
         });
       }
@@ -260,7 +267,7 @@
         var qasdata = _.map(qas, function (qa) {
           var answ = _.findWhere(answs, {'answer-id': qa['answer-id']});
           var answtext = answ ? answ['answer-text'] : '';
-          return [qa.digital, qa['question-number'], qa['question-text'], answtext, qa['motivation']];
+          return [qa.digital, qa['question-number'], qa['question-text'], answtext, qa['motivation-question'], qa['motivation-answer']];
         });
         $('#qastable').himitable(qaslistopts, qasdata);
         $('#addQas.ui-icon-circle-plus').toggle(!(readonly || qas.length >= 14));
@@ -284,9 +291,11 @@
 
       function initActionsForHimilist() { // Actions for Himilist
         $('.himitable .ui-icon-trash').off().on('click', function (ev) { // delete himi
-          var r = parseInt(ev.target.id.replace('himi', ''));
-          himis.splice(r, 1);
-          initHimiTable(himis);
+          $.confirm('Frage', 'Sind Sie sicher, dass Sie das Hilfsmittel löschen wollen?', function () {
+            var r = parseInt(ev.target.id.replace('himi', ''));
+            himis.splice(r, 1);
+            initHimiTable(himis);
+          });
         });
         $('#himilist .ui-icon-pencil, #himilist .ui-icon-info').off().on('click', function (ev) { // edit himi
           var r = parseInt(ev.target.id.replace('himi', ''));
@@ -318,10 +327,12 @@
 
       function initActionsForQaslist(qas) {   // Actions for Qaslist
         $('#qastable .ui-icon-trash').off().on('click', function (ev) { // delete qas
-          var r = parseInt(ev.target.id.replace('qas', ''));
-          var qas = himis[acthimirow].qas;
-          qas.splice(r, 1);
-          initQasTable(qas);
+          $.confirm('Frage', 'Sind Sie sicher, dass Sie die Frage zum Hilfsmittel löschen wollen?', function () {
+            var r = parseInt(ev.target.id.replace('qas', ''));
+            var qas = himis[acthimirow].qas;
+            qas.splice(r, 1);
+            initQasTable(qas);
+          });
         });
         $('#qastable .ui-icon-pencil, #qastable .ui-icon-info').off().on('click', function (ev) { // edit qas
           var r = parseInt(ev.target.id.replace('qas', ''));
@@ -336,23 +347,24 @@
           $('#dlgQas select#quests').selectmenu().selectmenu(readonly || actqas.digital ? 'disable' : 'enable');
           $('#dlgQas select#answs').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
 
-          $('#dlgQas .ui-selectmenu-button').width(450);
-          $('#dlgQas textarea').val(actqas['motivation']);
+          $('#dlgQas .ui-selectmenu-button').width(500);
+          $('#dlgQas #motivation-question').val(actqas['motivation-question']);
+          $('#dlgQas #motivation-answer').val(actqas['motivation-answer']);
           if (readonly) {
             $('.selectmenu').selectmenu().selectmenu('disable');
           }
           $('#dlgQas').dialog('option', 'title', 'Frage ' + (r + 1)).dialog('open');
-
         });
         $('#addQas').off().on('click', function () {  // add qas
-          var nqa = himiutils.createQas(-1, $('#dlgQas #reason').val(), quests[0], answs[0]);
+          var nqa = himiutils.createQas(-1, $('#dlgQas #motivation-question').val(), $('#dlgQas #motivation-answer').val(), quests[0], answs[0]);
           nqa.isnew = true;
           himis[acthimirow].qas.push(nqa);
           $('#quests').html(himiutils.selectBox('quests', quests));
           $('#answs').html(himiutils.selectBox('answs', answs));
           $('#dlgQas .selectmenu').selectmenu();
-          $('#dlgQas .ui-selectmenu-button').width(450);
-          $('#dlgQas textarea').val('');
+          $('#dlgQas .ui-selectmenu-button').width(500);
+          $('#dlgQas #motivation-question').val('');
+          $('#dlgQas #motivation-answer').val('');
           $('#dlgQas').dialog('option', 'title', 'Neue Frage').dialog('open');
           actqasrow = himis[acthimirow].qas.length - 1;
         });
@@ -360,9 +372,12 @@
 
       function initActionsForIcdlist() {   // Actions for Icdlist
         $('#diagnosen .ui-icon-trash').off().on('click', function (event) { // delete icd
-          var n = event.target.id.replace('icdtrash', '') - 1;
-          icds.splice(n, 1);
-          initIcdTable(icds);
+          $.confirm('Frage', 'Sind Sie sicher, dass Sie die Diagnose löschen wollen?', function () {
+            var n = event.target.id.replace('icdtrash', '') - 1;
+            icds.splice(n, 1);
+            icds.push( {'icd-code-id': null, 'icd-code-number': null, digital: false} );
+            initIcdTable(icds);
+          });
         });
         $('#diagnosen .ui-icon-search').on('click', function (event) {
           var n = event.target.id.replace('icdsrch', '');
@@ -493,13 +508,14 @@
         });
 
         // Qas-Dialog
-        $('#dlgQas').dialog({title: 'Frage', autoOpen: false, height: 300, width: 550, closeText: 'Schlie\u00dfen', modal: true,
+        $('#dlgQas').dialog({title: 'Frage', autoOpen: false, height: 400, width: 620, closeText: 'Schlie\u00dfen', modal: true,
           close: function (event, ui) {
             himis[acthimirow].qas = _.reject(himis[acthimirow].qas, {isnew: true});
           },
           buttons: {
             Ok: function () {
-              himis[acthimirow].qas[actqasrow].motivation = $('#dlgQas #reason').val();
+              himis[acthimirow].qas[actqasrow]['motivation-question'] = $('#dlgQas #motivation-question').val();
+              himis[acthimirow].qas[actqasrow]['motivation-answer'] = $('#dlgQas #motivation-answer').val();
               _.extend(himis[acthimirow].qas[actqasrow],
                       _.findWhere(quests, {'question-id': parseInt($('#dlgQas select#quests option:selected').val())}),
                       _.findWhere(answs, {'answer-id': parseInt($('#dlgQas select#answs  option:selected').val())})
@@ -548,6 +564,7 @@
       }
 
       $(document).ready(function () {
+        top.DialogID = "himi";
         $(".positive-integer").numeric({decimal: false, negative: false});
         $('textarea[maxlength]').bind("keyup change", function () {
           var maxlen = $(this).attr('maxlength');
@@ -563,28 +580,11 @@
             initDialog(result.data);
           }
         });
-        $.alert("TEST", 
-          '<div class="errors"><br>  <ul>\
-              <span class="title"><span class="code error"></span><span class="text error">Validierungsfehler</span></span>\
-              <ul>\
-                <li class="message error"><span class="code"></span><span class="text">Himi: Eingaben in Anamnese sind Pflicht</span></li>\
-                <li class="message error"><span class="code"></span><span class="text">Himi: Eingaben in Befund sind Pflicht</span></li>\
-                <li class="message error"><span class="code"></span><span class="text">Himi: Hilfsmittel 2 unvollständig bearbeitet (Frage/Antwort-Paare 1)</span></li>\
-              </ul>\
-            </ul>\
-          </div>');
       });
     </script>
 
   </head>
   <body style="background:#F0F0F0">
-    <script>
-      if (top) {
-        top.DialogID = "himi";
-        // ?? top.refreshMenu(2);
-      }
-    </script>
-
     <div id='himilist'>
       <table style='border: none;'>
         <tr>
@@ -633,8 +633,8 @@
 
     <div id='dlgHimi'>
       <table style="border-style:none">
-        <tr><td>Hilfsmittel-Nummer:</td><td><input id='himinumber' type='text' class='positive-integer' maxlength="10"/></td></tr>
-        <tr><td>Bezeichnung:       </td><td><input id='himiname' type='text'/></td></tr>
+        <tr><td>Hilfsmittel-Nummer: </td><td><input id='himinumber' type='text' class='positive-integer' maxlength="10"/></td></tr>
+        <tr><td>Bezeichnung:        </td><td><input id='himiname' type='text'/></td></tr>
         <tr><td>Hilfsmittel-Antwort:</td><td><div id='himiresponse'></div></td></tr>
       </table>
       <br>
@@ -650,11 +650,11 @@
 
     <div id='dlgQas'>
       <table>
-        <tr><td>Frage:    </td><td><div id='quests'></div></td></tr>
-        <tr><td>Antwort:  </td><td><div id='answs'></div></td></tr>
+        <tr><td>Frage:     </td><td><div id='quests'></div></td></tr>
+        <tr><td>Erläuterung:</td><td><textarea id="motivation-question" rows=5 cols=80 maxlength="1000"></textarea></td></tr>
+        <tr><td>Antwort:   </td><td><div id='answs'></div></td></tr>
+        <tr><td>Begründung:</td><td><textarea id="motivation-answer" rows=5 cols=80 maxlength="1000"></textarea></td></tr>
       </table>
-      <h1>Begründung:</h1>
-      <textarea id="reason" rows=5 cols=80 maxlength="1000"></textarea>
     </div>
 
     <div id='tooltipdlg'></div>

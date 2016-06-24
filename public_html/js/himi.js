@@ -18,15 +18,21 @@ var himiutils = {
         _.reduce(qas, function( res, qa ) { 
           var answ = _.findWhere(answs, {'answer-id': qa['answer-id']});
           var answtext = answ ? answ['answer-text'] : '';
-          return res + '<tr><td>' + qa['question-text'] + '</td><td>' + answtext + '</td><td hidden=true>' + qa['motivation'] + '</td></tr>\n';
+          return res + '\
+            <tr>\n\
+              <td>' + qa['question-text'] + '</td>\n\
+              <td>' + answtext + '</td>\n\
+              <td hidden=true>' + qa['motivation-question'] + '</td>\n\
+              <td hidden=true>' + qa['motivation-answer'] + '</td>\n\
+            </tr>\n';
         }, '' ) +
       '</table>\n';
   },
   createHimi: function createHimi(number, name) {
     return {id: -1, number: number, text: name, digital: false, qas: []};
   },
-  createQas: function createQas(id, motivation, q, a) {
-    return _.extend({id: id, motivation: motivation}, q, a);
+  createQas: function createQas(id, motivationQuestion, motivationAnswer, q, a) {
+    return _.extend({id: id, 'motivation-question': motivationQuestion, 'motivation-answer': motivationAnswer}, q, a);
   },
   selectVal: function selectVal(id, val) {
     var x = '#' + id;
@@ -57,7 +63,7 @@ var himiutils = {
           if (coldef.invisible)
             continue;
           var v = tblData[r][c];
-            var val = coldef.render ? coldef.render(v, row, r) : v;
+          var val = coldef.render ? coldef.render(v, row, r) : v;
           res += _.template('<td><%=val%></td>')({val: val});
         }
         res += '</tr>\n';
@@ -81,21 +87,3 @@ var himiutils = {
     return this;
   };
 })(jQuery);
-
-if (typeof $ !== 'undefined') {
-  $.extend({
-    alert: function (title, message) {
-      $("<div></div>").dialog({
-        buttons: {"Ok": function () {
-            $(this).dialog("close");
-          }},
-        close: function () {
-          $(this).remove();
-        },
-        title: title,
-        modal: true,
-        closeText: 'Schlie\u00dfen'
-      }).html('<br>' + message.replace('\n', '<br>'));
-    }
-  });
-}

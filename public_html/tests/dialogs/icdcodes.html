@@ -21,9 +21,8 @@
     <script src="/data/himilists.js"></script>
     <script>
       $().ready(function () {
-        $('#number').selectmenu().selectmenu('disable');
         $('#test').on('click', function () {
-          dlgIcd(icds, function(){
+          dlgIcd(icdlist, function(){
             return true;
           }, {icdCode:'A'});
         });

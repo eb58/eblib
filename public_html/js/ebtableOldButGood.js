@@ -35,7 +35,7 @@ var tableTemplateXXX = _.template(
     return w1 - w2;
   }();
     function wdths() {
-    var wh = $("#head").width();
+      var wh = $("#head").width();
       var wd = $("#data").width();
       var wb = $('body').width();
       var ww = $(window).width();

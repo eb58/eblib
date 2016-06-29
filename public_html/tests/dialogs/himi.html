@@ -14,24 +14,27 @@
       * {font-family:Arial;color: black;font-size: 12px;}
       body{ margin: 20px 20px 20px 20px; }
       table, td { border: 1px solid lightgrey; border-collapse: collapse;padding: 5px 3px ;}
-      textarea{ width:500px;}
+
+      textarea{ width:100%;}
+      .textfield{ margin: 15px 1px 15px 1px; width:99%;}
+
       .ui-dialog-content label { display: inline-block; vertical-align: baseline; width: 80px;  margin: 5px 2px; font-weight: bold}
       .ui-dialog-content input { display: inline-block; vertical-align: baseline; width: 550px; margin: 5px 2px;}
 
-      .textfield{ margin: 15px 1px 15px 1px; width:600px;}
       .ui-selectmenu-button {width:300px;}
       .ui-selectmenu-menu {height:250px; overflow:auto}
 
       #orderresponseX { width:500px; }
-      #himilist{ margin: 5px 1px 5px 1px; width:500px; float:left;}
-      #orderattr{ margin: 5px 10px 5px 10px; width:500px; float:left;}
+      #himilist{ margin: 5px 1px 5px 1px; width: 100%;}
+      #orderattr{ margin: 5px 1px 5px 1px;  float: left; width: 100%; }
 
-
-      .qastbl td:nth-child(2) { width: 500px;}
+      .qastbl td:nth-child(1) { width: 80%;}
+      .qastbl td:nth-child(2) { width: 20%;}
       .qastbl td { background-color: #dfdfdf;  }
-      .qastbl td:nth-child(1) { width:80%;}
+      
+      #grid table{ width:100%}
 
-      #diagnosen { width: 500px; }
+      #diagnosen { width: 500px;  float: left; }
       #diagnosen table, td { border: 1px solid lightgrey; border-collapse: collapse;}
       #diagnosen td:nth-child(1) { width: 10px }   
       #diagnosen td:nth-child(2) { width: 50px }
@@ -42,8 +45,8 @@
       #diagnosen td{ padding: 3px; }
       #diagnosen input{ border: 0px; }
 
-
-      #versandeinstellungen td, #versandeinstellungen table{ border: 0px;}
+      #versandeinstellungen {  float: right }
+      #versandeinstellungen td, #versandeinstellungen table{ border: 0px;   }
       #auftraggeberX, #leistungserbringerX, #sanitaetshausX { width:100%; }
 
       #suggkeysX { width:500px; }
@@ -57,8 +60,7 @@
       #dlgQas textarea{ width:500px;}
       #dlgQas table, #dlgQas td { border-style:none; }
 
-      .nebeneinander div {  float: left;  clear: none; }
-      div .errors > ul { margin:2px; padding:1px}
+      div .errors > ul { margin:2px; padding:1px; }
 
     </style>
     <script src='/lib/underscore-1.8.3/underscore-1.8.3.js'></script>
@@ -225,17 +227,18 @@
 
       // ##########################################################################################################
       function initBegruendungToolTips() {
-        $(".qastbl tr").off().on('mouseenter', function (e) {
+        $(".qastbl tr").off().on( 'mouseenter', function (e) {
           var erlauterungFrage = $('td:nth-child(3)', e.currentTarget).text().trim();
           var begruendungAntwort = $('td:nth-child(4)', e.currentTarget).text().trim();
-          console.log('aaa', erlauterungFrage, begruendungAntwort);
-          if (erlauterungFrage === '' && begruendungAntwort === '')
-            return;
+          console.log('aaa', erlauterungFrage, begruendungAntwort );
+          if( erlauterungFrage==='' && begruendungAntwort==='' ) return;
+          if( erlauterungFrage==='null') erlauterungFrage='';
+          if( begruendungAntwort==='null') begruendungAntwort='';
           var t = _.template("<b>Erläuterung Frage:</b><br><\%=b1%><br><b>Begründung Antwort:</b><br><\%=b2%>")
-                  ({
-                    b1: erlauterungFrage,
-                    b2: begruendungAntwort
-                  });
+          ({
+            b1:erlauterungFrage,
+            b2:begruendungAntwort
+          });
 
           $('#tooltipdlg').dialog({
             title: 'Erläuterung/Begründung',
@@ -246,11 +249,11 @@
             } // hide x in titlebar for closing 
           }).dialog('open').html(t);
         });
-        $(".qastbl tr").on('mouseleave', function () {
+        $(".qastbl tr").on( 'mouseleave', function () {
           $('#tooltipdlg').dialog().dialog('close');
         });
       }
-
+      
       function initHimiTable(himis) {
         var himidata = _.map(himis, function (h) {
           var answ = _.findWhere(answs, {'answer-id': h['answer-id']});
@@ -375,7 +378,7 @@
           $.confirm('Frage', 'Sind Sie sicher, dass Sie die Diagnose löschen wollen?', function () {
             var n = event.target.id.replace('icdtrash', '') - 1;
             icds.splice(n, 1);
-            icds.push( {'icd-code-id': null, 'icd-code-number': null, digital: false} );
+            icds.push({'icd-code-id': null, 'icd-code-number': null, digital: false});
             initIcdTable(icds);
           });
         });
@@ -593,44 +596,46 @@
         </tr>
       </table>
       <div id='grid'></div>
-
-      <br>
-      <h1>Diagnosen:</h1>
-      <div>
-        <table id='diagnosen'>
-          <tbody>
-            <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icdsrch1' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash1' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icdsrch2' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash2' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icdsrch3' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash3' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icdsrch4' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash4' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icdsrch5' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash5' class='ui-icon ui-icon-trash'></span></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <br>
-      <h1>Versandeinstellungen:</h1>
-      <div id='versandeinstellungen'>
-        <table>
-          <tr><td>Auftraggeber:     </td><td><div id='auftraggeber'>       </div></td>
-          <tr><td>Leistungserbringer</td><td><div id='leistungserbringer'> </div></td>
-          <tr><td>Sanitätshaus      </td><td><div id='sanitaetshaus'>      </div></td>
-        </table>
-      </div>
     </div>
+
+    <br>
+
+    <div id='diagnosen'>
+      <h1>Diagnosen:</h1>
+      <table >
+        <tbody>
+          <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icdsrch1' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash1' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icdsrch2' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash2' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icdsrch3' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash3' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icdsrch4' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash4' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icdsrch5' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash5' class='ui-icon ui-icon-trash'></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id='versandeinstellungen'>
+      <h1>Versandeinstellungen:</h1>
+      <table>
+        <tr><td>Auftraggeber:     </td><td><div id='auftraggeber'>       </div></td>
+        <tr><td>Leistungserbringer</td><td><div id='leistungserbringer'> </div></td>
+        <tr><td>Sanitätshaus      </td><td><div id='sanitaetshaus'>      </div></td>
+      </table>
+    </div>
+
+    <br>
 
     <div id='orderattr'>
+      <div class='textfield'><h1>Medizinische Unterlagen:</h1><textarea id='medical-base' rows='10' maxlength="4000"></textarea></div>
+      <div class='textfield'><h1>Anamnese:               </h1><textarea id='anamnesis'    rows='10' maxlength="4000"></textarea></div>
+      <div class='textfield'><h1>Befund:                 </h1><textarea id='indication'   rows='10' maxlength="4000"></textarea></div>
+      <div class='textfield'><h1>Antwort mit Begründung: </h1><textarea id='evaluation'   rows='10' maxlength="10000"></textarea></div>
       <h1>Auftrags-Antwort:</h1>
       <div id='orderresponse'></div>
-      <div class='textfield'><h1>Medizinische Unterlagen:</h1><textarea id='medical-base' rows='4'  cols='80' maxlength="4000"></textarea></div>
-      <div class='textfield'><h1>Anamnese:               </h1><textarea id='anamnesis'    rows='4'  cols='80' maxlength="4000"></textarea></div>
-      <div class='textfield'><h1>Befund:                 </h1><textarea id='indication'   rows='4'  cols='80' maxlength="4000"></textarea></div>
-      <div class='textfield'><h1>Antwort mit Begründung: </h1><textarea id='evaluation'   rows='10' cols='80' maxlength="10000"></textarea></div>
-      <div class='textfield'><h1>Empfehlung:             </h1>
-        <div id='suggkeys'></div>
-        <textarea id='suggestion-add' rows='4' cols='80' maxlength='4000'></textarea>
-      </div>
+      <h1>Empfehlung::</h1>
+      <div id='suggkeys'></div>
+      <div class='textfield'><textarea id='suggestion-add' rows='10' maxlength='4000'></textarea></div>
     </div>
 
+    <!-- ######                            Dialoge                              ######## -->
     <div id='dlgHimi'>
       <table style="border-style:none">
         <tr><td>Hilfsmittel-Nummer: </td><td><input id='himinumber' type='text' class='positive-integer' maxlength="10"/></td></tr>
@@ -651,9 +656,9 @@
     <div id='dlgQas'>
       <table>
         <tr><td>Frage:     </td><td><div id='quests'></div></td></tr>
-        <tr><td>Erläuterung:</td><td><textarea id="motivation-question" rows=5 cols=80 maxlength="1000"></textarea></td></tr>
+        <tr><td>Erläuterung:</td><td><textarea id="motivation-question" rows=5 maxlength="1000"></textarea></td></tr>
         <tr><td>Antwort:   </td><td><div id='answs'></div></td></tr>
-        <tr><td>Begründung:</td><td><textarea id="motivation-answer" rows=5 cols=80 maxlength="1000"></textarea></td></tr>
+        <tr><td>Begründung:</td><td><textarea id="motivation-answer" rows=5 maxlength="1000"></textarea></td></tr>
       </table>
     </div>
 

@@ -1,11 +1,11 @@
-/* global _ */
+http://localhost:7101/ISmed/mima.do?user=50000000000015&action=edit&mimaid=999000/* global _ */
 (function ($) {
   $.fn.ebdropdown = function (opts, values, selected) {
     // values = ['val1', 'val2', 'val3' ];
     // values = [{v:1, txt:'val1'}, {v:2, txt:'val2'} ];
     var defopts = {
       width: '100%',
-      onchange: function (evt, ui) {
+      change: function (evt, ui) {
         console.log('changed', ui, evt);
       }
     };
@@ -38,10 +38,10 @@
         var txt = typeof o.txt !== 'undefined' ? o.txt : o;
         return '<option' + val + '>' + txt + '</option>';
       }).join('\n');
-      var t = _.template('<select id="<%=id%>" size="1" style="width:<%=w%>"><%= o %> </select>');
+      var t = _.template('<select id="<%=id%>" size="1"><%= o %> </select>');
       a.html(t({id: id + 'X', w: myopts.width, o: options}));
       setSelectedValue(selected);
-      $(idX).selectmenu().selectmenu({change: myopts.onchange});
+      $(idX).selectmenu().selectmenu(myopts);
     };
     init(this);
     this.setSelectedValue = setSelectedValue;

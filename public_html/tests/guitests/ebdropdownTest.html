@@ -14,7 +14,7 @@
       var dd1, dd2;
       $(document).ready(function () {
 
-        var values1 = ['','test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7'];
+        var values1 = ['', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7'];
         dd1 = $('#dd1').ebdropdown({width: '400px'}, values1, 'test3');
 
         var values2 = [
@@ -25,7 +25,14 @@
           {v: 4, txt: 'Besonderheit4'},
           {v: 5, txt: 'Besonderheit5'}
         ];
-        dd2 = $('#dd2').ebdropdown({width: '400px'}, values2, 'Besonderheit5');
+        var dd2opts = {
+          disabled: false,
+          width: '400px',
+          change: function (evt, ui) {
+            console.log('aaa', ui.item.value);
+          }
+        };
+        dd2 = $('#dd2').ebdropdown( dd2opts, values2, 2 );
         console.log(dd2.getSelectedValue());
 
       });

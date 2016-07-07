@@ -31,7 +31,7 @@
       .qastbl td:nth-child(1) { width: 80%;}
       .qastbl td:nth-child(2) { width: 20%;}
       .qastbl td { background-color: #dfdfdf;  }
-      
+
       #grid table{ width:100%}
 
       #diagnosen { width: 500px;  float: left; }
@@ -66,6 +66,7 @@
     <script src='/lib/underscore-1.8.3/underscore-1.8.3.js'></script>
     <script src='/lib/jquery-1.11.3/jquery-1.11.3.js'></script>
     <script src='/lib/jQueryUI-1.11.4/jquery-ui.js'></script>
+    <script src='/js/polyfills.js'></script>
     <script src='/lib/numeric.js'></script>
     <script src='/js/himi.js'></script>
     <script src='/js/mx.js'></script>
@@ -132,11 +133,16 @@
           return o[2] === code;
         });
       }
+      
       function getIcdCodeFromNumber(code) {
         var x = _.find(icdlist, function (o) {
           return o[2] === code;
         });
         return x ? {id: x[0], text: x[1]} : null;
+      }
+ 
+      function byteCount(s) {
+        return encodeURI(s).split(/%..|./).length - 1;
       }
 
       // ##########################################################################################################
@@ -227,18 +233,21 @@
 
       // ##########################################################################################################
       function initBegruendungToolTips() {
-        $(".qastbl tr").off().on( 'mouseenter', function (e) {
+        $(".qastbl tr").off().on('mouseenter', function (e) {
           var erlauterungFrage = $('td:nth-child(3)', e.currentTarget).text().trim();
           var begruendungAntwort = $('td:nth-child(4)', e.currentTarget).text().trim();
-          console.log('aaa', erlauterungFrage, begruendungAntwort );
-          if( erlauterungFrage==='' && begruendungAntwort==='' ) return;
-          if( erlauterungFrage==='null') erlauterungFrage='';
-          if( begruendungAntwort==='null') begruendungAntwort='';
+          console.log('aaa', erlauterungFrage, begruendungAntwort);
+          if (erlauterungFrage === '' && begruendungAntwort === '')
+            return;
+          if (erlauterungFrage === 'null')
+            erlauterungFrage = '';
+          if (begruendungAntwort === 'null')
+            begruendungAntwort = '';
           var t = _.template("<b>Erläuterung Frage:</b><br><\%=b1%><br><b>Begründung Antwort:</b><br><\%=b2%>")
-          ({
-            b1:erlauterungFrage,
-            b2:begruendungAntwort
-          });
+                  ({
+                    b1: erlauterungFrage,
+                    b2: begruendungAntwort
+                  });
 
           $('#tooltipdlg').dialog({
             title: 'Erläuterung/Begründung',
@@ -249,11 +258,11 @@
             } // hide x in titlebar for closing 
           }).dialog('open').html(t);
         });
-        $(".qastbl tr").on( 'mouseleave', function () {
+        $(".qastbl tr").on('mouseleave', function () {
           $('#tooltipdlg').dialog().dialog('close');
         });
       }
-      
+
       function initHimiTable(himis) {
         var himidata = _.map(himis, function (h) {
           var answ = _.findWhere(answs, {'answer-id': h['answer-id']});
@@ -445,7 +454,9 @@
           }});
 
         $('#medical-base,#anamnesis,#indication,#evaluation,#suggestion-add').on("change", function (ev) {
-          console.log('change', ev.target.id, $('#' + ev.target.id).val());
+          var maxByte = $('#'+ ev.target.id).prop('maxlength');
+          while( byteCount($('#' + ev.target.id).val()) > maxByte ) $('#' + ev.target.id).val($('#' + ev.target.id).val().slice(0, -1));
+          console.log('change', ev.target.id, byteCount($('#' + ev.target.id).val()));
           data[ev.target.id] = $('#' + ev.target.id).val();
         });
 
@@ -624,7 +635,7 @@
     <br>
 
     <div id='orderattr'>
-      <div class='textfield'><h1>Medizinische Unterlagen:</h1><textarea id='medical-base' rows='10' maxlength="4000"></textarea></div>
+      <div class='textfield'><h1>Medizinische Unterlagen:</h1><textarea id='medical-base' rows='10' maxlength="100"></textarea></div>
       <div class='textfield'><h1>Anamnese:               </h1><textarea id='anamnesis'    rows='10' maxlength="4000"></textarea></div>
       <div class='textfield'><h1>Befund:                 </h1><textarea id='indication'   rows='10' maxlength="4000"></textarea></div>
       <div class='textfield'><h1>Antwort mit Begründung: </h1><textarea id='evaluation'   rows='10' maxlength="10000"></textarea></div>

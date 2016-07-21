@@ -5,7 +5,7 @@
     var id = this[0].id;
     var defopts = {
       height: Math.min(100, 50 * vals.length),
-      width: 400,
+      width: 400
     };
     var myopts = $.extend({}, defopts, opts);
 

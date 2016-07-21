@@ -41,6 +41,11 @@
           width: 250,
         };
         $('#list').eblist(listopts,['AAA', 'BBB', 'CCCC', 'VVVV', 'ghghgh', '****', 'ewewewe', 'YYYYYY']);
+        
+       var keywords = ['Schlagwort1', 'Schlagwort2', 'Schlagwort3', 'Schlagwort4', 'Schlagwort5', 'Schlagwort6', 'Schlagwort7' ];
+       var optSchlag = { values: keywords || [], onselchange: function(){} };
+       var xx = $("#select3").ebselect(optSchlag, [1, 3]);
+       
       });
     </script>
   </head>
@@ -50,5 +55,6 @@
     <input id="forselect2" value=""/>
     <div id='select2'></div>
     <div id='list'></div>
+    <div id='select3' style="width:400px"></div>
   </body>
 </html>

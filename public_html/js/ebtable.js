@@ -419,7 +419,10 @@
           $(event.currentTarget).prop('checked', true);
         });
       }
-      //adjustLayout();
+      if( myopt.afterRedraw ){
+        myopt.afterRedraw(this);
+      }
+       
     }
 
     // ##############################################################################

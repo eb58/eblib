@@ -40,6 +40,9 @@
     this.getSelectedValues = function getSelectedValues() {
       return _.pluck($('#' + id + ' .ebselect input:checked'), 'value');
     };
+    this.getSelectedValuesAsString = function getSelectedValues() {
+      return _.map(this.getSelectedValues(), function(o,idx){ console.log(o,idx);return myopts.values[o].label; });
+    };
     $('#' + id + ' .ebselect input').on('change', function () {
       myopts.onselchange(self);
     });

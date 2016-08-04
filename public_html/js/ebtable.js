@@ -114,7 +114,7 @@
 
     var defopts = {
       columns: [],
-      flags: {filter: true, pagelenctrl: true, config: true, withsorting: true },
+      flags: {filter: true, pagelenctrl: true, config: true, withsorting: true},
       bodyHeight: Math.max(200, $(window).height() - 100),
       bodyWidth: Math.max(200, $(window).width() - 10),
       rowsPerPageSelectValues: [10, 25, 50, 100],
@@ -127,7 +127,7 @@
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       hasMoreResults: hasMoreResults
     };
-    opts.flags = _.extend( defopts.flags, opts.flags );
+    opts.flags = _.extend(defopts.flags, opts.flags);
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
@@ -310,7 +310,7 @@
 
     function sorting(event) { // sorting
       var colid = event.currentTarget.id;
-      if (colid && myopts.flags.withsorting ) {
+      if (colid && myopts.flags.withsorting) {
         deselectRows();
         myopts.sortcolname = util.colNameFromColid(colid);
         sortToggle();
@@ -419,10 +419,10 @@
           $(event.currentTarget).prop('checked', true);
         });
       }
-      if( myopt.afterRedraw ){
-        myopt.afterRedraw(this);
+      if (myopts.afterRedraw) {
+        myopts.afterRedraw(this);
       }
-       
+
     }
 
     // ##############################################################################
@@ -606,7 +606,7 @@
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/);
       return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
     },
-    'datetime-sec-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
+    'datetime-sec-de': function (a) { // '01.01.2013 12:36:59'  -->  '20130101123659' 
       var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
       return d ? (d[3] + d[2] + d[1] + d[4] + d[5] + d[6]) : '';
     },
@@ -634,14 +634,10 @@
     'de': {
     },
     'en': {
-      '(<%=len%> Eintr\u00e4ge insgesamt)':
-              '(<%=len%> entries)',
-      '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>':
-              '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
-      'Anpassen':
-              'Configuration',
-      'Abbrechen':
-              'Cancel'
+      '(<%=len%> Eintr\u00e4ge insgesamt)': '(<%=len%> entries)',
+      '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
+      'Anpassen': 'Configuration',
+      'Abbrechen': 'Cancel'
     }
   };
 })(jQuery);

@@ -48,9 +48,28 @@ var ebutils = (function () {
     return result;
   }
 
+  function getMimetypeByExt(ext) {
+    var extToMimes = {
+      'img': 'image/jpeg',
+      'gif': 'image/gif',
+      'png': 'image/png',
+      'tif': 'image/tif',
+      'tiff': 'image/tiff',
+      'jpg': 'image/jpg',
+      'jepg': 'image/jepg',
+      'pdf': 'application/pdf',
+      'txt': 'text/plain',
+      'doc': 'application/msword',
+      'xls': 'application/msexcel',
+      'docx': 'application/vnd.openxmlformats-officedocument'
+    }
+    return extToMimes[ext] || 'unknown';
+  }
+
   return {
     byteCount: byteCount,
     formatBytes: formatBytes,
+    getMimeByExt: getMimetypeByExt,
   };
 })();
 

@@ -1,17 +1,4 @@
 /* global QUnit, mx */
-$.fn.ebtable.sortformats = {
-  'date-de': function (a) { // '01.01.2013' -->   '20130101' 
-    var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-    return d ? (d[3] + d[2] + d[1]) : '';
-  },
-  'datetime-de': function (a) { // '01.01.2013 12:36'  -->  '201301011236' 
-    var d = a.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/);
-    return d ? (d[3] + d[2] + d[1] + d[4] + d[5]) : '';
-  },
-  'scientific': function (a) { // '1e+3'  -->  '1000' 
-    return parseFloat(a);
-  }
-};
 
 QUnit.test('testset1 easy ones', function (assert) {
   assert.deepEqual(mx([[1, 2, 3], [4, 5, 6], [7, 8, 9]]), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
@@ -61,6 +48,11 @@ QUnit.test('testset2 Array sorting functions', function (assert) {
   var m = mx([['04.01.2011 12:34'], ['03.01.2013 13:35'], ['01.01.2015 13:34'], ['03.01.2013 13:36'], ['17.01.2001 07:30']]);
   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', sortformat: 'datetime-de'})), [['17.01.2001 07:30'], ['04.01.2011 12:34'], ['03.01.2013 13:35'], ['03.01.2013 13:36'], ['01.01.2015 13:34']]);
   assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'datetime-de'})), [["01.01.2015 13:34"], ["03.01.2013 13:36"], ["03.01.2013 13:35"], ["04.01.2011 12:34"], ["17.01.2001 07:30"]]);
+
+  var m = mx([['04.01.2011 12:34:33'], ['03.01.2013 13:35:59']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', sortformat: 'datetime-sec-de'})), [['04.01.2011 12:34:33'], ['03.01.2013 13:35:59']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'datetime-sec-de'})), [['03.01.2013 13:35:59'], ['04.01.2011 12:34:33']]);
+
 });
 
 QUnit.test('testset3 Array filtering functions', function (assert) {

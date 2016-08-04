@@ -61,7 +61,8 @@ var mx = function mx(m, groupdef) {  //groupdef see below
           for (var i = 0; i < filters.length && b; i++) {
             var f = filters[i];
             var cellData = $.trim(row[f.col]);
-            b = b && f.match(cellData, f.searchtext, row);
+            var matchfct = f.match || $.fn.ebtable.matcher['starts-with-matches'];
+            b = b && matchfct(cellData, f.searchtext, row);
           }
           return b;
         };

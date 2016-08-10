@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>/docs/test.pdf</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
+    <style type="text/css">
+      html, body, iframe, div { margin: 0; padding: 0; outline: 0; }
+      html, body { height: 100%; width: 100%; cursor: default; }
+      #container { z-index: 2; min-height: 100%; height: 100%; min-width: 800px; width: 100%; position: absolute; overflow: hidden; text-align: center; background: #dfdfdf; }     
+      #document { z-index: 3; position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; overflow: hidden; background:url(images/loading.gif) no-repeat center center; background-color: #fff; }              
+    </style>
+    <script src="/lib/underscore-1.8.3/underscore.js"></script>
+    <script src="/lib/jquery-1.11.3/jquery.js"></script>
+    <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+    <script>
+      function getXXX(docurl,ext) {
+        if ($.inArray(ext, ['jpg', 'jepg', 'png', 'gif', 'tiff', 'tif']) >= 0) {
+          return "<img id='docframeImg' src='" + docurl + "' style='width:100%'/>";
+        } else {
+          return "<iframe id='docframePdf' src='" + docurl + "' style='width:100%; height:100%'/>";
+        }
+      }
+      $(document).ready(function () {
+        var params = (window.location.search || '/docs/test.pdf&pdf').replace('?', '').split('|');
+        var doc = params[0];
+        var ext = params[1];
+        $('#document').html(getXXX(doc,ext));
+        $("#btnOK").button();
+      })
+    </script>
+  </head>
+  <body>
+    <div id="container" style="height:100%">
+      <div id="document" style="height:100%">
+      </div>
+    </div>
+    <button id="btnOK">OK</button>
+  </body>
+</html>

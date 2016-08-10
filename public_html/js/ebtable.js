@@ -2,6 +2,10 @@
 (function ($) {
   "use strict";
   $.fn.ebtable = function (opts, data, hasMoreResults) {
+    function log() {
+      if (opts.debug)
+        console.log.apply(console, [].slice.call(arguments, 0));
+    }
     var gridid = this[0].id;
     var selgridid = '#' + gridid + ' ';
     var translate = function translate(str) {
@@ -51,6 +55,7 @@
         });
       }
     };
+
     var util = {
       indexOfCol: function indexOfCol(colname) {
         return _.findIndex(myopts.columns, function (o) {
@@ -171,7 +176,7 @@
 
     function tableData(pageNr) {
       if (origData[0] && origData[0].length !== myopts.columns.length) {
-        console.log('Definition and Data dont match!');
+        log('Definition and Data dont match!');
         return '';
       }
 
@@ -246,7 +251,7 @@
       var gc = myopts.groupdefs;
       var groupid = row[gc.groupid];
       if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
-        console.log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
+        log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
         _.each(origData.getGroupRows(gc, groupid), function (o) {
           o.selected = b;
         });
@@ -256,7 +261,7 @@
           }
         }
       } else {
-        console.log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
+        log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
         $(selgridid + '#check' + rowNr).prop('checked', b);
       }
       myopts.onSelection && myopts.onSelection(rowNr, row, origData);
@@ -340,12 +345,12 @@
         tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
         pageCur = 0;
         redraw(pageCur);
-        console.log('sorting', myopts.sortcolname);
+        log('sorting', myopts.sortcolname);
       }
     }
 
     function filtering(event) { // filtering
-      console.log('filtering', event, event.which);
+      log('filtering', event, event.which);
       deselectRows();
       filterData();
       pageCur = 0;
@@ -355,7 +360,7 @@
 
     function reloading(event) { // reloading
       if (event.which === 13 && myopts.reloadData) {
-        console.log('reloading', event, event.which);
+        log('reloading', event, event.which);
         var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
         var sortcrit = {};
         sortcrit[coldef.dbcol] = coldef.order;
@@ -376,7 +381,7 @@
 // ##############################################################################
 
     function adjustLayout() {
-      //console.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
+      //log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
       //adjust();
       //$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
       //$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
@@ -477,7 +482,7 @@
     // #################################################################
 
     $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
-        console.log('change rowsPerPage', event, data.item.value);
+        log('change rowsPerPage', event, data.item.value);
         myopts.rowsPerPage = Number(data.item.value);
         pageCur = 0;
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -512,7 +517,7 @@
         var col = myopts.columns[util.indexOfCol(event.target.id)];
         col.invisible = !col.invisible;
         $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
-        console.log('change visibility', event.target.id, 'now visible:', !col.invisible);
+        log('change visibility', event.target.id, 'now visible:', !col.invisible);
       });
     });
     $('#' + gridid + 'configDlg').dialog({
@@ -551,7 +556,7 @@
     }
 
     $(window).on('resize', function () {
-      console.log('resize!!!');
+      //log('resize!!!');
       //adjustLayout();
     });
 
@@ -627,8 +632,16 @@
     },
     'starts-with-matches': function (cellData, searchTxt) {
       return cellData.match(new RegExp('^' + searchTxt.replace(/\*/g, '.*'), 'i'));
-    }
-  };
+    },
+    'matches-date': function (cellData, searchTxt) {
+      return moment(parseInt(cellData)).format('DD.MM.YYYY').indexOf(searchTxt) >= 0;
+    },
+    'matches-date-time': function (cellData, searchTxt) {
+      return moment(parseInt(cellData)).format('DD.MM.YYYY hh:mm').indexOf(searchTxt) >= 0;
+    },
+    'matches-date-time-sec': function (cellData, searchTxt) {
+      return moment(parseInt(cellData)).format('DD.MM.YYYY hh:mm:ss').indexOf(searchTxt) >= 0;
+    }  };
 
   $.fn.ebtable.lang = {
     'de': {

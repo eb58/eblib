@@ -184,7 +184,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
         page = Math.max(0, page - 1);
       },
       pageNext: function pageNext() {
-        page = Math.min(pageCur + 1, pageMax);
+        page = Math.min(page + 1, pageMax);
       },
       pageLast: function pageLast() {
         page = pageMax;

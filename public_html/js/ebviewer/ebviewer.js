@@ -9,9 +9,6 @@ var ebviewer = (function () {
       data: {action: "read", name: "docWindowPos"},
       success: function (result) {
         return result.error ? {} : {x: result.x, y: result.y};
-      },
-      error: function () {
-        console.log("user preference ajax error");
       }
     });
   }
@@ -37,7 +34,7 @@ var ebviewer = (function () {
     if (myopts.x !== -1 && myopts.y !== -1)
       params += ",left=" + myopts.x + "px,top=" + myopts.y + "px";
 
-    return window.open("ebviewer.html?" + docurl + '|' + ext, '', params);
+    return window.open("/js/ebviewer/ebviewer.html?" + docurl + '|' + ext, '', params);
   }
   return {
     view: view

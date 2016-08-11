@@ -22,7 +22,7 @@
         }
       }
       $(document).ready(function () {
-        var params = (window.location.search || '/docs/test.pdf&pdf').replace('?', '').split('|');
+        var params = (window.location.search || '/docs/test.pdf|pdf').replace('?', '').split('|');
         var doc = params[0];
         var ext = params[1];
         $('#document').html(getXXX(doc,ext));

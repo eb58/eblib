@@ -1,4 +1,4 @@
-/* global _ */
+/* global _, moment */
 (function ($) {
   "use strict";
   $.fn.ebtable = function (opts, data, hasMoreResults) {
@@ -256,7 +256,7 @@
           o.selected = b;
         });
         for (var i = 0; i < tblData.length; i++) {
-          if (tblData[i][gc.groupid] === groupid) {
+          if (tblData[i][gc.groupid] === groupid ) {
             $(selgridid + '#check' + i).prop('checked', b);
           }
         }
@@ -423,11 +423,9 @@
           $(selgridid + 'input[type=checkbox').prop('checked', false);
           $(event.currentTarget).prop('checked', true);
         });
+        $(selgridid + '#checkAll').hide();
       }
-      if (myopts.afterRedraw) {
-        myopts.afterRedraw(this);
-      }
-
+      myopts.afterRedraw &&  myopts.afterRedraw(this);
     }
 
     // ##############################################################################
@@ -549,10 +547,11 @@
       }
     }).parent().find('.ui-widget-header').hide();
     if (myopts.singleSelection) {
-      $('input[type=checkbox').on('click', function (o) {
-        $('input[type=checkbox').prop('checked', false);
+      $(selgridid +'input[type=checkbox').on('click', function (o) {
+        $(selgridid +'input[type=checkbox').prop('checked', false);
         $(o.currentTarget).prop('checked', true);
       });
+      $(selgridid + '#checkAll').hide();
     }
 
     $(window).on('resize', function () {
@@ -597,7 +596,10 @@
         return this;
       },
       getStateAsJSON: state.getStateAsJSON,
-      loadState: state.loadState
+      loadState: state.loadState,
+      iterateSelectedValues : function(fct){ 
+        _.each( _.filter( tblData, function(row){return row.selected;} ), fct ); 
+      }
     });
     return this.tooltip();
   };
@@ -641,7 +643,8 @@
     },
     'matches-date-time-sec': function (cellData, searchTxt) {
       return moment(parseInt(cellData)).format('DD.MM.YYYY hh:mm:ss').indexOf(searchTxt) >= 0;
-    }  };
+    }
+  };
 
   $.fn.ebtable.lang = {
     'de': {

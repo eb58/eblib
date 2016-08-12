@@ -116,9 +116,13 @@
         ],
         rowsPerPageSelectValues: [5, 10, 25, 50, 100],
         bodyHeight: 300,
-        selection: true, // {render: renderer.renderSelect},
+        selection: true, //{render: function (rowNr, row, origData) { console.log('onSelection', rowNr, row, origData);    }},
         onSelection: function (rowNr, row, origData) {
-          console.log('onSelection', rowNr, row, origData);
+          if( row[0]!=='  ' ){ 
+            row.selected = false;
+            $('#check'+rowNr).prop('checked', false).prop('disabled', true);
+          }
+          console.log('onSelection', rowNr, row);
         },
         sortmaster: [{col: idx.gid}, {col: idx.gtyp}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},

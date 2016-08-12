@@ -51,8 +51,9 @@
         ],
         //sortcolname: 'Tierart',
         selection: true,
-        flags: { withsorting: false },
-      saveState: function (s) {
+        singleSelection: true,
+        flags: {withsorting: false},
+        saveState: function (s) {
           localStorage['AA'] = s;
         },
         loadState: function () {

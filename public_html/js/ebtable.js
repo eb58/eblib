@@ -547,13 +547,6 @@
         }
       }
     }).parent().find('.ui-widget-header').hide();
-//    if (myopts.singleSelection) {
-//      $(selgridid + 'input[type=checkbox').on('click', function (o) {
-//        $(selgridid + 'input[type=checkbox').prop('checked', false);
-//        $(o.currentTarget).prop('checked', true);
-//      });
-//      $(selgridid + '#checkAll').hide();
-//    }
 
     $(window).on('resize', function () {
       //log('resize!!!');

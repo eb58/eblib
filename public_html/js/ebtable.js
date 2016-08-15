@@ -1,4 +1,4 @@
-/* global _, moment */
+/* global _*/
 (function ($) {
   "use strict";
   $.fn.ebtable = function (opts, data, hasMoreResults) {
@@ -244,7 +244,8 @@
       return label;
     }
 
-    function selectRow(rowNr, row, b) { // b = true/false ~ on/off
+    function selectRow(rowNr, b) { // b = true/false ~ on/off
+      var row = tblData[rowNr];
       if (!row)
         return;
       row.selected = b;
@@ -256,7 +257,7 @@
           o.selected = b;
         });
         for (var i = 0; i < tblData.length; i++) {
-          if (tblData[i][gc.groupid] === groupid ) {
+          if (tblData[i][gc.groupid] === groupid) {
             $(selgridid + '#check' + i).prop('checked', b);
           }
         }
@@ -271,21 +272,29 @@
       var checked = $(event.target).prop('checked');
       if (event.target.id === 'checkAll') {
         _.each(tblData, function (row, rowNr) {
-          selectRow(rowNr, tblData[rowNr], checked);
+          selectRow(rowNr, checked);
         });
       } else {
-        var rowNr = event.target.id.replace('check', '');
-        selectRow(rowNr, tblData[rowNr], checked);
         $('#checkAll').prop('checked', false);
+        if (myopts.singleSelection) {
+          $(selgridid + 'input[type=checkbox').prop('checked', false);
+          _.each(tblData, function (row, rowNr) {
+            if (row.selected)
+              selectRow(rowNr, false);
+          });
+        }
+        var rowNr = event.target.id.replace('check', '');
+        selectRow(rowNr, checked);
       }
     }
 
-    function deselectRows() {
-      $(selgridid + '#data input[type=checkbox]').prop('checked', false);
+    function deselectAllRows() {
+      log('deselectAllRows')
+      //$(selgridid + '#data input[type=checkbox]').prop('checked', false);
       if (myopts.onSelection) {
         _.each(origData, function (row, rowNr) {
           if (row.selected) {
-            selectRow(rowNr, row, false);
+            selectRow(rowNr, false);
           }
         });
       }
@@ -316,7 +325,7 @@
     function sorting(event) { // sorting
       var colid = event.currentTarget.id;
       if (colid && myopts.flags.withsorting) {
-        deselectRows();
+        deselectAllRows();
         myopts.sortcolname = util.colNameFromColid(colid);
         sortToggle();
         if (myopts.hasMoreResults) {
@@ -351,7 +360,7 @@
 
     function filtering(event) { // filtering
       log('filtering', event, event.which);
-      deselectRows();
+      deselectAllRows();
       filterData();
       pageCur = 0;
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -418,14 +427,7 @@
         $(selgridid + 'thead th').off().on('click', sorting);
         $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
-      if (myopts.singleSelection) {
-        $(selgridid + 'input[type=checkbox').off().on('click', function (event) {
-          $(selgridid + 'input[type=checkbox').prop('checked', false);
-          $(event.currentTarget).prop('checked', true);
-        });
-        $(selgridid + '#checkAll').hide();
-      }
-      myopts.afterRedraw &&  myopts.afterRedraw(this);
+      myopts.afterRedraw && myopts.afterRedraw(this);
     }
 
     // ##############################################################################
@@ -547,8 +549,8 @@
       }
     }).parent().find('.ui-widget-header').hide();
     if (myopts.singleSelection) {
-      $(selgridid +'input[type=checkbox').on('click', function (o) {
-        $(selgridid +'input[type=checkbox').prop('checked', false);
+      $(selgridid + 'input[type=checkbox').on('click', function (o) {
+        $(selgridid + 'input[type=checkbox').prop('checked', false);
         $(o.currentTarget).prop('checked', true);
       });
       $(selgridid + '#checkAll').hide();
@@ -597,8 +599,10 @@
       },
       getStateAsJSON: state.getStateAsJSON,
       loadState: state.loadState,
-      iterateSelectedValues : function(fct){ 
-        _.each( _.filter( tblData, function(row){return row.selected;} ), fct ); 
+      iterateSelectedValues: function (fct) {
+        _.each(_.filter(tblData, function (row) {
+          return row.selected;
+        }), fct);
       }
     });
     return this.tooltip();
@@ -621,6 +625,16 @@
       return parseFloat(a);
     }
   };
+  
+  function getFormatedDate(date) {
+    var d = ('0' + date.getDate()).slice(-2);
+    var m = ('0' + (date.getMonth()+1)).slice(-2);
+    var y = date.getFullYear();
+    var hs = ('0' + date.getHours()).slice(-2);
+    var ms = ('0' + date.getMinutes()).slice(-2);
+    var ss = ('0' + date.getSeconds()).slice(-2);
+    return d + '.' + m + '.' + y + ' ' + hs + ':' + ms + ':' + ss ; 
+  }
 
   $.fn.ebtable.matcher = {
     'contains': function (cellData, searchTxt) {
@@ -636,13 +650,13 @@
       return cellData.match(new RegExp('^' + searchTxt.replace(/\*/g, '.*'), 'i'));
     },
     'matches-date': function (cellData, searchTxt) {
-      return moment(parseInt(cellData)).format('DD.MM.YYYY').indexOf(searchTxt) >= 0;
+      return getFormatedDate( new Date(parseInt(cellData)) ).substr(10).indexOf(searchTxt) >= 0;
     },
     'matches-date-time': function (cellData, searchTxt) {
-      return moment(parseInt(cellData)).format('DD.MM.YYYY hh:mm').indexOf(searchTxt) >= 0;
+      return getFormatedDate( new Date(parseInt(cellData)) ).substr(16).indexOf(searchTxt) >= 0;
     },
     'matches-date-time-sec': function (cellData, searchTxt) {
-      return moment(parseInt(cellData)).format('DD.MM.YYYY hh:mm:ss').indexOf(searchTxt) >= 0;
+      return getFormatedDate( new Date(parseInt(cellData)) ).indexOf(searchTxt) >= 0;
     }
   };
 

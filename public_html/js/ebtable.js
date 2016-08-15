@@ -547,7 +547,9 @@
         }
       }
     }).parent().find('.ui-widget-header').hide();
-
+    if (myopts.singleSelection) {
+      $(selgridid + '#checkAll').hide();
+    }
     $(window).on('resize', function () {
       //log('resize!!!');
       //adjustLayout();

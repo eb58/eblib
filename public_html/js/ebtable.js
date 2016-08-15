@@ -150,7 +150,7 @@
       }, '');
       var t = '<button id="configBtn">' + translate('Anpassen') + '</button>\n\
                <div id="' + gridid + 'configDlg">\n\
-                  <ol id="' + gridid + 'selectable" class="selectable"><%=list%></ol>\n\
+                  <ol id="' + gridid + 'selectable" class="ebtableSelectable"><%=list%></ol>\n\
                </div>';
       return _.template(t)({list: list});
     }
@@ -244,8 +244,7 @@
       return label;
     }
 
-    function selectRow(rowNr, b) { // b = true/false ~ on/off
-      var row = tblData[rowNr];
+    function selectRow(rowNr, row, b) { // b = true/false ~ on/off
       if (!row)
         return;
       row.selected = b;
@@ -269,32 +268,32 @@
     }
 
     function selectRows(event) { // select row
+      log( 'selectRows',  event);
       var checked = $(event.target).prop('checked');
       if (event.target.id === 'checkAll') {
         _.each(tblData, function (row, rowNr) {
-          selectRow(rowNr, checked);
+          selectRow(rowNr, tblData[rowNr], checked);
         });
       } else {
-        $('#checkAll').prop('checked', false);
         if (myopts.singleSelection) {
-          $(selgridid + 'input[type=checkbox').prop('checked', false);
+          //$(selgridid + 'input[type=checkbox').prop('checked', false);
           _.each(tblData, function (row, rowNr) {
             if (row.selected)
-              selectRow(rowNr, false);
+              selectRow(rowNr, row, false);
           });
         }
         var rowNr = event.target.id.replace('check', '');
-        selectRow(rowNr, checked);
+        selectRow(rowNr, tblData[rowNr], checked);
+        $('#checkAll').prop('checked', false);
       }
     }
 
     function deselectAllRows() {
-      log('deselectAllRows')
-      //$(selgridid + '#data input[type=checkbox]').prop('checked', false);
+      $(selgridid + '#data input[type=checkbox]').prop('checked', false);
       if (myopts.onSelection) {
         _.each(origData, function (row, rowNr) {
           if (row.selected) {
-            selectRow(rowNr, false);
+            selectRow(rowNr, row, false);
           }
         });
       }
@@ -421,12 +420,12 @@
     function redraw(pageCur, withHeader) {
       $(selgridid + '#ctrlInfo').html(infoCtrl());
       $(selgridid + '#data tbody').html(tableData(pageCur));
-      $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       if (withHeader) {
         $(selgridid + 'thead tr').html(tableHead());
         $(selgridid + 'thead th').off().on('click', sorting);
         $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
+      $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       myopts.afterRedraw && myopts.afterRedraw(this);
     }
 
@@ -490,7 +489,7 @@
         myopts.saveState(state.getStateAsJSON());
       }
     });
-    $(selgridid + '#lenctrl~span').css('height', '21px');
+    $(selgridid + '#lenctrl~span').css('height', $.ui.version === '1.11.4' ?  '21px': '14px');
     $(selgridid + '.firstBtn').css('height', ctrlHeight).button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);
@@ -540,7 +539,7 @@
             return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
           });
           myopts.saveState(state.getStateAsJSON());
-          redraw(pageCur, true);
+          redraw(pageCur,true);
           $(this).dialog("close");
         },
         'Abbrechen': function () {
@@ -548,13 +547,13 @@
         }
       }
     }).parent().find('.ui-widget-header').hide();
-    if (myopts.singleSelection) {
-      $(selgridid + 'input[type=checkbox').on('click', function (o) {
-        $(selgridid + 'input[type=checkbox').prop('checked', false);
-        $(o.currentTarget).prop('checked', true);
-      });
-      $(selgridid + '#checkAll').hide();
-    }
+//    if (myopts.singleSelection) {
+//      $(selgridid + 'input[type=checkbox').on('click', function (o) {
+//        $(selgridid + 'input[type=checkbox').prop('checked', false);
+//        $(o.currentTarget).prop('checked', true);
+//      });
+//      $(selgridid + '#checkAll').hide();
+//    }
 
     $(window).on('resize', function () {
       //log('resize!!!');
@@ -600,9 +599,7 @@
       getStateAsJSON: state.getStateAsJSON,
       loadState: state.loadState,
       iterateSelectedValues: function (fct) {
-        _.each(_.filter(tblData, function (row) {
-          return row.selected;
-        }), fct);
+        _.each( _.filter( tblData, function(row){return row.selected;} ), fct ); 
       }
     });
     return this.tooltip();

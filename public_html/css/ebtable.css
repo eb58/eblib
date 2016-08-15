@@ -4,23 +4,23 @@
 }
 
 .ebtable .ctrl div{ 
-  margin : 5px 3px;
+  margin: 5px 3px;
 }
 
 .ebtable #lenctrl{ 
   width: 70px;
 }
 
-.ebtable #data{ 
+.ebtable .ui-selectmenu-button.ui-button {
+	width: 50px;
+}
+
+.ebtable #data, .ebtable table{ 
   width: 100%;
 }
 
 .ebtable #head, .ebtable #data { 
   background-color:#eee;
-}
-
-.ebtable table {
-  width: 100%;
 }
 
 .ebtable #data th{ 
@@ -60,6 +60,6 @@
 }
 
 /* ConfigDlg */
-.selectable { list-style-type: none; padding: 0px; width: 100%; }
-.selectable li.visible  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
-.selectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }
+.ebtableSelectable { list-style-type: none; padding: 0px; width: 100%; }
+.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
+.ebtableSelectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }

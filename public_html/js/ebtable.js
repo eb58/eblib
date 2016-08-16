@@ -426,6 +426,7 @@
         $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
+      myopts.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw(this);
     }
 
@@ -547,9 +548,8 @@
         }
       }
     }).parent().find('.ui-widget-header').hide();
-    if (myopts.singleSelection) {
-      $(selgridid + '#checkAll').hide();
-    }
+    myopts.singleSelection && $(selgridid + '#checkAll').hide();
+
     $(window).on('resize', function () {
       //log('resize!!!');
       //adjustLayout();

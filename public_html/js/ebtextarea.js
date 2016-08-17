@@ -52,7 +52,6 @@
     setTextAreaCounter(id, myopts.maxByte);
     $('#'+id +' .ebtextareatitle').css('font-size', myopts.counter.fontSize);
     $('#'+id +' .ebtextareacnt').css('font-size', myopts.counter.fontSize);
-    //$(this).parent().find('.title').css('font-size', myopts.titleFontSize);
     return this;
   };
 })(jQuery);        

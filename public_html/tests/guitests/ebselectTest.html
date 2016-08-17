@@ -43,8 +43,8 @@
         $('#list').eblist(listopts,['AAA', 'BBB', 'CCCC', 'VVVV', 'ghghgh', '****', 'ewewewe', 'YYYYYY']);
         
        var keywords = ['Schlagwort1', 'Schlagwort2', 'Schlagwort3', 'Schlagwort4', 'Schlagwort5', 'Schlagwort6', 'Schlagwort7' ];
-       var optSchlag = { values: keywords || [], onselchange: function(){} };
-       var xx = $("#select3").ebselect(optSchlag, [1, 3]);
+       var optSchlag = { values: keywords || [], onselchange: function(){ console.log('xx', this)} };
+       $("#select3").ebselect(optSchlag, {labels:['Schlagwort1', 'Schlagwort4']});
        
       });
     </script>

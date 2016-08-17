@@ -1,7 +1,7 @@
 /* global _ */
 (function ($) {
   "use strict";
-  $.fn.ebselect = function (opts, data) { // data = array of selected values i.e ['3','4']
+  $.fn.ebselect = function (opts, selected) {  // selected =[1,3] { vals:[1,3]}  or {labels:['Keyword1', 'Keyword3']};
     var id = this[0].id;
     var self = this;
     var defopts = {
@@ -13,12 +13,13 @@
       }
     };
     var myopts = $.extend({}, defopts, opts);
+    selected = _.isArray(selected) ? { vals:selected} : selected; 
 
     myopts.values = _.map(myopts.values, function (key, val) {
       return _.isString(key) ? {value: val, label: key} : key;
     });
     _.each(myopts.values, function (val) {
-      val.selected = _.indexOf(data, val.value) >= 0;
+      val.selected = selected.vals && _.indexOf(selected.vals, val.value) >= 0 || selected.labels && _.indexOf(selected.labels, val.label) >= 0;
     });
 
     var init = function init(a) {
@@ -41,7 +42,10 @@
       return _.pluck($('#' + id + ' .ebselect input:checked'), 'value');
     };
     this.getSelectedValuesAsString = function getSelectedValues() {
-      return _.map(this.getSelectedValues(), function(o,idx){ console.log(o,idx);return myopts.values[o].label; });
+      return _.map(this.getSelectedValues(), function (o, idx) {
+        console.log(o, idx);
+        return myopts.values[o].label;
+      });
     };
     $('#' + id + ' .ebselect input').on('change', function () {
       myopts.onselchange(self);

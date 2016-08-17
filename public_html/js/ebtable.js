@@ -126,6 +126,7 @@
       rowsPerPage: 10,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
       selection: false,
+      singleSelection: false,
       saveState: state.saveState,
       loadState: state.loadState,
       sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
@@ -156,7 +157,7 @@
     }
 
     function tableHead() {
-      var res = myopts.selection ? '<th><input id="checkAll" type="checkbox"></th>' : '';
+      var res = myopts.selection ? '<th class="selectCol"><input id="checkAll" type="checkbox"></th>' : '';
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {

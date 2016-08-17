@@ -53,8 +53,10 @@
 .ebtable #data td.groupheader{
   background-color: #c3c3d0;
 }
-.ebtable #data input[type=checkbox] {
-  width: 15px;
+
+/* selection===true -> width of selection column */
+.ebtable #data table .selectCol{
+  width: 20px;
   padding: 0px;
   margin: 0px;
 }

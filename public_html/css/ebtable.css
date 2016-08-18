@@ -12,7 +12,7 @@
 }
 
 .ebtable .ui-selectmenu-button.ui-button {
-	width: 50px;
+  width: 50px;
 }
 
 .ebtable #data, .ebtable table{ 
@@ -53,8 +53,6 @@
 .ebtable #data td.groupheader{
   background-color: #c3c3d0;
 }
-
-/* selection===true -> width of selection column */
 .ebtable #data table .selectCol{
   width: 20px;
   padding: 0px;

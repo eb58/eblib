@@ -28,7 +28,7 @@ if (!String.prototype.endsWith) {
   };
 }
 
-$ && !$.alert && $.extend({
+if(typeof $ !== 'undefined')  $.extend({
   alert: function (title, message) {
     message = message || '';
     $("<div id='dlgAlert'></div>").dialog({
@@ -46,11 +46,11 @@ $ && !$.alert && $.extend({
     }).html('<br>' + message.replace('\n', '<br>'));
   }
 });
-$ && !$.confirm && $.extend({
+if(typeof $ !== 'undefined') $.extend({
   confirm: function (title, question, callback) {
     question = question || '';
     callback = callback || function () {
-      console.log('choosen yes');
+      console.log('$.confirm:please provide callback!');
     };
     $("<div id='dlgConfirm'></div>").dialog({
       buttons: {

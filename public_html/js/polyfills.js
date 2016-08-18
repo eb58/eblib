@@ -28,48 +28,47 @@ if (!String.prototype.endsWith) {
   };
 }
 
-if (typeof $ !== 'undefined') {
-  $.extend({
-    alert: function (title, message) {
-      message = message || '';
-      $("<div id='dlgAlert'></div>").dialog({
-        buttons: {
-          "Ok": function () {
-            $(this).dialog("close");
-          }
-        },
-        close: function () {
-          $(this).remove();
-        },
-        title: title,
-        modal: true,
-        closeText: 'Schlie\u00dfen'
-      }).html('<br>' + message.replace('\n', '<br>'));
-    },
-    confirm: function (title, question, callback) {
-      question = question || '';
-      callback = callback || function (b) {
-        console.log('choosen', b);
-      }
-      $("<div id='dlgConfirm'></div>").dialog({
-        buttons: {
-          "Ja": function () {
-            callback();
-            $(this).dialog("close");
-          },
-          "Nein": function () {
-            $(this).dialog("close");
-            console.log('Nein');
-          }
-        },
-        close: function () {
-          $(this).remove();
-        },
-        title: title,
-        modal: true,
-        closeText: 'Schlie\u00dfen'
-      }).html('<br>' + question.replace('\n', '<br>'));
+$ && !$.alert && $.extend({
+  alert: function (title, message) {
+    message = message || '';
+    $("<div id='dlgAlert'></div>").dialog({
+      buttons: {
+        "Ok": function () {
+          $(this).dialog("close");
+        }
+      },
+      close: function () {
+        $(this).remove();
+      },
+      title: title,
+      modal: true,
+      closeText: 'Schlie\u00dfen'
+    }).html('<br>' + message.replace('\n', '<br>'));
+  }
+});
+$ && !$.confirm && $.extend({
+  confirm: function (title, question, callback) {
+    question = question || '';
+    callback = callback || function (b) {
+      console.log('choosen', b);
     }
-  })
-}
-;
+    $("<div id='dlgConfirm'></div>").dialog({
+      buttons: {
+        "Ja": function () {
+          callback();
+          $(this).dialog("close");
+        },
+        "Nein": function () {
+          $(this).dialog("close");
+          console.log('Nein');
+        }
+      },
+      close: function () {
+        $(this).remove();
+      },
+      title: title,
+      modal: true,
+      closeText: 'Schlie\u00dfen'
+    }).html('<br>' + question.replace('\n', '<br>'));
+  }
+});

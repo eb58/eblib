@@ -48,8 +48,8 @@ if (typeof $ !== 'undefined') {
     },
     confirm: function (title, question, callback) {
       question = question || '';
-      callback = callback || function () {
-        console.log('Ja');
+      callback = callback || function (b) {
+        console.log('choosen', b);
       }
       $("<div id='dlgConfirm'></div>").dialog({
         buttons: {

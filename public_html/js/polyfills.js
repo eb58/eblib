@@ -49,9 +49,9 @@ $ && !$.alert && $.extend({
 $ && !$.confirm && $.extend({
   confirm: function (title, question, callback) {
     question = question || '';
-    callback = callback || function (b) {
-      console.log('choosen', b);
-    }
+    callback = callback || function () {
+      console.log('choosen yes');
+    };
     $("<div id='dlgConfirm'></div>").dialog({
       buttons: {
         "Ja": function () {
@@ -60,7 +60,6 @@ $ && !$.confirm && $.extend({
         },
         "Nein": function () {
           $(this).dialog("close");
-          console.log('Nein');
         }
       },
       close: function () {

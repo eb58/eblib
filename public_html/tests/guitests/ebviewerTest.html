@@ -9,6 +9,7 @@
     <script src="/lib/underscore-1.8.3/underscore.js"></script>
     <script src="/lib/jquery-1.11.3/jquery.js"></script>
     <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+    <script src="/js/polyfills.js"></script>
     <script src="/js/ebviewer/ebviewer.js"></script>
     <script>
       $(document).ready(function () {
@@ -18,11 +19,15 @@
         $('#test2').button().click(function () {
           ebviewer.view('/docs/test.jpg','jpg', {});
         })
+        $('#test3').button().click(function () {
+          console.log($.confirm('Frage', 'ja?'));
+        })
       });
     </script>
   </head>
   <body>
     <button id='test1'>TESTPDF</button>
     <button id='test2'>TESTIMG</button>
+    <button id='test3'>xxx</button>
   </body>
 </html>

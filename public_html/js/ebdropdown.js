@@ -6,7 +6,7 @@
     var defopts = {
       width: '100%',
       change: function (evt, ui) {
-        console.log('changed', ui, evt);
+        //console.log('changed', ui, evt);
       }
     };
     var myopts = $.extend({}, defopts, opts);

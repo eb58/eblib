@@ -3,11 +3,6 @@
 (function ($) {
   "use strict";
 
-  function setTextAreaCounter(id, maxByte) {
-    var bc = ebutils.byteCount($('#' + id + ' textarea').val());
-    $('#' + id + ' .ebtextareacnt').text('(' + bc + '/' + maxByte + ')');
-  }
-
   $.fn.ebtextarea = function (opts) {
     var id = this[0].id;
     var defopts = {
@@ -19,16 +14,21 @@
     };
     var myopts = $.extend({}, defopts, opts);
 
+    var setTextAreaCounter = function () {
+      var bc = ebutils.byteCount($('#' + id + ' textarea').val());
+      $('#' + id + ' .ebtextareacnt').text('(' + bc + '/' + myopts.maxByte + ')');
+    }
+
     var top =
-        '<div>'
-        + (myopts.title.pos === 'top' ?  '<span class="ebtextareatitle">' + myopts.title.text +'&nbsp;&nbsp;</span>' : '')
-        + (myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"><span>' : '')
-        + '</div>';
+      '<div>'
+      + (myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '')
+      + (myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"><span>' : '')
+      + '</div>';
     var bottom =
-        '<div>'
-        + (myopts.title.pos === 'bottom' ?  '<span class="ebtextareatitle">' + myopts.title.text +'&nbsp;&nbsp;</span>' : '')
-        + (myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '')
-        + '</div>';
+      '<div>'
+      + (myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '')
+      + (myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '')
+      + '</div>';
     var s = _.template('\
       <div class="ebtextarea">\n\
         <%=top%>\n\
@@ -37,8 +37,8 @@
       </div>\n')({rows: myopts.nrRows, cols: myopts.nrCols, top: top, bottom: bottom});
 
     $(this).html(s);
-    $('#'+id +' textarea').on("keyup", function () {
-      var s = $('#'+id +' textarea').val();
+    $('#' + id + ' textarea').on("keyup", function () {
+      var s = $('#' + id + ' textarea').val();
       var bc = ebutils.byteCount(s);
       if (bc > myopts.maxByte) {
         $.alert('Warnung', 'Maximal erlaubte Textl\u00e4nge erreicht.\nText wird abgeschnitten.');
@@ -47,11 +47,12 @@
         }
         $(this).val(s);
       }
-      setTextAreaCounter(id, myopts.maxByte)
+      setTextAreaCounter()
     });
-    setTextAreaCounter(id, myopts.maxByte);
-    $('#'+id +' .ebtextareatitle').css('font-size', myopts.counter.fontSize);
-    $('#'+id +' .ebtextareacnt').css('font-size', myopts.counter.fontSize);
+    setTextAreaCounter();
+    $('#' + id + ' .ebtextareatitle').css('font-size', myopts.counter.fontSize);
+    $('#' + id + ' .ebtextareacnt').css('font-size', myopts.counter.fontSize);
+    this.setTextAreaCounter = setTextAreaCounter;
     return this;
   };
 })(jQuery);        

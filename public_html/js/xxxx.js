@@ -28,3 +28,42 @@
   };
 })(jQuery);
 
+//###############################################################################################################
+
+(function ($) {
+  "use strict";
+  $.fn.ebinput = function (opts, data, m) {
+    var id = this[0].id;
+    var type = this[0].type;
+    this.id = id;
+
+    m = m || id.replace('#', '');
+    if (type === 'text' || type === 'password') {
+      $(this).val(data[m]);
+      $(this).keyup(function () {
+        data[m] = $(this).val();
+        console.log('changed ' + id, data[m], data);
+      });
+    }
+    if ($('select',this).length) {
+      var self = this;
+      this.setSelectedValue(data[m]);
+      $( '#' + id ).on( "selectmenuchange", function( event, ui ) {
+        data[m] = self.getSelectedValue();
+        console.log('changed ' + id, data[m], data);
+        
+      } );
+    }
+    if ($('textarea',this).length) {
+      $('#' + id + ' textarea').val(data[m])
+      $('#' + id + ' textarea').keyup(function () {
+        data[m] = $('#' + id + ' textarea').val();
+        console.log('changed ' + id, data[m], data);
+      });
+      this.setTextAreaCounter();
+    }
+    return this;
+  };
+})(jQuery);
+
+

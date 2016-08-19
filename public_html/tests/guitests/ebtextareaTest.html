@@ -16,26 +16,6 @@ and open the template in the editor.
     <script src="/js/ebutils.js"></script>
     <script src="/js/ebtextarea.js"></script>
     <script>
-      if (typeof $ !== 'undefined') {
-        $.extend({
-          alert: function (title, message) {
-            message = message || '';
-            $("<div id='dlgAlert'></div>").dialog({
-              buttons: {
-                "Ok": function () {
-                  $(this).dialog("close");
-                }
-              },
-              close: function () {
-                $(this).remove();
-              },
-              title: title,
-              modal: true,
-              closeText: 'Schlie\u00dfen'
-            }).html('<br>' + message.replace('\n', '<br>'));
-          }
-        });
-      }
 
       $(document).ready(function () {
         opts1 = {title: { text: 'Text1', fontSize: '12px',  pos: 'top'}, counter: { fontSize: '12px',  pos: 'top'}, maxByte:50}

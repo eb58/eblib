@@ -1,4 +1,4 @@
-/* global ebutils */
+/* global ebutils, _ */
 
 (function ($) {
   "use strict";
@@ -17,7 +17,7 @@
     var setTextAreaCounter = function () {
       var bc = ebutils.byteCount($('#' + id + ' textarea').val());
       $('#' + id + ' .ebtextareacnt').text('(' + bc + '/' + myopts.maxByte + ')');
-    }
+    };
 
     var top =
       '<div>'
@@ -47,14 +47,11 @@
         }
         $(this).val(s);
       }
-      setTextAreaCounter()
+      setTextAreaCounter();
     });
     setTextAreaCounter();
     $('#' + id + ' .ebtextareatitle').css('font-size', myopts.counter.fontSize);
-    $('#' + id + ' .ebtextareacnt').css('font-size', myopts.counter.fontSize)
-    
-    
-    ;
+    $('#' + id + ' .ebtextareacnt').css('font-size', myopts.counter.fontSize);
     this.setTextAreaCounter = setTextAreaCounter;
     return this;
   };

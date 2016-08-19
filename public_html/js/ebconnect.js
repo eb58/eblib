@@ -40,7 +40,10 @@
     m = m || this.id.replace('#', '');
     if (type === 'text' || type === 'password' || type === 'radio') {
       $(this).val(data[m]);
-      $(this).keyup(function () {
+      $(this).on('change', function () {
+        data[m] = $(this).val();
+        console.log('changed ' + id, data[m], data);
+      }).on('keyup', function () {
         data[m] = $(this).val();
         console.log('changed ' + id, data[m], data);
       });

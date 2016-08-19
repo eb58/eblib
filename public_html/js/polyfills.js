@@ -43,7 +43,7 @@ if(typeof $ !== 'undefined')  $.extend({
       title: title,
       modal: true,
       closeText: 'Schlie\u00dfen'
-    }).html('<br>' + message.replace('\n', '<br>'));
+    }).html('<br>' + message.replace(/\n/g, '<br>'));
   }
 });
 if(typeof $ !== 'undefined') $.extend({
@@ -68,6 +68,6 @@ if(typeof $ !== 'undefined') $.extend({
       title: title,
       modal: true,
       closeText: 'Schlie\u00dfen'
-    }).html('<br>' + question.replace('\n', '<br>'));
+    }).html('<br>' + question.replace(/\n/g, '<br>'));
   }
 });

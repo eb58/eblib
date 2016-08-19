@@ -48,27 +48,27 @@
       }
 
       //#######################################################################
-      var flagsdef = [
-        {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
-        {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
-        {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
-        {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
-        {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
-        {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
-        {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
-        {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
-      ];
-      var flags = _.pluck(flagsdef, 'key').join(''); // -> '!*PFGKSC'
 
       var flagutils = {
+        flagsdef: [
+          {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
+          {key: '*', id: 2, img: 'blackstar.gif', alt: 'Spezialfall'},
+          {key: 'P', id: 4, img: 'problem.gif', alt: 'Problemfall'},
+          {key: 'F', id: 8, img: 'caseConsolidation.gif', alt: 'Fallzusammenführung'},
+          {key: 'G', id: 16, img: 'isPrg.gif', alt: 'Prg'},
+          {key: 'K', id: 32, img: 'korrekturauftrag.gif', alt: 'Korrekturauftrag'},
+          {key: 'S', id: 64, img: 'sperre.gif', alt: 'Sperre'},
+          {key: 'C', id: 128, img: 'storniert.gif', alt: 'Stornierung angefordert'}
+        ],
+        flags: _.pluck(this.flagsdef, 'key').join(''), // -> '!*PFGKSC'
         fromBitNumber: function (bits) { // 5 (101)  -->  '!P' # 7 (111) -> '!*p' # 8 (1000) -> F
           return _.reduce(Number(bits).toString(2).split('').reverse(), function (acc, o, i) {
-            return acc += (o === '1' && flags[i] ? flags[i] : '');
+            return acc += (o === '1' && flagutils.flags[i] ? flagutilsflags[i] : '');
           }, '');
         },
         toBitNumber: function (str) { // '!P' -> 5 (101), '!PG' -> 21
           return _.reduce(str.toUpperCase().split(''), function (acc, c) {
-            var x = _.findWhere(flagsdef, {key: c});
+            var x = _.findWhere(flagutils.flagsdef, {key: c});
             return acc += x ? x.id : 0;
           }, 0);
         }
@@ -82,6 +82,7 @@
         flags: flagutils.fromBitNumber
       };
 
+      var idx = {gtyp: 0, gcnt: 1, gid: 2, gss: 3};
       var renderer = {
         tierart: function (data, row) {
           var groupid = row[idx.gid];
@@ -98,9 +99,7 @@
             return acc + ((data & o.id) ? _.template("<img src='/images/<\%=img%>' title='<\%=title%>' height='10px'/>")({img: o.img, title: o.alt}) : '');
           }, '');
         }
-      };
-
-      var idx = {gtyp: 0, gcnt: 1, gid: 2, gss: 3};
+      }
 
       var opts = {
         columns: [
@@ -116,10 +115,10 @@
         rowsPerPageSelectValues: [5, 10, 25, 50, 100],
         bodyHeight: 300,
         selection: true, //{render: function (rowNr, row, origData) { console.log('onSelection', rowNr, row, origData);    }},
-        onSelection: function (rowNr, row, origData) {
-          if( row[0]!=='  ' ){ 
+        onSelection: function (rowNr, row) {
+          if (row[0] !== '  ') {
             row.selected = false;
-            $('#check'+rowNr).prop('checked', false).prop('disabled', true);
+            $('#check' + rowNr).prop('checked', false).prop('disabled', true);
           }
           console.log('onSelection', rowNr, row);
         },

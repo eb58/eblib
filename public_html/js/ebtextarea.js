@@ -51,7 +51,10 @@
     });
     setTextAreaCounter();
     $('#' + id + ' .ebtextareatitle').css('font-size', myopts.counter.fontSize);
-    $('#' + id + ' .ebtextareacnt').css('font-size', myopts.counter.fontSize);
+    $('#' + id + ' .ebtextareacnt').css('font-size', myopts.counter.fontSize)
+    
+    
+    ;
     this.setTextAreaCounter = setTextAreaCounter;
     return this;
   };

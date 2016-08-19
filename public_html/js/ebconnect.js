@@ -1,7 +1,7 @@
 /* global _ */
 (function ($) {
   "use strict";
-  $.fn.xxxx = function (opts, data) {
+  $.fn.ebxxx = function (opts, data) {
     var id = this[0].id;
     var defopts = {
       fields: {
@@ -32,13 +32,13 @@
 
 (function ($) {
   "use strict";
-  $.fn.ebinput = function (opts, data, m) {
+  $.fn.ebconnect = function (data, m) {
     var id = this[0].id;
     var type = this[0].type;
     this.id = id;
 
-    m = m || id.replace('#', '');
-    if (type === 'text' || type === 'password') {
+    m = m || this.id.replace('#', '');
+    if (type === 'text' || type === 'password' || type === 'radio') {
       $(this).val(data[m]);
       $(this).keyup(function () {
         data[m] = $(this).val();
@@ -54,8 +54,17 @@
         
       } );
     }
+    if ($('input:radio',this).length) {
+      var self = this;
+      this.setValue(data[m]);
+      $( '#' + id ).on( "change", function( event, ui ) {
+        data[m] = self.getValue();
+        console.log('changed ' + id, data[m], data);
+        
+      } );
+    }
     if ($('textarea',this).length) {
-      $('#' + id + ' textarea').val(data[m])
+      $('#' + id + ' textarea').val(data[m]);
       $('#' + id + ' textarea').keyup(function () {
         data[m] = $('#' + id + ' textarea').val();
         console.log('changed ' + id, data[m], data);

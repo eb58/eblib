@@ -1,30 +1,26 @@
 <!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
 <html>
   <head>
     <title>TODO supply a title</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/lib/jQueryUI-1.12.0/jquery-ui.min.css"/>
     <script src="/lib/underscore-1.8.3/underscore.js"></script>
     <script src="/lib/jquery-1.11.3/jquery.js"></script>
-    <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
+    <script src="/lib/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="/js/polyfills.js"></script>
     <script src="/js/ebutils.js"></script>
     <script src="/js/ebtextarea.js"></script>
     <script>
 
       $(document).ready(function () {
-        opts1 = {title: { text: 'Text1', fontSize: '12px',  pos: 'top'}, counter: { fontSize: '12px',  pos: 'top'}, maxByte:50}
-        opts2 = {title: { text: 'Text2', fontSize: '12px',  pos: 'top'}, maxByte:30    }
-        opts3 = {title: { text: 'Noch ein Test', fontSize: '8px',  pos: 'bottom'}, maxByte:30    }
+        opts1 = {title: {text: 'Text1', fontSize: '12px', pos: 'top'}, counter: {fontSize: '12px', pos: 'top'}, maxByte: 50};
+        opts2 = {title: {text: 'Text2', fontSize: '12px', pos: 'top'}, maxByte: 30};
+        opts3 = {title: {text: 'Noch ein Test', fontSize: '8px', pos: 'bottom'}, maxByte: 30};
         $('#test1Textarea').ebtextarea(opts1);
         $('#test2Textarea').ebtextarea(opts2);
         $('#test3Textarea').ebtextarea(opts3);
-      })
+      });
 
     </script>
   </head>

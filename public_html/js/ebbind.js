@@ -32,45 +32,45 @@
 
 (function ($) {
   "use strict";
-  $.fn.ebconnect = function (data, m) {
+  $.fn.ebbind = function (data, m) {
     var id = this[0].id;
     var type = this[0].type;
     this.id = id;
+    var self = this;
 
     m = m || this.id.replace('#', '');
-    if (type === 'text' || type === 'password' || type === 'radio') {
-      $(this).val(data[m]);
-      $(this).on('change', function () {
-        data[m] = $(this).val();
+    if (type === 'text' || type === 'password'  ) {
+      this.val(data[m]).on('change', function () {
+        data[m] = self.val();
         console.log('changed ' + id, data[m], data);
       }).on('keyup', function () {
-        data[m] = $(this).val();
+        data[m] = self.val();
+        console.log('changed ' + id, self, data[m], data);
+      });
+    }
+    if (type === 'checkbox') {
+      this.prop('checked', data[m]).on('click', function () {
+        data[m] = self.prop('checked');
         console.log('changed ' + id, data[m], data);
       });
     }
-    if ($('select',this).length) {
-      var self = this;
-      this.setSelectedValue(data[m]);
-      $( '#' + id ).on( "selectmenuchange", function( event, ui ) {
+    if ($('select', this).length) {
+      this.setSelectedValue(data[m]).on("selectmenuchange", function () {
         data[m] = self.getSelectedValue();
-        console.log('changed ' + id, data[m], data);
-        
-      } );
+        console.log('select changed ' + id, data[m], data);
+      });
     }
-    if ($('input:radio',this).length) {
-      var self = this;
-      this.setValue(data[m]);
-      $( '#' + id ).on( "change", function( event, ui ) {
+    if ($('input:radio', this).length) {
+      this.setValue(data[m]).on("change", function () {
         data[m] = self.getValue();
-        console.log('changed ' + id, data[m], data);
-        
-      } );
+        console.log('radio changed ' + id, data[m], data);
+      });
     }
-    if ($('textarea',this).length) {
-      $('#' + id + ' textarea').val(data[m]);
-      $('#' + id + ' textarea').keyup(function () {
-        data[m] = $('#' + id + ' textarea').val();
-        console.log('changed ' + id, data[m], data);
+    if ($('textarea', this).length) {
+      var $x = $('textarea',this);
+      $x.val(data[m],this).on('keyup', function () {
+        data[m] = $x.val();
+        console.log('textarea changed ' + id, data[m], data);
       });
       this.setTextAreaCounter();
     }

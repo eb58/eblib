@@ -10,19 +10,20 @@
       * {
         font-family:Arial;
         color: black;
-        font-size: 12px;
+        font-size: 10px;
       }
     </style>
     <script src="/lib/underscore-1.8.3/underscore.js"></script>
     <script src="/lib/jquery-1.11.3/jquery.js"></script>
     <script src="/lib/jQueryUI-1.12.0/jquery-ui.js"></script>
     <script src="/lib/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+    <script src="/js/polyfills.js"></script>
     <script src="/js/ebutils.js"></script>
     <script src="/js/ebselect.js"></script>
     <script src="/js/ebdropdown.js"></script>
     <script src="/js/eblist.js"></script>
     <script src="/js/ebtextarea.js"></script>
-    <script src="/js/ebconnect.js"></script>
+    <script src="/js/ebbind.js"></script>
     <script src="/js/ebradio.js"></script>
     <script>
       var datepickerOptions = {
@@ -39,17 +40,19 @@
         usr: 'ebrandl',
         pwd: '',
         date: '28.01.2011',
+        sec: true,
         srv: 'Server4',
         txt: 'Das ist ein Test',
         choice: 'Radio2'
       };
       $(document).ready(function () {
-        $('#usr').ebconnect(data);
-        $('#pwd').ebconnect(data);
-        $('#date').datepicker(datepickerOptions).ebconnect(data);
-        $('#srv').ebdropdown({}, keywords).ebconnect(data);
-        $('#choice').ebradio({}, radios).ebconnect(data);
-        $('#txt').ebtextarea().ebconnect(data);
+        $('#usr').ebbind(data);
+        $('#pwd').ebbind(data);
+        $('#sec').ebbind(data);
+        $('#date').datepicker(datepickerOptions).ebbind(data);
+        $('#srv').ebdropdown({}, keywords).ebbind(data);
+        $('#choice').ebradio({}, radios).ebbind(data);
+        $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(data);
       });
     </script>
   </head>
@@ -59,6 +62,7 @@
       <tr><td>User</td><td><input id='usr' type="text"></td></tr>
       <tr><td>Pass</td><td><input id='pwd' type="password"></td></tr>
       <tr><td>Date</td><td><input id='date' type="text"></td></tr>
+      <tr><td>Secure</td><td><input id='sec' type="checkbox"></td></tr>
       <tr><td>Serv</td><td><div id='srv'></div></td></tr>
       <tr><td>Auswahl:</td><td><div id='choice'></div></td></tr>
       <tr><td>Bemerkung:</td><td><div id='txt'></div></td></tr>

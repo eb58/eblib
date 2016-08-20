@@ -26,6 +26,7 @@
         }).prop("selected", "selected");
         $(idX).selectmenu().selectmenu('refresh');
       }
+      return this;
     };
     var getSelectedValue = function () {
       var v = $(idX).val();

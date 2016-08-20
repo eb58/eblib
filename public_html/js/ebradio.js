@@ -25,7 +25,8 @@
     $('#' + id + " input").checkboxradio(myopts);
     this.id = id;
     this.setValue = function setValue(choice) {
-      return $('#' + id + ' #' + choice).prop('checked', true).checkboxradio("refresh");
+       $('#' + id + ' #' + choice).prop('checked', true).checkboxradio("refresh");
+       return this;
     };
     this.getValue = function getValue() {
       return $('#' + id + ' input:radio:checked').prop('id');

@@ -36,23 +36,53 @@
       };
       var radios = ['Radio1', 'Radio2', 'Radio3'];
       var keywords = ['Server1', 'Server2', 'Server3', 'Server4', 'Server5', 'Server6', 'Server7'];
-      var data = {
+      var haircolor = ['blond', 'braun', 'rot', 'weiß'];
+      var dataX = {
         usr: 'ebrandl',
         pwd: '',
         date: '28.01.2011',
         sec: true,
         srv: 'Server4',
         txt: 'Das ist ein Test',
-        choice: 'Radio2'
+        choice1: 'Radio2',
+        choice2: 'Radio2',
+        haircolor1: [2, 3],
+        haircolor2: [3]
       };
+      function defineProp(o, oX, keyname) {
+        Object.defineProperty(o, keyname, {
+          set: function (v) {
+            console.log('setting', this, v);
+            oX[keyname] = v;
+            $('#' + keyname).val(v);
+          },
+          get: function () {
+            console.log('reading', this);
+            return oX[keyname];
+          }
+        });
+
+      }
+      data = _.extend({}, dataX);
+      defineProp(data, dataX, 'usr');
+      defineProp(data, dataX, 'pwd');
+      defineProp(data, dataX, 'sec');
+      defineProp(data, dataX, 'date');
+      defineProp(data, dataX, 'srv');
+      defineProp(data, dataX, 'choice1');
+      defineProp(data, dataX, 'choice2');
+
       $(document).ready(function () {
         $('#usr').ebbind(data);
         $('#pwd').ebbind(data);
         $('#sec').ebbind(data);
         $('#date').datepicker(datepickerOptions).ebbind(data);
         $('#srv').ebdropdown({}, keywords).ebbind(data);
-        $('#choice').ebradio({}, radios).ebbind(data);
+        $('#choice1').ebradio({}, radios).ebbind(data);
+        $('#choice2').ebradio({}, radios).ebbind(data);
         $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(data);
+        $('#haircolor1').ebselect({values: haircolor}, {vals: [1, 3]}).ebbind(data);
+        $('#haircolor2').ebselect({values: haircolor}, {txts: haircolor}).ebbind(data);
       });
     </script>
   </head>
@@ -64,7 +94,10 @@
       <tr><td>Date</td><td><input id='date' type="text"></td></tr>
       <tr><td>Secure</td><td><input id='sec' type="checkbox"></td></tr>
       <tr><td>Serv</td><td><div id='srv'></div></td></tr>
-      <tr><td>Auswahl:</td><td><div id='choice'></div></td></tr>
+      <tr><td>Auswahl1:</td><td><div id='choice1'></div></td></tr>
+      <tr><td>Auswahl2:</td><td><div id='choice2'></div></td></tr>
+      <tr><td>Haarfarbe1</td><td><div id='haircolor1'></div></td></tr>
+      <tr><td>Haarfarbe2</td><td><div id='haircolor2'></div></td></tr>
       <tr><td>Bemerkung:</td><td><div id='txt'></div></td></tr>
     </table>
   </body>

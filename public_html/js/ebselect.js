@@ -1,25 +1,26 @@
 /* global _ */
 (function ($) {
   "use strict";
-  $.fn.ebselect = function (opts, selected) {  // selected =[1,3] { vals:[1,3]}  or {labels:['Keyword1', 'Keyword3']};
+  $.fn.ebselect = function (opts, selected) {  // selected = [1,3] or { vals:[1,3]}  or {txts:['Keyword1', 'Keyword3']};
     var id = this[0].id;
     var self = this;
     var defopts = {
       height: Math.min(100, 50 * opts.values.length),
       width: 400,
-      values: [{value: '1', label: 'test1'}, {value: '2', label: 'test2'}], //  just an example for docu
+      values: [{v: '1', txt: 'test1'}, {v: '2', txt: 'test2'}], //  just an example for docu
       onselchange: function (o) {
-        alert("selected values" + o.getSelectedValues());
+        console.log("selected values" + o.getSelectedValues());
       }
     };
     var myopts = $.extend({}, defopts, opts);
-    selected = _.isArray(selected) ? { vals:selected} : selected; 
 
+    this.id = id;
+    selected = _.isArray(selected) ? {vals: selected} : selected;
     myopts.values = _.map(myopts.values, function (key, val) {
-      return _.isString(key) ? {value: val, label: key} : key;
+      return _.isString(key) ? {v: val, txt: key} : key;
     });
     _.each(myopts.values, function (val) {
-      val.selected = selected.vals && _.indexOf(selected.vals, val.value) >= 0 || selected.labels && _.indexOf(selected.labels, val.label) >= 0;
+      val.selected = selected.vals && _.indexOf(selected.vals, val.v) >= 0 || selected.txts && _.indexOf(selected.txts, val.txt) >= 0;
     });
 
     var init = function init(a) {
@@ -27,8 +28,8 @@
         var isselected = o.selected ? 'checked="checked"' : '';
         return acc + _.template('\
                <li>\
-                 <input type="checkbox" id="<%=id%>" value="<%=value%>" <%=isselected%> /><%=label%>\n\
-               </li>')({id: o.label, value: o.value, isselected: isselected, label: o.label});
+                 <input type="checkbox" id="<%=id%>" value="<%=value%>" <%=isselected%> /><%=txt%>\n\
+               </li>')({id: o.txt, value: o.v, isselected: isselected, txt: o.txt});
       }, '');
       var s = _.template('\
             <div class="ebselect" style="height:<%=height%>px; width:<%=width%>px;">\n\
@@ -37,19 +38,18 @@
       a.html(s);
     }(this);
 
-    this.id = id;
     this.getSelectedValues = function getSelectedValues() {
       return _.pluck($('#' + id + ' .ebselect input:checked'), 'value');
     };
     this.getSelectedValuesAsString = function getSelectedValues() {
       return _.map(this.getSelectedValues(), function (o, idx) {
-        console.log(o, idx);
-        return myopts.values[o].label;
+        return myopts.values[o].txt;
       });
     };
     $('#' + id + ' .ebselect input').on('change', function () {
       myopts.onselchange(self);
     });
+    myopts.onselchange(this);
     return this;
   };
 })(jQuery);

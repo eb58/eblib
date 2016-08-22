@@ -22,39 +22,42 @@
         };
         var opts1 = {
           values: [
-            {value: '1', label: 'Besonderheit1'},
-            {value: '2', label: 'Besonderheit2'},
-            {value: '3', label: 'Besonderheit3'},
-            {value: '4', label: 'Besonderheit4'},
-            {value: '5', label: 'Besonderheit5'}
+            {v: '1', txt: 'Besonderheit1'},
+            {v: '2', txt: 'Besonderheit2'},
+            {v: '3', txt: 'Besonderheit3'},
+            {v: '4', txt: 'Besonderheit4'},
+            {v: '5', txt: 'Besonderheit5'}
           ],
-          //height: 80,
-          //width: 200,
           onselchange: onselchange
         };
-        var data1 = $("#forselect1").val().split(',');
-        $("#select1").ebselect(opts1, data1);
-        var opts2 = {values: ['test1', 'test2', 'test3', 'test4'], onselchange: onselchange};
-        $("#select2").ebselect(opts2, [1, 3]);
-        var listopts = {
-          height: 100,
-          width: 250,
+        var opts2 = {
+          values: ['test1', 'test2', 'test3', 'test4'],
+          onselchange: onselchange
         };
-        $('#list').eblist(listopts,['AAA', 'BBB', 'CCCC', 'VVVV', 'ghghgh', '****', 'ewewewe', 'YYYYYY']);
-        
-       var keywords = ['Schlagwort1', 'Schlagwort2', 'Schlagwort3', 'Schlagwort4', 'Schlagwort5', 'Schlagwort6', 'Schlagwort7' ];
-       var optSchlag = { values: keywords || [], onselchange: function(){ console.log('xx', this)} };
-       $("#select3").ebselect(optSchlag, {labels:['Schlagwort1', 'Schlagwort4']});
-       
+        var opt3 = {
+          values: ['Schlagwort1', 'Schlagwort2', 'Schlagwort3', 'Schlagwort4', 'Schlagwort5'],
+          onselchange: function (select) {
+            console.log('xx', select.getSelectedValuesAsString().join());
+          }
+        };
+
+        $("#select1").ebselect(opts1, $("#forselect1").val().split(','));
+        $("#select2").ebselect(opts2, [1, 3]);
+        $("#select3").ebselect(opt3, {txts: ['Schlagwort1', 'Schlagwort4']});
+
+        var listopts = {height: 60,width:150 };
+        $('#list').eblist(listopts, ['AAA', 'BBB', 'CCCC', 'VVVV', 'YYYYYY']);
+
       });
     </script>
   </head>
   <body>
-    <input id="forselect1" value="3,4"/>
+    <input id="forselect1" />
     <div id='select1'></div>
-    <input id="forselect2" value=""/>
+    <input id="forselect2" />
     <div id='select2'></div>
-    <div id='list'></div>
     <div id='select3' style="width:400px"></div>
+    <hr>
+    <div id='list'></div>
   </body>
 </html>

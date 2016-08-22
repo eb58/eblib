@@ -13,7 +13,7 @@
     var init = function init(a) {
       var options = _.reduce(vals, function (acc, o) {
         return acc + _.template('<label><input type="radio" id="<%=val%>" name="<%=name%>"><%=val%></label><%=vertical%>')
-                ({name: id, val: o, vertical:myopts.vertical?'<br>':''});
+                ({name: id, val: o, vertical: myopts.vertical ? '<br>' : ''});
       }, '');
 
       var s = _.template('\
@@ -24,12 +24,13 @@
     }(this);
     $('#' + id + " input").checkboxradio(myopts);
     this.id = id;
-    this.setValue = function setValue(choice) {
-       $('#' + id + ' #' + choice).prop('checked', true).checkboxradio("refresh");
-       return this;
-    };
-    this.getValue = function getValue() {
-      return $('#' + id + ' input:radio:checked').prop('id');
+    this.val = function val(choice) {
+      if (_.isString(choice) || _.isNumber(choice)) {
+        $('#' + id + ' #' + choice).prop('checked', true).checkboxradio("refresh");
+        return this;
+      } else{
+        return $('#' + id + ' input:radio:checked').prop('id');
+      }
     };
     return this;
   };

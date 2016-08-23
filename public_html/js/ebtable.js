@@ -198,7 +198,9 @@
         if (myopts.selection && myopts.selection.render) {
           var x = '<td ' + cls + '>' + myopts.selection.render(origData, row, checked) + '</td>';
           res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
-        } else if (myopts.selection) {
+        } else if (myopts.selection && myopts.singleSelection ) {
+          res += '<td ' + cls + '><input id="check' + r + '" type="radio"' + checked + '/></td>';
+        } else if (myopts.selection && !myopts.singleSelection ) {
           res += '<td ' + cls + '><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
         }
 
@@ -277,7 +279,6 @@
         });
       } else {
         if (myopts.singleSelection) {
-          //$(selgridid + 'input[type=checkbox').prop('checked', false);
           _.each(tblData, function (row, rowNr) {
             if (row.selected)
               selectRow(rowNr, row, false);
@@ -427,6 +428,7 @@
         $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
       }
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
+      $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
       myopts.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw(this);
     }
@@ -511,6 +513,7 @@
     $(selgridid + 'thead th').off().on('click', sorting);
     $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
     $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
+    $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
     $(selgridid + '#configBtn').button().css('height', ctrlHeight).off().on('click', function () {
       $('#' + gridid + 'selectable').sortable();
       $('#' + gridid + 'configDlg').dialog('open');

@@ -12,6 +12,9 @@
         color: black;
         font-size: 10px;
       }
+      img.ui-datepicker-trigger{
+        vertical-align: bottom
+      } 
     </style>
     <script src="/lib/underscore-1.8.3/underscore.js"></script>
     <script src="/lib/jquery-1.11.3/jquery.js"></script>
@@ -77,7 +80,7 @@
         $('#pwd').ebbind(data);
         $('#sec').ebbind(data);
         $('#date').datepicker(datepickerOptions).ebbind(data);
-        $('#srv').ebdropdown({}, keywords).ebbind(data);
+        $('#srv').ebdropdown({width: '100px',}, keywords).ebbind(data);
         $('#choice1').ebradio({}, radios).ebbind(data);
         $('#choice2').ebradio({}, radios).ebbind(data);
         $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(data);

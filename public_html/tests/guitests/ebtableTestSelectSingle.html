@@ -10,7 +10,10 @@
       * {
         font-family:Arial;
         color: black;
-        font-size: 11px !important;
+        font-size: 12px;
+      }
+      div #configBtn, div #ctrlLength span{ 
+        font-size: 10px !important;
       }
     </style>
 
@@ -43,7 +46,7 @@
       //#######################################################################
 
       var opts = {
-        debug:true,
+        debug: true,
         columns: [
           {name: "Tierart", match: 'contains'},
           {name: "Datum", sortformat: 'date-de', match: 'matches-date-time', css: 'text-align: center'},

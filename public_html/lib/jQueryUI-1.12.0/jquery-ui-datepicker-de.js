@@ -35,7 +35,7 @@ var datepickerOptions = {
     changeYear: true,
     buttonImageOnly: true,
     buttonText: 'Datum ausw\u00e4hlen',
-    buttonImage: 'images/calender.gif',
+    buttonImage: '/images/calender.gif',
     showOn: 'button'
   };
 

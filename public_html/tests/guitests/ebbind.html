@@ -29,14 +29,6 @@
     <script src="/js/ebbind.js"></script>
     <script src="/js/ebradio.js"></script>
     <script>
-      var datepickerOptions = {
-        changeMonth: true,
-        changeYear: true,
-        buttonImageOnly: true,
-        buttonImage: '/images/calender.gif',
-        buttonText: 'Datumsauswahl',
-        showOn: 'button'
-      };
       var radios = ['Radio1', 'Radio2', 'Radio3'];
       var keywords = ['Server1', 'Server2', 'Server3', 'Server4', 'Server5', 'Server6', 'Server7'];
       var haircolor = ['blond', 'braun', 'rot', 'weiß'];
@@ -72,15 +64,18 @@
       defineProp(data, dataX, 'sec');
       defineProp(data, dataX, 'date');
       defineProp(data, dataX, 'srv');
+      defineProp(data, dataX, 'txt');
       defineProp(data, dataX, 'choice1');
       defineProp(data, dataX, 'choice2');
+      defineProp(data, dataX, 'haircolor1');
+      defineProp(data, dataX, 'haircolor2');
 
       $(document).ready(function () {
         $('#usr').ebbind(data);
         $('#pwd').ebbind(data);
         $('#sec').ebbind(data);
         $('#date').datepicker(datepickerOptions).ebbind(data);
-        $('#srv').ebdropdown({width: '100px',}, keywords).ebbind(data);
+        $('#srv').ebdropdown({width: '100px'}, keywords).ebbind(data);
         $('#choice1').ebradio({}, radios).ebbind(data);
         $('#choice2').ebradio({}, radios).ebbind(data);
         $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(data);

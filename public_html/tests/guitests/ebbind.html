@@ -75,7 +75,7 @@
         $('#pwd').ebbind(data);
         $('#sec').ebbind(data);
         $('#date').datepicker(datepickerOptions).ebbind(data);
-        $('#srv').ebdropdown({width: '100px'}, keywords).ebbind(data);
+        $('#srv').ebdropdown({}, keywords).ebbind(data);
         $('#choice1').ebradio({}, radios).ebbind(data);
         $('#choice2').ebradio({}, radios).ebbind(data);
         $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(data);
@@ -85,7 +85,6 @@
     </script>
   </head>
   <body>
-
     <table>
       <tr><td>User</td><td><input id='usr' type="text"></td></tr>
       <tr><td>Pass</td><td><input id='pwd' type="password"></td></tr>

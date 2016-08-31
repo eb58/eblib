@@ -3,16 +3,18 @@
   $.fn.ebdropdown = function (opts, values, selected) {
     // values = ['val1', 'val2', 'val3' ];
     // values = [{v:1, txt:'val1'}, {v:2, txt:'val2'} ];
+    if( !this || !this[0] ) return;
+    var id = this[0].id;
     var defopts = {
+      id: id + 'X',
       width: '100%',
-      change: function (evt, ui) {
-        //console.log('changed', ui, evt);
-      }
+      disabled: false,
+      jqueryui: true,
+      change: function (evt, ui) {}
     };
     var myopts = $.extend({}, defopts, opts);
-    var id = this[0].id;
-    var idX = '#' + id + 'X';
-
+    var idX = '#' + myopts.id;
+    
     var setSelectedValue = function (v) {
       if (v) {
         var cmp = '' + (v.txt || v.v || v);
@@ -20,11 +22,11 @@
           if (v.txt)
             return $(o).text() === v.txt;
           else if (v.v)
-            return  $(o).val() === v.v;
+            return $(o).val() === v.v;
           else
             return $(o).text() === cmp || $(o).val() === cmp;
         }).prop("selected", "selected");
-        $(idX).selectmenu().selectmenu('refresh');
+        myopts.jqueryui && $(idX).selectmenu().selectmenu('refresh');
       }
       return this;
     };
@@ -39,12 +41,16 @@
         var txt = typeof o.txt !== 'undefined' ? o.txt : o;
         return '<option' + val + '>' + txt + '</option>';
       }).join('\n');
-      var t = _.template('<select id="<%=id%>" size="1"><%= o %> </select>');
-      a.html(t({id: id + 'X', w: myopts.width, o: options}));
+      var t = _.template('<select id="<%=id%>" name="<%=id%>" size="1"><%= o %> </select>');
+      a.html(t({id: myopts.id, w: myopts.width, o: options}));
       setSelectedValue(selected);
-      $(idX).selectmenu().selectmenu(myopts);
-      if (myopts.disabled)
-        $(idX).selectmenu('disable');
+      if (myopts.jqueryui) {
+        $(idX).selectmenu().selectmenu(myopts);
+        myopts.disabled && $(idX).selectmenu('disable');
+      } else {
+        myopts.disabled && $(idX).prop('disable', true);
+        $(idX).change(myopts.change).width(myopts.width);
+      }
     };
     init(this);
     this.setSelectedValue = setSelectedValue;

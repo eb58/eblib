@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>/docs/test.pdf</title>
+    <title>Viewer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/lib/jQueryUI-1.11.4/jquery-ui.css">
     <style type="text/css">
@@ -14,27 +14,64 @@
     <script src="/lib/jquery-1.11.3/jquery.js"></script>
     <script src="/lib/jQueryUI-1.11.4/jquery-ui.js"></script>
     <script>
-      function getXXX(docurl,ext) {
-        if ($.inArray(ext, ['jpg', 'jepg', 'png', 'gif', 'tiff', 'tif']) >= 0) {
-          return "<img id='docframeImg' src='" + docurl + "' style='width:100%'/>";
+      var sbw = 16;
+      function getEmbedString(docurl, ext) {
+        if ($.inArray(ext, ['jpg', 'jepg', 'png', 'gif', 'tiff', 'tif', 'bmp']) >= 0) {
+          return "<img id='docframeImg' src='" + docurl + "' style='height:100%'>";
         } else {
           return "<iframe id='docframePdf' src='" + docurl + "' style='width:100%; height:100%'/>";
         }
       }
+      function resize() {
+        $('.ui-dialog').css({
+          'width': $(window).width() - sbw,
+          'height': $(window).height() - sbw,
+          'left': '0px',
+          'top': '0px'
+        })
+      }
       $(document).ready(function () {
         var params = (window.location.search || '/docs/test.pdf|pdf').replace('?', '').split('|');
+        console.log(params);
         var doc = params[0];
         var ext = params[1];
-        $('#document').html(getXXX(doc,ext));
-        $("#btnOK").button();
-      })
+        var width = params[2];
+        var height = params[3];
+        $('#document').html(getEmbedString(doc, ext));
+        $('#dlgViewer').dialog({
+          open: resize,
+          title: 'Anzeige' + doc,
+          closeText: 'Schlie\u00dfen',
+          width: width,
+          height: height,
+          closeOnEscape: false,
+          draggable: false,
+          resizable: false,
+          close: function () {
+            $(this).dialog("close");
+            window.close();
+          },
+          buttons: {
+            'Position merken': function () {
+            },
+            'Lokaler Druck': function () {
+            },
+            'Abbrechen': function () {
+              $(this).dialog("close");
+              window.close();
+            }
+          }
+        });
+        $(window).resize();
+      });
+      $(window).resize(resize);
+
     </script>
   </head>
   <body>
-    <div id="container" style="height:100%">
-      <div id="document" style="height:100%">
+    <div id='dlgViewer'>
+      <div id="document">
       </div>
     </div>
-    <button id="btnOK">OK</button>
   </body>
 </html>

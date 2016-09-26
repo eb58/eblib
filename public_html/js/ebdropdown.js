@@ -48,7 +48,7 @@
         $(idX).selectmenu().selectmenu(myopts);
         myopts.disabled && $(idX).selectmenu('disable');
       } else {
-        myopts.disabled && $(idX).prop('disable', true);
+        myopts.disabled && $(idX).prop('disabled', true);
         $(idX).change(myopts.change).width(myopts.width);
       }
     };

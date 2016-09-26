@@ -36,6 +36,7 @@
               <ul> <%=options%> </ul>\n\
             </div>\n')({options: options, width: myopts.width, height: myopts.height});
       a.html(s);
+      myopts.disabled && $('#' + id + ' input' ).prop('disabled', true);
     }(this);
 
     this.getSelectedValues = function getSelectedValues() {

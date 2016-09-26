@@ -1,3 +1,5 @@
+/* global _ */
+
 (function ($) {
   "use strict";
   $.fn.ebbind = function (data, m) {
@@ -43,8 +45,15 @@
     }
     if ($('.ebselect', this).length) {
       var $x = $('input:checkbox',this);
-      $x.val(data[m],this).on('click', function () {
-        data[m] = self.getSelectedValues();
+      data[m].forEach(function(v){
+        if( _.isNumber(v) ){ 
+          $($x[v]).prop('checked', true );
+        }else{
+          $('#'+v, self).prop('checked', true );
+        }
+      });
+      $x.on('click', function () {
+        data[m] = self.getSelectedValuesAsString();
         console.log('textarea changed ' + id, data[m], data);
       });
     }

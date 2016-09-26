@@ -42,7 +42,7 @@
         choice1: 'Radio2',
         choice2: 'Radio2',
         haircolor1: [2, 3],
-        haircolor2: [3]
+        haircolor2: ['blond', 'weiß']
       };
       function defineProp(o, oX, keyname) {
         Object.defineProperty(o, keyname, {
@@ -79,8 +79,8 @@
         $('#choice1').ebradio({}, radios).ebbind(data);
         $('#choice2').ebradio({}, radios).ebbind(data);
         $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(data);
-        $('#haircolor1').ebselect({values: haircolor}, {vals: [1, 3]}).ebbind(data);
-        $('#haircolor2').ebselect({values: haircolor}, {txts: haircolor}).ebbind(data);
+        $('#haircolor1').ebselect({values: haircolor}).ebbind(data);
+        $('#haircolor2').ebselect({values: haircolor}).ebbind(data);
       });
     </script>
   </head>

@@ -9,7 +9,7 @@
       width: 400,
       values: [{v: '1', txt: 'test1'}, {v: '2', txt: 'test2'}], //  just an example for docu
       onselchange: function (o) {
-        console.log("selected values" + o.getSelectedValues());
+        console.log("selected values:" + o.getSelectedValues());
       }
     };
     var myopts = $.extend({}, defopts, opts);
@@ -19,9 +19,15 @@
     myopts.values = _.map(myopts.values, function (key, val) {
       return _.isString(key) ? {v: val, txt: key} : key;
     });
-    _.each(myopts.values, function (val) {
-      val.selected = selected.vals && _.indexOf(selected.vals, val.v) >= 0 || selected.txts && _.indexOf(selected.txts, val.txt) >= 0;
-    });
+    if( selected ){
+      _.each(myopts.values, function (val) {
+        if (_.isArray(selected)) {
+          val.selected = _.indexOf(selected, val.v) >= 0 
+        } else {
+          val.selected = selected.vals && _.indexOf(selected.vals, val.v) >= 0 || selected.txts && _.indexOf(selected.txts, val.txt) >= 0;
+        }
+      }); 
+    }
 
     var init = function init(a) {
       var options = _.reduce(myopts.values, function (acc, o) {

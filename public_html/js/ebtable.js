@@ -441,9 +441,11 @@
         state.loadState(opts.getState());
       util.checkConfig();
 
-      _.each(myopts.columns, function (cdef) {
-        cdef.id = cdef.name.replace(/[^\d\w]/g, '');
+      myopts.columns = _.map( myopts.columns, function (coldef) {
+        coldef.id = coldef.name.replace(/[^\d\w]/g, '');
+        return coldef;
       });
+      
       filterData();
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template("\
@@ -490,7 +492,7 @@
         pageCur = 0;
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         redraw(pageCur);
-        myopts.saveState(state.getStateAsJSON());
+        myopts.saveState && myopts.saveState(state.getStateAsJSON());
       }
     });
     $(selgridid + '#lenctrl~span').css('height', $.ui.version === '1.11.4' ?  '21px': '14px');
@@ -543,7 +545,7 @@
           myopts.colorder = _.map(myopts.columns, function (col, idx) {
             return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
           });
-          myopts.saveState(state.getStateAsJSON());
+          myopts.saveState && myopts.saveState(state.getStateAsJSON());
           redraw(pageCur,true);
           $(this).dialog("close");
         },

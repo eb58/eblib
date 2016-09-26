@@ -47,18 +47,19 @@ if(typeof $ !== 'undefined')  $.extend({
   }
 });
 if(typeof $ !== 'undefined') $.extend({
-  confirm: function (title, question, callback) {
+  confirm: function (title, question, callbackYes, callbackNo) {
     question = question || '';
-    callback = callback || function () {
+    callbackYes = callbackYes || function () {
       console.log('$.confirm:please provide callback!');
     };
     $("<div id='dlgConfirm'></div>").dialog({
       buttons: {
         "Ja": function () {
-          callback();
+          callbackYes();
           $(this).dialog("close");
         },
         "Nein": function () {
+          callbackNo && callbackNo();
           $(this).dialog("close");
         }
       },

@@ -8,7 +8,7 @@
     var self = this;
 
     m = m || id;
-    if (type === 'text' || type === 'password'  ) {
+    if (type === 'text' || type === 'password') {
       this.val(data[m]).on('change', function () {
         data[m] = self.val();
         console.log('changed ' + id, data[m], data);
@@ -16,40 +16,35 @@
         data[m] = self.val();
         console.log('changed ' + id, self, data[m], data);
       });
-    }
-    if (type === 'checkbox') {
+    } else if (type === 'checkbox') {
       this.prop('checked', data[m]).on('click', function () {
         data[m] = self.prop('checked');
         console.log('changed ' + id, data[m], data);
       });
-    }
-    if ($('select', this).length) {
+    } else if ($('select', this).length) {
       this.setSelectedValue(data[m]).on("selectmenuchange", function () {
         data[m] = self.getSelectedValue();
         console.log('select changed ' + id, data[m], data);
       });
-    }
-    if ($('input:radio', this).length) {
+    } else if ($('input:radio', this).length) {
       this.val(data[m]).on("change", function () {
         data[m] = self.val();
         console.log('radio changed ' + id, data[m], data);
       });
-    }
-    if ($('textarea', this).length) {
-      var $x = $('textarea',this);
-      $x.val(data[m],this).on('keyup', function () {
+    } else if ($('textarea', this).length) {
+      var $x = $('textarea', this);
+      $x.val(data[m], this).on('keyup', function () {
         data[m] = $x.val();
         console.log('textarea changed ' + id, data[m], data);
       });
       this.setTextAreaCounter();
-    }
-    if ($('.ebselect', this).length) {
-      var $x = $('input:checkbox',this);
-      data[m] && data[m].forEach(function(v){
-        if( _.isNumber(v) ){ 
-          $($x[v]).prop('checked', true );
-        }else{
-          $('#'+v.replace(/ /g,''), self).prop('checked', true );
+    } else if ($('.ebselect', this).length) {
+      var $x = $('input:checkbox', this);
+      data[m] && data[m].forEach(function (v) {
+        if (_.isNumber(v)) {
+          $($x[v]).prop('checked', true);
+        } else {
+          $('#' + v.replace(/ /g, ''), self).prop('checked', true);
         }
       });
       $x.on('click', function () {

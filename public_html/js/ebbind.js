@@ -49,7 +49,7 @@
         if( _.isNumber(v) ){ 
           $($x[v]).prop('checked', true );
         }else{
-          $('#'+v, self).prop('checked', true );
+          $('#'+v.replace(/ /g,''), self).prop('checked', true );
         }
       });
       $x.on('click', function () {

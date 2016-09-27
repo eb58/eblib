@@ -43,7 +43,7 @@
         return acc + _.template('\
                <li>\
                  <input type="checkbox" id="<%=id%>" value="<%=value%>" <%=isselected%> /><%=txt%>\n\
-               </li>')({id: o.txt, value: o.v, isselected: isselected, txt: o.txt});
+               </li>')({id: o.txt.replace(/ /g,''), value: o.v, isselected: isselected, txt: o.txt});
       }, '');
       var s = _.template('\
             <div class="ebselect" style="height:<%=height%>px; width:<%=width%>px;">\n\

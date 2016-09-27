@@ -45,7 +45,7 @@
     }
     if ($('.ebselect', this).length) {
       var $x = $('input:checkbox',this);
-      data[m].forEach(function(v){
+      data[m] && data[m].forEach(function(v){
         if( _.isNumber(v) ){ 
           $($x[v]).prop('checked', true );
         }else{
@@ -60,5 +60,3 @@
     return this;
   };
 })(jQuery);
-
-

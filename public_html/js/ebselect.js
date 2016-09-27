@@ -1,7 +1,18 @@
 /* global _ */
 (function ($) {
   "use strict";
-  $.fn.ebselect = function (opts, selected) {  // selected = [1,3] or { vals:[1,3]}  or {txts:['Keyword1', 'Keyword3']};
+  $.fn.ebselect = function (opts, selected) {  
+    // selected = 
+    //  [1,3]  
+    // or 
+    //  ['Keyword1', 'Keyword3'] 
+    // or  
+    //  [
+    //   {v: 9, txt: 'Besonderheit1'},
+    //   {v: 2, txt: 'Besonderheit2'},
+    //   {v: 6, txt: 'Besonderheit3'}
+    //  ]
+    selected = selected || [];
     var id = this[0].id;
     var self = this;
     var defopts = {
@@ -15,18 +26,15 @@
     var myopts = $.extend({}, defopts, opts);
 
     this.id = id;
-    selected = _.isArray(selected) ? {vals: selected} : selected;
     myopts.values = _.map(myopts.values, function (key, val) {
       return _.isString(key) ? {v: val, txt: key} : key;
     });
-    if( selected ){
-      _.each(myopts.values, function (val) {
-        if (_.isArray(selected)) {
-          val.selected = _.indexOf(selected, val.v) >= 0 
-        } else {
-          val.selected = selected.vals && _.indexOf(selected.vals, val.v) >= 0 || selected.txts && _.indexOf(selected.txts, val.txt) >= 0;
-        }
-      }); 
+    if( selected.length ){
+      if( _.isNumber(selected[0]) ){
+        _.each(myopts.values, function (val) { val.selected = _.indexOf(selected, val.v) >= 0; }); 
+      }else{
+        _.each(myopts.values, function (val) { val.selected = _.indexOf(selected, val.txt) >= 0; }); 
+      }
     }
 
     var init = function init(a) {
@@ -50,7 +58,7 @@
     };
     this.getSelectedValuesAsString = function getSelectedValues() {
       return _.map(this.getSelectedValues(), function (o, idx) {
-        return myopts.values[o].txt;
+        return _.findWhere(myopts.values,{v:parseInt(o)}).txt;
       });
     };
     $('#' + id + ' .ebselect input').on('change', function () {

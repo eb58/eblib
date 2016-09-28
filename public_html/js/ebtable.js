@@ -603,7 +603,7 @@
         _.each( _.filter( tblData, function(row){return row.selected;} ), fct ); 
       }
     });
-    return this.tooltip();
+    return !myopts.jqueryuiTooltips ? this: this.tooltip();
   };
 
   $.fn.ebtable.sortformats = {

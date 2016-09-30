@@ -141,19 +141,7 @@
     var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
 
     function configBtn() {
-      if (!myopts.flags.config)
-        return '';
-      var list = myopts.colorder.reduce(function (res, idx) {
-        var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
-        var coldef = myopts.columns[idx];
-        var cls = coldef.invisible ? 'invisible' : 'visible';
-        return res + (coldef.technical || coldef.mandatory ? '' : _.template(t)({name: coldef.name, cls: cls}));
-      }, '');
-      var t = '<button id="configBtn">' + translate('Anpassen') + '<span class="ui-icon ui-icon-shuffle"></button>\n\
-               <div id="' + gridid + 'configDlg">\n\
-                  <ol id="' + gridid + 'selectable" class="ebtableSelectable"><%=list%></ol>\n\
-               </div>';
-      return _.template(t)({list: list});
+      return !myopts.flags.config ? '' : '<button id ="configBtn">' + translate('Anpassen') + ' <span class = "ui-icon ui-icon-shuffle"></button>'
     }
 
     function tableHead() {
@@ -508,7 +496,6 @@
         myopts.saveState && myopts.saveState(state.getStateAsJSON());
       }
     });
-    //$(selgridid + '#lenctrl~span').css('height', $.ui.version === '1.11.4' ?  '21px': '14px');
     $(selgridid + '.firstBtn').button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);
@@ -531,43 +518,8 @@
     $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
     $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
     $(selgridid + '#configBtn').button().off().on('click', function () {
-      $('#' + gridid + 'selectable').sortable();
-      $('#' + gridid + 'configDlg').dialog('open');
-      $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
-        var col = myopts.columns[util.indexOfCol(event.target.id)];
-        col.invisible = !col.invisible;
-        $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
-        log('change visibility', event.target.id, 'now visible:', !col.invisible);
-      });
+      dlgConfig(gridid);
     });
-    $('#' + gridid + 'configDlg').dialog({
-      create: function () {
-        $('button span:contains(Abbrechen)').text(translate('Abbrechen'));
-      },
-      position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
-      autoOpen: false,
-      height: _.where(myopts.columns, {technical: false, mandatory: false}).length * 23 + 90,
-      width: 250,
-      modal: true,
-      resizable: true,
-      buttons: {
-        "OK": function () {
-          var colnames = [];
-          $('#' + gridid + 'configDlg li').each(function (idx, o) {
-            colnames.push($(o).prop('id'));
-          });
-          myopts.colorder = myopts.columns.map(function (col, idx) {
-            return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
-          });
-          myopts.saveState && myopts.saveState(state.getStateAsJSON());
-          redraw(pageCur, true);
-          $(this).dialog("close");
-        },
-        'Abbrechen': function () {
-          $(this).dialog("close");
-        }
-      }
-    }).parent().find('.ui-widget-header').hide();
     myopts.singleSelection && $(selgridid + '#checkAll').hide();
 
     $(window).on('resize', function () {
@@ -614,6 +566,58 @@
         }).forEach(fct);
       }
     });
+    var dlgConfig = function (gridid) {
+      $('#' + gridid + 'configDlg').remove();
+      var list = myopts.colorder.reduce(function (res, idx) {
+        var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
+        var coldef = myopts.columns[idx];
+        var cls = coldef.invisible ? 'invisible' : 'visible';
+        return res + (coldef.technical || coldef.mandatory ? '' : _.template(t)({name: coldef.name, cls: cls}));
+      }, '');
+      var t = '\
+        <div id="<%=gridid%>configDlg">\n\
+          <ol id="<%=gridid%>selectable" class="ebtableSelectable"> <%= list %> </ol>\n\
+        </div>';
+
+      var dlg = $(_.template(t)({list: list, gridid: gridid}));
+      var dlgopts = {
+        create: function () {
+          $('button span:contains(Abbrechen)').text(translate('Abbrechen'));
+          $('ol#' + gridid + 'selectable').sortable();
+          $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
+            var col = myopts.columns[util.indexOfCol(event.target.id)];
+            col.invisible = !col.invisible;
+            $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
+            log('change visibility', event.target.id, 'now visible:', !col.invisible);
+          });
+        },
+        position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
+        width: 250,
+        modal: true,
+        resizable: true,
+        closeText: 'Schlie\u00dfen',
+        buttons: {
+          "OK": function () {
+            var colnames = [];
+            $('#' + gridid + 'configDlg li').each(function (idx, o) {
+              colnames.push($(o).prop('id'));
+            });
+            myopts.colorder = myopts.columns.map(function (col, idx) {
+              return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
+            });
+            myopts.saveState && myopts.saveState(state.getStateAsJSON());
+            redraw(pageCur, true);
+            $(this).dialog("close");
+          },
+          'Abbrechen': function () {
+            $(this).dialog("close");
+          }
+        }
+      };
+      dlg.dialog(dlgopts).parent().find('.ui-widget-header').hide();
+    };
+
+
     return !myopts.jqueryuiTooltips ? this : this.tooltip();
   };
 

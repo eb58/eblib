@@ -3,10 +3,12 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>Stornobearbeitung</title>
-    <link rel="stylesheet" href="/lib/jQueryUI-1.12.0/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/lib/jQueryUI-1.12.0/jquery-ui.css"/>
     <link rel="stylesheet" href="/css/ebtable.css"/>
     <style>
       * {font-family:Arial;font-size: 12px;}
+      .ebtable .ui-icon{ margin: 0px}
+      .ebtable .ui-button{ padding-top: 2px; padding-bottom: 2px}
     </style>
 
     <script src="/lib/underscore-1.8.3//underscore.min.js"></script>
@@ -37,10 +39,7 @@
           var nrow = [];
           for (var c = 0; c < colorder.length; c++) {
             if (colorder[c] === 4) {
-              if (row[colorder[c]] === 1)
-                row[colorder[c]] = 'offen';
-              else
-                row[colorder[c]] = 'abgelehnt';
+              row[colorder[c]] = row[colorder[c]] === 1 ? 'offen' : 'abgelehnt';
             }
             nrow.push(row[colorder[c]]);
           }
@@ -88,7 +87,7 @@
 
       function searchOnServer() {
         var filters = grid ? grid.getFilterValues() : {};
-       
+
 // 
 //        var columns = _.pluck( _.filter( opts.columns, function(o){ return o.dbcol && (o.mandatory || o.technical || !o.invisible) ;  } ), 'dbcol' );
 //          $.getJSON("cancellation-list.do?action=filter&filterStornostatus=1", function (data) {
@@ -111,7 +110,9 @@
           {name: "Workorderid", invisible: true, technical: true},
           {name: "Frist"},
           {name: "Stornoalter"},
-          {name: "Stornostatus", valuelist: ['offen','abgelehnt']},
+          {name: "Stornostatus", transform: function (data) {
+              return data === 1 ? 'offen' : 'abgelehnt'
+            }, valuelist: ['offen', 'abgelehnt']},
           {name: "Auftragsstatus"},
           {name: "AKZ"},
           {name: "Versicherter", render: renderer.renderInsurand},
@@ -125,7 +126,7 @@
           {name: "Stornoerl\u00e4uterung", dbcol: "Stornoerlaeuterung"}
         ],
         bodyHeight: 300,
-        selection:  true
+        selection: true
       };
 
       function getFilter() {

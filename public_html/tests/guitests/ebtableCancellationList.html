@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Stornobearbeitung</title>
+    <link rel="stylesheet" href="/lib/jQueryUI-1.12.0/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/css/ebtable.css"/>
+    <style>
+      * {font-family:Arial;font-size: 12px;}
+    </style>
+
+    <script src="/lib/underscore-1.8.3//underscore.min.js"></script>
+    <script src="/lib/jQuery-1.11.3/jquery.js"></script>
+    <script src="/lib/jQueryUI-1.12.0/jquery-ui.min.js"></script>
+    <script src="/js/polyfills.js"></script>
+    <script src="/js/mx.js"></script>
+    <script src="/js/ebtable.js"></script>
+    <script>
+      //top.DialogID = "cancellation-list";
+      //top.refreshMenu(2);
+{"hasMoreElements":false,
+"listSize":100,
+"list":[  
+   [  
+      50000007544,
+      "nein",
+      14,
+      226,
+      1,
+      "Test Storno 01",
+      "08",
+      "System",
+      null,
+      "Gesperrt",
+      "",
+      "Müller, Lieschen, 12.10.1979",
+      "125000000002056545",
+      "Klinikum Dortmund gGmbH",
+      "Default",
+      "Default - Vorbereiter"
+   ]
+],
+"message-html":null,
+"message-type":null
+};      
+      
+
+      var cancellationResponses = [
+        [50, "10", "Gutachtenerstellung zu weit fortgeschritten"],
+        [51, "20", "Begehung im Krankenhaus bereits erfolgt"],
+        [52, "30", "Auftrag bereits abgeschlossen/zurückgegeben"],
+        [53, "40", "Stornierung von der Krankenkasse zurückgezogen"],
+        [54, "50", "Sonstiges"]
+      ];
+
+      var grid;
+
+      function reorderData(data) {
+        var colorder = [0, 2, 3, 4, 9, 12, 11, 13, 10, 15, 14, 1, 7, 8, 5];
+        for (var r = 0; r < data.length; r++) {
+          var row = data[r];
+          var nrow = [];
+          for (var c = 0; c < colorder.length; c++) {
+            if (colorder[c] === 4) {
+              if (row[colorder[c]] === 1)
+                row[colorder[c]] = 'offen';
+              else
+                row[colorder[c]] = 'abgelehnt';
+            }
+            nrow.push(row[colorder[c]]);
+          }
+          data[r] = nrow;
+        }
+        return data;
+      }
+
+      function initTable(data) {
+        var grid = $('#grid').ebtable(opts, reorderData(data.list));
+//          $('#grid_wrapper .dataTables_scrollHead thead th').each(function () {
+//            var id = coltitle2dbattr[$(this).text()] ? coltitle2dbattr[$(this).text()] : $(this).text();
+//            $(this).append('<input type="text" id="' + id + '"/>');
+//          });
+//          grid.columns().every(function () {
+//            $('input', this.header())
+//               .on('click', function (data) {
+//                 data.target.focus();
+//                 return false; // ignore - sorting
+//               })
+//               .on('keyup change', function (data) {
+//                 if (data.keyCode !== 13) { // not enter -> search on local data
+//                   grid.columns(data.target.id + ':name').search(data.target.value).draw();
+//                 } else { // enter -> get data from server
+//                   applyFilters();
+//                 }
+//               });
+//          });
+//          $('#Stornostatus').replaceWith(
+//             '<select id="Stornostatus">'
+//             + '<option value=1>offen</option>'
+//             + '<option value=2>abgelehnt</option>'
+//             + '</select>');
+//          $("#Stornostatus").selectmenu({change: function (event, data) {applyFilters();}
+//          });
+        // ---------- Tooltips -------------
+//          $("table thead tr th:contains('Stornotyp')")
+//             .attr('title', '08 = Stornierung ohne Folgeauftrag <br\> 09 = Stornierung mit Folgeauftrag ')
+//             .tooltip({content: function () {
+//                 return this.getAttribute("title");
+//               }});
+//          $(document).tooltip();
+        return grid;
+      }
+
+      function searchOnServer() {
+        var filters = grid ? grid.getFilterValues() : {};
+        console.log(filters);
+//        var dbfilters = _.reduce(filters, function( acc, val, id ){ 
+//          acc[_.findWhere( opts.columns, {id:id} ).dbcol] = _.isString(val)? val.toUpperCase(): val; return acc;}, 
+//          {} 
+//        );
+// 
+//        var columns = _.pluck( _.filter( opts.columns, function(o){ return o.dbcol && (o.mandatory || o.technical || !o.invisible) ;  } ), 'dbcol' );
+//          $.getJSON("cancellation-list.do?action=filter&filterStornostatus=1", function (data) {
+//            grid = initTable(data);
+//            //????$("#accept,#reject").button(grid.rows().data().length > 0 ? 'enable' : 'disable');
+//          });
+        grid = initTable(data);
+      }
+
+
+
+      var renderer = {
+        renderInsurand: function (data, row) {
+          return '<a title="' + row[0] + '" href="/ISmed/showOrder.do;jsessionid=<%=session.getId()%>?src=cancellationList&workorderid=' + row[0] + '&mode=showTracingOrder")">' + data + '</a>';
+        }
+      };
+      var opts = {
+        columns: [
+          {name: "Workorderid", invisible: true, technical: true},
+          {name: "Frist"},
+          {name: "Stornoalter"},
+          {name: "Stornostatus"},
+          {name: "Auftragsstatus"},
+          {name: "AKZ"},
+          {name: "Versicherter", render: renderer.renderInsurand},
+          {name: "Krankenhausname"},
+          {name: "Auftragspaket"},
+          {name: "Aktueller Bearbeiter", dbcol: 'Bearbeiter'},
+          {name: "Beratungsstelle"},
+          {name: "Produkt"},
+          {name: "Stornobearbeiter"},
+          {name: "Ablehnungsgrund", dbcol: "Stornogrund"},
+          {name: "Stornoerl\u00e4uterung", dbcol: "Stornoerlaeuterung"}
+        ],
+        bodyHeight: 300,
+        select: true,
+        saveState: false
+      };
+
+      function getFilter() {
+        var filterMap = {}, filter = '';
+        $('#grid_wrapper thead th input').each(function (idx, elem) {
+          if ($.trim($(elem).val()) !== '') {
+            var dbname = _.findWhere(opts.columns, {name: elem.id}).dbname;
+            filterMap[dbname] = $(elem).val();
+          }
+        });
+        $.each(filterMap, function (key, val) {
+          filter += '&filter' + key + '=' + val;
+        });
+        filter += '&filterStornostatus=' + $('#Stornostatus').val();
+        return filter;
+      }
+//
+//        function getSelectedWorkorderIds(table) {
+//          var s = [];
+//          $.each(table.rows({selected: true}).data(), function (n, elem) {
+//            s.push(elem[0]);
+//          });
+//          return s;
+//        }
+//
+//        function applyFilters() {
+//          $.getJSON(
+//             "cancellation-list.do?action=filter" + getFilter(),
+//             function (data) {
+//               data.list = reorderData(data.list);
+//               grid.clear().rows.add(data.list).draw();
+//               $('#accept,#reject').button(grid.rows().data().length > 0 && $("#Stornostatus").val() === 'offen' ? 'enable' : 'disable');
+//             }
+//          );
+//        }
+
+
+
+      $(document).ready(function () {
+        searchOnServer();
+
+
+        // ------  Button 'Annehmen'  ---------
+        $("#accept").button().click(function () {
+          if (grid.rows({selected: true}).data().length === 0) {
+            $.alert("Meldung", "Kein Eintrag ausgew\u00e4hlt.");
+            return;
+          }
+          $.confirm("Annehmen", "Wirklich annehmen?", function () {
+            $.getJSON("cancellation-list.do?action=acceptCancellation&workorderIds=" + getSelectedWorkorderIds(grid),
+              function (data) {
+                if (data.res < 0) {
+                  $.alert("Fehler", data.errors);
+                } else {
+                  applyFilters();
+                }
+              }
+            );
+          });
+        });
+        // -----  Button 'Ablehnen'  --------
+        $("#reject").button().click(function () {
+          if (grid.rows({selected: true}).data().length === 0) {
+            $.alert("Meldung", "Kein Eintrag ausgew\u00e4hlt.");
+            return;
+          }
+          rejectDlg.dialog("open");
+        });
+
+        // -----  Dialog "Stornoanforderung zurückweisen"  -------
+
+//        var ropts = {
+//          columns: [
+//            {name: "id", invisible: true},
+//            {name: "Code"},
+//            {name: "Grund"}
+//          ],
+//          select: true
+//        };
+//
+//        var rejectDlg = $('#rejectDlg').dialog({
+//          buttons: {
+//            OK: function () {
+//              var reasons = $('#reasons').ebtable(ropts,cancellationResponses);
+//              var dataSel = reasons.rows({selected: true}).data();
+//              if (dataSel.length === 0)// nothing selected
+//                $.alert("Meldung", "Kein Grund ausgew\u00e4hlt");
+//              var code = dataSel[0][0];
+//              $.getJSON("cancellation-list.do?action=rejectCancellation&workorderIds=" + getSelectedWorkorderIds(grid) + "&reasonId=" + code,
+//                 function (data) {
+//                   if (data.error) {
+//                     $.alert("Fehler", data.error);
+//                   } else {
+//                     applyFilters();
+//                   }
+//                 });
+//              $(this).dialog("close");
+//            },
+//            Abbrechen: function () {$(this).dialog("close"); }
+//          },
+//          title: 'Ausgew\u00e4hlte Stornoanforderungen zur\u00fcckweisen',
+//          autoOpen: false,
+//          modal: true,
+//          stack: true,
+//          height: 400,
+//          width: 600,
+//          closeText: 'Schlie\u00dfen'
+//        });
+
+      });
+    </script>
+  </head>
+  <body style="background:#F0F0F0">
+    <!-- ##############################################################  -->
+
+    <h2>Stornotabelle</h2>
+    <div id="grid"></div>
+
+    <button id="accept">Annehmen</button>
+    <button id="reject">Ablehnen</button>
+    <!-- ##############################################################  -->
+
+    <div id="rejectDlg">
+      <p>Bitte w&auml;hlen Sie den Grund:</p>
+      <table id="reasons" class="cell-border" style="width:100%;"></table>
+    </div>
+
+    <!-- ##############################################################  -->
+
+  </body>
+</html>

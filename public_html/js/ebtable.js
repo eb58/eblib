@@ -149,7 +149,7 @@
         var cls = col.invisible ? 'invisible' : 'visible';
         return res + (col.technical || col.mandatory ? '' : _.template(t)({name: col.name, cls: cls}));
       }, '');
-      var t = '<button id="configBtn">' + translate('Anpassen') + '</button>\n\
+      var t = '<button id="configBtn">' + translate('Anpassen') + '<span class="ui-icon ui-icon-shuffle"></button>\n\
                <div id="' + gridid + 'configDlg">\n\
                   <ol id="' + gridid + 'selectable" class="ebtableSelectable"><%=list%></ol>\n\
                </div>';

@@ -28,7 +28,7 @@
   padding: 5px 2px 5px 2px;
 }
 
-.ebtable #data th input {
+.ebtable #data th input, .ebtable #data th select {
   width: 70%;
   box-sizing: border-box;
 }

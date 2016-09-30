@@ -9,17 +9,17 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       return m[n];
     },
     rows: function rows(p) { // p = predicate-function or arr [1,4,5]
-      return _.filter(m, function (r, idx) {
+      return m.filter(function (r, idx) {
         return _.isFunction(p) ? p(m[r]) : _.indexOf(p, idx) >= 0;
       });
     },
     withoutRows: function withoutRows(p) { // p = predicate-function or arr
-      return _.filter(m, function (r, idx) {
+      return m.filter(function (r, idx) {
         return _.isFunction(p) ? !p(r) : _.indexOf(p, idx) < 0;
       });
     },
     col: function col(n) {
-      return _.map(_.range(m.length), function (r) {
+      return _.range(m.length).map(function (r) {
         return m[r][n];
       });
     },
@@ -68,7 +68,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
         };
       },
       filterData: function filterData(filters) { // filters [{col: col, searchtext: text, render:myrenderer},...]
-        return _.filter(this, fcts.rowMatch(filters));
+        return this.filter(fcts.rowMatch(filters));
       }
     };
     return {

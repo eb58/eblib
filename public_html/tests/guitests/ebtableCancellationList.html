@@ -15,35 +15,10 @@
     <script src="/js/polyfills.js"></script>
     <script src="/js/mx.js"></script>
     <script src="/js/ebtable.js"></script>
+    <script src="/data/cancellationListData.js"></script>
     <script>
       //top.DialogID = "cancellation-list";
       //top.refreshMenu(2);
-{"hasMoreElements":false,
-"listSize":100,
-"list":[  
-   [  
-      50000007544,
-      "nein",
-      14,
-      226,
-      1,
-      "Test Storno 01",
-      "08",
-      "System",
-      null,
-      "Gesperrt",
-      "",
-      "Müller, Lieschen, 12.10.1979",
-      "125000000002056545",
-      "Klinikum Dortmund gGmbH",
-      "Default",
-      "Default - Vorbereiter"
-   ]
-],
-"message-html":null,
-"message-type":null
-};      
-      
 
       var cancellationResponses = [
         [50, "10", "Gutachtenerstellung zu weit fortgeschritten"],
@@ -113,18 +88,14 @@
 
       function searchOnServer() {
         var filters = grid ? grid.getFilterValues() : {};
-        console.log(filters);
-//        var dbfilters = _.reduce(filters, function( acc, val, id ){ 
-//          acc[_.findWhere( opts.columns, {id:id} ).dbcol] = _.isString(val)? val.toUpperCase(): val; return acc;}, 
-//          {} 
-//        );
+       
 // 
 //        var columns = _.pluck( _.filter( opts.columns, function(o){ return o.dbcol && (o.mandatory || o.technical || !o.invisible) ;  } ), 'dbcol' );
 //          $.getJSON("cancellation-list.do?action=filter&filterStornostatus=1", function (data) {
 //            grid = initTable(data);
 //            //????$("#accept,#reject").button(grid.rows().data().length > 0 ? 'enable' : 'disable');
 //          });
-        grid = initTable(data);
+        grid = initTable(result2);
       }
 
 
@@ -135,11 +106,12 @@
         }
       };
       var opts = {
+        debug: true,
         columns: [
           {name: "Workorderid", invisible: true, technical: true},
           {name: "Frist"},
           {name: "Stornoalter"},
-          {name: "Stornostatus"},
+          {name: "Stornostatus", valuelist: ['offen','abgelehnt']},
           {name: "Auftragsstatus"},
           {name: "AKZ"},
           {name: "Versicherter", render: renderer.renderInsurand},
@@ -153,13 +125,12 @@
           {name: "Stornoerl\u00e4uterung", dbcol: "Stornoerlaeuterung"}
         ],
         bodyHeight: 300,
-        select: true,
-        saveState: false
+        selection:  true
       };
 
       function getFilter() {
         var filterMap = {}, filter = '';
-        $('#grid_wrapper thead th input').each(function (idx, elem) {
+        $('#grid_wrapper thead th input,#grid_wrapper thead th select').each(function (idx, elem) {
           if ($.trim($(elem).val()) !== '') {
             var dbname = _.findWhere(opts.columns, {name: elem.id}).dbname;
             filterMap[dbname] = $(elem).val();
@@ -205,13 +176,13 @@
           }
           $.confirm("Annehmen", "Wirklich annehmen?", function () {
             $.getJSON("cancellation-list.do?action=acceptCancellation&workorderIds=" + getSelectedWorkorderIds(grid),
-              function (data) {
-                if (data.res < 0) {
-                  $.alert("Fehler", data.errors);
-                } else {
-                  applyFilters();
-                }
-              }
+                    function (data) {
+                      if (data.res < 0) {
+                        $.alert("Fehler", data.errors);
+                      } else {
+                        applyFilters();
+                      }
+                    }
             );
           });
         });

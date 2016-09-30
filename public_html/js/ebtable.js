@@ -17,10 +17,10 @@
       getStateAsJSON: function () {
         return JSON.stringify({
           rowsPerPage: myopts.rowsPerPage,
-          colorderByName: _.map(myopts.colorder, function (idx) {
+          colorderByName: myopts.colorder.map(function (idx) {
             return myopts.columns[idx].name;
           }),
-          invisibleColnames: _.reduce(myopts.columns, function (acc, o) {
+          invisibleColnames: myopts.columns.reduce(function (acc, o) {
             if (o.invisible && !o.technical)
               acc.push(o.name);
             return acc;
@@ -36,17 +36,17 @@
         var state = s;
         myopts.rowsPerPage = state.rowsPerPage;
         myopts.colorder = [];
-        _.each(state.colorderByName, function (colname) {
+        state.colorderByName.forEach(function (colname) {
           var n = util.indexOfCol(colname);
           if (n >= 0) {
             myopts.colorder.push(n);
           }
         });
-        _.each(myopts.columns, function (coldef, idx) {
+        myopts.columns.forEach(function (coldef, idx) {
           if (!_.contains(state.colorderByName, coldef.name))
             myopts.colorder.push(idx);
         });
-        _.each(state.invisibleColnames, function (colname) {
+        state.invisibleColnames.forEach(function (colname) {
           var n = util.indexOfCol(colname);
           if (n >= 0) {
             myopts.columns[n].invisible = true;
@@ -83,12 +83,12 @@
         return _.isString(matcher) ? $.fn.ebtable.matcher[matcher] : matcher;
       },
       getVisibleCols: function getVisibleCols() {
-        return _.filter(myopts.columns, function (o) {
+        return myopts.columns.filter(function (o) {
           return !o.invisible;
         });
       },
       checkConfig: function checkConfig() {
-        $.each(myopts.columns, function (idx, coldef) { // set reasonable defaults for coldefs
+        myopts.columns.forEach(function (coldef) { // set reasonable defaults for coldefs
           coldef.technical = coldef.technical || false;
           coldef.invisible = coldef.invisible || false;
           coldef.mandatory = coldef.mandatory || false;
@@ -106,7 +106,7 @@
           localStorage[localStorageKey] = '';
           myopts = $.extend({}, defopts, opts);
         }
-        $.each(myopts.columns, function (idx, coldef) {
+        myopts.columns.forEach(function (coldef) {
           if (coldef.technical && !coldef.invisible)
             alert(coldef.name + ": technical column must be invisble!");
           if (coldef.mandatory && coldef.invisible)
@@ -143,11 +143,11 @@
     function configBtn() {
       if (!myopts.flags.config)
         return '';
-      var list = _.reduce(myopts.colorder, function (res, idx) {
+      var list = myopts.colorder.reduce(function (res, idx) {
         var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
-        var col = myopts.columns[idx];
-        var cls = col.invisible ? 'invisible' : 'visible';
-        return res + (col.technical || col.mandatory ? '' : _.template(t)({name: col.name, cls: cls}));
+        var coldef = myopts.columns[idx];
+        var cls = coldef.invisible ? 'invisible' : 'visible';
+        return res + (coldef.technical || coldef.mandatory ? '' : _.template(t)({name: coldef.name, cls: cls}));
       }, '');
       var t = '<button id="configBtn">' + translate('Anpassen') + '<span class="ui-icon ui-icon-shuffle"></button>\n\
                <div id="' + gridid + 'configDlg">\n\
@@ -161,15 +161,28 @@
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
+          var fld = '';
+          if (myopts.flags.filter) {
+            var t_inputfld = '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>';
+            var t_selectfld = '<select id="<%=colid%>"><%=opts%></select>';
+            var opts = (coldef.valuelist || []).reduce(function (acc, o) {
+              return acc + '<option ' + o + '>' + o + '</option>';
+            }, '');
+            var t = coldef.valuelist ? t_selectfld : t_inputfld;
+            fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip});
+          }
           var t = '\
-            <th id="<%=colid%>">\
-              <div class="sort_wrapper">\
-                <span/><%=colname%>\
-              </div>'
-                  + (myopts.flags.filter ? '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>' : '') +
-                  '</th>';
-          // &#8209; = non breakable hyphen
-          res += _.template(t)({colname: coldef.name.replace('-', '&#8209;'), colid: coldef.id, tooltip: coldef.tooltip});
+            <th id="<%=colid%>">\n\
+              <div class="sort_wrapper"><span/><%=colname%></div>\n\
+              <%=fld%>\n\
+             </th>';
+          // &#8209; = non breakable hyphen : &#0160; = non breakable space
+          res += _.template(t)({
+            colname: coldef.name.replace(/-/g, '&#8209;').replace(/ /g, '&#0160;'),
+            colid: coldef.id,
+            fld: fld,
+            tooltip: coldef.tooltip
+          });
         }
       }
       return res;
@@ -198,9 +211,9 @@
         if (myopts.selection && myopts.selection.render) {
           var x = '<td ' + cls + '>' + myopts.selection.render(origData, row, checked) + '</td>';
           res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
-        } else if (myopts.selection && myopts.singleSelection ) {
+        } else if (myopts.selection && myopts.singleSelection) {
           res += '<td ' + cls + '><input id="check' + r + '" type="radio"' + checked + '/></td>';
-        } else if (myopts.selection && !myopts.singleSelection ) {
+        } else if (myopts.selection && !myopts.singleSelection) {
           res += '<td ' + cls + '><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
         }
 
@@ -222,12 +235,11 @@
 
     function selectLenCtrl() {
       if (!myopts.flags.pagelenctrl)
-        return;
-      var options = '';
-      $.each(myopts.rowsPerPageSelectValues, function (idx, o) {
+        return '';
+      var options = myopts.rowsPerPageSelectValues.reduce(function (acc, o) {
         var selected = o === myopts.rowsPerPage ? 'selected' : '';
-        options += '<option value="' + o + '" ' + selected + '>' + o + '</option>\n';
-      });
+        return acc + '<option value="' + o + '" ' + selected + '>' + o + '</option>\n';
+      }, '');
       return '<select id="lenctrl">\n' + options + '</select>\n';
     }
 
@@ -255,7 +267,7 @@
       var groupid = row[gc.groupid];
       if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
         log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
-        _.each(origData.getGroupRows(gc, groupid), function (o) {
+        origData.getGroupRows(gc, groupid).forEach(function (o) {
           o.selected = b;
         });
         for (var i = 0; i < tblData.length; i++) {
@@ -271,15 +283,15 @@
     }
 
     function selectRows(event) { // select row
-      log( 'selectRows',  event);
+      log('selectRows', event);
       var checked = $(event.target).prop('checked');
       if (event.target.id === 'checkAll') {
-        _.each(tblData, function (row, rowNr) {
+        tblData.forEach(function (row, rowNr) {
           selectRow(rowNr, tblData[rowNr], checked);
         });
       } else {
         if (myopts.singleSelection) {
-          _.each(tblData, function (row, rowNr) {
+          tblData.rorEach(function (row, rowNr) {
             if (row.selected)
               selectRow(rowNr, row, false);
           });
@@ -293,7 +305,7 @@
     function deselectAllRows() {
       $(selgridid + '#data input[type=checkbox]').prop('checked', false);
       if (myopts.onSelection) {
-        _.each(origData, function (row, rowNr) {
+        origData.forEach(function (row, rowNr) {
           if (row.selected) {
             selectRow(rowNr, row, false);
           }
@@ -318,7 +330,7 @@
       if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
         coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
       }
-      $.each(coldefs, function (idx, o) {
+      coldefs.forEach(function (o) {
         myopts.columns[o.col].order = sortToggleS[myopts.columns[o.col].order] || 'asc';
       });
     }
@@ -349,7 +361,7 @@
         if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
           coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
         }
-        $.each(coldefs, function (idx, o) {
+        coldefs.forEach(function (o) {
           o.order = myopts.columns[o.col].order || 'desc';
         });
         tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
@@ -403,7 +415,7 @@
 
     function filterData() {
       var filters = [];
-      $(selgridid + 'thead th input[type=text]').each(function (idx, o) {
+      $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
         var val = $(o).val().trim();
         if (val) {
           var colid = $(o).attr('id');
@@ -426,6 +438,7 @@
         $(selgridid + 'thead tr').html(tableHead());
         $(selgridid + 'thead th').off().on('click', sorting);
         $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
+        $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
       }
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
@@ -441,12 +454,11 @@
         state.loadState(opts.getState());
       util.checkConfig();
 
-      myopts.columns = _.map( myopts.columns, function (coldef) {
+      myopts.columns = myopts.columns.map(function (coldef) {
         coldef.id = coldef.name.replace(/[^\d\w]/g, '');
         return coldef;
       });
-      
-      filterData();
+
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template("\
         <div class='ebtable'>\n\
@@ -477,7 +489,8 @@
         info: infoCtrl(),
         bodyHeight: myopts.bodyHeight
       }));
-      doSort();
+      filterData();
+      redraw(0);
     }
 
     initGrid(this);
@@ -514,6 +527,7 @@
     });
     $(selgridid + 'thead th').off().on('click', sorting);
     $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
+    $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
     $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
     $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
     $(selgridid + '#configBtn').button().off().on('click', function () {
@@ -542,11 +556,11 @@
           $('#' + gridid + 'configDlg li').each(function (idx, o) {
             colnames.push($(o).prop('id'));
           });
-          myopts.colorder = _.map(myopts.columns, function (col, idx) {
+          myopts.colorder = myopts.columns.map(function (col, idx) {
             return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
           });
           myopts.saveState && myopts.saveState(state.getStateAsJSON());
-          redraw(pageCur,true);
+          redraw(pageCur, true);
           $(this).dialog("close");
         },
         'Abbrechen': function () {
@@ -564,13 +578,11 @@
 // ##########  Exports ############  
     $.extend(this, {
       toggleGroupIsOpen: function (groupid) {
+        var pc = pageCur;
         origData.groups[groupid].isOpen = !origData.groups[groupid].isOpen;
         filterData();
-        var pc = pageCur;
-        doSort();
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         pageCur = Math.min(pc, pageCurMax);
-        redraw(0);
         redraw(pageCur);
       },
       groupIsOpen: function (groupName) {
@@ -578,18 +590,15 @@
       },
       getFilterValues: function getFilterValues() {
         var filter = {};
-        $(selgridid + 'thead th input[type="text"')
-                .filter(function (idx, elem) {
-                  return $(elem).val().trim() !== '';
-                })
-                .each(function (idx, elem) {
-                  filter[elem.id] = $(elem).val().trim();
-                });
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          if ($.trim($(o).val()))
+            filter[o.id] = $(o).val().trim();
+        });
         return filter;
       },
       setFilterValues: function setFilterValues(filter) {
-        $(selgridid + 'thead th input[type="text"').each(function (i, o) {
-          $(selgridid + '#' + o.id + ' input').val(filter[o.id]);
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          $(o).val(filter[o.id]);
         });
         filterData();
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -600,7 +609,9 @@
       getStateAsJSON: state.getStateAsJSON,
       loadState: state.loadState,
       iterateSelectedValues: function (fct) {
-        _.each( _.filter( tblData, function(row){return row.selected;} ), fct ); 
+        tblData.filter(function (row) {
+          return row.selected;
+        }).forEach(fct);
       }
     });
     return !myopts.jqueryuiTooltips ? this : this.tooltip();
@@ -623,15 +634,15 @@
       return parseFloat(a);
     }
   };
-  
+
   function getFormatedDate(date) {
     var d = ('0' + date.getDate()).slice(-2);
-    var m = ('0' + (date.getMonth()+1)).slice(-2);
+    var m = ('0' + (date.getMonth() + 1)).slice(-2);
     var y = date.getFullYear();
     var hs = ('0' + date.getHours()).slice(-2);
     var ms = ('0' + date.getMinutes()).slice(-2);
     var ss = ('0' + date.getSeconds()).slice(-2);
-    return d + '.' + m + '.' + y + ' ' + hs + ':' + ms + ':' + ss ; 
+    return d + '.' + m + '.' + y + ' ' + hs + ':' + ms + ':' + ss;
   }
 
   $.fn.ebtable.matcher = {
@@ -648,13 +659,13 @@
       return cellData.match(new RegExp('^' + searchTxt.replace(/\*/g, '.*'), 'i'));
     },
     'matches-date': function (cellData, searchTxt) {
-      return getFormatedDate( new Date(parseInt(cellData)) ).substr(10).indexOf(searchTxt) >= 0;
+      return getFormatedDate(new Date(parseInt(cellData))).substr(10).indexOf(searchTxt) >= 0;
     },
     'matches-date-time': function (cellData, searchTxt) {
-      return getFormatedDate( new Date(parseInt(cellData)) ).substr(16).indexOf(searchTxt) >= 0;
+      return getFormatedDate(new Date(parseInt(cellData))).substr(16).indexOf(searchTxt) >= 0;
     },
     'matches-date-time-sec': function (cellData, searchTxt) {
-      return getFormatedDate( new Date(parseInt(cellData)) ).indexOf(searchTxt) >= 0;
+      return getFormatedDate(new Date(parseInt(cellData))).indexOf(searchTxt) >= 0;
     }
   };
 

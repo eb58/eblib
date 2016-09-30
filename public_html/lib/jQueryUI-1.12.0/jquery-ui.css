@@ -1313,22 +1313,3 @@ a.ui-button:active,
 }
 
 
-/* eb */
-
-.ui-button,
-/* We use html here because we need a greater specificity to make sure disabled
-works properly when clicked or hovered */
-html .ui-button.ui-state-disabled:hover,
-html .ui-button.ui-state-disabled:active {
-  border: 1px solid #d3d3d3;
-  background: #dfdfff;
-  font-weight: normal;
-  color: #212121;
-}
-.ui-button:hover,
-.ui-button:focus {
-  border: 1px solid #999999;
-  background: #cfcfff;
-  font-weight: normal;
-  color: #212121;
-}

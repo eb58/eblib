@@ -3,8 +3,7 @@
   "use strict";
   $.fn.ebtable = function (opts, data, hasMoreResults) {
     function log() {
-      if (opts.debug)
-        console.log.apply(console, [].slice.call(arguments, 0));
+      opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
     }
     var gridid = this[0].id;
     var selgridid = '#' + gridid + ' ';
@@ -566,6 +565,7 @@
         }).forEach(fct);
       }
     });
+
     var dlgConfig = function (gridid) {
       $('#' + gridid + 'configDlg').remove();
       var list = myopts.colorder.reduce(function (res, idx) {
@@ -616,7 +616,6 @@
       };
       dlg.dialog(dlgopts).parent().find('.ui-widget-header').hide();
     };
-
 
     return !myopts.jqueryuiTooltips ? this : this.tooltip();
   };

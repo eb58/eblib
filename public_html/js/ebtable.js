@@ -12,7 +12,6 @@
       var translation = $.fn.ebtable.lang[opts.lang || 'de'][str];
       return translation || str;
     };
-    var ctrlHeight = '24px';
     var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
     var state = {// saving/loading state
       getStateAsJSON: function () {
@@ -131,7 +130,8 @@
       loadState: state.loadState,
       sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
-      hasMoreResults: hasMoreResults
+      hasMoreResults: hasMoreResults,
+      jqueryuiTooltips: true
     };
     opts.flags = _.extend(defopts.flags, opts.flags);
     var myopts = $.extend({}, defopts, opts);
@@ -495,20 +495,20 @@
         myopts.saveState && myopts.saveState(state.getStateAsJSON());
       }
     });
-    $(selgridid + '#lenctrl~span').css('height', $.ui.version === '1.11.4' ?  '21px': '14px');
-    $(selgridid + '.firstBtn').css('height', ctrlHeight).button().on('click', function () {
+    //$(selgridid + '#lenctrl~span').css('height', $.ui.version === '1.11.4' ?  '21px': '14px');
+    $(selgridid + '.firstBtn').button().on('click', function () {
       pageCur = 0;
       redraw(pageCur);
     });
-    $(selgridid + '.backBtn').css('height', ctrlHeight).button().on('click', function () {
+    $(selgridid + '.backBtn').button().on('click', function () {
       pageCur = Math.max(0, pageCur - 1);
       redraw(pageCur);
     });
-    $(selgridid + '.nextBtn').css('height', ctrlHeight).button().on('click', function () {
+    $(selgridid + '.nextBtn').button().on('click', function () {
       pageCur = Math.min(pageCur + 1, pageCurMax);
       redraw(pageCur);
     });
-    $(selgridid + '.lastBtn').css('height', ctrlHeight).button().on('click', function () {
+    $(selgridid + '.lastBtn').button().on('click', function () {
       pageCur = pageCurMax;
       redraw(pageCur);
     });
@@ -516,7 +516,7 @@
     $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
     $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
     $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
-    $(selgridid + '#configBtn').button().css('height', ctrlHeight).off().on('click', function () {
+    $(selgridid + '#configBtn').button().off().on('click', function () {
       $('#' + gridid + 'selectable').sortable();
       $('#' + gridid + 'configDlg').dialog('open');
       $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
@@ -603,7 +603,7 @@
         _.each( _.filter( tblData, function(row){return row.selected;} ), fct ); 
       }
     });
-    return !myopts.jqueryuiTooltips ? this: this.tooltip();
+    return !myopts.jqueryuiTooltips ? this : this.tooltip();
   };
 
   $.fn.ebtable.sortformats = {

@@ -26,10 +26,12 @@
 .ebtable #data th{ 
   background-color:#d5d5cd; 
   padding: 5px 2px 5px 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ebtable #data th input, .ebtable #data th select {
-  width: 70%;
+  width: 85%;
   box-sizing: border-box;
 }
 
@@ -46,6 +48,8 @@
 .ebtable #data td{ 
   background-color:#dfdfdf;
   padding: 2px 1px 2px 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ebtable #data td.group{
   background-color: #c7c7da;

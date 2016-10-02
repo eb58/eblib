@@ -110,9 +110,7 @@
           {name: "Workorderid", invisible: true, technical: true},
           {name: "Frist"},
           {name: "Stornoalter"},
-          {name: "Stornostatus", transform: function (data) {
-              return data === 1 ? 'offen' : 'abgelehnt'
-            }, valuelist: ['offen', 'abgelehnt']},
+          {name: "Stornostatus", css:'width:120px', valuelist: ['','offen', 'abgelehnt']},
           {name: "Auftragsstatus"},
           {name: "AKZ"},
           {name: "Versicherter", render: renderer.renderInsurand},
@@ -125,8 +123,9 @@
           {name: "Ablehnungsgrund", dbcol: "Stornogrund"},
           {name: "Stornoerl\u00e4uterung", dbcol: "Stornoerlaeuterung"}
         ],
-        bodyHeight: 300,
-        selection: true
+        bodyHeight: 600,
+        selection: true,
+        lang:'en'
       };
 
       function getFilter() {

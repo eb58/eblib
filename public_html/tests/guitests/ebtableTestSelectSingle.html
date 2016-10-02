@@ -57,12 +57,6 @@
         selection: true,
         singleSelection: true,
         flags: {withsorting: true},
-        saveState: function (s) {
-          localStorage['AA'] = s;
-        },
-        loadState: function () {
-          return JSON.parse(localStorage['AA']);
-        }
       };
       var grid;
       $().ready(function () {

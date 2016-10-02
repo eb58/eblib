@@ -52,11 +52,8 @@
           if (!_.contains(state.colorderByName, coldef.name))
             myopts.colorder.push(idx);
           if (!_.contains(state.colwidths, coldef.name)) {
-            var coldef = _.findWhere(myopts.columns, {name: coldef.name});
-            if (coldef)
-              coldef['css'] = 'width:' + state.colwidths[coldef.name] + 'px';
+             coldef['css'] = 'width:' + state.colwidths[coldef.name] + 'px';
           }
-
         });
         state.invisibleColnames.forEach(function (colname) {
           var n = util.indexOfCol(colname);
@@ -181,8 +178,9 @@
             var t = coldef.valuelist ? t_selectfld : t_inputfld;
             fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip});
           }
+          var style = coldef.css ? ' style="' + coldef.css + '"' : '';
           var t = '\
-            <th id="<%=colid%>">\n\
+            <th id="<%=colid%>" <%=style%> >\n\
               <div class="sort_wrapper"><span/><%=colname%></div>\n\
               <%=fld%>\n\
              </th>';
@@ -191,6 +189,7 @@
             colname: coldef.name.replace(/-/g, '&#8209;').replace(/ /g, '&#0160;'),
             colid: coldef.id,
             fld: fld,
+            style:style,
             tooltip: coldef.tooltip
           });
         }

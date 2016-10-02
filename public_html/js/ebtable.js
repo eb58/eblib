@@ -2,19 +2,13 @@
 (function ($) {
   "use strict";
   $.fn.ebtable = function (opts, data, hasMoreResults) {
-    function log() {
-      opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
-    }
     var gridid = this[0].id;
     var selgridid = '#' + gridid + ' ';
-    var translate = function translate(str) {
-      var translation = $.fn.ebtable.lang[opts.lang || 'de'][str];
-      return translation || str;
-    };
     var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
     var state = {// saving/loading state
       getStateAsJSON: function () {
         return JSON.stringify({
+          bodyWidth: $(selgridid + '.ebtable').width(),
           rowsPerPage: myopts.rowsPerPage,
           colorderByName: myopts.colorder.map(function (idx) {
             return myopts.columns[idx].name;
@@ -23,17 +17,30 @@
             if (o.invisible && !o.technical)
               acc.push(o.name);
             return acc;
-          }, [])
+          }, []),
+          colwidths: $(selgridid + 'th').map(function (i, o) {
+            var id = $(o).prop('id');
+            var w = $(o).width();
+            var name = (_.findWhere(myopts.columns, {id: id}) || {}).name;
+            log($(o).prop('id'), w, name);
+            var ret = {};
+            ret[name] = w;
+            return ret;
+          }).toArray().filter(function (o) {
+            return !o.undefined;
+          }).reduce(function (acc, o) {
+            return o ? _.extend(acc, o) : acc;
+          }, {})
         });
       },
       saveState: function saveState(s) {
         localStorage[localStorageKey] = s;
       },
-      loadState: function loadState(s) {
-        if (!s)
+      loadState: function loadState(state) {
+        if (!state)
           return;
-        var state = s;
         myopts.rowsPerPage = state.rowsPerPage;
+        myopts.bodyWidth = state.tableWidth;
         myopts.colorder = [];
         state.colorderByName.forEach(function (colname) {
           var n = util.indexOfCol(colname);
@@ -44,6 +51,12 @@
         myopts.columns.forEach(function (coldef, idx) {
           if (!_.contains(state.colorderByName, coldef.name))
             myopts.colorder.push(idx);
+          if (!_.contains(state.colwidths, coldef.name)) {
+            var coldef = _.findWhere(myopts.columns, {name: coldef.name});
+            if (coldef)
+              coldef['css'] = 'width:' + state.colwidths[coldef.name] + 'px';
+          }
+
         });
         state.invisibleColnames.forEach(function (colname) {
           var n = util.indexOfCol(colname);
@@ -52,6 +65,15 @@
           }
         });
       }
+    };
+
+
+    var log = function () {
+      opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
+    }
+
+    var translate = function translate(str) {
+      return $.fn.ebtable.lang[myopts.lang][str] || str;
     };
 
     var util = {
@@ -130,7 +152,8 @@
       sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       hasMoreResults: hasMoreResults,
-      jqueryuiTooltips: true
+      jqueryuiTooltips: true,
+      lang: 'de'
     };
     opts.flags = _.extend(defopts.flags, opts.flags);
     var myopts = $.extend({}, defopts, opts);
@@ -306,7 +329,7 @@
       var coldef = myopts.columns[colidx];
       var bAsc = coldef.order === 'asc';
       $(selgridid + 'thead div span').removeClass();
-      $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-triangle-1-' + (bAsc ? 'n' : 's'));
+      $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
     }
 
     function sortToggle() {
@@ -448,7 +471,7 @@
 
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template("\
-        <div class='ebtable'>\n\
+        <div class='ebtable' style='width:<%=bodyWidth%>px'>\n\
           <div class='ctrl'>\n\
             <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
             <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
@@ -474,6 +497,7 @@
         configBtn: configBtn(),
         browseBtns: pageBrowseCtrl(),
         info: infoCtrl(),
+        bodyWidth: myopts.bodyWidth,
         bodyHeight: myopts.bodyHeight
       }));
       filterData();
@@ -519,6 +543,15 @@
     $(selgridid + '#configBtn').button().off().on('click', function () {
       dlgConfig(gridid);
     });
+    $(selgridid + '.ebtable,' + selgridid + '.ebtable th').resizable({// resize columns
+      handles: 'e',
+      stop: function (evt, ui) {
+        log('stopping resize!');
+        myopts.saveState && myopts.saveState(state.getStateAsJSON());
+        evt.stopPropagation();
+      }
+    });
+
     myopts.singleSelection && $(selgridid + '#checkAll').hide();
 
     $(window).on('resize', function () {
@@ -581,12 +614,10 @@
 
       var dlg = $(_.template(t)({list: list, gridid: gridid}));
       var dlgopts = {
-        create: function () {
-          $('button span:contains(Abbrechen)').text(translate('Abbrechen'));
+        open: function () {
+          $('button:contains(Abbrechen)').text(translate('Abbrechen'));
           $('ol#' + gridid + 'selectable').sortable();
           $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
-            var col = myopts.columns[util.indexOfCol(event.target.id)];
-            col.invisible = !col.invisible;
             $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
             log('change visibility', event.target.id, 'now visible:', !col.invisible);
           });
@@ -599,6 +630,12 @@
         buttons: {
           "OK": function () {
             var colnames = [];
+            $('#' + gridid + 'configDlg li.visible').each(function (idx, o) {
+              myopts.columns[util.indexOfCol($(o).prop('id'))].invisible = false;
+            });
+            $('#' + gridid + 'configDlg li.invisible').each(function (idx, o) {
+              myopts.columns[util.indexOfCol($(o).prop('id'))].invisible = true;
+            });
             $('#' + gridid + 'configDlg li').each(function (idx, o) {
               colnames.push($(o).prop('id'));
             });
@@ -678,6 +715,7 @@
     'en': {
       '(<%=len%> Eintr\u00e4ge insgesamt)': '(<%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
+      '<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen': 'Configuration',
       'Abbrechen': 'Cancel'
     }

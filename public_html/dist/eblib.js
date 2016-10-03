@@ -331,7 +331,7 @@
           myopts = $.extend({}, defopts, opts);
         }
         var ls = localStorage[localStorageKey];
-        if (ls && ls['colorder'] && ls['colorder'].length !== myopts.columns.length) {
+        if (ls && ls.colorder && ls.colorder.length !== myopts.columns.length) {
           alert('Column definition and LocalStorage don\'t match!');
           localStorage[localStorageKey] = '';
           myopts = $.extend({}, defopts, opts);
@@ -396,7 +396,7 @@
           if (!_.contains(state.colorderByName, coldef.name))
             myopts.colorder.push(idx);
           if (!_.contains(state.colwidths, coldef.name)) {
-            coldef['css'] = 'width:' + state.colwidths[coldef.name] + 'px';
+            coldef.css = 'width:' + state.colwidths[coldef.name] + 'px';
           }
         });
         state.invisibleColnames.forEach(function (colname) {
@@ -436,7 +436,7 @@
     var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
 
     function configBtn() {
-      return !myopts.flags.config ? '' : '<button id ="configBtn">' + translate('Anpassen') + ' <span class = "ui-icon ui-icon-shuffle"></button>'
+      return !myopts.flags.config ? '' : '<button id ="configBtn">' + translate('Anpassen') + ' <span class = "ui-icon ui-icon-shuffle"></button>';
     }
 
     function tableHead() {

@@ -4,7 +4,13 @@ module.exports = function (grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     qunit: {
-      files: ['public_html/tests/unittests/*.html']
+      all: {
+        options: {
+          urls: [
+            'http://localhost:8383/tests/unittests/mxtests.html'
+          ]
+        }
+      }
     },
     concat: {
       options: {
@@ -16,10 +22,16 @@ module.exports = function (grunt) {
         dest: 'public_html/dist/<%= pkg.name %>.js'
       }
     },
-    min: {
+    uglify: {
+      options: {
+        banner: '/*! <%= pkg.name %> Version:<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */',
+        compress: true,
+        mangle: true
+      },
       dist: {
-        src: 'public_html/dist/<%= pkg.name %>.js',
-        dest: 'public_html/dist/<%= pkg.name %>.min.js'
+        files: {
+          'public_html/dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+        }
       }
     },
     jshint: {
@@ -38,28 +50,22 @@ module.exports = function (grunt) {
 //        node: true,
         multistr: false,
         browser: true,
-        devel:true
+        devel: true
       }
     },
-    globals: {
-      exports: true,
-      module: false
-    },
-    uglify: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-      },
-      build: {
-        src: 'public_html/dist/<%= pkg.name %>*.js',
-        dest: 'public_html/dist/<%= pkg.name %>.min.js'
-      }
+    watch: {
+      files: ['<%= jshint.files %>'],
+      tasks: ['jshint', 'concat', 'uglify']
     }
+
   });
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-qunit');
-  // Default task(s).
-  grunt.registerTask('default', ['concat']);
+
+  // task(s).
+  grunt.registerTask('default', ['watch']);
+  grunt.registerTask('test', ['jshint', 'qunit']);
 };

@@ -1,4 +1,4 @@
-/* global _, jQuery */ /* jshint multistr: true */
+/* global _, jQuery */ /* jshint multistr: true *//* jshint expr: true */
 (function ($) {
   "use strict";
   $.fn.ebselect = function (opts, selected) {  

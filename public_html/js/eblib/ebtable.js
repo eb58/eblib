@@ -1,4 +1,4 @@
-/* global _,jQuery,mx *//* jshint multistr: true */
+/* global _,jQuery,mx *//* jshint multistr: true */ /* jshint expr: true */
 (function ($) {
   "use strict";
   $.fn.ebtable = function (opts, data, hasMoreResults) {
@@ -454,7 +454,7 @@
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
       myopts.singleSelection && $(selgridid + '#checkAll').hide();
-      myopts.afterRedraw && myopts.afterRedraw(this);
+      myopts.afterRedraw &&  myopts.afterRedraw($(gridid));
     }
 
     // ##############################################################################

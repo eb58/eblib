@@ -61,7 +61,7 @@
 
 /*################################################*/
 
-/* global _,jQuery */
+/* global _,jQuery *//* jshint expr: true */
 (function ($) {
   $.fn.ebdropdown = function (opts, values, selected) {
     // values = ['val1', 'val2', 'val3' ];
@@ -200,7 +200,7 @@
 
 /*################################################*/
 
-/* global _, jQuery */ /* jshint multistr: true */
+/* global _, jQuery */ /* jshint multistr: true *//* jshint expr: true */
 (function ($) {
   "use strict";
   $.fn.ebselect = function (opts, selected) {  
@@ -273,7 +273,7 @@
 
 /*################################################*/
 
-/* global _,jQuery,mx *//* jshint multistr: true */
+/* global _,jQuery,mx *//* jshint multistr: true */ /* jshint expr: true */
 (function ($) {
   "use strict";
   $.fn.ebtable = function (opts, data, hasMoreResults) {
@@ -729,7 +729,7 @@
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
       myopts.singleSelection && $(selgridid + '#checkAll').hide();
-      myopts.afterRedraw && myopts.afterRedraw(this);
+      myopts.afterRedraw &&  myopts.afterRedraw($(gridid));
     }
 
     // ##############################################################################
@@ -1059,7 +1059,7 @@
 /*################################################*/
 
 var ebutils = (function () {
-
+  "use strict";
   function formatBytes(bytes, decimals) {
     if (bytes === 0)
       return '0 Byte';

@@ -1,4 +1,4 @@
-/* global _,jQuery */
+/* global _,jQuery *//* jshint expr: true */
 (function ($) {
   $.fn.ebdropdown = function (opts, values, selected) {
     // values = ['val1', 'val2', 'val3' ];

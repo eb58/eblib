@@ -1,4 +1,4 @@
-/* global _,$ */
+/* global _,$ *//* jshint expr: true */
 // string-polyfills
 if (!String.prototype.trim) {
   String.prototype.trim = function () {

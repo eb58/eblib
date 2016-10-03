@@ -62,7 +62,7 @@ var ebutils = (function () {
       'doc': 'application/msword',
       'xls': 'application/msexcel',
       'docx': 'application/vnd.openxmlformats-officedocument'
-    }
+    };
     return extToMimes[ext] || 'unknown';
   }
 

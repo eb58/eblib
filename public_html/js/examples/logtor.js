@@ -1,6 +1,8 @@
-var logtor = function () {
+/* global _,jQuery */
+var logtor = (function () {
+  'use esversion: 6';
   var lev = 0;
-  var blanks = _.range(100).map( x => ' ').join('');
+  var blanks = _.range(100).map(function(){return ' ';}).join(' ');
 
   function indent(lev) {
     return blanks.substring(0, lev * 3);
@@ -23,7 +25,7 @@ var logtor = function () {
   return{
     apply: apply
   };
-}();
+})();
 
 // ----------  some tests  ---------------
 
@@ -35,9 +37,10 @@ function f2(a) {
   console.log('F2');
   return '(f2-' + a + ')';
 }
-function fib(n) {
+
+var fib = function fib(n) {
   return n < 2 ? 1 : fib(n - 1) + fib(n - 2);
-}
+};
 
 //f1 = logtor.apply(f1);
 //f2 = logtor.apply(f2);

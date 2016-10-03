@@ -1,4 +1,4 @@
-/* global _ */
+/* global _,jQuery */
 (function ($) {
   "use strict";
   $.fn.ebxxx = function (opts, data) {

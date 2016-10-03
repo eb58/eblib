@@ -1,9 +1,11 @@
-/* global _ */
+/* global _,jQuery */
 (function ($) {
   $.fn.ebdropdown = function (opts, values, selected) {
     // values = ['val1', 'val2', 'val3' ];
     // values = [{v:1, txt:'val1'}, {v:2, txt:'val2'} ];
-    if( !this || !this[0] ) return;
+    if( !this || !this[0] ){
+      return;
+    }
     var id = this[0].id;
     var defopts = {
       id: id + 'X',
@@ -19,12 +21,13 @@
       if (v) {
         var cmp = '' + (v.txt || v.v || v);
         $(idX + ' option').filter(function (i, o) {
-          if (v.txt)
+          if (v.txt){
             return $(o).text() === v.txt;
-          else if (v.v)
+          }else if (v.v){
             return $(o).val() === v.v;
-          else
+          }else{
             return $(o).text() === cmp || $(o).val() === cmp;
+          }
         }).prop("selected", "selected");
         myopts.jqueryui && $(idX).selectmenu().selectmenu('refresh');
       }

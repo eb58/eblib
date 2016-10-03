@@ -1,3 +1,4 @@
+/* global _,$ */
 // string-polyfills
 if (!String.prototype.trim) {
   String.prototype.trim = function () {

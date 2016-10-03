@@ -1,4 +1,4 @@
-/* global _ */
+/* global _ ,jQuery*/
 
 (function ($) {
   "use strict";
@@ -6,6 +6,7 @@
     var id = this[0].id;
     var type = this[0].type;
     var self = this;
+    var $x;
 
     m = m || id;
     if (type === 'text' || type === 'password') {
@@ -32,21 +33,23 @@
         console.log('radio changed ' + id, data[m], data);
       });
     } else if ($('textarea', this).length) {
-      var $x = $('textarea', this);
+      $x = $('textarea', this);
       $x.val(data[m], this).on('keyup', function () {
         data[m] = $x.val();
         console.log('textarea changed ' + id, data[m], data);
       });
       this.setTextAreaCounter();
     } else if ($('.ebselect', this).length) {
-      var $x = $('input:checkbox', this);
-      data[m] && data[m].forEach(function (v) {
-        if (_.isNumber(v)) {
-          $($x[v]).prop('checked', true);
-        } else {
-          $('#' + v.replace(/ /g, ''), self).prop('checked', true);
-        }
-      });
+      $x = $('input:checkbox', this);
+      if (data[m]) {
+        data[m].forEach(function (v) {
+          if (_.isNumber(v)) {
+            $($x[v]).prop('checked', true);
+          } else {
+            $('#' + v.replace(/ /g, ''), self).prop('checked', true);
+          }
+        });
+      }
       $x.on('click', function () {
         data[m] = self.getSelectedValuesAsString();
         console.log('textarea changed ' + id, data[m], data);

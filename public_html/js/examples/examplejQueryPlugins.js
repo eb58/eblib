@@ -1,3 +1,4 @@
+/* global jQuery*/
 (function ($) {
   (function () {
     var module = (function () {

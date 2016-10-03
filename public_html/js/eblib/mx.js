@@ -1,4 +1,4 @@
-/* global _ */
+/* global _, $ */
 //  2-dimensional array -- m(atri)x
 var mx = function mx(m, groupdef) {  //groupdef see below 
   var basicapi = {
@@ -52,7 +52,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
   };
 
 //####################################  filtering #######################
-  var filtering = function () {
+  var filtering = (function () {
     var fcts = {
       rowMatch: function rowMatch(filters) {
         return function (row) {
@@ -74,10 +74,10 @@ var mx = function mx(m, groupdef) {  //groupdef see below
     return {
       filterData: fcts.filterData
     };
-  }();
+  })();
 
 //####################################  grouping #######################
-  var grouping = function () {
+  var grouping = (function () {
     // // groupdefs  ~ {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'}
     var fcts = {
       normalizeGroupId: function (id) {
@@ -89,19 +89,19 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       initGroups: function initGroups(groupdefs) {
         if (!groupdefs.groupid)
           return;
-        var groups = {};
-        for (var r = 0; r < this.length; r++) {
-          var row = this[r];
-          var groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
+        var groups = {}, row, r, groupId;
+        for ( r = 0; r < this.length; r++) {
+          row = this[r];
+          groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
           row.isGroupHeader = row[groupdefs.grouplabel] === groupdefs.grouphead;
           row.isGroupElement = groupId && !row.isGroupHeader;
           if (groupId && !groups[groupId]) {
             groups[groupId] = {isOpen: false, name: $.trim(row[groupdefs.groupname])};
           }
         }
-        for (var r = 0; r < this.length; r++) {
-          var row = this[r];
-          var groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
+        for ( r = 0; r < this.length; r++) {
+          row = this[r];
+          groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
           row[groupdefs.groupsortstring] = groupId ? (groups[groupId].name + ' ' + groupId) : row[groupdefs.groupname];
         }
         this.groups = groups;
@@ -124,10 +124,10 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       filterGroups: fcts.filterGroups,
       getGroupRows: fcts.getGroupRows
     };
-  }();
+  })();
 
   //####################################  sorting #######################
-  var sorting = function () {
+  var sorting = (function () {
     var fcts = {
       toLower: function toLower(o) {
         return _.isString(o) ? o.toLowerCase() : o;
@@ -158,22 +158,22 @@ var mx = function mx(m, groupdef) {  //groupdef see below
     return {
       rowCmpCols: fcts.rowCmpCols
     };
-  }();
+  })();
   //####################################  pageing #######################
-  var pageing = function () {
+  var pageing = (function () {
     var page = 0;
     var pageSize = 10; // fcts.setPageSize(10);
     var pageMax = Math.floor((this.length - 1) / pageSize);
 
     var fcts = {
       setPageSize: function (n) {
-        pageNr = 0;
+        page = 0;
         pageSize = n;
         pageMax = Math.floor((this.length - 1) / n);
       },
       getCurPageData: function () {
-        var startRow = pageSize * pageNr;
-        return this.rows(_range(startRow, startRow + pageSize));
+        var startRow = pageSize * page;
+        return this.rows(_.range(startRow, startRow + pageSize));
       }
     };
     return {
@@ -192,7 +192,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       setPageSize: fcts.setPageSize,
       getCurPageData: fcts.getCurPageData
     };
-  }();
+  })();
   //#####################################################################
 
   var res = _.extend(m, basicapi, sorting, filtering, grouping);

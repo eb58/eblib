@@ -1,4 +1,4 @@
-/* global ebutils, _ */
+/* global ebutils, _, jQuery*/ /* jshint multistr: true */
 
 (function ($) {
   "use strict";
@@ -19,16 +19,8 @@
       $('#' + id + ' .ebtextareacnt').text('(' + bc + '/' + myopts.maxByte + ')');
     };
 
-    var top =
-      '<div>'
-      + (myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '')
-      + (myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"><span>' : '')
-      + '</div>';
-    var bottom =
-      '<div>'
-      + (myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '')
-      + (myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '')
-      + '</div>';
+    var top = '<div>' + (myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '') + (myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"><span>' : '') + '</div>';
+    var bottom = '<div>' + (myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '') + (myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '') + '</div>';
     var s = _.template('\
       <div class="ebtextarea">\n\
         <%=top%>\n\

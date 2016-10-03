@@ -1,4 +1,4 @@
-/* global _ */
+/* global _, jQuery */ /* jshint multistr: true */
 (function ($) {
   "use strict";
   $.fn.ebselect = function (opts, selected) {  
@@ -37,7 +37,7 @@
       }
     }
 
-    var init = function init(a) {
+    (function (a) {
       var options = _.reduce(myopts.values, function (acc, o) {
         var isselected = o.selected ? 'checked="checked"' : '';
         return acc + _.template('\
@@ -51,7 +51,7 @@
             </div>\n')({options: options, width: myopts.width, height: myopts.height});
       a.html(s);
       myopts.disabled && $('#' + id + ' input' ).prop('disabled', true);
-    }(this);
+    })(this);
 
     this.getSelectedValues = function getSelectedValues() {
       return _.pluck($('#' + id + ' .ebselect input:checked'), 'value');

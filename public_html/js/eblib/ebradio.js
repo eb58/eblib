@@ -1,4 +1,5 @@
-/* global _ */
+/* global _, jQuery*/
+/*jshint multistr: true */
 (function ($) {
   "use strict";
   $.fn.ebradio = function (opts, vals, choice) {
@@ -10,7 +11,7 @@
     };
     var myopts = $.extend({}, defopts, opts);
 
-    var init = function init(a) {
+    (function (a) {
       var options = _.reduce(vals, function (acc, o) {
         return acc + _.template('<label><input type="radio" id="<%=val%>" name="<%=name%>"><%=val%></label><%=vertical%>')
                 ({name: id, val: o, vertical: myopts.vertical ? '<br>' : ''});
@@ -21,7 +22,7 @@
               <%=options%>\n\
             </div>\n')({options: options});
       a.html(s);
-    }(this);
+    })(this);
     $('#' + id + " input").checkboxradio(myopts);
     this.id = id;
     this.val = function val(choice) {

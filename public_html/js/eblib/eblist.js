@@ -1,4 +1,5 @@
-/* global _ */
+/* global _,jQuery */
+/*jshint multistr: true */
 (function ($) {
   "use strict";
   $.fn.eblist = function (opts, vals) { 
@@ -9,17 +10,17 @@
     };
     var myopts = $.extend({}, defopts, opts);
 
-    var init = function init(a) {
+    (function(a) {
       var options = _.reduce(vals, function (acc, o) {
         return acc + _.template('<li><%=val%></li>')({val: o });
       }, '');
 
-      var s = _.template('\
+      var s = _.template('\n\
             <div class="eblist" style="height:<%=height%>px; width:<%=width%>px;">\n\
               <ul> <%=options%> </ul>\n\
             </div>\n')({options: options, width: myopts.width, height: myopts.height});
       a.html(s);
-    }(this);
+    })(this);
 
     this.id = id;
     return this;

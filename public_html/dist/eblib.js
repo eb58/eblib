@@ -729,7 +729,7 @@
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
       myopts.singleSelection && $(selgridid + '#checkAll').hide();
-      myopts.afterRedraw &&  myopts.afterRedraw($(gridid));
+      myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }
 
     // ##############################################################################

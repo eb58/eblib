@@ -9,7 +9,6 @@
     function translate(str) {
       return $.fn.ebtable.lang[myopts.lang][str] || str;
     }
-    var dlgConfig;
     var util = {
       indexOfCol: function indexOfCol(colname) {
         return _.findIndex(myopts.columns, function (o) {
@@ -109,7 +108,7 @@
         if (!state)
           return;
         myopts.rowsPerPage = state.rowsPerPage;
-        myopts.bodyWidth = state.tableWidth;
+        // XXXXXXXX myopts.bodyWidth = state.tableWidth;
         myopts.colorder = [];
         state.colorderByName.forEach(function (colname) {
           var n = util.indexOfCol(colname);
@@ -118,11 +117,10 @@
           }
         });
         myopts.columns.forEach(function (coldef, idx) {
-          if (!_.contains(state.colorderByName, coldef.name))
-            myopts.colorder.push(idx);
-          if (!_.contains(state.colwidths, coldef.name)) {
-            coldef.css = 'width:' + state.colwidths[coldef.name] + 'px';
-          }
+          !_.contains(state.colorderByName, coldef.name) && myopts.colorder.push(idx);
+        });
+        myopts.columns.forEach(function (coldef, idx) {
+          // XXXXX !_.contains(state.colwidths, coldef.name) && (coldef.css = 'width:' + state.colwidths[coldef.name] + 'px');
         });
         state.invisibleColnames.forEach(function (colname) {
           var n = util.indexOfCol(colname);
@@ -143,6 +141,7 @@
       rowsPerPageSelectValues: [10, 25, 50, 100],
       rowsPerPage: 10,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
+      colsResizable: false,
       selection: false,
       singleSelection: false,
       saveState: state.saveState,
@@ -544,7 +543,7 @@
     $(selgridid + '#configBtn').button().off().on('click', function () {
       dlgConfig(gridid);
     });
-    $(selgridid + '.ebtable,' + selgridid + '.ebtable th').resizable({// resize columns
+    myopts.colsResizable && $(selgridid + '.ebtable,' + selgridid + '.ebtable th').resizable({
       handles: 'e',
       stop: function (evt, ui) {
         log('stopping resize!');
@@ -605,7 +604,7 @@
       }
     });
 
-    dlgConfig = function (gridid) {
+    var dlgConfig = function (gridid) {
       $('#' + gridid + 'configDlg').remove();
       var list = myopts.colorder.reduce(function (res, idx) {
         var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';

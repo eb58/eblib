@@ -18,8 +18,8 @@
     <script src="/dist/eblib.js"></script>
     <script src="/data/cancellationListData.js"></script>
     <script>
-      //top.DialogID = "cancellation-list";
-      //top.refreshMenu(2);
+      top.DialogID = "cancellation-list";
+      top.refreshMenu && top.refreshMenu(2);
 
       var cancellationResponses = [
         [50, "10", "Gutachtenerstellung zu weit fortgeschritten"],
@@ -31,14 +31,13 @@
 
       var grid;
 
-      var dlgReject = function (selwids) {
-        //  Dialog "Stornoanforderung zurückweisen"  
+      var dlgReject = function (selwids) { //  Dialog "Stornoanforderung zurückweisen"  
         $('#dlgReject').remove();
-        var t = '\
-              <div id="dlgReject">\n\
-                <div id="reasons"></div>\n\
-              </div>';
+        var t = '<div id="dlgReject">\n\
+                  <div id="reasons"></div>\n\
+                </div>';
         var dlg = $(t);
+        var reasons;
         var dlgopts = {
           open: function () {
             var ropts = {
@@ -84,23 +83,16 @@
         dlg.dialog(dlgopts);
       };
 
-      function reorderData(data) {
-        var colorder = [0, 2, 3, 4, 9, 12, 11, 13, 10, 15, 14, 1, 7, 8, 5];
-        for (var r = 0; r < data.length; r++) {
-          var row = data[r];
-          var nrow = [];
-          for (var c = 0; c < colorder.length; c++) {
-            if (colorder[c] === 4) {
-              row[colorder[c]] = row[colorder[c]] === 1 ? 'offen' : 'abgelehnt';
-            }
-            nrow.push(row[colorder[c]]);
-          }
-          data[r] = nrow;
-        }
-        return data;
-      }
-
       function initTable(data) {
+        var reorderData = function (data) {
+          var colorder = [0, 2, 3, 4, 9, 12, 11, 13, 10, 15, 14, 1, 7, 8, 5];
+          return data.map(function (row) {
+            row[4] = row[4] === 1 ? 'offen' : 'abgelehnt';
+            return row.map(function (col, c) {
+              return row[colorder[c]];
+            }).slice(0, -1);
+          });
+        }
         return $('#grid').ebtable(opts, reorderData(data.list));
       }
 
@@ -113,8 +105,6 @@
 //          });
         grid = initTable(result2);
       }
-
-
 
       var renderer = {
         renderInsurand: function (data, row) {
@@ -162,7 +152,7 @@
           return acc + '&filter' + key + '=' + filterMap[key];
         }, '');
       }
-//
+
       function getSelectedWorkorderIds(grid) {
         var ids = [];
         grid.iterateSelectedValues(function (x) {
@@ -180,7 +170,7 @@
 
       $(document).ready(function () {
         searchOnServer();
-        // ------  Button 'Annehmen'  ---------
+        
         $("#accept").button().click(function () {
           if (getSelectedWorkorderIds(grid).length === 0) {
             $.alert("Meldung", "Kein Eintrag ausgew\u00e4hlt.");
@@ -190,14 +180,14 @@
             $.getJSON("cancellation-list.do?action=acceptCancellation&workorderIds=" + getSelectedWorkorderIds(grid), function (data) {
               if (data.res < 0) {
                 $.alert("Fehler", data.errors);
-              } else {
-                applyFilters();
-              }
+                return;
+              } 
+              applyFilters();
             }
             );
           });
         });
-        // -----  Button 'Ablehnen'  --------
+        
         $("#reject").button().click(function () {
           selwids = getSelectedWorkorderIds(grid).join(',');
           if (selwids.length === 0) {
@@ -206,7 +196,8 @@
           }
           dlgReject(selwids);
         });
-      });
+      }
+      );
     </script>
   </head>
   <body style="background:#F0F0F0">

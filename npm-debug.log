@@ -2,104 +2,73 @@
 1 verbose cli [ 'C:\\Program Files\\nodejs\\node.exe',
 1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
 1 verbose cli   'install',
-1 verbose cli   'grunt-contrib-minimize',
-1 verbose cli   '--save-dev' ]
+1 verbose cli   'jquery.js',
+1 verbose cli   '--save' ]
 2 info using npm@2.15.9
 3 info using node@v4.6.0
-4 verbose install initial load of C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\package.json
-5 warn package.json eblib@1.0.0 No description
-6 warn package.json eblib@1.0.0 No repository field.
-7 warn package.json eblib@1.0.0 No README data
-8 warn package.json eblib@1.0.0 No license field.
-9 verbose installManyTop reading scoped package data from C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\node_modules\grunt\package.json
-10 verbose installManyTop reading scoped package data from C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\node_modules\grunt-contrib-concat\package.json
-11 verbose installManyTop reading scoped package data from C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\node_modules\grunt-contrib-jshint\package.json
-12 verbose installManyTop reading scoped package data from C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\node_modules\grunt-contrib-qunit\package.json
-13 verbose installManyTop reading scoped package data from C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\node_modules\grunt-contrib-uglify\package.json
-14 verbose installManyTop reading scoped package data from C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\node_modules\grunt-contrib-watch\package.json
-15 verbose readDependencies loading dependencies from C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS\package.json
-16 silly cache add args [ 'grunt-contrib-minimize', null ]
-17 verbose cache add spec grunt-contrib-minimize
-18 silly cache add parsed spec Result {
-18 silly cache add   raw: 'grunt-contrib-minimize',
-18 silly cache add   scope: null,
-18 silly cache add   name: 'grunt-contrib-minimize',
-18 silly cache add   rawSpec: '',
-18 silly cache add   spec: 'latest',
-18 silly cache add   type: 'tag' }
-19 silly addNamed grunt-contrib-minimize@latest
-20 verbose addNamed "latest" is being treated as a dist-tag for grunt-contrib-minimize
-21 info addNameTag [ 'grunt-contrib-minimize', 'latest' ]
-22 silly mapToRegistry name grunt-contrib-minimize
-23 silly mapToRegistry using default registry
-24 silly mapToRegistry registry https://registry.npmjs.org/
-25 silly mapToRegistry data Result {
-25 silly mapToRegistry   raw: 'grunt-contrib-minimize',
-25 silly mapToRegistry   scope: null,
-25 silly mapToRegistry   name: 'grunt-contrib-minimize',
-25 silly mapToRegistry   rawSpec: '',
-25 silly mapToRegistry   spec: 'latest',
-25 silly mapToRegistry   type: 'tag' }
-26 silly mapToRegistry uri https://registry.npmjs.org/grunt-contrib-minimize
-27 verbose addNameTag registry:https://registry.npmjs.org/grunt-contrib-minimize not in flight; fetching
-28 verbose request uri https://registry.npmjs.org/grunt-contrib-minimize
-29 verbose request no auth needed
-30 info attempt registry request try #1 at 19:20:42
-31 verbose request id 1b517d3986bc0a4a
-32 http request GET https://registry.npmjs.org/grunt-contrib-minimize
-33 http 404 https://registry.npmjs.org/grunt-contrib-minimize
-34 verbose headers { 'content-type': 'application/json',
-34 verbose headers   'cache-control': 'max-age=0',
-34 verbose headers   'content-length': '2',
-34 verbose headers   'accept-ranges': 'bytes',
-34 verbose headers   date: 'Mon, 03 Oct 2016 17:20:43 GMT',
-34 verbose headers   via: '1.1 varnish',
-34 verbose headers   age: '0',
-34 verbose headers   connection: 'keep-alive',
-34 verbose headers   'x-served-by': 'cache-fra1236-FRA',
-34 verbose headers   'x-cache': 'MISS',
-34 verbose headers   'x-cache-hits': '0',
-34 verbose headers   'x-timer': 'S1475515242.955716,VS0,VE110',
-34 verbose headers   vary: 'Accept-Encoding' }
-35 silly get cb [ 404,
-35 silly get   { 'content-type': 'application/json',
-35 silly get     'cache-control': 'max-age=0',
-35 silly get     'content-length': '2',
-35 silly get     'accept-ranges': 'bytes',
-35 silly get     date: 'Mon, 03 Oct 2016 17:20:43 GMT',
-35 silly get     via: '1.1 varnish',
-35 silly get     age: '0',
-35 silly get     connection: 'keep-alive',
-35 silly get     'x-served-by': 'cache-fra1236-FRA',
-35 silly get     'x-cache': 'MISS',
-35 silly get     'x-cache-hits': '0',
-35 silly get     'x-timer': 'S1475515242.955716,VS0,VE110',
-35 silly get     vary: 'Accept-Encoding' } ]
-36 verbose stack Error: Registry returned 404 for GET on https://registry.npmjs.org/grunt-contrib-minimize
-36 verbose stack     at makeError (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:264:12)
-36 verbose stack     at CachingRegistryClient.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:242:14)
-36 verbose stack     at Request._callback (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:172:14)
-36 verbose stack     at Request.self.callback (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:200:22)
-36 verbose stack     at emitTwo (events.js:87:13)
-36 verbose stack     at Request.emit (events.js:172:7)
-36 verbose stack     at Request.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1067:10)
-36 verbose stack     at emitOne (events.js:82:20)
-36 verbose stack     at Request.emit (events.js:169:7)
-36 verbose stack     at IncomingMessage.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:988:12)
-37 verbose statusCode 404
-38 verbose pkgid grunt-contrib-minimize
-39 verbose cwd C:\Users\eb\OneDrive\Dokumente\NetBeansProjects\SpielwieseJS
-40 error Windows_NT 10.0.14393
-41 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "grunt-contrib-minimize" "--save-dev"
+4 verbose install initial load of C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\package.json
+5 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\functional.js\package.json
+6 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\grunt\package.json
+7 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\grunt-cli\package.json
+8 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\grunt-contrib-concat\package.json
+9 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\grunt-contrib-jshint\package.json
+10 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\grunt-contrib-qunit\package.json
+11 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\grunt-contrib-uglify\package.json
+12 verbose installManyTop reading scoped package data from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\node_modules\grunt-contrib-watch\package.json
+13 info package.json functional.js@0.8.0 No license field.
+14 verbose readDependencies loading dependencies from C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic\package.json
+15 silly cache add args [ 'jquery.js', null ]
+16 verbose cache add spec jquery.js
+17 silly cache add parsed spec Result {
+17 silly cache add   raw: 'jquery.js',
+17 silly cache add   scope: null,
+17 silly cache add   name: 'jquery.js',
+17 silly cache add   rawSpec: '',
+17 silly cache add   spec: 'latest',
+17 silly cache add   type: 'tag' }
+18 silly addNamed jquery.js@latest
+19 verbose addNamed "latest" is being treated as a dist-tag for jquery.js
+20 info addNameTag [ 'jquery.js', 'latest' ]
+21 silly mapToRegistry name jquery.js
+22 silly mapToRegistry using default registry
+23 silly mapToRegistry registry https://registry.npmjs.org/
+24 silly mapToRegistry data Result {
+24 silly mapToRegistry   raw: 'jquery.js',
+24 silly mapToRegistry   scope: null,
+24 silly mapToRegistry   name: 'jquery.js',
+24 silly mapToRegistry   rawSpec: '',
+24 silly mapToRegistry   spec: 'latest',
+24 silly mapToRegistry   type: 'tag' }
+25 silly mapToRegistry uri https://registry.npmjs.org/jquery.js
+26 verbose addNameTag registry:https://registry.npmjs.org/jquery.js not in flight; fetching
+27 verbose request uri https://registry.npmjs.org/jquery.js
+28 verbose request no auth needed
+29 info attempt registry request try #1 at 12:57:49
+30 verbose request id 568f15a7772ef659
+31 http request GET https://registry.npmjs.org/jquery.js
+32 info retry will retry, error on last attempt: Error: connect ETIMEDOUT 151.101.12.162:443
+33 info attempt registry request try #2 at 12:58:20
+34 http request GET https://registry.npmjs.org/jquery.js
+35 info retry will retry, error on last attempt: Error: connect ETIMEDOUT 151.101.12.162:443
+36 info attempt registry request try #3 at 12:59:41
+37 http request GET https://registry.npmjs.org/jquery.js
+38 verbose stack Error: connect ETIMEDOUT 151.101.12.162:443
+38 verbose stack     at Object.exports._errnoException (util.js:907:11)
+38 verbose stack     at exports._exceptionWithHostPort (util.js:930:20)
+38 verbose stack     at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1077:14)
+39 verbose cwd C:\Users\a403163\Documents\NetBeansProjects\SpielwieseJSPublic
+40 error Windows_NT 6.1.7601
+41 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "jquery.js" "--save"
 42 error node v4.6.0
 43 error npm  v2.15.9
-44 error code E404
-45 error 404 Registry returned 404 for GET on https://registry.npmjs.org/grunt-contrib-minimize
-45 error 404
-45 error 404 'grunt-contrib-minimize' is not in the npm registry.
-45 error 404 You should bug the author to publish it (or use the name yourself!)
-45 error 404 It was specified as a dependency of 'eblib'
-45 error 404
-45 error 404 Note that you can also install from a
-45 error 404 tarball, folder, http url, or git url.
-46 verbose exit [ 1, true ]
+44 error code ETIMEDOUT
+45 error errno ETIMEDOUT
+46 error syscall connect
+47 error network connect ETIMEDOUT 151.101.12.162:443
+47 error network This is most likely not a problem with npm itself
+47 error network and is related to network connectivity.
+47 error network In most cases you are behind a proxy or have bad network settings.
+47 error network
+47 error network If you are behind a proxy, please make sure that the
+47 error network 'proxy' config is set properly.  See: 'npm help config'
+48 verbose exit [ 1, true ]

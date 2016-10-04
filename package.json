@@ -1,16 +1,26 @@
 {
   "name": "eblib",
   "version": "1.0.0",
+  "license": "GPL-3.0",
   "keywords": [
-    "util",
+    "just another html grid tool...",
     "functional",
     "server",
     "client",
     "browser"
   ],
+  "readme": "README.md",
+  "repository": {
+    "name": "my-super-amazing-app",
+    "version": "1.0.0",
+    "private": true
+  },
+  "description": "just another html grid tool...",
   "author": "A403163",
   "contributors": [],
-  "dependencies": {},
+  "dependencies": {
+    "functional.js": "^0.8.0"
+  },
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-contrib-concat": "^1.0.1",

@@ -5,10 +5,71 @@
     function log() {
       opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
     }
-
+    var gridid = this[0].id;
+    var selgridid = '#' + gridid + ' ';
     function translate(str) {
       return $.fn.ebtable.lang[myopts.lang][str] || str;
     }
+    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
+
+    var state = {// saving/loading state
+      getStateAsJSON: function () {
+        return JSON.stringify({
+          bodyWidth: $(selgridid + '.ebtable').width(),
+          rowsPerPage: myopts.rowsPerPage,
+          colorderByName: myopts.colorder.map(function (idx) {
+            return myopts.columns[idx].name;
+          }),
+          invisibleColnames: myopts.columns.reduce(function (acc, o) {
+            if (o.invisible && !o.technical)
+              acc.push(o.name);
+            return acc;
+          }, []),
+          colwidths: $(selgridid + 'th').map(function (i, o) {
+            var id = $(o).prop('id');
+            var w = $(o).width();
+            var name = (_.findWhere(myopts.columns, {id: id}) || {}).name;
+            log($(o).prop('id'), w, name);
+            var ret = {};
+            ret[name] = w;
+            return ret;
+          }).toArray().filter(function (o) {
+            return !o.undefined;
+          }).reduce(function (acc, o) {
+            return o ? _.extend(acc, o) : acc;
+          }, {})
+        });
+      },
+      saveState: function saveState(s) {
+        localStorage[localStorageKey] = s;
+      },
+      loadState: function loadState(state) {
+        if (!state)
+          return;
+        myopts.rowsPerPage = state.rowsPerPage;
+        // XXXXXXXX myopts.bodyWidth = state.tableWidth;
+        myopts.colorder = [];
+        state.colorderByName.forEach(function (colname) {
+          var n = util.indexOfCol(colname);
+          if (n >= 0) {
+            myopts.colorder.push(n);
+          }
+        });
+        myopts.columns.forEach(function (coldef, idx) {
+          !_.contains(state.colorderByName, coldef.name) && myopts.colorder.push(idx);
+        });
+        myopts.columns.forEach(function (coldef, idx) {
+          // XXXXX !_.contains(state.colwidths, coldef.name) && (coldef.css = 'width:' + state.colwidths[coldef.name] + 'px');
+        });
+        state.invisibleColnames.forEach(function (colname) {
+          var n = util.indexOfCol(colname);
+          if (n >= 0) {
+            myopts.columns[n].invisible = true;
+          }
+        });
+      }
+    };
+    
     var util = {
       indexOfCol: function indexOfCol(colname) {
         return _.findIndex(myopts.columns, function (o) {
@@ -68,76 +129,13 @@
         });
       }
     };
-
-
-    var gridid = this[0].id;
-    var selgridid = '#' + gridid + ' ';
-    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
-    var state = {// saving/loading state
-      getStateAsJSON: function () {
-        return JSON.stringify({
-          bodyWidth: $(selgridid + '.ebtable').width(),
-          rowsPerPage: myopts.rowsPerPage,
-          colorderByName: myopts.colorder.map(function (idx) {
-            return myopts.columns[idx].name;
-          }),
-          invisibleColnames: myopts.columns.reduce(function (acc, o) {
-            if (o.invisible && !o.technical)
-              acc.push(o.name);
-            return acc;
-          }, []),
-          colwidths: $(selgridid + 'th').map(function (i, o) {
-            var id = $(o).prop('id');
-            var w = $(o).width();
-            var name = (_.findWhere(myopts.columns, {id: id}) || {}).name;
-            log($(o).prop('id'), w, name);
-            var ret = {};
-            ret[name] = w;
-            return ret;
-          }).toArray().filter(function (o) {
-            return !o.undefined;
-          }).reduce(function (acc, o) {
-            return o ? _.extend(acc, o) : acc;
-          }, {})
-        });
-      },
-      saveState: function saveState(s) {
-        localStorage[localStorageKey] = s;
-      },
-      loadState: function loadState(state) {
-        if (!state)
-          return;
-        myopts.rowsPerPage = state.rowsPerPage;
-        // XXXXXXXX myopts.bodyWidth = state.tableWidth;
-        myopts.colorder = [];
-        state.colorderByName.forEach(function (colname) {
-          var n = util.indexOfCol(colname);
-          if (n >= 0) {
-            myopts.colorder.push(n);
-          }
-        });
-        myopts.columns.forEach(function (coldef, idx) {
-          !_.contains(state.colorderByName, coldef.name) && myopts.colorder.push(idx);
-        });
-        myopts.columns.forEach(function (coldef, idx) {
-          // XXXXX !_.contains(state.colwidths, coldef.name) && (coldef.css = 'width:' + state.colwidths[coldef.name] + 'px');
-        });
-        state.invisibleColnames.forEach(function (colname) {
-          var n = util.indexOfCol(colname);
-          if (n >= 0) {
-            myopts.columns[n].invisible = true;
-          }
-        });
-      }
-    };
-
 // ##############################################################################
 
     var defopts = {
       columns: [],
       flags: {filter: true, pagelenctrl: true, config: true, withsorting: true},
       bodyHeight: Math.max(200, $(window).height() - 100),
-      bodyWidth: Math.max(200, $(window).width() - 10),
+      bodyWidth: '', // Math.max(200, $(window).width() - 10) + 'px',
       rowsPerPageSelectValues: [10, 25, 50, 100],
       rowsPerPage: 10,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
@@ -173,7 +171,7 @@
             var t_inputfld = '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>';
             var t_selectfld = '<select id="<%=colid%>"><%=opts%></select>';
             var opts = (coldef.valuelist || []).reduce(function (acc, o) {
-              return acc + '<option ' + o + '>' + o + '</option>';
+              return acc + '<option ' + o.v + '>' + o.txt + '</option>';
             }, '');
             var t = coldef.valuelist ? t_selectfld : t_inputfld;
             fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip});
@@ -471,7 +469,7 @@
 
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template("\
-        <div class='ebtable' style='width:<%=bodyWidth%>px'>\n\
+        <div class='ebtable'>\n\
           <div class='ctrl'>\n\
             <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
             <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
@@ -570,7 +568,7 @@
         redraw(pageCur);
       },
       groupIsOpen: function (groupName) {
-        return _.property('isOpen')(origData.groups[groupName]);
+        return _.property('isOpen') (origData.groups[groupName]);
       },
       getFilterValues: function getFilterValues() {
         var filter = {};
@@ -719,7 +717,6 @@
     },
     'en': {
       '(<%=len%> Eintr\u00e4ge insgesamt)': '(<%=len%> entries)',
-      '<%=start%> bis <%=end%> von <%=count%>  Eintr\u00e4gen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       '<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen': 'Configuration',
       'Abbrechen': 'Cancel'

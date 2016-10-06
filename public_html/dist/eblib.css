@@ -1,0 +1,122 @@
+
+/*#########################################*/
+/*####  public_html/css/eblist.css #####*/
+/*#########################################*/
+
+.eblist{
+  height: 50px;
+  overflow-y: auto;
+  border: solid black;
+  border-width: 1px;
+}
+.eblist ul {
+  padding: 0;
+  margin: 3px;
+}
+.eblist li {
+  list-style-type: none;  
+  text-align: left;
+  font-size: 12px;
+  padding: 2px 4px 2px 4px;
+}
+
+/*#########################################*/
+/*####  public_html/css/ebselect.css #####*/
+/*#########################################*/
+
+.ebselect{
+  height: 50px;
+  overflow-y: auto;
+  border: solid black;
+  border-width: 1px;
+}
+.ebselect ul {
+  padding: 0;
+  margin: 3px;
+}
+.ebselect li {
+  list-style-type: none;  
+  text-align: left;
+  font-size: 10px;
+  
+}
+.ebselect li input:checked {width:15px;}
+
+.selectable { list-style-type: none; padding: 0px; }
+.selectable li.selected   { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
+.selectable li.notselected{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }
+
+
+/*#########################################*/
+/*####  public_html/css/ebtable.css #####*/
+/*#########################################*/
+
+.ebtable .ctrl{ 
+  height: 40px;
+  margin: 10px 0 0 0;
+}
+
+.ebtable .ctrl div{ 
+  margin: 5px 3px;
+}
+
+.ebtable #lenctrl{ 
+  width: 70px;
+}
+
+.ebtable .ui-selectmenu-button.ui-button {
+  width: 50px;
+}
+
+.ebtable #data, .ebtable table{ 
+  width: 100%;
+}
+
+.ebtable #head, .ebtable #data { 
+  background-color:#eee;
+}
+
+.ebtable #data th{ 
+  background-color:#d5d5cd; 
+  padding: 5px 2px 5px 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ebtable #data th input, .ebtable #data th select {
+  width: 85%;
+  box-sizing: border-box;
+}
+
+.ebtable #data th div.sort_wrapper {
+  position: relative;
+}
+
+.ebtable #data th div.sort_wrapper span {
+  position: absolute;
+  margin-top: 10px;
+  right: -6px;
+}
+
+.ebtable #data td{ 
+  background-color:#dfdfdf;
+  padding: 2px 1px 2px 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ebtable #data td.group{
+  background-color: #c7c7da;
+}
+.ebtable #data td.groupheader{
+  background-color: #c3c3d0;
+}
+.ebtable #data table .selectCol{
+  width: 20px;
+  padding: 0px;
+  margin: 0px;
+}
+
+/* ConfigDlg */
+.ebtableSelectable { list-style-type: none; padding: 0px; width: 100%; }
+.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
+.ebtableSelectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }

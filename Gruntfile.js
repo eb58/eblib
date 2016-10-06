@@ -14,12 +14,18 @@ module.exports = function (grunt) {
     },
     concat: {
       options: {
-        // define a string to put between each file in the concatenated output
-        separator: '\n\n/*################################################*/\n\n'
+        //separator: '\n\n/*################################################*/\n\n'
+        process: function (src, filepath) {
+          return '\n/*#########################################*/\n/*####  ' + filepath + ' #####*/\n/*#########################################*/\n\n' + src;
+        }
       },
       dist: {
         src: ['public_html/js/eblib/*.js'],
         dest: 'public_html/dist/<%= pkg.name %>.js'
+      },
+      css: {
+        src: 'public_html/css/*.css',
+        dest: 'public_html/dist/eblib.css'
       }
     },
     uglify: {
@@ -31,6 +37,16 @@ module.exports = function (grunt) {
       dist: {
         files: {
           'public_html/dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+        }
+      }
+    },
+    cssmin: {
+      dist: {
+        options: {
+          banner: '/*! eblib 1.0.0  */'
+        },
+        files: {
+          'public_html/dist/<%= pkg.name %>.min.css': ['public_html/css/**/*.css']
         }
       }
     },
@@ -54,8 +70,8 @@ module.exports = function (grunt) {
       }
     },
     watch: {
-      files: ['<%= jshint.files %>'],
-      tasks: ['jshint', 'qunit', 'concat', 'uglify']
+      files: ['<%= jshint.files %>', 'public_html/css/*.css'],
+      tasks: ['jshint', 'qunit', 'concat', 'uglify', 'cssmin']
     }
 
   });
@@ -64,7 +80,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-qunit');
-
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
   // task(s).
   grunt.registerTask('default', ['watch']);
   grunt.registerTask('test', ['jshint', 'qunit']);

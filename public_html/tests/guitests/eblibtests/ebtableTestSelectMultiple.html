@@ -57,7 +57,7 @@
           localStorage['AA'] = s;
         },
         getState: function () {
-          return JSON.parse(localStorage['AA']);
+          return localStorage['AA'] ? JSON.parse(localStorage['AA']) : null;
         }
       };
       var grid;

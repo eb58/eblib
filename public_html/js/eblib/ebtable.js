@@ -69,7 +69,7 @@
         });
       }
     };
-    
+
     var util = {
       indexOfCol: function indexOfCol(colname) {
         return _.findIndex(myopts.columns, function (o) {
@@ -251,19 +251,23 @@
     }
 
     function pageBrowseCtrl() {
-      return '<button class="firstBtn"><span class="ui-icon ui-icon-seek-first"></button>\
-              <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" ></button>\
-              <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" ></button>\
-              <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  ></button>';
+      return '<button class="firstBtn"><span class="ui-icon ui-icon-seek-first"/></button>\
+              <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" /></button>\
+              <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" /></button>\
+              <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  /></button>';
     }
 
-    function infoCtrl() {
+    function ctrlInfo() {
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
       var filtered = origData.length === tblData.length ? '' : _.template(translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
       var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
       return label;
+    }
+
+    function ctrlAddInfo() {
+      return (myopts.addInfo && myopts.addInfo(myopts)) || '';
     }
 
     function selectRow(rowNr, row, b) { // b = true/false ~ on/off
@@ -348,7 +352,7 @@
         deselectAllRows();
         myopts.sortcolname = util.colNameFromColid(colid);
         sortToggle();
-        if (myopts.hasMoreResults) {
+        if (myopts.hasMoreResults && myopts.reloadData) {
           var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
           var sortcrit = {};
           sortcrit[coldef.dbcol] = coldef.order;
@@ -440,7 +444,8 @@
     }
 
     function redraw(pageCur, withHeader) {
-      $(selgridid + '#ctrlInfo').html(infoCtrl());
+      $(selgridid + '#ctrlInfo').html(ctrlInfo());
+      $(selgridid + '#ctrlAddInfo').html(ctrlAddInfo());
       $(selgridid + '#data tbody').html(tableData(pageCur));
       if (withHeader) {
         $(selgridid + 'thead tr').html(tableHead());
@@ -482,9 +487,9 @@
             </table>\n\
           </div>\n\
           <div class='ctrl'>\n\
-            <div id='ctrlInfo'  style='float: left;' class='ui-widget-content'><%= info %></div>\n\
-            <div style='float: left;' class='ui-widget-content' hidden>Anzahl markierter Auftr\u00e4ge: <span id='cntSel'>0</span></div>\n\
-            <div id='ctrlPage2' style='float: right;' ><%= browseBtns %></div>\n\
+            <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
+            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content'><%= addInfo %></div>\n\
+            <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
         </div>");
 
@@ -494,7 +499,8 @@
         selectLen: selectLenCtrl(),
         configBtn: configBtn(),
         browseBtns: pageBrowseCtrl(),
-        info: infoCtrl(),
+        info: ctrlInfo(),
+        addInfo: ctrlAddInfo(),
         bodyWidth: myopts.bodyWidth,
         bodyHeight: myopts.bodyHeight
       }));
@@ -568,7 +574,7 @@
         redraw(pageCur);
       },
       groupIsOpen: function (groupName) {
-        return _.property('isOpen') (origData.groups[groupName]);
+        return _.property('isOpen')(origData.groups[groupName]);
       },
       getFilterValues: function getFilterValues() {
         var filter = {};

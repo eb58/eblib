@@ -541,10 +541,10 @@
     }
 
     function pageBrowseCtrl() {
-      return '<button class="firstBtn"><span class="ui-icon ui-icon-seek-first"></button>\
-              <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" ></button>\
-              <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" ></button>\
-              <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  ></button>';
+      return '<button class="firstBtn"><span class="ui-icon ui-icon-seek-first"/></button>\
+              <button class="backBtn"><span  class="ui-icon ui-icon-seek-prev" /></button>\
+              <button class="nextBtn"><span  class="ui-icon ui-icon-seek-next" /></button>\
+              <button class="lastBtn"><span  class="ui-icon ui-icon-seek-end"  /></button>';
     }
 
     function infoCtrl() {
@@ -553,7 +553,8 @@
       var filtered = origData.length === tblData.length ? '' : _.template(translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
       var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
-      return label;
+      var flag = _.template('<span class="ui-icon ui-icon-flag" title="<%=title%>"/>')({title:translate('Trefferliste abgeschnitten')});
+      return label + (myopts.hasMoreResults ? flag : '');
     }
 
     function selectRow(rowNr, row, b) { // b = true/false ~ on/off
@@ -638,7 +639,7 @@
         deselectAllRows();
         myopts.sortcolname = util.colNameFromColid(colid);
         sortToggle();
-        if (myopts.hasMoreResults) {
+        if (myopts.hasMoreResults && myopts.reloadData ) {
           var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
           var sortcrit = {};
           sortcrit[coldef.dbcol] = coldef.order;
@@ -1009,7 +1010,8 @@
       '(<%=len%> Eintr\u00e4ge insgesamt)': '(<%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen': 'Configuration',
-      'Abbrechen': 'Cancel'
+      'Abbrechen': 'Cancel',
+      'Trefferliste abgeschnitten': 'Hitlist truncated'
     }
   };
 })(jQuery);

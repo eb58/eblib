@@ -118,6 +118,7 @@
         ],
         rowsPerPageSelectValues: [5, 10, 25, 50, 100],
         bodyHeight: 300,
+        colsResizable: true,
         selection: true, //{render: function (rowNr, row, origData) { console.log('onSelection', rowNr, row, origData);    }},
         onSelection: function (rowNr, row) {
           if (row[0] !== '  ') {
@@ -130,14 +131,14 @@
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
         sortcolname: 'Tierart',
         reloadData: function () {
-          grid = $('#grid').ebtable(opts, basketTestdata);
+          grid = $('#grid').ebtable(opts, basketTestdata, true);
         },
-        lang: 'mdk',
+        lang: 'en',
         saveState: false
       };
       var grid;
       $().ready(function () {
-        grid = $('#grid').ebtable(opts, basketTestdata);
+        grid = $('#grid').ebtable(opts, basketTestdata,true);
         $('#aaa').button();
       });
     </script>

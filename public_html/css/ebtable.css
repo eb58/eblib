@@ -4,15 +4,20 @@
 }
 
 .ebtable .ctrl div{ 
-  margin: 5px 3px;
+  margin: 4px 1px;
 }
 
 .ebtable #lenctrl{ 
   width: 70px;
 }
 
+.ebtable #ctrlInfo, .ebtable #ctrlAddInfo{
+  padding: 3px;
+  margin: 1px;
+}
+
 .ebtable .ui-selectmenu-button.ui-button {
-  width: 50px;
+	width: 50px;
 }
 
 .ebtable #data, .ebtable table{ 
@@ -26,8 +31,6 @@
 .ebtable #data th{ 
   background-color:#d5d5cd; 
   padding: 5px 2px 5px 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .ebtable #data th input, .ebtable #data th select {
@@ -48,8 +51,6 @@
 .ebtable #data td{ 
   background-color:#dfdfdf;
   padding: 2px 1px 2px 1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .ebtable #data td.group{
   background-color: #c7c7da;

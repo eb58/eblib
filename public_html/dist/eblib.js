@@ -1073,6 +1073,7 @@
 /*####  public_html/js/eblib/ebutils.js #####*/
 /*#########################################*/
 
+/* jshint expr: true */
 var ebutils = (function () {
   "use strict";
   function formatBytes(bytes, decimals) {
@@ -1147,6 +1148,53 @@ var ebutils = (function () {
     getMimeByExt: getMimetypeByExt,
   };
 })();
+
+if(typeof $ !== 'undefined')  $.extend({
+  alert: function (title, message) {
+    message = message || '';
+    $("<div id='dlgAlert'></div>").dialog({
+      buttons: {
+        "Ok": function () {
+          $(this).dialog("close");
+        }
+      },
+      close: function () {
+        $(this).remove();
+      },
+      title: title,
+      modal: true,
+      closeText: 'Schlie\u00dfen'
+    }).html('<br>' + message.replace(/\n/g, '<br>'));
+  }
+});
+
+if(typeof $ !== 'undefined') $.extend({
+  confirm: function (title, question, callbackYes, callbackNo) {
+    question = question || '';
+    callbackYes = callbackYes || function () {
+      console.log('$.confirm:please provide callback!');
+    };
+    $("<div id='dlgConfirm'></div>").dialog({
+      buttons: {
+        "Ja": function () {
+          callbackYes && (callbackYes());
+          $(this).dialog("close");
+        },
+        "Nein": function () {
+          callbackNo && (callbackNo());
+          $(this).dialog("close");
+        }
+      },
+      close: function () {
+        $(this).remove();
+      },
+      title: title,
+      modal: true,
+      closeText: 'Schlie\u00dfen'
+    }).html('<br>' + question.replace(/\n/g, '<br>'));
+  }
+});
+
 
 
 

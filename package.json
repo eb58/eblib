@@ -4,10 +4,9 @@
   "license": "GPL-3.0",
   "keywords": [
     "just another html grid tool...",
-    "functional",
-    "server",
-    "client",
-    "browser"
+    "ebtable",
+    "ebselect",
+    "ebdropdown",
   ],
   "readme": "README.md",
   "repository": {

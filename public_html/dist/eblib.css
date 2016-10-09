@@ -57,20 +57,20 @@
 }
 
 .ebtable .ctrl div{ 
-  margin: 5px 3px;
+  margin: 4px 1px;
 }
 
 .ebtable #lenctrl{ 
   width: 70px;
 }
 
-.ebtable #ctrlInfo{
+.ebtable #ctrlInfo, .ebtable #ctrlAddInfo{
   padding: 3px;
-  margin: 5px;
+  margin: 1px;
 }
 
 .ebtable .ui-selectmenu-button.ui-button {
-  width: 50px;
+	width: 50px;
 }
 
 .ebtable #data, .ebtable table{ 

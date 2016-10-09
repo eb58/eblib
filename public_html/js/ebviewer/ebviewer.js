@@ -17,7 +17,7 @@ var ebviewer = (function () {
   function view(docurl, ext, opts) {
     opts = opts || {};
     var defopts = {
-      width: 600, /* width of document window */
+      width: 700, /* width of document window */
       height: 1000, /* height of document window */
       resizable: true, /* should the document window be resizable? */
       dependent: true, /* does the document window depend on its opener? */

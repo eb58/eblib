@@ -23,12 +23,12 @@
         }
       }
       function resize() {
-        $('.ui-dialog').css({
+        $('.ui-dialog') && $('.ui-dialog').css({
           'width': $(window).width() - sbw,
           'height': $(window).height() - sbw,
           'left': '0px',
           'top': '0px'
-        })
+        });
       }
       $(document).ready(function () {
         var params = (window.location.search || '/docs/test.pdf|pdf').replace('?', '').split('|');
@@ -44,7 +44,6 @@
           closeText: 'Schlie\u00dfen',
           width: width,
           height: height,
-          closeOnEscape: false,
           draggable: false,
           resizable: false,
           close: function () {

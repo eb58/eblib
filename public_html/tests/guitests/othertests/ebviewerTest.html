@@ -18,13 +18,13 @@
       $(document).ready(function () {
         $('#test1').button().click(function () {
           ebviewer.view('/docs/test.pdf', 'pdf', {});
-        })
+        });
         $('#test2').button().click(function () {
           ebviewer.view('/docs/test.jpg', 'jpg', {});
-        })
+        });
         $('#test3').button().click(function () {
           console.log($.confirm('Frage', 'ja?'));
-        })
+        });
 
         $("#myDialog").dialog({
           autoOpen: false,
@@ -41,7 +41,7 @@
           $("#myDialog").dialog("open");
           $(window).resize();
         });
-        $(window).resize();
+        //$(window).resize();
       });
       var i = 0;
       $(window).resize(_.debounce(function (e) {
@@ -61,7 +61,7 @@
     <button id='test3'>xxx</button>
 
     <div id="myDialog">
-      <img src="/docs/test.jpg" style='width:95%'/>  
+      <img src="/docs/test.jpg" style='width:95%' alt="Bild!"/>  
     </div>
     <button id="b1">Test</button>
   </body>

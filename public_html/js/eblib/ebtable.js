@@ -628,7 +628,7 @@
           $('ol#' + gridid + 'selectable').sortable();
           $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
             $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
-            log('change visibility', event.target.id, 'now visible:', !codef.invisible);
+            log('change visibility', event.target.id, 'now visible:', !coldef.invisible);
           });
         },
         position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},

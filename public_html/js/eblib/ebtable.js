@@ -171,7 +171,7 @@
             var t_inputfld = '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>';
             var t_selectfld = '<select id="<%=colid%>"><%=opts%></select>';
             var opts = (coldef.valuelist || []).reduce(function (acc, o) {
-              return acc + '<option ' + o.v + '>' + o.txt + '</option>';
+              return acc + '<option>' + o + '</option>';
             }, '');
             var t = coldef.valuelist ? t_selectfld : t_inputfld;
             fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip});

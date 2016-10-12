@@ -116,7 +116,7 @@
           {name: "Workorderid", invisible: true, technical: true},
           {name: "Frist"},
           {name: "Stornoalter"},
-          {name: "Stornostatus", css: 'width:120px', valuelist: [{v:null,txt:''}, {v:0,txt:'offen'}, {v:1, txt:'abgelehnt'}]},
+          {name: "Stornostatus", css: 'width:120px', valuelist: ['', 'offen','abgelehnt']},
           {name: "Auftragsstatus"},
           {name: "AKZ"},
           {name: "Versicherter", render: renderer.renderInsurand},
@@ -131,6 +131,7 @@
         ],
         bodyHeight: 600,
         selection: true,
+        colsResizable:true,
         reloadData: function () {
           grid = initTable(result2);
         }

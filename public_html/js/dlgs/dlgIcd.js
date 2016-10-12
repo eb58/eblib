@@ -38,7 +38,7 @@ var dlgIcd = function (icds, onTakeOverCallback, opts) {
       $('#dlgIcd #Code').focus().select();
     },
     title: 'ICD-Code w\u00e4hlen',
-    width: 800, height: 500,
+    width: 800, height: 520,
     closeText: 'Schlie\u00dfen',
     modal: true,
     buttons: {

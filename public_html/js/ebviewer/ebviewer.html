@@ -14,15 +14,15 @@
     <script src="/lib/jquery-1.11.3/jquery.js"></script>
     <script src="/lib/jQueryUI-1.12.0/jquery-ui.js"></script>
     <script>
-      var sbw = 16;
       function getEmbedString(docurl, ext) {
         if ($.inArray(ext, ['jpg', 'jepg', 'png', 'gif', 'tiff', 'tif', 'bmp']) >= 0) {
           return "<img id='docframeImg' src='" + docurl + "' style='height:100%'>";
         } else {
-          return "<iframe id='docframePdf' src='" + docurl + "' style='width:100%; height:100%'/>";
+          return "<iframe id='docframePdf' src='" + docurl + "' style='width:100%; height:100%'>";
         }
       }
       function resize() {
+        var sbw = 16;
         $('.ui-dialog') && $('.ui-dialog').css({
           'width': $(window).width() - sbw,
           'height': $(window).height() - sbw,

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Mimas zuordnen</title>
+
+  <link rel="stylesheet" href="/lib/jQueryUI-1.12.0/jquery-ui.css">
+  <link rel="stylesheet" href="/css/ebtable.css">
+  <style>
+    * {font-family:Arial; color: black; font-size: 12px; }
+  </style>
+
+  <script src="/lib/underscore-1.8.3/underscore.js"></script>
+  <script src="/lib/jquery-1.11.3/jquery.js"></script>
+  <script src="/lib/jQueryUI-1.12.0/jquery-ui.js"></script>
+  <script src="/lib/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+  <script src="/lib/vue-1.0.26/vue.js"></script>
+  <script src="/lib/vue-1.0.26/vue-eb.js"></script>
+  <script src="/js/eblib/mx.js"></script>  
+  <script src="/js/eblib/ebtable.js"></script>  
+  <script src="/js/eblib/ebutils.js"></script>  
+  <script src="/tests/vueTests/mimaUtils.js"></script>
+  <script src="/tests/vueTests/dlgMimaAssignDocuments.js"></script>
+  <script src="/data/mimadata.js"></script>
+  <script>
+    var sessionId = '';
+    $(document).ready(function () {
+      dlgMimaAssignDocuments(mimadata.mimas);
+    });
+  </script>
+</head>
+<body>
+</body>
+</html>

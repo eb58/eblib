@@ -13,10 +13,12 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
   var dlg = $(t);
 
   function initMimaList(mimas) {
-    var mimaTblData = getTableDataFromResult(mimas);
+    var mimaTblData = _.map(mimas, function (o) {
+      return [o.id, utils.getEntryType(o), utils.formatIpName(o), o.applicantName, o.applicantReference, 
+        o.servicerendererName, utils.getServiceType(o), o.packageName, utils.formatPerformerName(o) ];
+    });
     var mimaTblOpts = {
       columns: [
-        {name: "Type", invisible: true, technical: true},
         {name: "MimaId", invisible: true, technical: true},
         {name: "Typ", css: 'width:65px', render: renderer.typ, dbcol: 'type'},
         {name: "Vorgang", mandatory: true},
@@ -24,10 +26,8 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
         {name: "Aktenzeichen", dbcol: 'applicantReference'},
         {name: "Leistungserbringer", dbcol: 'servicerendererName'},
         {name: "Leistungsbereich", dbcol: 'serviceTypeId'},
-        {name: "Frage des AG", dbcol: 'reasonNumber'},
         {name: "Paketname", dbcol: 'packageName'},
         {name: "Vorgangsbearbeiter"},
-        {name: "Unterlagenstatus", dbcol: 'docStatus'}
       ],
       saveState: function () {},
       loadState: function () {},
@@ -39,6 +39,9 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
   }
 
   function initDoclist(docs) {
+    var docsdata = _.map(docs, function (o) {
+      return [o.crypteddocid, o.name, o.tab.name, o.doctype.doctypetext, o.extension, o.docdate, ''];
+    });
     var docsopts = {
       columns: [
         {name: "crypteddocid", invisible: true},
@@ -47,7 +50,6 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
         {name: "Lasche"},
         {name: "Dateierweiterung"},
         {name: "Datum", sortformat: 'date-de'},
-        {name: "Gr\u00f6\u00dfe"}, // = Größe
         {name: "", render: renderer.actions, css: 'width: 50px'}
       ],
       bodyHeight: 300,
@@ -56,9 +58,6 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
       saveState: function () {},
       loadState: function () {}
     };
-    var docsdata = _.map(docs, function (o) {
-      return [o.crypteddocid, o.name, o.tab.name, o.doctype.doctypetext, o.extension, o.docdate, ebutils.formatBytes(o.docsize), ''];
-    });
     $('#docsgrid').ebtable(docsopts, docsdata);
     $('#docsgrid tbody tr').off().click(function () { // Auch Klick auf Zeile öffnet Viewer
       var row = docsdata[$(this).index()];
@@ -72,8 +71,9 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
     vue = new Vue({
       el: '#dlgMimaAssignDocuments',
       data: {
+        curr: 0,
         mimas: mimas,
-        docs: mimas.length > 0 ? mimas[0].docs : []
+        docs: mimas[0].docs
       }
     });
     initMimaList(mimas);
@@ -87,7 +87,7 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
     },
     title: 'Mimas zuordnen',
     width: 1200,
-    height: 900,
+    height: 600,
     closeText: 'Schlie\u00dfen',
     buttons: {
       'Sichern': function () {
@@ -104,5 +104,5 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
   function style() {
     $('#dlgMimaAssignDocuments').css('background-color', '#eeeee0');
   }
-  
+
 };

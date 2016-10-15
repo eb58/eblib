@@ -778,7 +778,7 @@
           </div>\n\
           <div class='ctrl'>\n\
             <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
-            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content'><%= addInfo %></div>\n\
+            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content' hidden><%= addInfo %></div>\n\
             <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
         </div>");

@@ -168,7 +168,54 @@ var mimadata = {
       "creationdate": "22.08.2016"
     },
     {
-      "docs": [],
+      "docs": [
+        {
+          "crypteddocid": "3C7F671BC7983BE1",
+          "name": "fdgnnf",
+          "extension": "pdf",
+          "doctype": {
+            "doctypeid": -1,
+            "doctypetext": "Unbekannt"
+          },
+          "docdate": "25.08.2016",
+          "docsize": 59998,
+          "social": true,
+          "keywords": null,
+          "receptiondate": "25.08.2016 11:54",
+          "archivingdate": null,
+          "author": null,
+          "note": null,
+          "tab": {
+            "tabid": 3,
+            "name": "weitere Dokumente zum Auftrag",
+            "systemtab": false
+          },
+          "decisionAccept": null
+        },
+        {
+          "crypteddocid": "F02B690CD57A4776",
+          "name": "halzuuzuztulo",
+          "extension": "pdf",
+          "doctype": {
+            "doctypeid": -1,
+            "doctypetext": "Unbekannt"
+          },
+          "docdate": "25.08.2016",
+          "docsize": 59998,
+          "social": true,
+          "keywords": null,
+          "receptiondate": "25.08.2016 11:54",
+          "archivingdate": null,
+          "author": null,
+          "note": null,
+          "tab": {
+            "tabid": 3,
+            "name": "weitere Dokumente zum Auftrag",
+            "systemtab": false
+          },
+          "decisionAccept": null
+        }
+      ],
       "type": "M",
       "id": 50000000209,
       "ipFirstname": "Corné",

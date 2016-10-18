@@ -148,9 +148,13 @@
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       hasMoreResults: hasMoreResults,
       jqueryuiTooltips: true,
+      clickOnRowHandler: function (rowData, row) {
+        console.log(rowData, row);
+      },
       lang: 'de'
     };
     opts.flags = _.extend(defopts.flags, opts.flags);
+    opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? state.saveState: opts.saveState;
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
@@ -462,14 +466,12 @@
     // ##############################################################################
 
     function initGrid(a) {
-      state.loadState(localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null);
-      if (opts.getState)
-        state.loadState(opts.getState());
+      myopts.saveState && state.loadState(localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null);
+      myopts.saveState && myopts.getState && state.loadState(opts.getState());
       util.checkConfig();
 
-      myopts.columns = myopts.columns.map(function (coldef) {
+      myopts.columns.forEach(function (coldef) {
         coldef.id = coldef.name.replace(/[^\d\w]/g, '');
-        return coldef;
       });
 
       pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
@@ -547,6 +549,11 @@
     $(selgridid + '#configBtn').button().off().on('click', function () {
       dlgConfig(gridid);
     });
+    $(selgridid + ' table tbody tr').off().on('click', function () {
+      var rowData = tblData[ pageCur * myopts.rowsPerPage + $(this).index()];
+      myopts.clickOnRowHandler(rowData, $(this));
+    });
+
     myopts.colsResizable && $(selgridid + '.ebtable,' + selgridid + '.ebtable th').resizable({
       handles: 'e',
       stop: function (evt, ui) {
@@ -628,7 +635,8 @@
           $('ol#' + gridid + 'selectable').sortable();
           $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
             $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
-            log('change visibility', event.target.id, 'now visible:', !coldef.invisible);
+            var coldef = _.findWhere(myopts.columns, {id: event.target.id});
+            log('change visibility', event.target.id, 'now visible:', coldef.invisible);
           });
         },
         position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},

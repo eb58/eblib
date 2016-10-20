@@ -1,17 +1,13 @@
 /* global _, renderer, utils, doctabs, doctypes */
 var dlgMimaAssignDocuments = function (mimas, opts) {
   $('#dlgMimaAssignDocuments').remove();
-
   var DOCSTATUS = {
     ACCEPTED: 1,
     REJECTED: 2
   };
-
   opts = opts || {};
-
   var mimagrid;
   var actMima = mimas[0];
-
   function initMimaGrid(mimas) {
     var mimaTblData = _.map(mimas, function (o) {
       return [o.id, utils.getEntryType(o), utils.formatIpName(o), o.applicantName, o.applicantReference,
@@ -48,7 +44,6 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
     var docsdata = _.map(docs, function (o) {
       return [o.crypteddocid, o.name, o.tab.name, o.doctype.doctypetext, o.extension, o.docdate, ''];
     });
-
     var docsrenderer = {
       actioncol: function (data, row, idx) {
         var t = "\
@@ -63,7 +58,6 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
         return _.template(t)({docid: row[0], col: col});
       }
     };
-
     var docsopts = {
       columns: [
         {name: "crypteddocid", invisible: true},
@@ -87,7 +81,6 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
     docsgrid = $('#docsgrid').ebtable(docsopts, docsdata);
     $('#docsgrid .ctrl:first').hide()
     $('#docsgrid').css('text-align', 'left');
-
     // actions
     var actions = {
       accept: function (evt) {
@@ -111,30 +104,29 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
         var doc = _.findWhere(actMima.docs, {crypteddocid: evt.target.id});
         console.log('ebviewer', doc.crypteddocid, doc.name, doc.extension, actMima.id);
         //ebviewer.view('mima.do?action=document&crypteddocid=' + evt.target.id, name, ext, actMima.id);
+      },
+      allSetDocstatus: function (stat) {
+        return function () {
+          console.log('set status', stat, actMima.id, actMima.docs);
+          actMima.docs.forEach(function (doc) {
+            doc.status = stat;
+          });
+          initDoclist(actMima.docs);
+        };
       }
     }
     $('.ui-icon-circle-check').off().on('click', actions.accept);
     $('.ui-icon-circle-close').off().on('click', actions.reject)
     $('.ui-icon-document').off().on('click', actions.docShow)
     $('.ui-icon-info').off().on('click', actions.docInfo)
-    $('#docsgrid table thead th:last')
-      .append("<span id='allAccept' style='display:inline-block;' class='ui-icon ui-icon-circle-check' title='Alle Dokumente annehmen'></span>");
-     $('#allAccept').off().on('click', function () {
-        console.log('accept all', actMima.id, actMima.docs);
-        actMima.docs.forEach(function (doc) {
-          doc.status = DOCSTATUS.ACCEPTED;
-        });
-        initDoclist(actMima.docs);
-      });
-    $('#docsgrid table thead th:last')
-      .append("<span id='allReject' style='display:inline-block;' class='ui-icon ui-icon-circle-close' title='Alle Dokumente zurückweisen'></span>");
-    $('#allReject').off().on('click', function () {
-        console.log('accept all', actMima.id, actMima.docs);
-        actMima.docs.forEach(function (doc) {
-          doc.status = DOCSTATUS.REJECTED;
-        });
-        initDoclist(actMima.docs);
-      });
+
+    $('#docsgrid table thead th:last').append("<span id='allAccept' style='display:inline-block;' class='ui-icon ui-icon-circle-check' title='Alle Dokumente annehmen'></span>");
+    $('#docsgrid table thead th:last').append("<span id='allReject' style='display:inline-block;' class='ui-icon ui-icon-circle-close' title='Alle Dokumente zurückweisen'></span>");
+    $('#docsgrid table thead th:last').append("<span id='allReset' style='display:inline-block;' class='ui-icon  ui-icon-circle-arrow-w' title='Status aller Dokumente zurücksetzen'></span>");
+
+    $('#allReject').off().on('click', actions.allSetDocstatus(DOCSTATUS.REJECTED));
+    $('#allAccept').off().on('click', actions.allSetDocstatus(DOCSTATUS.ACCEPTED));
+    $('#allReset').off().on('click', actions.allSetDocstatus(null));
   }
 
   var dlgDefOpts = {
@@ -179,5 +171,4 @@ var dlgMimaAssignDocuments = function (mimas, opts) {
     </div>");
   var myopts = $.extend({}, dlgDefOpts, opts || {});
   dlg.dialog(myopts);
-
 };

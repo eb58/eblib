@@ -15,7 +15,7 @@ var dlgVueTest = function (opts) {
     </div>";
   var dlg = $(t);
   var init = function (disabled) {
-    vue = vue = new Vue({
+    vue = new Vue({
       el: '#dlgVueTest',
       data: {
         name: 'testname',

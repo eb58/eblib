@@ -18,7 +18,9 @@
   "author": "eb",
   "contributors": [],
   "dependencies": {
-    "functional.js": "^0.8.0"
+    "functional.js": "^0.8.0",
+    "vue": "2.0.3",
+    "vue-date-picker": "1.0.2"
   },
   "devDependencies": {
     "grunt": "^1.0.1",

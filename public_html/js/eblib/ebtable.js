@@ -6,6 +6,7 @@
       opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
     }
     var gridid = this[0].id;
+    var self = this;
     var selgridid = '#' + gridid + ' ';
     function translate(str) {
       return $.fn.ebtable.lang[myopts.lang][str] || str;
@@ -154,7 +155,7 @@
       lang: 'de'
     };
     opts.flags = _.extend(defopts.flags, opts.flags);
-    opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? state.saveState: opts.saveState;
+    opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? state.saveState : opts.saveState;
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
@@ -432,14 +433,14 @@
     function filterData() {
       var filters = [];
       $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
-        var val = $(o).val().trim();
-        if (val) {
+        var val = $(o).val();
+        if (val && val.trim()) {
           var colid = $(o).attr('id');
           var colname = util.colNameFromColid(colid);
           var col = util.indexOfCol(colname);
           var ren = util.getRender(colname);
           var mat = util.getMatch(colname);
-          filters.push({col: col, searchtext: $.trim(val), render: ren, match: mat});
+          filters.push({col: col, searchtext: val.trim(), render: ren, match: mat});
         }
       });
       tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
@@ -660,7 +661,9 @@
               return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
             });
             myopts.saveState && myopts.saveState(state.getStateAsJSON());
+            var filters = self.getFilterValues();
             redraw(pageCur, true);
+            self.setFilterValues(filters);
             $(this).dialog("close");
           },
           'Abbrechen': function () {

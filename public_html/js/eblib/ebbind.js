@@ -10,7 +10,7 @@
 
     m = m || id;
     if (type === 'text' || type === 'password') {
-      this.val(data[m]).on('change', function () {
+      this.val(data[m]).off().on('change', function () {
         data[m] = self.val();
         console.log('changed ' + id, data[m], data);
       }).on('keyup', function () {
@@ -18,23 +18,23 @@
         console.log('changed ' + id, self, data[m], data);
       });
     } else if (type === 'checkbox') {
-      this.prop('checked', data[m]).on('click', function () {
+      this.prop('checked', data[m]).off().on('click', function () {
         data[m] = self.prop('checked');
         console.log('changed ' + id, data[m], data);
       });
     } else if ($('select', this).length) {
-      this.setSelectedValue(data[m]).on("selectmenuchange", function () {
+      this.setSelectedValue(data[m]).off().on("selectmenuchange", function () {
         data[m] = self.getSelectedValue();
         console.log('select changed ' + id, data[m], data);
       });
     } else if ($('input:radio', this).length) {
-      this.val(data[m]).on("change", function () {
+      this.val(data[m]).off().on("change", function () {
         data[m] = self.val();
         console.log('radio changed ' + id, data[m], data);
       });
     } else if ($('textarea', this).length) {
       $x = $('textarea', this);
-      $x.val(data[m], this).on('keyup', function () {
+      $x.val(data[m], this).off().on('keyup', function () {
         data[m] = $x.val();
         console.log('textarea changed ' + id, data[m], data);
       });
@@ -50,7 +50,7 @@
           }
         });
       }
-      $x.on('click', function () {
+      $x.off().on('click', function () {
         data[m] = self.getSelectedValuesAsString();
         console.log('textarea changed ' + id, data[m], data);
       });

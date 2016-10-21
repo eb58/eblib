@@ -68,7 +68,6 @@
       $('#ddfag').ebdropdown({change: cp2textfield}, fags.map(o => ({v: o.number, txt: o.number + ' ' + o.text}))).ebbind(data, 'fag');
       $('#ddresultcategory').ebdropdown({change: cp2textfield}, resultcategorys.map(o => ({v: o.number, txt: o.number + ' ' + o.text}))).ebbind(data, 'resultcategory');
       $('#ddresultlocation').ebdropdown({change: cp2textfield}, resultlocations.map(o => ({v: o.number, txt: o.number + ' ' + o.text}))).ebbind(data, 'resultlocation');
-      ;
       $('#ddresult').ebdropdown({change: cp2textfield}, results.map(o => ({v: o.number, txt: o.number + ' ' + o.text}))).ebbind(data, 'result');
 
       $('#tfag').change(cp2dd).ebbind(data, 'fag')

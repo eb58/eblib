@@ -7,7 +7,6 @@ if (!String.prototype.trim) {
 }
 if (!String.prototype.contains) {
   String.prototype.contains = function () {
-    'use strict';
     return String.prototype.indexOf.apply(this, arguments) !== -1;
   };
 }

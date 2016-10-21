@@ -15,7 +15,7 @@ var dlgMimaSFB = function (opts) {
     buttons: {
       'OK': function () {
         computeIds();
-        console.log( data );
+        console.log(data);
         $(this).dialog("close");
       },
       'Beenden': function () {
@@ -24,75 +24,75 @@ var dlgMimaSFB = function (opts) {
     }
   };
 
-  var getListData = function (data) {
-    return [{v: -1, txt: ''}].concat(data.map(function (o) {
-      return {v: o.number, txt: o.number + ' ' + o.text}
-    })).sort(function (a, b) {
-      return a.txt === b.txt ? 0 : (a.txt < b.txt ? -1 : +1)
-    });
+  var utils = {
+    getListData: function getListData(data) {
+      return [{v: -1, txt: ''}].concat(data.map(function (o) {
+        return {v: o.number, txt: o.number + ' ' + o.text}
+      })).sort(function (a, b) {
+        return a.txt === b.txt ? 0 : (a.txt < b.txt ? -1 : +1)
+      });
+    },
+    productsList: function productsList(reasonnumber) {
+      var ids = _.pluck(_.where(reason2product, {reasonid: _.findWhere(reasons, {number: reasonnumber}).id}), 'productid');
+      return utils.getListData(_.compact(ids.map(function (o) {
+        return _.findWhere(products, {id: o})
+      })));
+    },
+    resultcategoryList: function resultcategoryList(prodnumber) {
+      var ids = _.pluck(_.where(product2resultcategory, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultcategoryid');
+      return utils.getListData(_.compact(ids.map(function (o) {
+        return _.findWhere(resultcategorys, {id: o})
+      })));
+    },
+    resultlocationList: function resultlocationList(prodnumber) {
+      var ids = _.pluck(_.where(product2resultlocation, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultlocationid');
+      return  utils.getListData(_.compact(ids.map(function (o) {
+        return _.findWhere(resultlocations, {id: o})
+      })));
+    },
+    resultList: function resultList(prodnumber) {
+      var ids = _.pluck(_.where(product2result, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultid');
+      return  utils.getListData(_.compact(ids.map(function (o) {
+        return _.findWhere(results, {id: o})
+      })));
+    }
   }
 
-  function productsList(reasonnumber) {
-    var ids = _.pluck(_.where(reason2product, {reasonid: _.findWhere(reasons, {number: reasonnumber}).id}), 'productid');
-    return getListData(_.compact(ids.map(function (o) {
-      return _.findWhere(products, {id: o})
-    })));
-  }
-  function resultcategoryList(prodnumber) {
-    var ids = _.pluck(_.where(product2resultcategory, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultcategoryid');
-    return getListData(_.compact(ids.map(function (o) {
-      return _.findWhere(resultcategorys, {id: o})
-    })));
-  }
-  function resultlocationList(prodnumber) {
-    var ids = _.pluck(_.where(product2resultlocation, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultlocationid');
-    return  getListData(_.compact(ids.map(function (o) {
-      return _.findWhere(resultlocations, {id: o})
-    })));
-  }
-  function resultList(prodnumber) {
-    var ids = _.pluck(_.where(product2result, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultid');
-    return  getListData(_.compact(ids.map(function (o) {
-      return _.findWhere(results, {id: o})
-    })));
-  }
-  
-  function computeIds(){
-    data.fagid = data.fagnumber && _.findWhere(fags,{number:data.fagnumber}).id
-    data.productid = data.productnumber && _.findWhere(products,{number:data.productnumber}).id
-    data.resultcategoryid = data.resultcategorynumber && _.findWhere(resultcategorys,{number:data.resultcategorynumber}).id
-    data.resultlocationid = data.resultlocationnumber && _.findWhere(resultlocations,{number:data.resultlocationnumber}).id
-    data.resultid = data.resultnumber && _.findWhere(results,{number:data.resultnumber}).id
+  function computeIds() {
+    data.fagid = data.fagnumber && _.findWhere(fags, {number: data.fagnumber}).id
+    data.productid = data.productnumber && _.findWhere(products, {number: data.productnumber}).id
+    data.resultcategoryid = data.resultcategorynumber && _.findWhere(resultcategorys, {number: data.resultcategorynumber}).id
+    data.resultlocationid = data.resultlocationnumber && _.findWhere(resultlocations, {number: data.resultlocationnumber}).id
+    data.resultid = data.resultnumber && _.findWhere(results, {number: data.resultnumber}).id
   }
 
   function cp2fagtextfield() {
     var fagnumber = $('#ddfagX').val();
     $('#tfag').val(fagnumber);
-    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, productsList(fagnumber)).ebbind(data, 'productnumber');
+    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, utils.productsList(fagnumber)).ebbind(data, 'productnumber');
     initProductDependingFields();
   }
 
   function cp2fagdd() {
     var fagnumber = $('#tfag').val();
     if (!_.findWhere(reasons, {number: fagnumber})) {
-      $('#tfag').val('');
-      $('#ddfagX').val(-1).selectmenu('refresh');
-      initProductDependingFields();
       $.alert('Hinweis', 'Kein erlaubte Nummer für Frage des Auftragebers: ' + fagnumber);
-      return;
+      $('#tfag').val('');
+      fagnumber = '-1';
     }
     $('#ddfagX').val(fagnumber).selectmenu('refresh');
-    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, productsList(fagnumber)).ebbind(data, 'productnumber');
+    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, utils.productsList(fagnumber)).ebbind(data, 'productnumber');
     initProductDependingFields();
     //console.log('cp2dd', evt.target.id, id, val, table, evt);
   }
 
   function initProductDependingFields() {
     var prodnumber = $('#ddproductX').val();
-    if (!prodnumber || parseInt(prodnumber) < 0) prodnumber = '';
-    $('#ddresultcategory').ebdropdown({width: '800px'}, resultcategoryList(prodnumber)).ebbind(data, 'resultcategorynumber');
-    $('#ddresultlocation').ebdropdown({width: '800px'}, resultlocationList(prodnumber)).ebbind(data, 'resultlocationnumber');
-    $('#ddresult').ebdropdown({width: '800px'}, resultList(prodnumber)).ebbind(data, 'resultnumber');
+    if (!prodnumber || parseInt(prodnumber) < 0)
+      prodnumber = '';
+    $('#ddresultcategory').ebdropdown({width: '800px'}, utils.resultcategoryList(prodnumber)).ebbind(data, 'resultcategorynumber');
+    $('#ddresultlocation').ebdropdown({width: '800px'}, utils.resultlocationList(prodnumber)).ebbind(data, 'resultlocationnumber');
+    $('#ddresult').ebdropdown({width: '800px'}, utils.resultList(prodnumber)).ebbind(data, 'resultnumber');
   }
 
   var init = function () {
@@ -101,10 +101,10 @@ var dlgMimaSFB = function (opts) {
 
     $('#tfag').ebbind(data, 'fagnumber').change(cp2fagdd)
 
-    $('#ddfag').ebdropdown({width: '800px', change: cp2fagtextfield}, getListData(fags)).ebbind(data, 'fagnumber');
-    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, getListData([])).ebbind(data, 'productnumber');
+    $('#ddfag').ebdropdown({width: '800px', change: cp2fagtextfield}, utils.getListData(fags)).ebbind(data, 'fagnumber');
+    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, utils.getListData([])).ebbind(data, 'productnumber');
     initProductDependingFields()
-    
+
     $('#begutachtungsdatum').datepicker(datepickerOptions).ebbind(data);
     $('#gutachter').ebbind(data);
     $('#bearbeitungsdauerHours').ebbind(data);
@@ -157,7 +157,7 @@ var dlgMimaSFB = function (opts) {
     </div>");
 
   var data = {
-    fagnumber: '270',
+    fagnumber: '',
     begutachtungsdatum: moment().format('DD.MM.YYYY')
   };
   var dlg = $(dlgTemplate);

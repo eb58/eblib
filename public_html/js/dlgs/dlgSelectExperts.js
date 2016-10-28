@@ -23,13 +23,13 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
         },
         error: function () {
           ret = [
-            {userid: 50000000000015, lastname: 'Fehrenbach', firstname: 'Mario', fakultaete: ['fakultät', 'moreFak1', 'moreFak2', 'moreFak3'], zusatzbezeichnung: ['ZusatzbezTest1', 'ZusatzbezTest2', 'ZusatzbezTest3']},
-            {userid: 50000000000016, lastname: 'Burka', firstname: 'Annika', fakultaete: ['Allgemeinmedizin'], zusatzbezeichnung: ['ZusatzbezTest1', 'ZusatzbezTest2', 'ZusatzbezTest3']},
-            {userid: 50000000000017, lastname: 'Schmider', firstname: 'Bernd', fakultaete: [], zusatzbezeichnung: []},
-            {userid: 50000000000018, lastname: 'Willmann', firstname: 'Peter', fakultaete: ['Geriatrie'], zusatzbezeichnung: ['Akkupunktur', 'Andrologie', 'Sportmedizin']},
-            {userid: 50000000000019, lastname: 'Burka', firstname: 'Annika', fakultaete: ['Allgemeinmedizin'], zusatzbezeichnung: ['ZusatzbezTest1', 'ZusatzbezTest2', 'ZusatzbezTest3']},
-            {userid: 50000000000020, lastname: 'Schmider', firstname: 'Bernd', fakultaete: [], zusatzbezeichnung: ''},
-            {userid: 50000000000021, lastname: 'Willmann', firstname: 'Peter', fakultaete: ['Geriatrie'], zusatzbezeichnung:['Akkupunktur', 'Andrologie', 'Sportmedizin']}
+            {userid: 50000000000015, lastname: 'Fahrenbach', firstname: 'Markus', fakultaete: ['fakultät', 'moreFak1', 'moreFak2', 'moreFak3'], zusatzbezeichnung: ['ZusatzbezTest1', 'ZusatzbezTest2', 'ZusatzbezTest3']},
+            {userid: 50000000000016, lastname: 'Burka', firstname: 'Anne', fakultaete: ['Allgemeinmedizin'], zusatzbezeichnung: ['ZusatzbezTest1', 'ZusatzbezTest2', 'ZusatzbezTest3']},
+            {userid: 50000000000017, lastname: 'Schmiester', firstname: 'Bernd', fakultaete: [], zusatzbezeichnung: []},
+            {userid: 50000000000018, lastname: 'Wollmann', firstname: 'Piot', fakultaete: ['Geriatrie'], zusatzbezeichnung: ['Akkupunktur', 'Andrologie', 'Sportmedizin']},
+            {userid: 50000000000019, lastname: 'Burka', firstname: 'Anne', fakultaete: ['Allgemeinmedizin'], zusatzbezeichnung: ['ZusatzbezTest1', 'ZusatzbezTest2', 'ZusatzbezTest3']},
+            {userid: 50000000000017, lastname: 'Schmiester', firstname: 'Bernd', fakultaete: [], zusatzbezeichnung: []},
+            {userid: 50000000000018, lastname: 'Wollmann', firstname: 'Piot', fakultaete: ['Geriatrie'], zusatzbezeichnung: ['Akkupunktur', 'Andrologie', 'Sportmedizin']},
           ];
         }
       });

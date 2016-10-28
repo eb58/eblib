@@ -358,10 +358,7 @@
         myopts.sortcolname = util.colNameFromColid(colid);
         sortToggle();
         if (myopts.hasMoreResults && myopts.reloadData) {
-          var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
-          var sortcrit = {};
-          sortcrit[coldef.dbcol] = coldef.order;
-          myopts.reloadData(sortcrit);
+          myopts.reloadData();
         } else {
           doSort();
         }
@@ -399,15 +396,7 @@
     function reloading(event) { // reloading
       if (event.which === 13 && myopts.reloadData) {
         log('reloading', event, event.which);
-        var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
-        var sortcrit = {};
-        if (coldef)
-          sortcrit[coldef.dbcol] = coldef.order;
-        if (myopts.reloadData(sortcrit)) {
-//          pageCur = 0;
-//          pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-//          redraw(pageCur);
-        }
+        myopts.reloadData();
         event.preventDefault();
       }
     }
@@ -613,6 +602,15 @@
         return tblData.filter(function (row) {
           return row.selected;
         });
+      },
+      setSortColname: function (colname) {
+        myopts.sortcolname = colname;
+      },
+      getSortColname: function () {
+        return myopts.sortcolname;
+      },
+      getColdef: function (colname) {
+        return _.findWhere(myopts.columns, {name: colname});
       }
     });
 

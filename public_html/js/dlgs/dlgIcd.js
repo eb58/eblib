@@ -40,7 +40,7 @@ var dlgIcd = function (icds, onTakeOverCallback, opts) {
     title: 'ICD-Code w\u00e4hlen',
     width: 800, height: 520,
     closeText: 'Schlie\u00dfen',
-    modal: false,
+    modal: true,
     buttons: {
       '\u00dcbernehmen': function () {
         var v = getValues();

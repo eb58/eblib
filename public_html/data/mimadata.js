@@ -23,7 +23,7 @@ var mimadata = {
             "name": "weitere Dokumente zum Auftrag",
             "systemtab": false
           },
-          "decisionAccept": null
+          "decisionAccept": true
         },
         {
           "crypteddocid": "F02B690CD57A4776",
@@ -46,7 +46,7 @@ var mimadata = {
             "name": "weitere Dokumente zum Auftrag",
             "systemtab": false
           },
-          "decisionAccept": null
+          "decisionAccept": false
         },
         {
           "crypteddocid": "BF0A8DB569277288",

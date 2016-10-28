@@ -1,16 +1,17 @@
 /* global _, moment, products, fags, resultcategorys, resultlocations, results, datepickerOptions, reasons, product2resultcategory, reason2product, product2resultlocation, product2result */
-
 var dlgMimaSFB = function (opts) {
   $('#dlgMimaSFB').remove();
   opts = opts || {};
+
+  var ddwidth = 600;
 
   var dlgDefOpts = {
     open: function () {
       init();
     },
     title: 'Mima-SFB erstellen',
-    width: 1035,
-    height: 430,
+    width: ddwidth + 235,
+    height: 435,
     closeText: 'Schlie\u00dfen',
     buttons: {
       'OK': function () {
@@ -27,61 +28,61 @@ var dlgMimaSFB = function (opts) {
   var utils = {
     getListData: function getListData(data) {
       return [{v: -1, txt: ''}].concat(data.map(function (o) {
-        return {v: o.number, txt: o.number + ' ' + o.text}
+        return {v: o.number, txt: o.number + ' ' + o.text};
       })).sort(function (a, b) {
-        return a.txt === b.txt ? 0 : (a.txt < b.txt ? -1 : +1)
+        return a.txt === b.txt ? 0 : (a.txt < b.txt ? -1 : +1);
       });
     },
     productsList: function productsList(reasonnumber) {
       var ids = _.pluck(_.where(reason2product, {reasonid: _.findWhere(reasons, {number: reasonnumber}).id}), 'productid');
       return utils.getListData(_.compact(ids.map(function (o) {
-        return _.findWhere(products, {id: o})
+        return _.findWhere(products, {id: o});
       })));
     },
     resultcategoryList: function resultcategoryList(prodnumber) {
       var ids = _.pluck(_.where(product2resultcategory, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultcategoryid');
       return utils.getListData(_.compact(ids.map(function (o) {
-        return _.findWhere(resultcategorys, {id: o})
+        return _.findWhere(resultcategorys, {id: o});
       })));
     },
     resultlocationList: function resultlocationList(prodnumber) {
       var ids = _.pluck(_.where(product2resultlocation, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultlocationid');
       return  utils.getListData(_.compact(ids.map(function (o) {
-        return _.findWhere(resultlocations, {id: o})
+        return _.findWhere(resultlocations, {id: o});
       })));
     },
     resultList: function resultList(prodnumber) {
       var ids = _.pluck(_.where(product2result, {productid: _.findWhere(products, {number: prodnumber}).id}), 'resultid');
       return  utils.getListData(_.compact(ids.map(function (o) {
-        return _.findWhere(results, {id: o})
+        return _.findWhere(results, {id: o});
       })));
     }
-  }
+  };
 
   function computeIds() {
-    data.fagid = data.fagnumber && _.findWhere(fags, {number: data.fagnumber}).id
-    data.productid = data.productnumber && _.findWhere(products, {number: data.productnumber}).id
-    data.resultcategoryid = data.resultcategorynumber && _.findWhere(resultcategorys, {number: data.resultcategorynumber}).id
-    data.resultlocationid = data.resultlocationnumber && _.findWhere(resultlocations, {number: data.resultlocationnumber}).id
-    data.resultid = data.resultnumber && _.findWhere(results, {number: data.resultnumber}).id
+    data.fagid = data.fagnumber && _.findWhere(fags, {number: data.fagnumber}).id;
+    data.productid = data.productnumber && _.findWhere(products, {number: data.productnumber}).id;
+    data.resultcategoryid = data.resultcategorynumber && _.findWhere(resultcategorys, {number: data.resultcategorynumber}).id;
+    data.resultlocationid = data.resultlocationnumber && _.findWhere(resultlocations, {number: data.resultlocationnumber}).id;
+    data.resultid = data.resultnumber && _.findWhere(results, {number: data.resultnumber}).id;
   }
 
   function cp2fagtextfield() {
     var fagnumber = $('#ddfagX').val();
     $('#tfag').val(fagnumber);
-    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, utils.productsList(fagnumber)).ebbind(data, 'productnumber');
+    $('#ddproduct').ebdropdown({width: ddwidth+'px', change: initProductDependingFields}, utils.productsList(fagnumber)).ebbind(data, 'productnumber');
     initProductDependingFields();
   }
 
   function cp2fagdd() {
     var fagnumber = $('#tfag').val();
     if (!_.findWhere(reasons, {number: fagnumber})) {
-      $.alert('Hinweis', 'Kein erlaubte Nummer für Frage des Auftragebers: ' + fagnumber);
+      $.alert('Hinweis', 'Kein erlaubte Nummer f\u00fcr Frage des Auftragebers: ' + fagnumber);
       $('#tfag').val('');
       fagnumber = '-1';
     }
     $('#ddfagX').val(fagnumber).selectmenu('refresh');
-    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, utils.productsList(fagnumber)).ebbind(data, 'productnumber');
+    $('#ddproduct').ebdropdown({width: ddwidth+'px', change: initProductDependingFields}, utils.productsList(fagnumber)).ebbind(data, 'productnumber');
     initProductDependingFields();
     //console.log('cp2dd', evt.target.id, id, val, table, evt);
   }
@@ -90,20 +91,20 @@ var dlgMimaSFB = function (opts) {
     var prodnumber = $('#ddproductX').val();
     if (!prodnumber || parseInt(prodnumber) < 0)
       prodnumber = '';
-    $('#ddresultcategory').ebdropdown({width: '800px'}, utils.resultcategoryList(prodnumber)).ebbind(data, 'resultcategorynumber');
-    $('#ddresultlocation').ebdropdown({width: '800px'}, utils.resultlocationList(prodnumber)).ebbind(data, 'resultlocationnumber');
-    $('#ddresult').ebdropdown({width: '800px'}, utils.resultList(prodnumber)).ebbind(data, 'resultnumber');
+    $('#ddresultcategory').ebdropdown({width: ddwidth+'px'}, utils.resultcategoryList(prodnumber)).ebbind(data, 'resultcategorynumber');
+    $('#ddresultlocation').ebdropdown({width: ddwidth+'px'}, utils.resultlocationList(prodnumber)).ebbind(data, 'resultlocationnumber');
+    $('#ddresult').ebdropdown({width: ddwidth+'px'}, utils.resultList(prodnumber)).ebbind(data, 'resultnumber');
   }
 
   var init = function () {
 
     $(".positive-integer").numeric({decimal: false, negative: false});
 
-    $('#tfag').ebbind(data, 'fagnumber').change(cp2fagdd)
+    $('#tfag').ebbind(data, 'fagnumber').change(cp2fagdd);
 
-    $('#ddfag').ebdropdown({width: '800px', change: cp2fagtextfield}, utils.getListData(fags)).ebbind(data, 'fagnumber');
-    $('#ddproduct').ebdropdown({width: '800px', change: initProductDependingFields}, utils.getListData([])).ebbind(data, 'productnumber');
-    initProductDependingFields()
+    $('#ddfag').ebdropdown({width: ddwidth+'px', change: cp2fagtextfield}, utils.getListData(fags)).ebbind(data, 'fagnumber');
+    $('#ddproduct').ebdropdown({width: ddwidth+'px', change: initProductDependingFields}, utils.getListData([])).ebbind(data, 'productnumber');
+    initProductDependingFields();
 
     $('#begutachtungsdatum').datepicker(datepickerOptions).ebbind(data);
     $('#gutachter').ebbind(data);
@@ -130,7 +131,7 @@ var dlgMimaSFB = function (opts) {
     $('#dlgMimaSFB img.ui-datepicker-trigger').css('vertical-align', 'bottom');
     $("#dlgMimaSFB #bearbeitungsdauerHours,#dlgMimaSFB #bearbeitungsdauerMins").css('width', '69px');
   };
-  var dlgTemplate = ("\
+  var dlgTemplate = "\
     <div id='dlgMimaSFB'>\n\
       <table id='layouttable1'>\n\
         <tbody>\n\
@@ -154,7 +155,7 @@ var dlgMimaSFB = function (opts) {
           <td>Bearbeitungsdauer(Std/Min)</td><td><input type='text' class='positive-integer' id='bearbeitungsdauerHours'> / <input type='text' class='positive-integer' id='bearbeitungsdauerMins'></td>\n\
         </tr>\n\
       </table>\n\
-    </div>");
+    </div>";
 
   var data = {
     fagnumber: '',
@@ -163,6 +164,6 @@ var dlgMimaSFB = function (opts) {
   var dlg = $(dlgTemplate);
   dlg.dialog($.extend({}, dlgDefOpts, opts || {}));
   dlg.data = data;
-  dlg.computeIds = computeIds
+  dlg.computeIds = computeIds;
   return dlg;
 };

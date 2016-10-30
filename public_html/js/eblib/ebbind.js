@@ -1,55 +1,53 @@
 /* global _ ,jQuery*/
-
-(function ($) {
-  "use strict";
-  $.fn.ebbind = function (data, m) {
+(function ($) { "use strict";
+  $.fn.ebbind = function (data, key) {
     var id = this[0].id;
     var type = this[0].type;
     var self = this;
 
-    m = m || id;
+    key = key || id;
     if (type === 'text' || type === 'password') {
-      this.val(data[m]).off().on('change', function () {
-        data[m] = self.val();
-        console.log('changed ' + id, data[m], data);
+      this.val(data[key]).off().on('change', function () {
+        data[key] = self.val();
+        console.log('text changed ' + id, data[key], data);
       }).on('keyup', function () {
-        data[m] = self.val();
-        console.log('changed ' + id, self, data[m], data);
+        data[key] = self.val();
+        console.log('text keyup ' + id, self, data[key], data);
       });
     } else if (type === 'checkbox') {
-      this.prop('checked', data[m]).off().on('click', function () {
-        data[m] = self.prop('checked');
-        console.log('changed ' + id, data[m], data);
+      this.prop('checked', data[key]).off().on('click', function () {
+        data[key] = self.prop('checked');
+        console.log('checkbox changed ' + id, data[key], data);
       });
     } else if ($('select', this).length) {
-      this.setSelectedValue(data[m]).off().on("selectmenuchange", function () {
-        data[m] = self.getSelectedValue();
-        console.log('select changed ' + id, data[m], data);
+      this.setSelectedValue(data[key]).off().on("selectmenuchange", function () {
+        data[key] = self.getSelectedValue();
+        console.log('select changed ' + id, data[key], data);
       });
     } else if ($('input:radio', this).length) {
-      this.val(data[m]).off().on("change", function () {
-        data[m] = self.val();
-        console.log('radio changed ' + id, data[m], data);
+      this.val(data[key]).off().on("change", function () {
+        data[key] = self.val();
+        console.log('radio changed ' + id, data[key], data);
       });
     } else if ($('textarea', this).length) {
-      var $x = $('textarea', this);
-      $x.val(data[m], this).off().on('keyup', function () {
-        data[m] = $x.val();
-        console.log('textarea changed ' + id, data[m], data);
+      var $ta = $('textarea', this);
+      $ta.val(data[key], this).off().on('keyup', function () {
+        data[key] = $ta.val();
+        console.log('textarea changed ' + id, data[key], data);
       });
       this.setTextAreaCounter();
     } else if ($('.ebselect', this).length) {
-      var $x = $('input:checkbox', this);
-      data[m] && data[m].forEach(function (v) {
+      var $sel = $('input:checkbox', this);
+      data[key] && data[key].forEach(function (v) {
         if (_.isNumber(v)) {
-          $($x[v]).prop('checked', true);
+          $($sel[v]).prop('checked', true);
         } else {
           $('#' + v.replace(/ /g, ''), self).prop('checked', true);
         }
       });
-      $x.off().on('click', function () {
-        data[m] = self.getSelectedValuesAsString();
-        console.log('textarea changed ' + id, data[m], data);
+      $sel.off().on('click', function () {
+        data[key] = self.getSelectedValuesAsString();
+        console.log('ebselect changed ' + id, data[key], data);
       });
     }
     return this;

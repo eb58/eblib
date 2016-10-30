@@ -7,12 +7,8 @@
     <link rel="stylesheet" href="/lib/jQueryUI-1.12.0/jquery-ui.css">
     <link rel="stylesheet" href="/css/ebselect.css">
     <style>
-      * {
-        font-family:Arial;
-        color: black;
-        font-size: 10px;
-      }
-      img.ui-datepicker-trigger{ vertical-align: bottom   } 
+      * {font-family:Arial;color: black;font-size: 12px; }
+      img.ui-datepicker-trigger{ vertical-align: bottom  } 
     </style>
     <script src="/lib/underscore-1.8.3/underscore.js"></script>
     <script src="/lib/jQuery-1.11.3/jquery.js"></script>
@@ -30,7 +26,7 @@
       var radios = ['Radio1', 'Radio2', 'Radio3'];
       var keywords = ['Server1', 'Server2', 'Server3', 'Server4', 'Server5', 'Server6', 'Server7'];
       var haircolor = ['blond', 'braun', 'rot', 'weiß'];
-      var dataX = {
+      var data = {
         usr: 'ebrandl',
         pwd: '',
         date: '28.01.2011',
@@ -42,43 +38,53 @@
         haircolor1: [2, 3],
         haircolor2: ['blond', 'weiß']
       };
-      function defineProp(o, oX, keyname) {
-        Object.defineProperty(o, keyname, {
+
+      function set(key, v) {
+        var x = $('#' + key);
+        var type = x.attr('type');
+        if (type === 'text' || type === 'password') {
+          x.val(v);
+        } else if (type === 'checkbox') {
+          x.attr('checked', v);
+        } else if ($('select', x).length) {
+          $('select', x).selectmenu().val(v).selectmenu('refresh');
+        } else if ($('input:radio', x).length) {
+          $('input:radio#' + v, x).prop('checked',true);
+          $('input:radio', x).checkboxradio('refresh');
+        } else if ($('select', x).length) {
+          // TODO
+        }
+      }
+
+      function defineProp(o, oX, key) {
+        Object.defineProperty(o, key, {
           set: function (v) {
-            console.log('setting', this, v);
-            oX[keyname] = v;
-            $('#' + keyname).val(v);
+            console.log('setting', key, v);
+            oX[key] = v;
+            set(key, v);
           },
           get: function () {
-            console.log('reading', this);
-            return oX[keyname];
+            console.log('getting', oX);
+            return oX[key];
           }
         });
-
       }
-      data = _.extend({}, dataX);
-      defineProp(data, dataX, 'usr');
-      defineProp(data, dataX, 'pwd');
-      defineProp(data, dataX, 'sec');
-      defineProp(data, dataX, 'date');
-      defineProp(data, dataX, 'srv');
-      defineProp(data, dataX, 'txt');
-      defineProp(data, dataX, 'choice1');
-      defineProp(data, dataX, 'choice2');
-      defineProp(data, dataX, 'haircolor1');
-      defineProp(data, dataX, 'haircolor2');
+      var vm = _.extend({}, data);
+      data = _.mapObject(data, function (val, key) {
+        return defineProp(vm, data, key);
+      });
 
       $(document).ready(function () {
-        $('#usr').ebbind(data);
-        $('#pwd').ebbind(data);
-        $('#sec').ebbind(data);
-        $('#date').datepicker(datepickerOptions).ebbind(data);
-        $('#srv').ebdropdown({}, keywords).ebbind(data);
-        $('#choice1').ebradio({}, radios).ebbind(data);
-        $('#choice2').ebradio({}, radios).ebbind(data);
-        $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(data);
-        $('#haircolor1').ebselect({values: haircolor}).ebbind(data);
-        $('#haircolor2').ebselect({values: haircolor}).ebbind(data);
+        $('#usr').ebbind(vm);
+        $('#pwd').ebbind(vm);
+        $('#sec').ebbind(vm);
+        $('#date').datepicker(datepickerOptions).ebbind(vm);
+        $('#srv').ebdropdown({}, keywords).ebbind(vm);
+        $('#choice1').ebradio({}, radios).ebbind(vm);
+        $('#choice2').ebradio({}, radios).ebbind(vm);
+        $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(vm);
+        $('#haircolor1').ebselect({values: haircolor}).ebbind(vm);
+        $('#haircolor2').ebselect({values: haircolor}).ebbind(vm);
       });
     </script>
   </head>

@@ -561,6 +561,7 @@
     });
 
 // ##########  Exports ############  
+    this.util = util;
     $.extend(this, {
       toggleGroupIsOpen: function (groupid) {
         var pc = pageCur;

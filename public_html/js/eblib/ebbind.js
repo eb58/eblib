@@ -21,7 +21,8 @@
       });
     } else if ($('select', this).length) {
       this.setSelectedValue(data[key]).off().on("selectmenuchange", function () {
-        data[key] = self.getSelectedValue();
+        var v = parseInt( self.getSelectedValue() );
+        data[key] = v || self.getSelectedValue();
         console.log('select changed ' + id, data[key], data);
       });
     } else if ($('input:radio', this).length) {

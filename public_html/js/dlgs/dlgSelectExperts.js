@@ -35,20 +35,14 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
       });
       return ret;
     },
-    getSelectedExpertId: function (grid) {
-      var a = [];
-      grid.iterateSelectedValues(function (o) {
-        a.push(o[0]);
-      });
-      return a.length === 0 ? 0 : a[0];
-    },
     takeover: function () {
-      var id = utils.getSelectedExpertId(grid);
-      if (!id) {
+      var rows =  grid.getSelectedRows();
+      if (!rows || rows.length===0) {
         $.alert('Hinweis', 'Bitte einen Eintrag ausw\u00e4hlen');
         return false;
       } else {
-        expert = _.findWhere(experts, {userid: id});
+        var id =  rows[0][0]
+        var expert = _.findWhere(experts, {userid:id});
         return onTakeOverCallback({
           userid: id,
           name: utils.formatName(expert)
@@ -62,7 +56,7 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
   var tbldata = experts.map(function (o) {
     return [o.userid, utils.formatName(o), (o.fakultaete || []).join(', '), (o.zusatzbezeichnung || []).join(', '), o.email || ''];
   });
-  
+
   var optsExpertsGrid = {
     columns: [
       {name: "userid", technical: true, invisible: true},

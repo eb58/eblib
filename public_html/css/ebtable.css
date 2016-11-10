@@ -29,14 +29,15 @@
 }
 
 .ebtable #data th{ 
-  background-color:#d5d5cd; 
+  background: linear-gradient(#c6c6b6, #e8e8d4);
+  /*background-color:#e5d5ff; */
   padding: 5px 2px 5px 2px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .ebtable #data th input, .ebtable #data th select {
-  width: 85%;
+  width: 90%;
   box-sizing: border-box;
 }
 
@@ -51,7 +52,7 @@
 }
 
 .ebtable #data td{ 
-  background-color:#dfdfdf;
+  background: #e8e8d4;
   padding: 2px 1px 2px 1px;
   overflow: hidden;
   text-overflow: ellipsis;

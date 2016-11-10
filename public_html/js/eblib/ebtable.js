@@ -80,20 +80,23 @@
       colNameFromColid: function colNameFromColid(colid) {
         return  _.findWhere(myopts.columns, {id: colid}).name;
       },
-      colColIdFromName: function colNameFromColid(colname) {
-        return  _.findWhere(myopts.columns, {name: colname}).id;
+      colDefFromName: function (colname) {
+        return _.findWhere(myopts.columns, {name: colname});
+      },
+      colIdFromName: function colNameFromColid(colname) {
+        return util.colDefFromName(colname).id;
       },
       colIsInvisible: function colIsInvisible(colname) {
-        return _.findWhere(myopts.columns, {name: colname}).invisible;
+        return util.colDefFromName(colname).invisible;
       },
       colIsTechnical: function colIsTechnical(colname) {
-        return _.findWhere(myopts.columns, {name: colname}).technical;
+        return util.colDefFromName(colname).technical;
       },
       getRender: function getRender(colname) {
-        return _.findWhere(myopts.columns, {name: colname}).render;
+        return util.colDefFromName(colname).render;
       },
       getMatch: function getMatch(colname) {
-        var matcher = _.findWhere(myopts.columns, {name: colname}).match;
+        var matcher = util.colDefFromName(colname).match;
         if (!matcher)
           return $.fn.ebtable.matcher['starts-with-matches'];
         return _.isString(matcher) ? $.fn.ebtable.matcher[matcher] : matcher;
@@ -150,7 +153,7 @@
       hasMoreResults: hasMoreResults,
       jqueryuiTooltips: true,
       clickOnRowHandler: function (rowData, row) {
-        console.log(rowData, row);
+        //console.log(rowData, row);
       },
       lang: 'de'
     };
@@ -320,6 +323,10 @@
 
     function deselectAllRows() {
       $(selgridid + '#data input[type=checkbox]').prop('checked', false);
+      origData.forEach(function (row) {
+        return row.selected = false;
+      });
+
       if (myopts.onSelection) {
         origData.forEach(function (row, rowNr) {
           if (row.selected) {
@@ -330,7 +337,7 @@
     }
 
     function showSortingIndicators() {
-      var colid = util.colColIdFromName(myopts.sortcolname);
+      var colid = util.colIdFromName(myopts.sortcolname);
       var colidx = util.indexOfCol(myopts.sortcolname);
       var coldef = myopts.columns[colidx];
       var bAsc = coldef.order === 'asc';
@@ -610,8 +617,11 @@
       getSortColname: function () {
         return myopts.sortcolname;
       },
-      getColdef: function (colname) {
-        return _.findWhere(myopts.columns, {name: colname});
+      unselect: function () {
+        tblData.forEach(function (row) {
+          return row.selected = false;
+        });
+        redraw(pageCur);
       }
     });
 

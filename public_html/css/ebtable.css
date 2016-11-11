@@ -30,7 +30,6 @@
 
 .ebtable #data th{ 
   background: linear-gradient(#c6c6b6, #e8e8d4);
-  /*background-color:#e5d5ff; */
   padding: 5px 2px 5px 2px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -71,5 +70,5 @@
 
 /* ConfigDlg */
 .ebtableSelectable { list-style-type: none; padding: 0px; width: 100%; }
-.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
-.ebtableSelectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }
+.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px; font-size: 10px; font-weight: bold; background-color:#e8e8d4; }
+.ebtableSelectable li.invisible{ margin: 3px 0 0 0;  padding: 3px; font-size: 10px; font-weight: bold; background-color:#f8f8ea; }

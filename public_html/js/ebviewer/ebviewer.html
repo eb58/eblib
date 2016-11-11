@@ -3,73 +3,91 @@
   <head>
     <title>Viewer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link  type="text/css" rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <link rel="stylesheet" href="vendor/jQueryUI-1.12.0/jquery-ui.min.css">
     <style type="text/css">
       html, body, iframe, div { margin: 0; padding: 0; outline: 0; }
       html, body { height: 100%; width: 100%; cursor: default; }
-      #container { z-index: 2; min-height: 100%; height: 100%; min-width: 800px; width: 100%; position: absolute; overflow: hidden; text-align: center; background: #dfdfdf; }     
-      #document { z-index: 3; position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; overflow: hidden; background:url(images/loading.gif) no-repeat center center; background-color: #fff; }              
+      #container { z-index: 2; min-height: 100%; height: 100%; min-width: 600px; width: 100%; position: absolute; overflow: hidden; text-align: center; background: #dfdfdf; }     
+      #document { z-index: 3; position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; overflow: hidden; background:url(images/loading.gif) no-repeat center center; background-color: #fff; }
+      #footer { z-index: 80;min-width: 600px; position: absolute; left: 0px; right: 0px; bottom: 0px; height: 50px; background: #aaa; }
+      #btns { padding: 5px 10px 5px 10px; float: right; }
     </style>
-    <script src="/vendor/underscore-1.8.3/underscore.js"></script>
-    <script src="/vendor/jquery-1.11.3/jquery.js"></script>
-    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+
+    <script src="/vendor/Underscore-1.8.3/underscore.min.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery.min.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.min.js"></script>
     <script>
       function getEmbedString(docurl, ext) {
         if ($.inArray(ext, ['jpg', 'jepg', 'png', 'gif', 'tiff', 'tif', 'bmp']) >= 0) {
-          return "<img id='docframeImg' src='" + docurl + "' style='height:100%'>";
+          return "<img id='docframeImg' src='" + docurl + "' style='width:100%'>";
         } else {
           return "<iframe id='docframePdf' src='" + docurl + "' style='width:100%; height:100%'>";
         }
       }
-      function resize() {
-        var sbw = 16;
-        $('.ui-dialog') && $('.ui-dialog').css({
-          'width': $(window).width() - sbw,
-          'height': $(window).height() - sbw,
-          'left': '0px',
-          'top': '0px'
+
+      function lockWindowPosition() {
+        $.ajax({
+          url: "/ISmed/ajaxUserPreference.do?ajax=1",
+          data: {
+            action: "write",
+            name: "docWindowPos",
+            x: window.screenLeft ? window.screenLeft : window.screenX,
+            y: window.screenTop ? window.screenTop : window.screenY
+          },
+          success: function (result) {
+            var opts = {
+              cbOk: function () {
+                $.alert("Hinweis", "Die Fensterposition wurde erfolgreich gespeichert.");
+              },
+              cbErr: function () {
+                $.alert("Warning", "Die Fensterposition konnte nicht gespeichert werden.");
+              }
+            };
+            handleAjaxResult(result, opts);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log("user preference ajax error: " + textStatus);
+          }
         });
       }
       $(document).ready(function () {
-        var params = (window.location.search || '/docs/test.pdf|pdf').replace('?', '').split('|');
+        $("#document").css("background", "transparent");
+        var params = window.location.search.replace('?', '').split('|');
         console.log(params);
-        var doc = params[0];
-        var ext = params[1];
-        var width = params[2];
-        var height = params[3];
-        $('#document').html(getEmbedString(doc, ext));
-        $('#dlgViewer').dialog({
-          open: resize,
-          title: 'Anzeige' + doc,
-          closeText: 'Schlie\u00dfen',
-          width: width,
-          height: height,
-          draggable: false,
-          resizable: false,
-          close: function () {
-            $(this).dialog("close");
-            window.close();
-          },
-          buttons: {
-            'Position merken': function () {
-            },
-            'Lokaler Druck': function () {
-            },
-            'Abbrechen': function () {
-              $(this).dialog("close");
-              window.close();
-            }
-          }
-        });
-        $(window).resize();
-      });
-      $(window).resize(resize);
+        var docurl = params[0];
+        var name = params[1];
+        var ext = params[2];
+        var info = params[3];
+        $('title').text('Viewer - ' + name + '.' + ext + ' (' + info + ')');
+        $('#document').html(getEmbedString(docurl, ext));
 
+        if (ext === 'pdf')
+          $('#btnPrintLocal').hide();
+        else
+          $('#btnPrintLocal').show();
+
+        $('#btnKeepPosition').button().click(function () {
+          lockWindowPosition();
+        });
+        $('#btnPrintLocal').button().click(function () {
+          $('#btnPrintLocal').prop('disabled', 'disabled');
+          print();
+        });
+        $('#btnEnd').button().click(function () {
+          window.close();
+        });
+      });
     </script>
   </head>
   <body>
-    <div id='dlgViewer'>
-      <div id="document">
+    <div id='container'>
+      <div style="height:95%" id="document"></div>
+    </div>
+    <div  id="footer">
+      <div style="height:5%" id="btns">
+        <button id='btnKeepPosition'><img src="images/pin.png" style="width:16px;height:16px;" alt="Fensterposition merken" title="Fensterposition merken"/></button>
+        <button id='btnPrintLocal'>Lokaler Druck</button>
+        <button id='btnEnd'>Beenden</button>
       </div>
     </div>
   </body>

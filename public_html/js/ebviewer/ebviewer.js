@@ -5,29 +5,31 @@ var ebviewer = (function () {
     var res = {};
     $.ajax({
       async: false,
-      url: "ajaxUserPreference.do",
+      url: "ajaxUserPreference.do?ajax=1",
       data: {action: "read", name: "docWindowPos"},
       success: function (result) {
-        res = result.x && result.y ? {x: result.x, y: result.y} : {};
+        handleAjaxResult(result, function () {
+          res = {x: result.x, y: result.y};
+        });
       }
     });
     return res;
   }
 
-  function view(docurl, ext, opts) {
+  function view(docurl, name, ext, info, opts) {
     opts = opts || {};
     var defopts = {
-      width: 700,
-      height: 1100,
+      width: 800,
+      height: 900,
       resizable: true,
       dependent: true, /* does the document window depend on its opener? */
       name: opts.crypteddocid ? "doc_" + opts.crypteddocid : docurl, /* internal document window name */
       x: -1, /* for fixed window position (-1 = not fixed) */
-      y: -1, /*fixed window position (-1 = not fixed) */
-      fixPosition: false /* true = fixed position is retrieved from user preferences */
+      y: -1, /* fixed window position (-1 = not fixed) */
+      fixPosition: true /* true = fixed position is retrieved from user preferences */
     };
-    var pos = opts.fixPosition && getPositionFromUserPrefs ? getPositionFromUserPrefs() : {x: -1, y: -1};
-    var myopts = $.extend({}, defopts, opts, pos);
+    var myopts = $.extend({}, defopts, opts );
+    var myopts = $.extend({}, myopts, myopts.fixPosition && getPositionFromUserPrefs ? getPositionFromUserPrefs() : {x: -1, y: -1});
     var params = _.template(
       "width=<%=w%>px,\n\
       height=<%=h%>px,\n\
@@ -50,7 +52,7 @@ var ebviewer = (function () {
       l: myopts.x,
       t: myopts.y
     });
-    return window.open("/js/ebviewer/ebviewer.html?" + docurl + '|' + ext + '|' + myopts.width + '|' + myopts.height, '', params);
+    return window.open("/js/ebviewer/ebviewer.html?" + docurl + '|' + name + '|' +  ext + '|' + info +'|'  , '', params);
   }
 
   return {

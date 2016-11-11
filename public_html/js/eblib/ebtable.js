@@ -322,11 +322,6 @@
     }
 
     function deselectAllRows() {
-      $(selgridid + '#data input[type=checkbox]').prop('checked', false);
-      origData.forEach(function (row) {
-        return row.selected = false;
-      });
-
       if (myopts.onSelection) {
         origData.forEach(function (row, rowNr) {
           if (row.selected) {
@@ -334,6 +329,10 @@
           }
         });
       }
+      $(selgridid + '#data input[type=checkbox]').prop('checked', false);
+      origData.forEach(function (row) {
+        return row.selected = false;
+      });
     }
 
     function showSortingIndicators() {

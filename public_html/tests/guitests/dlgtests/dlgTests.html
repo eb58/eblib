@@ -16,7 +16,9 @@
     <script src="/js/polyfills.js"></script>
     <script src="/js/eblib/mx.js"></script>
     <script src="/js/eblib/ebtable.js"></script>
+    <script src="/js/eblib/ebselect.js"></script>
     <script src="/js/dlgs/dlgIcd.js"></script>  
+    <script src="/js/dlgs/dlgTestEbselect.js"></script>  
     <script src="/data/icddata.js"></script>  
     <script>
       function takeover(o) {
@@ -25,10 +27,19 @@
       }
 
       $().ready(function () {
+        //dlgIcd(icddata, takeover, {icdCode: 'A'});
+        $('#testSelect').on('click', function () {
+          dlgTestEbselect();
+        })
+        $('#testIcd').on('click', function () {
           dlgIcd(icddata, takeover, {icdCode: 'A'});
+        })
+        dlgTestEbselect();
       });
     </script>
   </head>
   <body>
+    <button id="testSelect">Test Ebselect</button>
+    <button id="testIcd">Test Icd</button>
   </body>
 </html>

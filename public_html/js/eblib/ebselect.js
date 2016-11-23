@@ -54,14 +54,14 @@
     })(this);
 
     this.getSelectedValues = function getSelectedValues() {
-      return _.pluck($('#' + id + ' .ebselect input:checked'), 'value');
+      return _.pluck($('.ebselect input:checked',self), 'value');
     };
     this.getSelectedValuesAsString = function getSelectedValues() {
       return _.map(this.getSelectedValues(), function (o, idx) {
         return _.findWhere(myopts.values,{v:parseInt(o)}).txt;
       });
     };
-    $('#' + id + ' .ebselect input').on('change', function () {
+    $('.ebselect input',self).on('change', function () {
       myopts.onselchange(self);
     });
     myopts.onselchange(this);

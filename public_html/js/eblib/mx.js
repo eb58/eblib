@@ -1,4 +1,4 @@
-/* global _, $ */
+/* global _ */
 //  2-dimensional array -- m(atri)x
 var mx = function mx(m, groupdef) {  //groupdef see below 
   var basicapi = {
@@ -62,7 +62,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
             var f = filters[i];
             var cellData = $.trim(row[f.col]);
             var matchfct = f.match || $.fn.ebtable.matcher['starts-with-matches'];
-            b = b && matchfct(cellData, f.searchtext, row);
+            b = b && matchfct(cellData, f.searchtext, row, m);
           }
           return b;
         };
@@ -87,31 +87,33 @@ var mx = function mx(m, groupdef) {  //groupdef see below
         return row[groupdefs.grouplabel] === groupdefs.grouphead;
       },
       initGroups: function initGroups(groupdefs) {
-        if (!groupdefs.groupid)
+        if (!groupdefs.groupid )
           return;
-        var groups = {}, row, r, groupId;
-        for ( r = 0; r < this.length; r++) {
+        var groupsdata = this.groupsdata , row, r, groupId;
+        for (r = 0; r < this.length; r++) {
           row = this[r];
           groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
           row.isGroupHeader = row[groupdefs.grouplabel] === groupdefs.grouphead;
           row.isGroupElement = groupId && !row.isGroupHeader;
-          if (groupId && !groups[groupId]) {
-            groups[groupId] = {isOpen: false, name: $.trim(row[groupdefs.groupname])};
+          if (groupId && !groupsdata[groupId] ) {
+            groupsdata[groupId] = {isOpen: false, groupname: $.trim(row[groupdefs.groupname])};
           }
         }
         for ( r = 0; r < this.length; r++) {
           row = this[r];
           groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
-          row[groupdefs.groupsortstring] = groupId ? (groups[groupId].name + ' ' + groupId) : row[groupdefs.groupname];
+          row[groupdefs.groupsortstring] = groupId ? (groupsdata[groupId].groupname + ' ' + groupId) : row[groupdefs.groupname];
         }
-        this.groups = groups;
+        this.groupsdata = groupsdata;
         return this;
       },
-      filterGroups: function filterGroups(groupdefs, groups) {
-        return _.filter(this, function (row) {
+      filterGroups: function filterGroups(groupdefs, groupsdata) {
+        var filteredData =  _.filter(this, function (row) {
           var groupId = fcts.normalizeGroupId((row[groupdefs.groupid]));
-          return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groups[groupId].isOpen);
-        });
+          return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groupsdata[groupId].isOpen);
+        })
+        filteredData.groupsdata = this.groupsdata;
+        return filteredData;
       },
       getGroupRows: function getGroupRows(groupdefs, groupid) {
         return _.filter(this, function (row) {
@@ -196,7 +198,8 @@ var mx = function mx(m, groupdef) {  //groupdef see below
   //#####################################################################
 
   var res = _.extend(m, basicapi, sorting, filtering, grouping);
-  if (groupdef)
+  if (groupdef){
     res.initGroups(groupdef);
+  }
   return res;
 };

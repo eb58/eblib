@@ -215,7 +215,7 @@
       for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
         var row = tblData[r];
 
-        if (gc && row.isGroupElement && !origData.groups[tblData[r][gc.groupid]].isOpen)
+        if (gc && row.isGroupElement && !origData.groupsdata[tblData[r][gc.groupid]].isOpen)
           continue;
 
         var cls = row.isGroupElement ? 'class="group"' : '';
@@ -238,7 +238,7 @@
           if (!coldef.invisible) {
             var xx = tblData[r][order[c]];
             var v = _.isNumber(xx) ? xx : (xx || '');
-            var val = coldef.render ? coldef.render(v, row, r) : v;
+            var val = coldef.render ? coldef.render(v, row, r, origData) : v;
             var style = coldef.css ? ' style="' + coldef.css + '"' : '';
             res += '<td ' + cls + style + '>' + val + '</td>';
           }
@@ -438,7 +438,7 @@
           filters.push({col: col, searchtext: val.trim(), render: ren, match: mat});
         }
       });
-      tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
+      tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groupsdata));
       tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
       doSort();
     }
@@ -571,14 +571,14 @@
     $.extend(this, {
       toggleGroupIsOpen: function (groupid) {
         var pc = pageCur;
-        origData.groups[groupid].isOpen = !origData.groups[groupid].isOpen;
+        origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
         filterData();
         pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
         pageCur = Math.min(pc, pageCurMax);
         redraw(pageCur);
       },
       groupIsOpen: function (groupName) {
-        return _.property('isOpen')(origData.groups[groupName]);
+        return _.property('isOpen')(origData.groupsdata[groupName]);
       },
       getFilterValues: function getFilterValues() {
         var filter = {};
@@ -645,7 +645,7 @@
           $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
             $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
             var coldef = _.findWhere(myopts.columns, {id: event.target.id});
-            log('change visibility', event.target.id, 'now visible:', coldef.invisible);
+            log('change visibility', event.target.id, 'now visible:', coldef ? coldef.invisible: '???');
           });
         },
         position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},

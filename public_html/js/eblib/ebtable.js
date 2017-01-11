@@ -142,6 +142,7 @@
       bodyWidth: '', // Math.max(200, $(window).width() - 10) + 'px',
       rowsPerPageSelectValues: [10, 25, 50, 100],
       rowsPerPage: 10,
+      pageCur:0,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
       colsResizable: false,
       selection: false,
@@ -162,8 +163,8 @@
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
-    var pageCur = 0;
-    var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+    var pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
+    var pageCur = Math.min(Math.max(0,myopts.pageCur),pageCurMax);
 
     function configBtn() {
       return !myopts.flags.config ? '' : '<button id ="configBtn">' + translate('Anpassen') + ' <span class = "ui-icon ui-icon-shuffle"></button>';
@@ -367,6 +368,8 @@
           myopts.reloadData();
         } else {
           doSort();
+          pageCur = 0;
+          redraw(pageCur);
         }
       }
     }
@@ -384,8 +387,6 @@
           o.order = myopts.columns[o.col].order || 'desc';
         });
         tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
-        pageCur = 0;
-        redraw(pageCur);
         log('sorting', myopts.sortcolname);
       }
     }
@@ -395,7 +396,7 @@
       deselectAllRows();
       filterData();
       pageCur = 0;
-      pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+      pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
       redraw(pageCur);
     }
 
@@ -470,7 +471,7 @@
         coldef.id = coldef.name.replace(/[^\d\w]/g, '');
       });
 
-      pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+      pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template("\
         <div class='ebtable'>\n\
           <div class='ctrl'>\n\
@@ -503,7 +504,7 @@
         bodyHeight: myopts.bodyHeight
       }));
       filterData();
-      redraw(0);
+      redraw(pageCur);
     }
 
     initGrid(this);
@@ -516,7 +517,7 @@
         log('change rowsPerPage', event, data.item.value);
         myopts.rowsPerPage = Number(data.item.value);
         pageCur = 0;
-        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+        pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
         redraw(pageCur);
         myopts.saveState && myopts.saveState(state.getStateAsJSON());
       }
@@ -573,7 +574,7 @@
         var pc = pageCur;
         origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
         filterData();
-        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+        pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
         pageCur = Math.min(pc, pageCurMax);
         redraw(pageCur);
       },
@@ -588,13 +589,15 @@
         });
         return filter;
       },
-      setFilterValues: function setFilterValues(filter) {
+      setFilterValues: function setFilterValues(filter,n) {
+        if( _.keys(filter).length===0 ) 
+          return this;
         $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
           $(o).val(filter[o.id]);
         });
         filterData();
-        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-        pageCur = 0;
+        pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
+        pageCur = n;
         redraw(pageCur);
         return this;
       },
@@ -620,6 +623,13 @@
         tblData.forEach(function (row) {
           return row.selected = false;
         });
+        redraw(pageCur);
+      },
+      getPageCur: function(){
+        return pageCur;
+      },
+      setPageCur: function(n){
+        pageCur = n;
         redraw(pageCur);
       }
     });

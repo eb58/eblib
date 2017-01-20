@@ -1,4 +1,5 @@
-var result1 = {"hasMoreElements": false,
+var result1 = {
+  "hasMoreElements": false,
   "listSize": 100,
   "list": [
     [

@@ -6,7 +6,9 @@ Vue.directive('datepicker', {
     var key = this.expression;
     var opts = _.extend({}, datepickerOptions, {
       showOn: 'both', // --> 'focus' and 'button'
-      onClose: function (date) {vm.$set(key, date.match(/^(0?[1-9]|[12][0-9]|3[01])[\/\-\.](0?[1-9]|1[012])[\/\-\.]\d{4}$/) ? date : ''); }
+      onClose: function (date) {
+        var d =  date.match(/^(0?[1-9]|[12][0-9]|3[01])[\/\-\.](0?[1-9]|1[012])[\/\-\.]\d{4}$/) ? date : '';
+        vm.$set(key,d); }
     });
     $(this.el).datepicker(opts);
   },

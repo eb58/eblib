@@ -1,5 +1,4 @@
-var basketTestdataKH = [// [];
-//var x= [
+var basketTestdataKH = [
   ["W", 1, - 1, 50000003218, 2, "50000000000015", null, 0, 235, "Erfasst", null, "ZumLöschen, Hugo, 04.03.1965", "Beißerle", null, null, null, "Neuer AG", null, null, null, 20, "KH-Gutachten", "250", null, null, null],
   ["W", 1, - 1, 50000003504, 2, "50000000000015", null, 0, 235, "Erfasst", null, "Zimmermann, Georg, 15.12.2006", "Helios Klinikum Buch", null, null, null, "AOK Frankfurt a. M.", null, null, null, null, null, "251", null, null, null],
   ["W", 1, - 1, 50000005973, 2, "50000000000015", null, 0, 235, "Erfasst", null, "Wolf, Großer Böser, 06.06.1966", "Helios Klinikum Buch", null, null, null, "AOK Buxtehude", null, null, null, 10, "KH-Gutachten", "270", null, null, null],

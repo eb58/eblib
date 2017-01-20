@@ -35,7 +35,6 @@
           var row = data[r];
           row.splice(3, 0, 'XXX');
           row.splice(idx.wnm + 1, 0, '');
-
           var chargeId = row[2];
           if (chargeId < 0)
             continue;
@@ -102,7 +101,6 @@
           var cid = row[idx.gid] > 0 ? row[idx.gid] : null; // chargeid
           var cname = cid ? tbldata.groupsdata[cid].groupname : ''; // chargename
           return cname.match(rexp);
-
         },
         auftrag: function (cellData, searchtxt, row) {
           var rexp = new RegExp('^' + searchtxt.replace(/\*/g, '.*'), 'i');
@@ -149,8 +147,8 @@
           var imgsrc = isOpen ? '/images/details_opened.png' : '/images/details_closed.png';
           var auftrag = row[idx.gcnt] === 1 ? 'Auftrag' : 'Aufträge';
           var t = '\
-             <img src="<\%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<\%=chargeId%>\')"/>\
-             <b>&nbsp;<\%=chargeName%></b>&nbsp;(<\%=cnt%>&nbsp;<\%=auftrag%>)';
+                   <img src="<\%=imgsrc%>" onclick="grid.toggleGroupIsOpen(\'<\%=chargeId%>\')"/>\
+                      <b>&nbsp;<\%=chargeName%></b>&nbsp;(<\%=cnt%>&nbsp;<\%=auftrag%>)';
           return _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: name, cnt: row[1], auftrag: auftrag});
         },
         flags: function (data, row, type) {
@@ -166,7 +164,7 @@
 //               if ( type === 'filter') {// || type === 'display') {
 //                  return sprintf("%+05d#%+08s", frist, data);
 //               }
-          return data;// sprintf("%+05d#%+08d", frist, data);// data;
+          return data; // sprintf("%+05d#%+08d", frist, data);// data;
         },
         dta: function (data, row) {
           return data.replace(/,/g, ', ');
@@ -260,10 +258,10 @@
           {name: "FAG"},
           {name: "DTANummern", render: renderer.dta, match: matcher.dta},
           {name: "Vorg.VGA"},
-          {name: "KHFrist"}
+          {name: "KHFrist"},
         ],
         selection: true,
-        sortmaster: [{col: 2}, {col: 0}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
+        sortmaster: [{col: 2}, {col: 0}], //[{col:1, order:'asc', sortType:'date-de'},{col:2, order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idx.wnm, grouphead: 'C', groupelem: 'W'}
 
       };

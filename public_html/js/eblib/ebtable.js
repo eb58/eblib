@@ -142,7 +142,7 @@
       bodyWidth: '', // Math.max(200, $(window).width() - 10) + 'px',
       rowsPerPageSelectValues: [10, 25, 50, 100],
       rowsPerPage: 10,
-      pageCur:0,
+      pageCur: 0,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
       colsResizable: false,
       selection: false,
@@ -163,8 +163,8 @@
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
-    var pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
-    var pageCur = Math.min(Math.max(0,myopts.pageCur),pageCurMax);
+    var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+    var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
 
     function configBtn() {
       return !myopts.flags.config ? '' : '<button id ="configBtn">' + translate('Anpassen') + ' <span class = "ui-icon ui-icon-shuffle"></button>';
@@ -188,7 +188,7 @@
           var style = coldef.css ? ' style="' + coldef.css + '"' : '';
           var tt = '\
             <th id="<%=colid%>" <%=style%> >\n\
-              <div class="sort_wrapper"><span/><%=colname%></div>\n\
+              <div class="sort_wrapper">&nbsp;&nbsp;<span/><%=colname%>&nbsp;&nbsp</div>\n\
               <%=fld%>\n\
              </th>';
           // &#8209; = non breakable hyphen : &#0160; = non breakable space
@@ -396,7 +396,7 @@
       deselectAllRows();
       filterData();
       pageCur = 0;
-      pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
+      pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
       redraw(pageCur);
     }
 
@@ -471,7 +471,7 @@
         coldef.id = coldef.name.replace(/[^\d\w]/g, '');
       });
 
-      pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
+      pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template("\
         <div class='ebtable'>\n\
           <div class='ctrl'>\n\
@@ -517,7 +517,7 @@
         log('change rowsPerPage', event, data.item.value);
         myopts.rowsPerPage = Number(data.item.value);
         pageCur = 0;
-        pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
+        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
         redraw(pageCur);
         myopts.saveState && myopts.saveState(state.getStateAsJSON());
       }
@@ -574,7 +574,7 @@
         var pc = pageCur;
         origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
         filterData();
-        pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
+        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
         pageCur = Math.min(pc, pageCurMax);
         redraw(pageCur);
       },
@@ -589,14 +589,15 @@
         });
         return filter;
       },
-      setFilterValues: function setFilterValues(filter,n) {
-        if( _.keys(filter).length===0 ) 
+      setFilterValues: function setFilterValues(filter, n) {
+        n = n || 0;
+        if (_.keys(filter).length === 0)
           return this;
         $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
           $(o).val(filter[o.id]);
         });
         filterData();
-        pageCurMax = Math.floor( Math.max(0,tblData.length - 1) / myopts.rowsPerPage);
+        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
         pageCur = n;
         redraw(pageCur);
         return this;
@@ -625,12 +626,8 @@
         });
         redraw(pageCur);
       },
-      getPageCur: function(){
+      getPageCur: function () {
         return pageCur;
-      },
-      setPageCur: function(n){
-        pageCur = n;
-        redraw(pageCur);
       }
     });
 
@@ -655,7 +652,7 @@
           $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
             $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
             var coldef = _.findWhere(myopts.columns, {id: event.target.id});
-            log('change visibility', event.target.id, 'now visible:', coldef ? coldef.invisible: '???');
+            log('change visibility', event.target.id, 'now visible:', coldef ? coldef.invisible : '???');
           });
         },
         position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},

@@ -18,56 +18,12 @@
     <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
     <script src="/js/eblib/mx.js"></script>
     <script src="/js/eblib/ebtable.js"></script>
+    <!--<script src="/data/ebTableGroupExternalSmall.js"></script>-->
     <script src="/data/ebTableTestDataKhbasketSmall.js"></script>
+    <!--<script src="/data/ebTableTestDataKhbasketLarge.js"></script>-->
 
     <script>
       'use strict';
-      var idx = {gtyp: 0, gcnt: 1, gid: 2, gss: 3, wid: 4, pid: 5, per: 6, cty: 7, flg: 8, frs: 9, wnm: 12};
-
-      function preprocessData(data) {
-        // 0                      1     2        3             4                  5         6          7        8      9                    10       11               12
-        // charge                 #  chargeid  xxx  workorderid     ProcessStatusId Performer chargeType (X)flags  frist                status   kürzel   Auftrag/Charge 
-        // ["C",                  3, 7971,        , 50000005209,                  ,         ,      'DIS',       4,    '',     "Zur Disposition",     '', "AAAA", ... ]
-        // ["W",                  1, 7971,        , 50000005209,                  ,         ,      'BGL',       0, -1247, "Zur Sachbearbeitung",     '', "Schwarz..", ...]
-        // ... 
-        var groupsdata = {};
-        for (var r = 0; r < data.length; r++) {
-          var row = data[r];
-          row.splice(3, 0, 'XXX');
-          row.splice(idx.wnm + 1, 0, '');
-          var chargeId = row[2];
-          if (chargeId < 0)
-            continue;
-          var wid = row[idx.wid];
-          var chargeName = row[idx.wnm];
-          if (row[0] === 'C') {
-            groupsdata[chargeId] = {
-              groupname: chargeName,
-              isOpen: false,
-              isSelected: false,
-              fristmin: row[idx.frs],
-              fristmax: row[idx.frs],
-              wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
-              pids: [], // Liste ProcessStatusIds: [50000004850_524288,50000005018_524288,50000005204_1048576]
-              pers: [], // Liste preformers: 50000004850_50000000000015,50000005018_50000000000015,50000005204_50000000000015
-              spc: 0, //  Mindestens ein Auftrag in der Charge ist 'special'
-              flg: row[idx.flg]
-            };
-          } else if (row[0] === 'W' && chargeId >= 0 && groupsdata[chargeId]) {
-            var g = groupsdata[chargeId];
-            if (row[idx.frs] < g.fristmin)
-              g.fristmin = row[idx.frs];
-            if (row[idx.frs] > g.fristmax)
-              g.fristmax = row[idx.frs];
-            g.wids.push(wid);
-            g.pids.push(wid + '_' + row[idx.pid]);
-            g.pers.push(wid + '_' + row[idx.per]);
-            g.spc = g.spc || (row[idx.flg] & 2);
-          }
-        }
-        console.log('Grouping', groupsdata);
-        data.groupsdata = groupsdata;
-      }
 
       var flagsdef = [
         {key: '!', id: 1, img: 'important.gif', alt: 'Eilauftrag'},
@@ -225,6 +181,51 @@
           return  row[idx.gid] < 0 ? flagutils.fromBitNumber(v) : flagutils.fromBitNumber(groups[row[idx.gid]].flg);
         }
       });
+
+      var idx = {gtyp: 0, gcnt: 1, gid: 2, gss: 3, wid: 4, pid: 5, per: 6, cty: 7, flg: 8, frs: 9, wnm: 12};
+
+      function preprocessData(data) {
+        // 0                      1     2        3             4                  5         6          7        8      9                    10       11               12
+        // charge                 #  chargeid  xxx  workorderid     ProcessStatusId Performer chargeType (X)flags  frist                status   kürzel   Auftrag/Charge 
+        // ["C",                  3, 7971,        , 50000005209,                  ,         ,      'DIS',       4,    '',     "Zur Disposition",     '', "AAAA", ... ]
+        // ["W",                  1, 7971,        , 50000005209,                  ,         ,      'BGL',       0, -1247, "Zur Sachbearbeitung",     '', "Schwarz..", ...]
+        // ...
+        var groupsdata = {};
+        for (var r = 0; r < data.length; r++) {
+          var row = data[r];
+          row.splice(idx.gss, 0, 'SORTCOL!!!'); // create empty column for storing grouping info (gss)
+          row.splice(idx.wnm + 1, 0, '');
+          var chargeId = row[idx.gid];
+          if (chargeId < 0)
+            continue;
+          var wid = row[idx.wid];
+          var chargeName = row[idx.wnm];
+          if (row[idx.gtyp] === 'C') {
+            groupsdata[chargeId] = {
+              groupname: chargeName,
+              isOpen: false,
+              isSelected: false,
+              fristmin: row[idx.frs],
+              fristmax: row[idx.frs],
+              wids: [], // Liste der zur Gruppe gehörenden workorderids: [50000004850,50000005018,50000005204]
+              pids: [], // Liste ProcessStatusIds: [50000004850_524288,50000005018_524288,50000005204_1048576]
+              pers: [], // Liste preformers: 50000004850_50000000000015,50000005018_50000000000015,50000005204_50000000000015
+              spc: false, //  Mindestens ein Auftrag in der Charge ist 'special'
+              flg: row[idx.flg]
+            };
+          } else if (row[idx.gtyp] === 'W' && chargeId >= 0 && groupsdata[chargeId]) {
+            var g = groupsdata[chargeId];
+            g.fristmin = row[idx.frs] < g.fristmin ? row[idx.frs] : g.fristmin;
+            g.fristmax = row[idx.frs] > g.fristmax ? row[idx.frs] : g.fristmax;
+            g.wids.push(wid);
+            g.pids.push(wid + '_' + row[idx.pid]);
+            g.pers.push(wid + '_' + row[idx.per]);
+            g.spc = g.spc || (row[idx.flg] & 2);
+          }
+        }
+        console.log('Grouping', groupsdata);
+        data.groupsdata = groupsdata;
+      }
 
       var grid;
 

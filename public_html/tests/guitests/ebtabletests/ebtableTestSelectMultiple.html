@@ -50,16 +50,9 @@
           {name: "Name"},
           {name: "Flag"}
         ],
-        //sortcolname: 'Tierart',
-        selection: true,
-        //singleSelection: true,
+        sortcolname: 'Tierart',
+        selectionCol: true,
         flags: {withsorting: true},
-        saveState: function (s) {
-          localStorage['AA'] = s;
-        },
-        getState: function () {
-          return localStorage['AA'] ? JSON.parse(localStorage['AA']) : null;
-        }
       };
       var grid;
       $().ready(function () {

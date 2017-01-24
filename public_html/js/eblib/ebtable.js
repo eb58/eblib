@@ -29,26 +29,25 @@
           colwidths: $(selgridid + 'th').map(function (i, o) {
             var id = $(o).prop('id');
             var w = $(o).width();
-            var name = (_.findWhere(myopts.columns, {id: id}) || {}).name;
+            var name = util.colNameFromColid(id);
             log($(o).prop('id'), w, name);
-            var ret = {};
-            ret[name] = w;
+            var ret = {name: name, w: w};
             return ret;
           }).toArray().filter(function (o) {
-            return !o.undefined;
-          }).reduce(function (acc, o) {
-            return o ? _.extend(acc, o) : acc;
-          }, {})
+            return o.name;
+          })
         });
       },
       saveState: function saveState(s) {
         localStorage[localStorageKey] = s;
       },
+      getState: function getState() {
+        return localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null
+      },
       loadState: function loadState(state) {
         if (!state)
           return;
         myopts.rowsPerPage = state.rowsPerPage;
-        // XXXXXXXX myopts.bodyWidth = state.tableWidth;
         myopts.colorder = [];
         state.colorderByName.forEach(function (colname) {
           var n = util.indexOfCol(colname);
@@ -57,11 +56,11 @@
           }
         });
         myopts.columns.forEach(function (coldef, idx) {
-          !_.contains(state.colorderByName, coldef.name) && myopts.colorder.push(idx);
+          if (!_.contains(state.colorderByName, coldef.name))
+            myopts.colorder.push(idx);
         });
-        myopts.columns.forEach(function (coldef, idx) {
-          // XXXXX !_.contains(state.colwidths, coldef.name) && (coldef.css = 'width:' + state.colwidths[coldef.name] + 'px');
-        });
+        myopts.bodyWidth = state.bodyWidth;
+        myopts.colwidths = state.colwidths;
         state.invisibleColnames.forEach(function (colname) {
           var n = util.indexOfCol(colname);
           if (n >= 0) {
@@ -78,7 +77,7 @@
         });
       },
       colNameFromColid: function colNameFromColid(colid) {
-        return  _.findWhere(myopts.columns, {id: colid}).name;
+        return  (_.findWhere(myopts.columns, {id: colid}) || {}).name;
       },
       colDefFromName: function (colname) {
         return _.findWhere(myopts.columns, {name: colname});
@@ -135,43 +134,61 @@
     };
 // ##############################################################################
 
-    var defopts = {
-      columns: [],
-      flags: {filter: true, pagelenctrl: true, config: true, withsorting: true},
-      bodyHeight: Math.max(200, $(window).height() - 100),
-      bodyWidth: '', // Math.max(200, $(window).width() - 10) + 'px',
-      rowsPerPageSelectValues: [10, 25, 50, 100],
-      rowsPerPage: 10,
-      pageCur: 0,
-      colorder: _.range(opts.columns.length), // [0,1,2,... ]
-      colsResizable: false,
-      selection: false,
-      singleSelection: false,
-      saveState: state.saveState,
-      loadState: state.loadState,
-      sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
-      groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
-      hasMoreResults: hasMoreResults,
-      jqueryuiTooltips: true,
-      clickOnRowHandler: function (rowData, row) {
-        //console.log(rowData, row);
-      },
-      lang: 'de'
-    };
-    opts.flags = _.extend(defopts.flags, opts.flags);
-    opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? state.saveState : opts.saveState;
-    var myopts = $.extend({}, defopts, opts);
-    var origData = mx(data, myopts.groupdefs);
-    var tblData = mx(origData.slice());
-    var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
-    var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
+    function initGrid(a) {
+      pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+
+      var tableTemplate = _.template("\
+        <div class='ebtable'>\n\
+          <div class='ctrl'>\n\
+            <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
+            <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
+            <div id='ctrlClearFilter' style='float: left;'><%= clearFilter  %></div>\n\
+            <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
+          </div>\n\
+          <div id='data' style='overflow-y:auto;overflow-x:auto; max-height:<%= bodyHeight %>px; width:100%'>\n\
+            <table <%= tblClass %>>\n\
+              <thead><tr><%= head %></tr></thead>\n\
+              <tbody><%= data %></tbody>\n\
+            </table>\n\
+          </div>\n\
+          <div class='ctrl'>\n\
+            <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
+            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content' hidden><%= addInfo %></div>\n\
+            <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
+          </div>\n\
+        </div>");
+
+      a.html(tableTemplate({
+        head: tableHead(),
+        data: tableData(pageCur),
+        selectLen: selectLenCtrl(),
+        configBtn: configBtn(),
+        clearFilter: clearFilterBtn(),
+        browseBtns: pageBrowseCtrl(),
+        info: ctrlInfo(),
+        addInfo: ctrlAddInfo(),
+        bodyWidth: myopts.bodyWidth,
+        bodyHeight: myopts.bodyHeight,
+        tblClass: myopts.colwidths && myopts.colwidths.length ? 'class="ebtablefix"' : ''
+      }));
+      filterData();
+      redraw(pageCur);
+      myopts.colwidths.forEach(function (o) {
+        $(selgridid + 'table th>#' + o.name).parent().width(o.w);
+      });
+
+    }
 
     function configBtn() {
-      return !myopts.flags.config ? '' : '<button id ="configBtn">' + translate('Anpassen') + ' <span class = "ui-icon ui-icon-shuffle"></button>';
+      return myopts.flags.config ? '<button id="configBtn">' + translate('Anpassen') + ' <span class="ui-icon ui-icon-shuffle"></button>' : '';
+    }
+
+    function clearFilterBtn() {
+      return myopts.flags.filter && myopts.flags.clearFilter ? '<button id="clearFilterBtn"><span class="ui-icon ui-icon-minus" title="' + translate('Alle Filter entfernen') + '"></button>' : '';
     }
 
     function tableHead() {
-      var res = myopts.selection ? '<th class="selectCol"><input id="checkAll" type="checkbox"></th>' : '';
+      var res = myopts.selectionCol ? '<th class="selectCol"><input id="checkAll" type="checkbox"></th>' : '';
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
@@ -188,7 +205,7 @@
           var style = coldef.css ? ' style="' + coldef.css + '"' : '';
           var tt = '\
             <th id="<%=colid%>" <%=style%> >\n\
-              <div class="sort_wrapper">&nbsp;&nbsp;<span/><%=colname%>&nbsp;&nbsp</div>\n\
+              <div class="sort_wrapper">&nbsp;&nbsp;<%=colname%>&nbsp;&nbsp<span/></div>\n\
               <%=fld%>\n\
              </th>';
           // &#8209; = non breakable hyphen : &#0160; = non breakable space
@@ -224,13 +241,15 @@
         res += '<tr>';
 
         var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
-        if (myopts.selection && myopts.selection.render) {
-          var x = '<td ' + cls + '>' + myopts.selection.render(origData, row, checked) + '</td>';
-          res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
-        } else if (myopts.selection && myopts.singleSelection) {
-          res += '<td ' + cls + '><input id="check' + r + '" type="radio"' + checked + '/></td>';
-        } else if (myopts.selection && !myopts.singleSelection) {
-          res += '<td ' + cls + '><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
+        if (myopts.selectionCol) {
+          if (myopts.selectionCol.render) {
+            var x = '<td ' + cls + '>' + myopts.selectionCol.render(origData, row, checked) + '</td>';
+            res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
+          } else if (myopts.selectionCol.singleSelection) {
+            res += '<td ' + cls + '><input id="check' + r + '" type="radio"' + checked + '/></td>';
+          } else if (!myopts.selectionCol.singleSelection) {
+            res += '<td ' + cls + '><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
+          }
         }
 
         var order = myopts.colorder;
@@ -299,7 +318,7 @@
         log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
         $(selgridid + '#check' + rowNr).prop('checked', b);
       }
-      myopts.onSelection && myopts.onSelection(rowNr, row, origData);
+      myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData);
     }
 
     function selectRows(event) { // select row
@@ -310,7 +329,7 @@
           selectRow(rowNr, tblData[rowNr], checked);
         });
       } else {
-        if (myopts.singleSelection) {
+        if (myopts.selectionCol && myopts.selectionCol.singleSelection) {
           tblData.forEach(function (row, rowNr) {
             if (row.selected)
               selectRow(rowNr, row, false);
@@ -318,12 +337,12 @@
         }
         var rowNr = event.target.id.replace('check', '');
         selectRow(rowNr, tblData[rowNr], checked);
-        $('#checkAll').prop('checked', false);
+        $(selgridid + '#checkAll').prop('checked', false);
       }
     }
 
     function deselectAllRows() {
-      if (myopts.onSelection) {
+      if (myopts.selectionCol && myopts.selectionCol.onSelection) {
         origData.forEach(function (row, rowNr) {
           if (row.selected) {
             selectRow(rowNr, row, false);
@@ -392,7 +411,7 @@
     }
 
     function filtering(event) { // filtering
-      log('filtering', event, event.which);
+      log('filtering', event);
       deselectAllRows();
       filterData();
       pageCur = 0;
@@ -450,122 +469,136 @@
       $(selgridid + '#data tbody').html(tableData(pageCur));
       if (withHeader) {
         $(selgridid + 'thead tr').html(tableHead());
-        $(selgridid + 'thead th').off().on('click', sorting);
-        $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
-        $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
+        initHeaderActions();
       }
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
-      myopts.singleSelection && $(selgridid + '#checkAll').hide();
+      $(selgridid + '.ebtable').width(myopts.bodyWidth);
+      myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }
 
-    // ##############################################################################
-
-    function initGrid(a) {
-      myopts.saveState && state.loadState(localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null);
-      myopts.saveState && myopts.getState && state.loadState(opts.getState());
-      util.checkConfig();
-
-      myopts.columns.forEach(function (coldef) {
-        coldef.id = coldef.name.replace(/[^\d\w]/g, '');
-      });
-
-      pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
-      var tableTemplate = _.template("\
-        <div class='ebtable'>\n\
-          <div class='ctrl'>\n\
-            <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
-            <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
-            <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
-          </div>\n\
-          <div id='data' style='overflow-y:auto;overflow-x:auto; max-height:<%= bodyHeight %>px; width:100%'>\n\
-            <table>\n\
-              <thead><tr><%= head %></tr></thead>\n\
-              <tbody><%= data %></tbody>\n\
-            </table>\n\
-          </div>\n\
-          <div class='ctrl'>\n\
-            <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
-            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content' hidden><%= addInfo %></div>\n\
-            <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
-          </div>\n\
-        </div>");
-
-      a.html(tableTemplate({
-        head: tableHead(),
-        data: tableData(pageCur),
-        selectLen: selectLenCtrl(),
-        configBtn: configBtn(),
-        browseBtns: pageBrowseCtrl(),
-        info: ctrlInfo(),
-        addInfo: ctrlAddInfo(),
-        bodyWidth: myopts.bodyWidth,
-        bodyHeight: myopts.bodyHeight
-      }));
-      filterData();
-      redraw(pageCur);
+    function initHeaderActions() {
+      $(selgridid + 'thead th').off().on('click', sorting);
+      $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
+      $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
+      if (myopts.flags.colsResizable) {
+        var resizeDef = {
+          handles: 'e',
+          start: function () {
+          },
+          stop: function (evt) {
+            myopts.saveState && myopts.saveState(state.getStateAsJSON());
+            evt.stopPropagation();
+          }
+        };
+        $(selgridid + '.ebtable').resizable(resizeDef);
+        $(selgridid + '.ebtable th').slice(myopts.selectionCol ? 1 : 0).resizable(resizeDef);
+      }
     }
-
-    initGrid(this);
 
     // #################################################################
     // Actions
     // #################################################################
 
-    $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
-        log('change rowsPerPage', event, data.item.value);
-        myopts.rowsPerPage = Number(data.item.value);
+    function initActions() {
+      $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
+          log('change rowsPerPage', event, data.item.value);
+          myopts.rowsPerPage = Number(data.item.value);
+          pageCur = 0;
+          pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+          redraw(pageCur);
+          myopts.saveState && myopts.saveState(state.getStateAsJSON());
+        }
+      });
+      $(selgridid + '.firstBtn').button().on('click', function () {
         pageCur = 0;
-        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
         redraw(pageCur);
-        myopts.saveState && myopts.saveState(state.getStateAsJSON());
-      }
-    });
-    $(selgridid + '.firstBtn').button().on('click', function () {
-      pageCur = 0;
-      redraw(pageCur);
-    });
-    $(selgridid + '.backBtn').button().on('click', function () {
-      pageCur = Math.max(0, pageCur - 1);
-      redraw(pageCur);
-    });
-    $(selgridid + '.nextBtn').button().on('click', function () {
-      pageCur = Math.min(pageCur + 1, pageCurMax);
-      redraw(pageCur);
-    });
-    $(selgridid + '.lastBtn').button().on('click', function () {
-      pageCur = pageCurMax;
-      redraw(pageCur);
-    });
-    $(selgridid + 'thead th').off().on('click', sorting);
-    $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
-    $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
-    $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
-    $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
-    $(selgridid + '#configBtn').button().off().on('click', function () {
-      dlgConfig(gridid);
-    });
-    $(selgridid + ' table tbody tr').off().on('click', function () {
-      var rowData = tblData[ pageCur * myopts.rowsPerPage + $(this).index()];
-      myopts.clickOnRowHandler(rowData, $(this));
+      });
+      $(selgridid + '.backBtn').button().on('click', function () {
+        pageCur = Math.max(0, pageCur - 1);
+        redraw(pageCur);
+      });
+      $(selgridid + '.nextBtn').button().on('click', function () {
+        pageCur = Math.min(pageCur + 1, pageCurMax);
+        redraw(pageCur);
+      });
+      $(selgridid + '.lastBtn').button().on('click', function () {
+        pageCur = pageCurMax;
+        redraw(pageCur);
+      });
+      $(selgridid + '#configBtn').button().off().on('click', function () {
+        dlgConfig(gridid);
+      });
+      $(selgridid + '#clearFilterBtn').button().off().on('click', function () {
+        $(selgridid + 'thead input[type=text]').val('');
+        filtering();
+      });
+      $(selgridid + ' table tbody tr').off().on('click', function () {
+        var rowData = tblData[ pageCur * myopts.rowsPerPage + $(this).index()];
+        myopts.clickOnRowHandler(rowData, $(this));
+      });
+      $(selgridid + '#data input[type=checkbox]', selgridid + '#data input[type=radio]').off().on('change', selectRows);
+      initHeaderActions();
+
+      $(window).on('resize', function () {
+        //log('resize!!!');
+        //adjustLayout();
+      });
+    }
+
+    var defopts = {
+      columns: [],
+      flags: {
+        filter: true,
+        pagelenctrl: true,
+        config: true,
+        withsorting: true,
+        clearFilter: false,
+        colsResizable: false,
+      },
+      bodyHeight: Math.max(200, $(window).height() - 100),
+      bodyWidth: '',
+      rowsPerPageSelectValues: [10, 25, 50, 100],
+      rowsPerPage: 10,
+      pageCur: 0,
+      colorder: _.range(opts.columns.length), // [0,1,2,... ]
+      selectionCol: false, // or true or  { singleSelection = true/false,  render = function(origData, row, checked)....  }
+      saveState: state.saveState,
+      loadState: state.loadState,
+      getState: state.getState,
+      sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
+      groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
+      hasMoreResults: hasMoreResults,
+      jqueryuiTooltips: true,
+      clickOnRowHandler: function (rowData, row) {
+        //console.log(rowData, row);
+      },
+      lang: 'de'
+    };
+    opts.flags = _.extend(defopts.flags, opts.flags);
+    opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? state.saveState : opts.saveState;
+    opts.colwidths = [];
+    var myopts = $.extend({}, defopts, opts);
+    if (myopts.saveState) {
+      state.loadState(myopts.getState());
+    }
+
+
+    var origData = mx(data, myopts.groupdefs);
+    var tblData = mx(origData.slice());
+    var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+    var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
+    util.checkConfig();
+
+    myopts.columns.forEach(function (coldef) {
+      coldef.id = coldef.name.replace(/[^\d\w]/g, '');
     });
 
-    myopts.colsResizable && $(selgridid + '.ebtable,' + selgridid + '.ebtable th').resizable({
-      handles: 'e',
-      stop: function (evt, ui) {
-        log('stopping resize!');
-        myopts.saveState && myopts.saveState(state.getStateAsJSON());
-        evt.stopPropagation();
-      }
-    });
+    myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
 
-    myopts.singleSelection && $(selgridid + '#checkAll').hide();
-
-    $(window).on('resize', function () {
-      //log('resize!!!');
-      //adjustLayout();
-    });
+    initGrid(this);
+    initActions();
 
 // ##########  Exports ############  
     this.util = util;
@@ -722,10 +755,10 @@
 
   $.fn.ebtable.matcher = {
     'contains': function (cellData, searchTxt) {
-      return cellData.indexOf(searchTxt) >= 0;
+      return cellData.toLowerCase().indexOf(searchTxt.toLowerCase()) >= 0;
     },
     'starts-with': function (cellData, searchTxt) {
-      return cellData.indexOf(searchTxt) === 0;
+      return cellData.toLowerCase().indexOf(searchTxt.toLowerCase()) === 0;
     },
     'matches': function (cellData, searchTxt) {
       return cellData.match(new RegExp('.*' + searchTxt, 'i'));
@@ -751,6 +784,7 @@
       '(<%=len%> Eintr\u00e4ge insgesamt)': '(<%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen': 'Configuration',
+      'Alle Filter entfernen': 'Remove all filter',
       'Abbrechen': 'Cancel'
     }
   };

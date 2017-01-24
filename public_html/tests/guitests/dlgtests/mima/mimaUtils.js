@@ -373,7 +373,7 @@ var tblopts = {
     {name: "Unterlagenstatus", dbcol: 'docStatus', valuelist: valuelistDocStatus}
   ],
   sortcolname: 'Auftrag/Vorgang',
-  selection: true,
+  selectionCol: true,
   rowsPerPageSelectValues: [10, 15, 25, 50, 100],
   lang: 'mdk',
   jqueryuiTooltips: false,

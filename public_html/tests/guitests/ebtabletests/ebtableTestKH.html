@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/ebtable.css">
     <style>
       * {font-family:Arial; color: black; font-size: 10px;}
-      body { width: 1500px; }
+      body { width: 1000px; }
     </style>
 
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
@@ -231,6 +231,10 @@
 
       var opts = {
         bodyHeight: 800,
+        flags: {
+          clearFilter: true,
+          colsResizable: true,
+        },
         columns: [
           {name: "Grouping", technical: true, invisible: true, order: 'asc-fix'},
           {name: "GroupCnt", technical: true, invisible: true},
@@ -261,7 +265,7 @@
           {name: "Vorg.VGA"},
           {name: "KHFrist"},
         ],
-        selection: true,
+        selectionCol: true,
         sortmaster: [{col: 2}, {col: 0}], //[{col:1, order:'asc', sortType:'date-de'},{col:2, order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idx.wnm, grouphead: 'C', groupelem: 'W'}
 

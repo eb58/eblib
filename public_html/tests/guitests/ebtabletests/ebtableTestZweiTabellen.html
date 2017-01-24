@@ -29,10 +29,9 @@
             {name: "Verfasser"},
             {name: "Kommentar"},
           ],
-          bodyHeight: 200,
-          rowsPerPage: 5,
-          selection: true,
-          singleSelection: true,
+          bodyHeight: 300,
+          rowsPerPage: 10,
+          selectionCol: true,
           //flags: {filter: false, config: false, }
         };
         var opts2 = {
@@ -41,10 +40,9 @@
             {name: "Verfasser2"},
             {name: "Kommentar2"},
           ],
-          bodyHeight: 100,
+          bodyHeight: 300,
           rowsPerPage: 10,
-          selection: true,
-          singleSelection: true,
+          selectionCol: false,
           //flags: {filter: false, config: false, }
         };
         var grid1 = $('#grid1').ebtable(opts1, tblData1);

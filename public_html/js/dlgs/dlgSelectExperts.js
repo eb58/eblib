@@ -66,8 +66,7 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
       {name: "E-Mail"}
     ],
     sortcolname: 'Name',
-    selection: true,
-    singleSelection: true
+    selectionCol: { singleSelection: true},
   };
   var defopts = {
     open: function ( ) {

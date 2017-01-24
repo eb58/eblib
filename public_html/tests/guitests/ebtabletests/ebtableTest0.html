@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/ebtable.css">
     <style>
       * {font-family:Arial;color: black;font-size: 12px;      }
-      body { background:#FAFAF0; margin: 10px 10px 10px 10px; width: 800px; }
+      body { background:#FAFAF0; margin: 10px 10px 10px 10px; width: 700px; }
     </style>
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
@@ -25,7 +25,7 @@
         ['Affe        ', '10.06.2013', 'Heine, Heinrich', 2],
         ['Maus        ', '15.09.2014', 'Manne, Antonia', 4],
         ['Hase        ', '15.09.2014', 'Liebig, Gustav', 8],
-        ['Hund        ', '31.08.2015', 'Mann, Heinrich Gustav Friedhelm', 16],
+        ['Hund        ', '31.08.2015', 'Mann, Heinrich Gustav Friedhelm Egon Friedrich August', 16],
         ['Fliege      ', '31.08.2009', 'Mann, Thomas', 0],
         ['Biene       ', '31.08.2001', 'Lessing, Gottfried', 7],
         ['Hummel      ', '01.08.1759', 'Schiller, Friedrich', 0],
@@ -40,15 +40,19 @@
 
       var opts = {
         debug: true,
+        flags: {
+          clearFilter: true,
+          colsResizable: true,
+        },
         columns: [
           {name: "Tierart", match: 'contains'},
-          {name: "Datum", sortformat: 'date-de', match: 'matches-date-time', css: 'text-align: center'},
+          {name: "Datum", sortformat: 'date-de', css: 'text-align: center'},
           {name: "Name"},
           {name: "Flag"}
         ],
         sortcolname: 'Tierart',
-        selection: true,
-        pageCur:1
+        selectionCol: true,
+        
       };
       var grid;
       $().ready(function () {

@@ -45,8 +45,7 @@
                 {name: "Code"},
                 {name: "Grund"}
               ],
-              selection: true,
-              singleSelection: true,
+              selectionCol: { singleSelection: true},
               flags: {filter: false, pagelenctrl: false, config: false, withsorting: false}
             };
             reasons = $('#reasons').ebtable(ropts, cancellationResponses);
@@ -112,11 +111,14 @@
       };
       var opts = {
         debug: true,
+        flags: {
+          colsResizable: true,
+        },
         columns: [
           {name: "Workorderid", invisible: true, technical: true},
           {name: "Frist"},
           {name: "Stornoalter"},
-          {name: "Stornostatus", css: 'width:120px', valuelist: ['', 'offen','abgelehnt']},
+          {name: "Stornostatus", css: 'width:120px', valuelist: ['', 'offen', 'abgelehnt']},
           {name: "Auftragsstatus"},
           {name: "AKZ"},
           {name: "Versicherter", render: renderer.renderInsurand},
@@ -130,8 +132,8 @@
           {name: "Stornoerl\u00e4uterung", dbname: "Stornoerlaeuterung"}
         ],
         bodyHeight: 600,
-        selection: true,
-        colsResizable:true,
+        selectionCol: true,
+        sortcolname: 'Auftragsstatus',
         reloadData: function () {
           grid = initTable(result2);
         }
@@ -170,7 +172,7 @@
 
       $(document).ready(function () {
         searchOnServer();
-        
+
         $("#accept").button().click(function () {
           if (getSelectedWorkorderIds(grid).length === 0) {
             $.alert("Meldung", "Kein Eintrag ausgew\u00e4hlt.");
@@ -181,13 +183,13 @@
               if (data.res < 0) {
                 $.alert("Fehler", data.errors);
                 return;
-              } 
+              }
               applyFilters();
             }
             );
           });
         });
-        
+
         $("#reject").button().click(function () {
           selwids = getSelectedWorkorderIds(grid).join(',');
           if (selwids.length === 0) {

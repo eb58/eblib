@@ -115,7 +115,9 @@
         ],
         rowsPerPageSelectValues: [5, 10, 25, 50, 100],
         bodyHeight: 500,
-        colsResizable: true,
+        flags:{
+          colsResizable: true
+        },
         selectionCol: {
           //{render: function (rowNr, row, origData) { console.log('onSelection', rowNr, row, origData);    }},
           onSelection: function (rowNr, row) {
@@ -133,7 +135,6 @@
           grid = $('#grid').ebtable(opts, basketTestdata, true);
         },
         lang: 'en',
-        saveState: false
       };
       var grid;
       $().ready(function () {

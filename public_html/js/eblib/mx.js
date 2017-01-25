@@ -89,7 +89,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       initGroups: function initGroups(groupdefs) {
         if (!groupdefs.groupid )
           return;
-        var groupsdata = this.groupsdata , row, r, groupId;
+        var groupsdata = this.groupsdata ||{}, row, r, groupId;
         for (r = 0; r < this.length; r++) {
           row = this[r];
           groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);

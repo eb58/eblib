@@ -173,8 +173,9 @@
       }));
       filterData();
       redraw(pageCur);
-      myopts.colwidths.forEach(function (o) {
-        $(selgridid + 'table th>#' + o.name).parent().width(o.w);
+      myopts.colwidths && myopts.colwidths.forEach(function (o) {
+        var id = util.colIdFromName(o.name);
+        $(selgridid + 'table th>#' + id).parent().width(o.w);
       });
 
     }

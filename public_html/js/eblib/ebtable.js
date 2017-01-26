@@ -1,19 +1,44 @@
 /* global _,jQuery,mx *//* jshint multistr: true */ /* jshint expr: true */
+
 (function ($) {
   "use strict";
-  $.fn.ebtable = function (opts, data, hasMoreResults) {
-    function log() {
-      opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
-    }
-    var gridid = this[0].id;
-    var self = this;
-    var selgridid = '#' + gridid + ' ';
-    function translate(str) {
-      return $.fn.ebtable.lang[myopts.lang][str] || str;
-    }
-    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
 
-    var state = {// saving/loading state
+  var dlgConfig = function (opts) {
+    var t = '\
+        <div id="<%=gridid%>configDlg">\n\
+          <ol id="<%=gridid%>selectable" class="ebtableSelectable"> <%= list %> </ol>\n\
+        </div>';
+    var dlg = $(_.template(t)({list: opts.list, gridid: opts.gridid}));
+    var dlgopts = {
+      open: function () {
+        $('button:contains(Abbrechen)').text(opts.cancelstring);
+        $('ol#' + opts.gridid + 'selectable').sortable();
+        $('#' + opts.gridid + 'configDlg li').off('click').on('click', function (event) {
+          $('#' + opts.gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
+        });
+      },
+      position: {my: "left top", at: "left bottom", of: opts.anchor},
+      width: 250,
+      modal: true,
+      resizable: true,
+      buttons: {
+        "OK": function () {
+          opts.callBack();
+          $(this).dialog("destroy");
+        },
+        'Abbrechen': function () {
+          $(this).dialog("destroy");
+        }
+      }
+    };
+    dlg.dialog(dlgopts).parent().find('.ui-widget-header').hide();
+  };
+
+  //###########################################################################################################
+
+  $.fn.ebtable = function (opts, data, hasMoreResults) {
+
+    var stateUtil = {// saving/loading state
       getStateAsJSON: function () {
         return JSON.stringify({
           bodyWidth: $(selgridid + '.ebtable').width(),
@@ -29,8 +54,8 @@
           colwidths: $(selgridid + 'th').map(function (i, o) {
             var id = $(o).prop('id');
             var w = $(o).width();
-            var name = util.colNameFromColid(id);
-            log($(o).prop('id'), w, name);
+            var name = util.colNameFromId(id);
+            util.log($(o).prop('id'), w, name);
             var ret = {name: name, w: w};
             return ret;
           }).toArray().filter(function (o) {
@@ -42,7 +67,7 @@
         localStorage[localStorageKey] = s;
       },
       getState: function getState() {
-        return localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null
+        return localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null;
       },
       loadState: function loadState(state) {
         if (!state)
@@ -50,7 +75,7 @@
         myopts.rowsPerPage = state.rowsPerPage;
         myopts.colorder = [];
         state.colorderByName.forEach(function (colname) {
-          var n = util.indexOfCol(colname);
+          var n = util.colIdxFromName(colname);
           if (n >= 0) {
             myopts.colorder.push(n);
           }
@@ -62,7 +87,7 @@
         myopts.bodyWidth = state.bodyWidth;
         myopts.colwidths = state.colwidths;
         state.invisibleColnames.forEach(function (colname) {
-          var n = util.indexOfCol(colname);
+          var n = util.colIdxFromName(colname);
           if (n >= 0) {
             myopts.columns[n].invisible = true;
           }
@@ -70,20 +95,60 @@
       }
     };
 
+    var sessionStateUtil = {// saving/loading state
+      getSessionStateAsJSON: function getSessionStateAsJSON() {
+        return JSON.stringify({
+          pageCur: pageCur,
+          sortcolname: myopts.sortcolname,
+          sortState: myopts.columns.map(function (col) {
+            var ret = {};
+            ret[col.name] = col.order;
+            return ret;
+          }),
+          filters: self.getFilterValues()
+        });
+      },
+      getSessionState: function getSessionState() {
+        return sessionStorage[localStorageKey] ? JSON.parse(sessionStorage[localStorageKey]) : null;
+      },
+      saveSessionState: function saveSessionState(s) {
+        sessionStorage[localStorageKey] = s || sessionStateUtil.getSessionStateAsJSON();
+      },
+      loadSessionState: function loadSessionState(s) {
+        s = s || sessionStateUtil.getSessionState();
+        if (!s)
+          return;
+        myopts.pageCur = s.pageCur;
+        myopts.sortcolname = s.sortcolname;
+        myopts.columns.forEach(function (coldef) {
+          coldef.order = s.sortState[coldef.name];
+        });
+        $(selgridid).ebtable(opts, data, hasMoreResults);
+      }
+    };
+
+    // ##############################################################################
+
     var util = {
-      indexOfCol: function indexOfCol(colname) {
+      translate: function translate(str) {
+        return $.fn.ebtable.lang[myopts.lang][str] || str;
+      },
+      log: function log() {
+        opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
+      },
+      colIdxFromName: function colIdxFromName(colname) {
         return _.findIndex(myopts.columns, function (o) {
           return o.name === colname;
         });
       },
-      colNameFromColid: function colNameFromColid(colid) {
-        return  (_.findWhere(myopts.columns, {id: colid}) || {}).name;
-      },
       colDefFromName: function (colname) {
         return _.findWhere(myopts.columns, {name: colname});
       },
-      colIdFromName: function colNameFromColid(colname) {
+      colIdFromName: function colNameFromId(colname) {
         return util.colDefFromName(colname).id;
+      },
+      colNameFromId: function colNameFromId(colid) {
+        return  (_.findWhere(myopts.columns, {id: colid}) || {}).name;
       },
       colIsInvisible: function colIsInvisible(colname) {
         return util.colDefFromName(colname).invisible;
@@ -112,7 +177,6 @@
           coldef.mandatory = coldef.mandatory || false;
           coldef.order = coldef.order || 'asc';
         });
-
         if (origData[0] && origData[0].length !== myopts.columns.length) {
           alert('Data definition and column definition don\'t match!');
           localStorage[localStorageKey] = '';
@@ -132,11 +196,250 @@
         });
       }
     };
-// ##############################################################################
+
+    // ##############################################################################
+
+    var selectionFcts = {
+      selectRow: function selectRow(rowNr, row, b) { // b = true/false ~ on/off
+        if (!row)
+          return;
+        row.selected = b;
+        var gc = myopts.groupdefs;
+        var groupid = row[gc.groupid];
+        if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
+          util.log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
+          origData.getGroupRows(gc, groupid).forEach(function (o) {
+            o.selected = b;
+          });
+          for (var i = 0; i < tblData.length; i++) {
+            if (tblData[i][gc.groupid] === groupid) {
+              $(selgridid + '#check' + i).prop('checked', b);
+            }
+          }
+        } else {
+          util.log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
+          $(selgridid + '#check' + rowNr).prop('checked', b);
+        }
+        myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData);
+      },
+      selectRows: function selectRows(event) { // select row
+        util.log('selectRows', event);
+        var checked = $(event.target).prop('checked');
+        if (event.target.id === 'checkAll') {
+          tblData.forEach(function (row, rowNr) {
+            selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
+          });
+        } else {
+          if (myopts.selectionCol && myopts.selectionCol.singleSelection) {
+            tblData.forEach(function (row, rowNr) {
+              if (row.selected)
+                selectionFcts.selectRow(rowNr, row, false);
+            });
+          }
+          var rowNr = event.target.id.replace('check', '');
+          selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
+          $(selgridid + '#checkAll').prop('checked', false);
+        }
+      },
+      deselectAllRows: function deselectAllRows() {
+        if (myopts.selectionCol && myopts.selectionCol.onSelection) {
+          origData.forEach(function (row, rowNr) {
+            if (row.selected) {
+              selectionFcts.selectRow(rowNr, row, false);
+            }
+          });
+        }
+        $(selgridid + '#data input[type=checkbox]').prop('checked', false);
+        origData.forEach(function (row) {
+          row.selected = false;
+        });
+      },
+      iterateSelectedValues: function iterateSelectedValues(fct) {
+        tblData.filter(function (row) {
+          return row.selected;
+        }).forEach(fct);
+      },
+      getSelectedRows: function getSelectedRows() {
+        return tblData.filter(function (row) {
+          return row.selected;
+        });
+      },
+      unselect: function unselect() {
+        tblData.forEach(function (row) {
+          row.selected = false;
+        });
+        redraw(pageCur);
+      }
+    };
+
+    var sortingFcts = {
+      showSortingIndicators: function showSortingIndicators() {
+        var colid = util.colIdFromName(myopts.sortcolname);
+        var colidx = util.colIdxFromName(myopts.sortcolname);
+        var coldef = myopts.columns[colidx];
+        var bAsc = coldef.order === 'asc';
+        $(selgridid + 'thead div span').removeClass();
+        $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
+      },
+      getSortState: function getSortState() {
+        var colidx = util.colIdxFromName(myopts.sortcolname);
+        var coldef = myopts.columns[colidx];
+        var coldefs = $.extend([], coldef.sortmaster || myopts.sortmaster);
+        if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
+          coldefs.push({col: colidx, order: coldef.order});
+        }
+        return coldefs;
+      },
+      sortToggle: function sortToggle() {
+        var sortToggleS = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+        sortingFcts.getSortState().forEach(function (o) {
+          myopts.columns[o.col].order = sortToggleS[myopts.columns[o.col].order] || 'asc';
+        });
+      },
+      sorting: function sorting(event) { // sorting
+        var colid = event.currentTarget.id;
+        if (colid && myopts.flags.withsorting) {
+          selectionFcts.deselectAllRows();
+          myopts.sortcolname = util.colNameFromId(colid);
+          sortingFcts.sortToggle();
+          if (myopts.hasMoreResults && myopts.reloadData) {
+            myopts.reloadData();
+          } else {
+            sortingFcts.doSort();
+            pageCur = 0;
+            redraw(pageCur);
+          }
+        }
+      },
+      doSort: function doSort() { // sorting
+        if (myopts.sortcolname) {
+          sortingFcts.showSortingIndicators();
+          var colidx = util.colIdxFromName(myopts.sortcolname);
+          var coldef = myopts.columns[colidx];
+          var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
+          if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
+            coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+          }
+          coldefs.forEach(function (o) {
+            o.order = myopts.columns[o.col].order || 'desc';
+          });
+          tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
+          util.log('sorting', myopts.sortcolname);
+        }
+      }
+    };
+
+    var filteringFcts = {
+      getFilterValues: function getFilterValues() {
+        var filter = {};
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          if ($.trim($(o).val()))
+            filter[o.id] = $(o).val().trim();
+        });
+        return filter;
+      },
+      setFilterValues: function setFilterValues(filter, n) {
+        n = n || 0;
+        if (_.keys(filter).length === 0)
+          return this;
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          $(o).val(filter[o.id]);
+        });
+        filteringFcts.filterData();
+        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+        pageCur = n;
+        redraw(pageCur);
+        return this;
+      },
+      filterData: function filterData() {
+        var filters = [];
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          var val = $(o).val();
+          if (val && val.trim()) {
+            var colid = $(o).attr('id');
+            var colname = util.colNameFromId(colid);
+            var col = util.colIdxFromName(colname);
+            var ren = util.getRender(colname);
+            var mat = util.getMatch(colname);
+            filters.push({col: col, searchtext: val.trim(), render: ren, match: mat});
+          }
+        });
+        tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groupsdata));
+        tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
+        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+        sortingFcts.doSort();
+      },
+      filtering: function filtering(event) { // filtering
+        util.log('filtering', event);
+        selectionFcts.deselectAllRows();
+        filteringFcts.filterData();
+        pageCur = 0;
+        redraw(pageCur);
+      }
+    };
+
+    // ##############################################################################
+
+    var gridid = this[0].id;
+    var self = this;
+    var selgridid = '#' + gridid + ' ';
+    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
+
+    var defopts = {
+      columns: [],
+      flags: {
+        filter: true,
+        pagelenctrl: true,
+        config: true,
+        withsorting: true,
+        clearFilter: false,
+        colsResizable: false,
+        jqueryuiTooltips: true,
+      },
+      bodyHeight: Math.max(200, $(window).height() - 100),
+      bodyWidth: '',
+      rowsPerPageSelectValues: [10, 25, 50, 100],
+      rowsPerPage: 10,
+      pageCur: 0,
+      colorder: _.range(opts.columns.length), // [0,1,2,... ]
+      selectionCol: false, // or true or  { singleSelection = true/false,  render = function(origData, row, checked)....  }
+      saveState: stateUtil.saveState,
+      loadState: stateUtil.loadState,
+      getState: stateUtil.getState,
+      sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
+      groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
+      hasMoreResults: hasMoreResults,
+      clickOnRowHandler: function (rowData, row) { // just for docu
+        //util.log(rowData, row);
+      },
+      lang: 'de'
+    };
+
+    { // trimming opts param
+      opts.flags = _.extend(defopts.flags, opts.flags);
+      opts.saveState = opts.saveState || opts.flags.colsResizable;
+      opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? stateUtil.saveState : opts.saveState;
+      opts.colwidths = [];
+    }
+
+    var myopts = $.extend({}, defopts, opts);
+    var origData = mx(data, myopts.groupdefs);
+    var tblData = mx(origData.slice());
+    var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+    var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
+    util.checkConfig();
+
+    if (myopts.saveState && myopts.getState) {
+      myopts.loadState(myopts.getState());
+    }
+    myopts.columns.forEach(function (coldef) {
+      coldef.id = coldef.name.replace(/[^\d\w]/g, '');
+    });
+    initGrid(this);
+    initActions();
 
     function initGrid(a) {
       pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
-
       var tableTemplate = _.template("\
         <div class='ebtable'>\n\
           <div class='ctrl'>\n\
@@ -157,7 +460,6 @@
             <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
         </div>");
-
       a.html(tableTemplate({
         head: tableHead(),
         data: tableData(pageCur),
@@ -169,23 +471,23 @@
         addInfo: ctrlAddInfo(),
         bodyWidth: myopts.bodyWidth,
         bodyHeight: myopts.bodyHeight,
-        tblClass: myopts.colwidths && myopts.colwidths.length ? 'class="ebtablefix"' : ''
+        tblClass: myopts.flags.colsResizable ? 'class="ebtablefix"' : ''
       }));
-      filterData();
+      filteringFcts.filterData();
       redraw(pageCur);
+
       myopts.colwidths && myopts.colwidths.forEach(function (o) {
         var id = util.colIdFromName(o.name);
         $(selgridid + 'table th>#' + id).parent().width(o.w);
       });
-
     }
 
     function configBtn() {
-      return myopts.flags.config ? '<button id="configBtn">' + translate('Anpassen') + ' <span class="ui-icon ui-icon-shuffle"></button>' : '';
+      return myopts.flags.config ? '<button id="configBtn">' + util.translate('Anpassen') + ' <span class="ui-icon ui-icon-shuffle"></button>' : '';
     }
 
     function clearFilterBtn() {
-      return myopts.flags.filter && myopts.flags.clearFilter ? '<button id="clearFilterBtn"><span class="ui-icon ui-icon-minus" title="' + translate('Alle Filter entfernen') + '"></button>' : '';
+      return myopts.flags.filter && myopts.flags.clearFilter ? '<button id="clearFilterBtn"><span class="ui-icon ui-icon-minus" title="' + util.translate('Alle Filter entfernen') + '"></button>' : '';
     }
 
     function tableHead() {
@@ -224,7 +526,7 @@
 
     function tableData(pageNr) {
       if (origData[0] && origData[0].length !== myopts.columns.length) {
-        log('Definition and Data dont match!');
+        util.log('Definition and Data dont match!');
         return '';
       }
 
@@ -233,14 +535,11 @@
       var gc = myopts.groupdefs;
       for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
         var row = tblData[r];
-
         if (gc && row.isGroupElement && !origData.groupsdata[tblData[r][gc.groupid]].isOpen)
           continue;
-
         var cls = row.isGroupElement ? 'class="group"' : '';
         cls = row.isGroupHeader ? 'class="groupheader"' : cls;
         res += '<tr>';
-
         var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
         if (myopts.selectionCol) {
           if (myopts.selectionCol.render) {
@@ -289,8 +588,8 @@
     function ctrlInfo() {
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
-      var filtered = origData.length === tblData.length ? '' : _.template(translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
-      var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
+      var filtered = origData.length === tblData.length ? '' : _.template(util.translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
+      var templ = _.template(util.translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
       return label;
     }
@@ -299,130 +598,9 @@
       return (myopts.addInfo && myopts.addInfo(myopts)) || '';
     }
 
-    function selectRow(rowNr, row, b) { // b = true/false ~ on/off
-      if (!row)
-        return;
-      row.selected = b;
-      var gc = myopts.groupdefs;
-      var groupid = row[gc.groupid];
-      if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
-        log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
-        origData.getGroupRows(gc, groupid).forEach(function (o) {
-          o.selected = b;
-        });
-        for (var i = 0; i < tblData.length; i++) {
-          if (tblData[i][gc.groupid] === groupid) {
-            $(selgridid + '#check' + i).prop('checked', b);
-          }
-        }
-      } else {
-        log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
-        $(selgridid + '#check' + rowNr).prop('checked', b);
-      }
-      myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData);
-    }
-
-    function selectRows(event) { // select row
-      log('selectRows', event);
-      var checked = $(event.target).prop('checked');
-      if (event.target.id === 'checkAll') {
-        tblData.forEach(function (row, rowNr) {
-          selectRow(rowNr, tblData[rowNr], checked);
-        });
-      } else {
-        if (myopts.selectionCol && myopts.selectionCol.singleSelection) {
-          tblData.forEach(function (row, rowNr) {
-            if (row.selected)
-              selectRow(rowNr, row, false);
-          });
-        }
-        var rowNr = event.target.id.replace('check', '');
-        selectRow(rowNr, tblData[rowNr], checked);
-        $(selgridid + '#checkAll').prop('checked', false);
-      }
-    }
-
-    function deselectAllRows() {
-      if (myopts.selectionCol && myopts.selectionCol.onSelection) {
-        origData.forEach(function (row, rowNr) {
-          if (row.selected) {
-            selectRow(rowNr, row, false);
-          }
-        });
-      }
-      $(selgridid + '#data input[type=checkbox]').prop('checked', false);
-      origData.forEach(function (row) {
-        return row.selected = false;
-      });
-    }
-
-    function showSortingIndicators() {
-      var colid = util.colIdFromName(myopts.sortcolname);
-      var colidx = util.indexOfCol(myopts.sortcolname);
-      var coldef = myopts.columns[colidx];
-      var bAsc = coldef.order === 'asc';
-      $(selgridid + 'thead div span').removeClass();
-      $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
-    }
-
-    function sortToggle() {
-      var sortToggleS = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
-      var colidx = util.indexOfCol(myopts.sortcolname);
-      var coldef = myopts.columns[colidx];
-      var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-      if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
-        coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
-      }
-      coldefs.forEach(function (o) {
-        myopts.columns[o.col].order = sortToggleS[myopts.columns[o.col].order] || 'asc';
-      });
-    }
-
-    function sorting(event) { // sorting
-      var colid = event.currentTarget.id;
-      if (colid && myopts.flags.withsorting) {
-        deselectAllRows();
-        myopts.sortcolname = util.colNameFromColid(colid);
-        sortToggle();
-        if (myopts.hasMoreResults && myopts.reloadData) {
-          myopts.reloadData();
-        } else {
-          doSort();
-          pageCur = 0;
-          redraw(pageCur);
-        }
-      }
-    }
-
-    function doSort() { // sorting
-      if (myopts.sortcolname) {
-        showSortingIndicators();
-        var colidx = util.indexOfCol(myopts.sortcolname);
-        var coldef = myopts.columns[colidx];
-        var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
-          coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
-        }
-        coldefs.forEach(function (o) {
-          o.order = myopts.columns[o.col].order || 'desc';
-        });
-        tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
-        log('sorting', myopts.sortcolname);
-      }
-    }
-
-    function filtering(event) { // filtering
-      log('filtering', event);
-      deselectAllRows();
-      filterData();
-      pageCur = 0;
-      pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
-      redraw(pageCur);
-    }
-
-    function reloading(event) { // reloading
+    function reloading(event) { // reloading on <CR> in filter fields
       if (event.which === 13 && myopts.reloadData) {
-        log('reloading', event, event.which);
+        util.log('reloading', event, event.which);
         myopts.reloadData();
         event.preventDefault();
       }
@@ -436,61 +614,46 @@
 // ##############################################################################
 
     function adjustLayout() {
-      //log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
-      //adjust();
-      //$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
-      //$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
-      //$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
-      //$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
+//util.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
+//adjust();
+//$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
+//$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
+//$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
+//$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
     }
 
 // ##############################################################################
 
-    function filterData() {
-      var filters = [];
-      $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
-        var val = $(o).val();
-        if (val && val.trim()) {
-          var colid = $(o).attr('id');
-          var colname = util.colNameFromColid(colid);
-          var col = util.indexOfCol(colname);
-          var ren = util.getRender(colname);
-          var mat = util.getMatch(colname);
-          filters.push({col: col, searchtext: val.trim(), render: ren, match: mat});
-        }
-      });
-      tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groupsdata));
-      tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
-      doSort();
-    }
 
     function redraw(pageCur, withHeader) {
-      $(selgridid + '#ctrlInfo').html(ctrlInfo());
-      $(selgridid + '#ctrlAddInfo').html(ctrlAddInfo());
-      $(selgridid + '#data tbody').html(tableData(pageCur));
       if (withHeader) {
         $(selgridid + 'thead tr').html(tableHead());
         initHeaderActions();
       }
-      $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
-      $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
+      $(selgridid + '#ctrlInfo').html(ctrlInfo());
+      $(selgridid + '#ctrlAddInfo').html(ctrlAddInfo());
+      $(selgridid + '#data tbody').html(tableData(pageCur));
+      $(selgridid + '#data input[type=checkbox]').off().on('change', selectionFcts.selectRows);
+      $(selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
       $(selgridid + '.ebtable').width(myopts.bodyWidth);
       myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }
 
+// #################################################################
+// Actions
+// #################################################################
+
     function initHeaderActions() {
-      $(selgridid + 'thead th').off().on('click', sorting);
-      $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
-      $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
+      $(selgridid + 'thead th').off().on('click', sortingFcts.sorting);
+      $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filteringFcts.filtering).on('click', ignoreSorting);
+      $(selgridid + 'thead select').off().on('change', filteringFcts.filtering).on('click', ignoreSorting);
       if (myopts.flags.colsResizable) {
         var resizeDef = {
           handles: 'e',
-          start: function () {
-          },
-          stop: function (evt) {
-            myopts.saveState && myopts.saveState(state.getStateAsJSON());
-            evt.stopPropagation();
+          stop: function () {
+            myopts.saveState(stateUtil.getStateAsJSON());
+            $(selgridid).ebtable(opts, data, hasMoreResults);
           }
         };
         $(selgridid + '.ebtable').resizable(resizeDef);
@@ -498,19 +661,46 @@
       }
     }
 
-    // #################################################################
-    // Actions
-    // #################################################################
-
     function initActions() {
       $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
-          log('change rowsPerPage', event, data.item.value);
+          util.log('change rowsPerPage', event, data.item.value);
           myopts.rowsPerPage = Number(data.item.value);
           pageCur = 0;
           pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
           redraw(pageCur);
-          myopts.saveState && myopts.saveState(state.getStateAsJSON());
+          myopts.saveState && myopts.saveState(stateUtil.getStateAsJSON());
         }
+      });
+      $(selgridid + '#configBtn').button().off().on('click', function () {
+        var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
+        var list = myopts.colorder.reduce(function (acc, idx) {
+          var coldef = myopts.columns[idx];
+          return acc + (coldef.technical || coldef.mandatory ? '' : _.template(t)({name: coldef.name, cls: coldef.invisible ? 'invisible' : 'visible'}));
+        }, '');
+        var dlgopts = {
+          list: list,
+          gridid: gridid,
+          cancelstring: util.translate('Abbrechen'),
+          anchor: '#' + gridid + ' #configBtn',
+          callBack: function () {
+            $('#' + gridid + 'configDlg li.visible').each(function (idx, o) {
+              myopts.columns[util.colIdxFromName($(o).prop('id'))].invisible = false;
+            });
+            $('#' + gridid + 'configDlg li.invisible').each(function (idx, o) {
+              myopts.columns[util.colIdxFromName($(o).prop('id'))].invisible = true;
+            });
+            var colnames = [];
+            $('#' + gridid + 'configDlg li').each(function (idx, o) {
+              colnames.push($(o).prop('id'));
+            });
+            myopts.colorder = myopts.columns.map(function (col, idx) {
+              return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
+            });
+            myopts.saveState && myopts.saveState(stateUtil.getStateAsJSON());
+            $('#' + gridid).ebtable(opts, data, hasMoreResults);
+          }
+        };
+        dlgConfig(dlgopts);
       });
       $(selgridid + '.firstBtn').button().on('click', function () {
         pageCur = 0;
@@ -528,125 +718,38 @@
         pageCur = pageCurMax;
         redraw(pageCur);
       });
-      $(selgridid + '#configBtn').button().off().on('click', function () {
-        dlgConfig(gridid);
-      });
       $(selgridid + '#clearFilterBtn').button().off().on('click', function () {
         $(selgridid + 'thead input[type=text]').val('');
-        filtering();
+        filteringFcts.filtering();
       });
       $(selgridid + ' table tbody tr').off().on('click', function () {
         var rowData = tblData[ pageCur * myopts.rowsPerPage + $(this).index()];
         myopts.clickOnRowHandler(rowData, $(this));
       });
-      $(selgridid + '#data input[type=checkbox]', selgridid + '#data input[type=radio]').off().on('change', selectRows);
+      $(selgridid + '#data input[type=checkbox]', selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
+
       initHeaderActions();
-
-      $(window).on('resize', function () {
-        //log('resize!!!');
-        //adjustLayout();
-      });
     }
-
-    var defopts = {
-      columns: [],
-      flags: {
-        filter: true,
-        pagelenctrl: true,
-        config: true,
-        withsorting: true,
-        clearFilter: false,
-        colsResizable: false,
-      },
-      bodyHeight: Math.max(200, $(window).height() - 100),
-      bodyWidth: '',
-      rowsPerPageSelectValues: [10, 25, 50, 100],
-      rowsPerPage: 10,
-      pageCur: 0,
-      colorder: _.range(opts.columns.length), // [0,1,2,... ]
-      selectionCol: false, // or true or  { singleSelection = true/false,  render = function(origData, row, checked)....  }
-      saveState: state.saveState,
-      loadState: state.loadState,
-      getState: state.getState,
-      sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
-      groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
-      hasMoreResults: hasMoreResults,
-      jqueryuiTooltips: true,
-      clickOnRowHandler: function (rowData, row) {
-        //console.log(rowData, row);
-      },
-      lang: 'de'
-    };
-    opts.flags = _.extend(defopts.flags, opts.flags);
-    opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? state.saveState : opts.saveState;
-    opts.colwidths = [];
-    var myopts = $.extend({}, defopts, opts);
-    if (myopts.saveState) {
-      state.loadState(myopts.getState());
-    }
-
-
-    var origData = mx(data, myopts.groupdefs);
-    var tblData = mx(origData.slice());
-    var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
-    var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
-    util.checkConfig();
-
-    myopts.columns.forEach(function (coldef) {
-      coldef.id = coldef.name.replace(/[^\d\w]/g, '');
-    });
-
-    myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
-
-    initGrid(this);
-    initActions();
 
 // ##########  Exports ############  
     this.util = util;
     $.extend(this, {
+      getFilterValues: filteringFcts.getFilterValues,
+      setFilterValues: filteringFcts.setFilterValues,
+      iterateSelectedValues: selectionFcts.iterateSelectedValues,
+      getSelectedRows: selectionFcts.getSelectedRows,
+      unselect: selectionFcts.unselect,
+      saveSessionState: sessionStateUtil.saveSessionState,
+      loadSessionState: sessionStateUtil.loadSessionState,
+
       toggleGroupIsOpen: function (groupid) {
-        var pc = pageCur;
         origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
-        filterData();
-        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
-        pageCur = Math.min(pc, pageCurMax);
+        filteringFcts.filterData();
+        pageCur = Math.min(pageCur, pageCurMax);
         redraw(pageCur);
       },
-      groupIsOpen: function (groupName) {
-        return _.property('isOpen')(origData.groupsdata[groupName]);
-      },
-      getFilterValues: function getFilterValues() {
-        var filter = {};
-        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
-          if ($.trim($(o).val()))
-            filter[o.id] = $(o).val().trim();
-        });
-        return filter;
-      },
-      setFilterValues: function setFilterValues(filter, n) {
-        n = n || 0;
-        if (_.keys(filter).length === 0)
-          return this;
-        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
-          $(o).val(filter[o.id]);
-        });
-        filterData();
-        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
-        pageCur = n;
-        redraw(pageCur);
-        return this;
-      },
-      getStateAsJSON: state.getStateAsJSON,
-      loadState: state.loadState,
-      iterateSelectedValues: function (fct) {
-        tblData.filter(function (row) {
-          return row.selected;
-        }).forEach(fct);
-      },
-      getSelectedRows: function () {
-        return tblData.filter(function (row) {
-          return row.selected;
-        });
+      groupIsOpen: function (groupid) {
+        return _.property('isOpen')(origData.groupsdata[groupid]);
       },
       setSortColname: function (colname) {
         myopts.sortcolname = colname;
@@ -654,77 +757,14 @@
       getSortColname: function () {
         return myopts.sortcolname;
       },
-      unselect: function () {
-        tblData.forEach(function (row) {
-          return row.selected = false;
-        });
-        redraw(pageCur);
-      },
       getPageCur: function () {
         return pageCur;
       }
     });
-
-    var dlgConfig = function (gridid) {
-      $('#' + gridid + 'configDlg').remove();
-      var list = myopts.colorder.reduce(function (res, idx) {
-        var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
-        var coldef = myopts.columns[idx];
-        var cls = coldef.invisible ? 'invisible' : 'visible';
-        return res + (coldef.technical || coldef.mandatory ? '' : _.template(t)({name: coldef.name, cls: cls}));
-      }, '');
-      var t = '\
-        <div id="<%=gridid%>configDlg">\n\
-          <ol id="<%=gridid%>selectable" class="ebtableSelectable"> <%= list %> </ol>\n\
-        </div>';
-
-      var dlg = $(_.template(t)({list: list, gridid: gridid}));
-      var dlgopts = {
-        open: function () {
-          $('button:contains(Abbrechen)').text(translate('Abbrechen'));
-          $('ol#' + gridid + 'selectable').sortable();
-          $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
-            $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
-            var coldef = _.findWhere(myopts.columns, {id: event.target.id});
-            log('change visibility', event.target.id, 'now visible:', coldef ? coldef.invisible : '???');
-          });
-        },
-        position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
-        width: 250,
-        modal: true,
-        resizable: true,
-        closeText: 'Schlie\u00dfen',
-        buttons: {
-          "OK": function () {
-            var colnames = [];
-            $('#' + gridid + 'configDlg li.visible').each(function (idx, o) {
-              myopts.columns[util.indexOfCol($(o).prop('id'))].invisible = false;
-            });
-            $('#' + gridid + 'configDlg li.invisible').each(function (idx, o) {
-              myopts.columns[util.indexOfCol($(o).prop('id'))].invisible = true;
-            });
-            $('#' + gridid + 'configDlg li').each(function (idx, o) {
-              colnames.push($(o).prop('id'));
-            });
-            myopts.colorder = myopts.columns.map(function (col, idx) {
-              return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
-            });
-            myopts.saveState && myopts.saveState(state.getStateAsJSON());
-            var filters = self.getFilterValues();
-            redraw(pageCur, true);
-            self.setFilterValues(filters);
-            $(this).dialog("close");
-          },
-          'Abbrechen': function () {
-            $(this).dialog("close");
-          }
-        }
-      };
-      dlg.dialog(dlgopts).parent().find('.ui-widget-header').hide();
-    };
-
-    return !myopts.jqueryuiTooltips ? this : this.tooltip();
+    return !myopts.flags.jqueryuiTooltips ? this : this.tooltip();
   };
+
+  // ##########  sortformats ############  
 
   $.fn.ebtable.sortformats = {
     'date-de': function (a) { // '01.01.2013' -->   '20130101' 
@@ -744,17 +784,20 @@
     }
   };
 
-  function getFormatedDate(date) {
-    var d = ('0' + date.getDate()).slice(-2);
-    var m = ('0' + (date.getMonth() + 1)).slice(-2);
-    var y = date.getFullYear();
-    var hs = ('0' + date.getHours()).slice(-2);
-    var ms = ('0' + date.getMinutes()).slice(-2);
-    var ss = ('0' + date.getSeconds()).slice(-2);
-    return d + '.' + m + '.' + y + ' ' + hs + ':' + ms + ':' + ss;
-  }
+  // ##########  matcher ############ 
 
   $.fn.ebtable.matcher = {
+    util: {
+      getFormatedDate: function getFormatedDate(date) {
+        var d = ('0' + date.getDate()).slice(-2);
+        var m = ('0' + (date.getMonth() + 1)).slice(-2);
+        var y = date.getFullYear();
+        var hs = ('0' + date.getHours()).slice(-2);
+        var ms = ('0' + date.getMinutes()).slice(-2);
+        var ss = ('0' + date.getSeconds()).slice(-2);
+        return d + '.' + m + '.' + y + ' ' + hs + ':' + ms + ':' + ss;
+      }
+    },
     'contains': function (cellData, searchTxt) {
       return cellData.toLowerCase().indexOf(searchTxt.toLowerCase()) >= 0;
     },
@@ -768,13 +811,13 @@
       return cellData.match(new RegExp('^' + searchTxt.replace(/\*/g, '.*'), 'i'));
     },
     'matches-date': function (cellData, searchTxt) {
-      return getFormatedDate(new Date(parseInt(cellData))).substr(10).indexOf(searchTxt) >= 0;
+      return $.fn.ebtable.matcher.util.getFormatedDate(new Date(parseInt(cellData))).substr(10).indexOf(searchTxt) >= 0;
     },
     'matches-date-time': function (cellData, searchTxt) {
-      return getFormatedDate(new Date(parseInt(cellData))).substr(16).indexOf(searchTxt) >= 0;
+      return $.fn.ebtable.matcher.util.getFormatedDate(new Date(parseInt(cellData))).substr(16).indexOf(searchTxt) >= 0;
     },
     'matches-date-time-sec': function (cellData, searchTxt) {
-      return getFormatedDate(new Date(parseInt(cellData))).indexOf(searchTxt) >= 0;
+      return $.fn.ebtable.matcher.util.getFormatedDate(new Date(parseInt(cellData))).indexOf(searchTxt) >= 0;
     }
   };
 

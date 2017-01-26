@@ -20,7 +20,7 @@
     <script src="/js/eblib/ebtable.js"></script>
     <!--<script src="/data/ebTableGroupExternalSmall.js"></script>-->
     <script src="/data/ebTableTestDataKhbasketSmall.js"></script>
-    <!--<script src="/data/ebTableTestDataKhbasketLarge.js"></script>-->
+    <script src="/data/ebTableTestDataKhbasketLarge.js"></script>
 
     <script>
       'use strict';
@@ -108,7 +108,7 @@
           return _.template(t)({imgsrc: imgsrc, chargeId: chargeId, chargeName: name, cnt: row[1], auftrag: auftrag});
         },
         flags: function (data, row, type) {
-          return flagutils.fromBitNumber(data);
+          //return flagutils.fromBitNumber(data);
           return _.reduce(flagsdef, function (acc, o) {
             return acc += (data & o.id) ? _.template("<img src='/images/<\%=img%>' alt='<\%=alt%>' title='<\%=alt%>' height='10px'/>")({img: o.img, alt: o.alt}) : '';
           }, '');
@@ -230,7 +230,7 @@
       var grid;
 
       var opts = {
-        bodyHeight: 800,
+        bodyHeight: 750,
         flags: {
           clearFilter: true,
           colsResizable: true,

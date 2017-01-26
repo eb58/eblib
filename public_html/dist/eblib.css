@@ -52,16 +52,12 @@
 /*#########################################*/
 
 .ebtable .ctrl{ 
-  height: 40px;
-  margin: 10px 0 0 0;
+  height: 30px;
+  margin: 5px 0 0 0;
 }
 
 .ebtable .ctrl div{ 
   margin: 4px 1px;
-}
-
-.ebtable #lenctrl{ 
-  width: 70px;
 }
 
 .ebtable #ctrlInfo, .ebtable #ctrlAddInfo{
@@ -69,9 +65,10 @@
   margin: 1px;
 }
 
-.ebtable .ui-selectmenu-button.ui-button {
-  width: 50px;
-}
+.ebtable .ctrl .ui-button {  padding-top: 1px;  padding-bottom: 3px; height: 22px;}
+.ebtable .ctrl .ui-icon   {  padding: 0px;   margin: 0px; }
+.ebtable .ctrl .ui-selectmenu-button { height: 15px;}
+.ebtable .ctrl .ui-selectmenu-button.ui-button { padding-top: 3px;  padding-bottom: 3px;  width: 50px;}
 
 .ebtable #data, .ebtable table{ 
   width: 100%;
@@ -82,14 +79,14 @@
 }
 
 .ebtable #data th{ 
-  background-color:#d5d5cd; 
+  background: linear-gradient(#c6c6b6, #e8e8d4);
   padding: 5px 2px 5px 2px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ebtable #data th input, .ebtable #data th select {
-  width: 85%;
+.ebtable #data th input[type=text], .ebtable #data th select {
+  width: 95%;
   box-sizing: border-box;
 }
 
@@ -99,15 +96,13 @@
 
 .ebtable #data th div.sort_wrapper span {
   position: absolute;
-  margin-top: 10px;
-  right: -6px;
+  margin-top: -4px;
+  right: -7px;
 }
 
 .ebtable #data td{ 
-  background-color:#dfdfdf;
+  background: #e8e8d4;
   padding: 2px 1px 2px 1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .ebtable #data td.group{
   background-color: #c7c7da;
@@ -115,13 +110,21 @@
 .ebtable #data td.groupheader{
   background-color: #c3c3d0;
 }
-.ebtable #data table .selectCol{
+
+.ebtable #data .selectCol{
   width: 20px;
-  padding: 0px;
   margin: 0px;
+  padding: 2px 1px 2px 1px;
+}
+
+.ebtablefix, .ebtablefix th, .ebtablefix td, .ebtablefix th .sort_wrapper{ 
+  table-layout:fixed;
+  overflow:hidden;
+  xwhite-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* ConfigDlg */
 .ebtableSelectable { list-style-type: none; padding: 0px; width: 100%; }
-.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
-.ebtableSelectable li.invisible{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }
+.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px; font-size: 10px; font-weight: bold; background-color:#e8e8d4; }
+.ebtableSelectable li.invisible{ margin: 3px 0 0 0;  padding: 3px; font-size: 10px; font-weight: bold; background-color:#f8f8ea; }

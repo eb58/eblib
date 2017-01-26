@@ -39,7 +39,7 @@
       this.setTextAreaCounter();
     } else if ($('.ebselect', this).length) {
       var $sel = $('input:checkbox', this);
-      data[key] && data[key].forEach(function (v) {
+      if(data[key] ) data[key].forEach(function (v) {
         if (_.isNumber(v)) {
           $($sel[v]).prop('checked', true);
         } else {

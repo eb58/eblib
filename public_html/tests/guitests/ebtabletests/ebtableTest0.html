@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="/css/ebtable.css">
     <style>
       * {font-family:Arial;color: black;font-size: 12px;      }
-      body { background:#FAFAF0; margin: 10px 10px 10px 10px; width: 700px; }
+      body { background:#FAFAF0; margin: 10px 10px 10px 10px; width: 400px; }
     </style>
+
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
     <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
@@ -45,22 +46,37 @@
           colsResizable: true,
         },
         columns: [
-          {name: "Tierart", match: 'contains'},
+          {name: "Tierart", match: 'contains', order:'desc'},
           {name: "Datum", sortformat: 'date-de', css: 'text-align: center'},
           {name: "Name"},
           {name: "Flag"}
         ],
         sortcolname: 'Tierart',
-        selectionCol: true,
-        
+        saveSessionState: true,
+        selectionCol: {singleSelection:true},
+        //lang:'en'
       };
       var grid;
       $().ready(function () {
         grid = $('#grid').ebtable(opts, basketTestdata);
+        $('#xgrid table').colResizable({
+          liveDrag: true,
+          gripInnerHtml: "<div class='grip'></div>",
+          draggingClass: "dragging",
+          resizeMode: 'overflow'
+        });
+        $('#saveGridStatus').on('click', function(){
+          grid.saveSessionState();
+        })
+        $('#loadGridStatus').on('click', function(){
+          grid.loadSessionState();
+        })
       });
     </script>
   </head>
   <body>
     <div id="grid"></div>
+    <button id="saveGridStatus">SaveGridStatus</button>
+    <button id="loadGridStatus">LoadGridStatus</button>
   </body>
 </html>

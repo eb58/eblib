@@ -87,19 +87,20 @@ var mx = function mx(m, groupdef) {  //groupdef see below
         return row[groupdefs.grouplabel] === groupdefs.grouphead;
       },
       initGroups: function initGroups(groupdefs) {
-        if (!groupdefs.groupid )
+        if (!groupdefs.groupid)
           return;
-        var groupsdata = this.groupsdata ||{}, row, r, groupId;
-        for (r = 0; r < this.length; r++) {
+        var row, groupId;
+        var groupsdata = this.groupsdata || {};
+        for (var r = 0; r < this.length; r++) {
           row = this[r];
           groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
           row.isGroupHeader = row[groupdefs.grouplabel] === groupdefs.grouphead;
           row.isGroupElement = groupId && !row.isGroupHeader;
-          if (groupId && !groupsdata[groupId] ) {
+          if (groupId && !groupsdata[groupId]) {
             groupsdata[groupId] = {isOpen: false, groupname: $.trim(row[groupdefs.groupname])};
           }
         }
-        for ( r = 0; r < this.length; r++) {
+        for (r = 0; r < this.length; r++) {
           row = this[r];
           groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
           row[groupdefs.groupsortstring] = groupId ? (groupsdata[groupId].groupname + ' ' + groupId) : row[groupdefs.groupname];
@@ -108,10 +109,10 @@ var mx = function mx(m, groupdef) {  //groupdef see below
         return this;
       },
       filterGroups: function filterGroups(groupdefs, groupsdata) {
-        var filteredData =  _.filter(this, function (row) {
+        var filteredData = _.filter(this, function (row) {
           var groupId = fcts.normalizeGroupId((row[groupdefs.groupid]));
           return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groupsdata[groupId].isOpen);
-        })
+        });
         filteredData.groupsdata = this.groupsdata;
         return filteredData;
       },
@@ -198,7 +199,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
   //#####################################################################
 
   var res = _.extend(m, basicapi, sorting, filtering, grouping);
-  if (groupdef){
+  if (groupdef) {
     res.initGroups(groupdef);
   }
   return res;

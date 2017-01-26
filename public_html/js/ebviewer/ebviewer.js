@@ -1,4 +1,4 @@
-/* global _, $ */
+/* global _, $ *//* jshint multistr: true */
 var ebviewer = (function () {
 
   function getPositionFromUserPrefs() {
@@ -28,8 +28,7 @@ var ebviewer = (function () {
       y: -1, /* fixed window position (-1 = not fixed) */
       fixPosition: true /* true = fixed position is retrieved from user preferences */
     };
-    var myopts = $.extend({}, defopts, opts );
-    var myopts = $.extend({}, myopts, myopts.fixPosition && getPositionFromUserPrefs ? getPositionFromUserPrefs() : {x: -1, y: -1});
+    var myopts = $.extend({}, defopts, opts, myopts.fixPosition && getPositionFromUserPrefs ? getPositionFromUserPrefs() : {x: -1, y: -1});
     var params = _.template(
       "width=<%=w%>px,\n\
       height=<%=h%>px,\n\

@@ -4,60 +4,56 @@
 /*#########################################*/
 
 /* global _ ,jQuery*/
-
-(function ($) {
-  "use strict";
-  $.fn.ebbind = function (data, m) {
+(function ($) { "use strict";
+  $.fn.ebbind = function (data, key) {
     var id = this[0].id;
     var type = this[0].type;
     var self = this;
-    var $x;
 
-    m = m || id;
+    key = key || id;
     if (type === 'text' || type === 'password') {
-      this.val(data[m]).on('change', function () {
-        data[m] = self.val();
-        console.log('changed ' + id, data[m], data);
+      this.val(data[key]).off().on('change', function () {
+        data[key] = self.val();
+        console.log('text changed ' + id, data[key], data);
       }).on('keyup', function () {
-        data[m] = self.val();
-        console.log('changed ' + id, self, data[m], data);
+        data[key] = self.val();
+        console.log('text keyup ' + id, self, data[key], data);
       });
     } else if (type === 'checkbox') {
-      this.prop('checked', data[m]).on('click', function () {
-        data[m] = self.prop('checked');
-        console.log('changed ' + id, data[m], data);
+      this.prop('checked', data[key]).off().on('click', function () {
+        data[key] = self.prop('checked');
+        console.log('checkbox changed ' + id, data[key], data);
       });
     } else if ($('select', this).length) {
-      this.setSelectedValue(data[m]).on("selectmenuchange", function () {
-        data[m] = self.getSelectedValue();
-        console.log('select changed ' + id, data[m], data);
+      this.setSelectedValue(data[key]).off().on("selectmenuchange", function () {
+        var v = parseInt( self.getSelectedValue() );
+        data[key] = v || self.getSelectedValue();
+        console.log('select changed ' + id, data[key], data);
       });
     } else if ($('input:radio', this).length) {
-      this.val(data[m]).on("change", function () {
-        data[m] = self.val();
-        console.log('radio changed ' + id, data[m], data);
+      this.val(data[key]).off().on("change", function () {
+        data[key] = self.val();
+        console.log('radio changed ' + id, data[key], data);
       });
     } else if ($('textarea', this).length) {
-      $x = $('textarea', this);
-      $x.val(data[m], this).on('keyup', function () {
-        data[m] = $x.val();
-        console.log('textarea changed ' + id, data[m], data);
+      var $ta = $('textarea', this);
+      $ta.val(data[key], this).off().on('keyup', function () {
+        data[key] = $ta.val();
+        console.log('textarea changed ' + id, data[key], data);
       });
       this.setTextAreaCounter();
     } else if ($('.ebselect', this).length) {
-      $x = $('input:checkbox', this);
-      if (data[m]) {
-        data[m].forEach(function (v) {
-          if (_.isNumber(v)) {
-            $($x[v]).prop('checked', true);
-          } else {
-            $('#' + v.replace(/ /g, ''), self).prop('checked', true);
-          }
-        });
-      }
-      $x.on('click', function () {
-        data[m] = self.getSelectedValuesAsString();
-        console.log('textarea changed ' + id, data[m], data);
+      var $sel = $('input:checkbox', this);
+      if(data[key] ) data[key].forEach(function (v) {
+        if (_.isNumber(v)) {
+          $($sel[v]).prop('checked', true);
+        } else {
+          $('#' + v.replace(/ /g, ''), self).prop('checked', true);
+        }
+      });
+      $sel.off().on('click', function () {
+        data[key] = self.getSelectedValuesAsString();
+        console.log('ebselect changed ' + id, data[key], data);
       });
     }
     return this;
@@ -176,32 +172,35 @@
   "use strict";
   $.fn.ebradio = function (opts, vals, choice) {
     var id = this[0].id;
-    var defopts = {
-      vertical: false,
-      width: 400,
-      icon: false
-    };
-    var myopts = $.extend({}, defopts, opts);
+    if (opts) {
+      var defopts = {
+        vertical: false,
+        width: 400,
+        icon: false
+      };
+      var myopts = $.extend({}, defopts, opts);
 
-    (function (a) {
-      var options = _.reduce(vals, function (acc, o) {
-        return acc + _.template('<label><input type="radio" id="<%=val%>" name="<%=name%>"><%=val%></label><%=vertical%>')
-                ({name: id, val: o, vertical: myopts.vertical ? '<br>' : ''});
-      }, '');
+      (function (a) {
+        var options = _.reduce(vals, function (acc, o) {
+          return acc + _.template('<label><input type="radio" id="<%=val%>" name="<%=name%>"><%=val%></label><%=vertical%>')
+                  ({name: id, val: o, vertical: myopts.vertical ? '<br>' : ''});
+        }, '');
 
-      var s = _.template('\
+        var s = _.template('\
             <div class="ebradio">\n\
               <%=options%>\n\
             </div>\n')({options: options});
-      a.html(s);
-    })(this);
-    $('#' + id + " input").checkboxradio(myopts);
+        a.html(s);
+      })(this);
+      $('#' + id + " input").checkboxradio(myopts);
+    }
     this.id = id;
-    this.val = function val(choice) {
+    this.val = function(choice) {
       if (_.isString(choice) || _.isNumber(choice)) {
-        $('#' + id + ' #' + choice).prop('checked', true).checkboxradio("refresh");
+        $('#' + id + ' #' + choice).prop('checked', true).checkboxradio('refresh');
+        //$('div#' +id +'input:radio', ).checkboxradio('refresh');
         return this;
-      } else{
+      } else {
         return $('#' + id + ' input:radio:checked').prop('id');
       }
     };
@@ -269,14 +268,14 @@
     })(this);
 
     this.getSelectedValues = function getSelectedValues() {
-      return _.pluck($('#' + id + ' .ebselect input:checked'), 'value');
+      return _.pluck($('.ebselect input:checked',self), 'value');
     };
     this.getSelectedValuesAsString = function getSelectedValues() {
       return _.map(this.getSelectedValues(), function (o, idx) {
         return _.findWhere(myopts.values,{v:parseInt(o)}).txt;
       });
     };
-    $('#' + id + ' .ebselect input').on('change', function () {
+    $('.ebselect input',self).on('change', function () {
       myopts.onselchange(self);
     });
     myopts.onselchange(this);
@@ -289,20 +288,46 @@
 /*#########################################*/
 
 /* global _,jQuery,mx *//* jshint multistr: true */ /* jshint expr: true */
+
 (function ($) {
   "use strict";
-  $.fn.ebtable = function (opts, data, hasMoreResults) {
-    function log() {
-      opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
-    }
-    var gridid = this[0].id;
-    var selgridid = '#' + gridid + ' ';
-    function translate(str) {
-      return $.fn.ebtable.lang[myopts.lang][str] || str;
-    }
-    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
 
-    var state = {// saving/loading state
+  var dlgConfig = function (opts) {
+    var t = '\
+        <div id="<%=gridid%>configDlg">\n\
+          <ol id="<%=gridid%>selectable" class="ebtableSelectable"> <%= list %> </ol>\n\
+        </div>';
+    var dlg = $(_.template(t)({list: opts.list, gridid: opts.gridid}));
+    var dlgopts = {
+      open: function () {
+        $('button:contains(Abbrechen)').text(opts.cancelstring);
+        $('ol#' + opts.gridid + 'selectable').sortable();
+        $('#' + opts.gridid + 'configDlg li').off('click').on('click', function (event) {
+          $('#' + opts.gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
+        });
+      },
+      position: {my: "left top", at: "left bottom", of: opts.anchor},
+      width: 250,
+      modal: true,
+      resizable: true,
+      buttons: {
+        "OK": function () {
+          opts.callBack();
+          $(this).dialog("destroy");
+        },
+        'Abbrechen': function () {
+          $(this).dialog("destroy");
+        }
+      }
+    };
+    dlg.dialog(dlgopts).parent().find('.ui-widget-header').hide();
+  };
+
+  //###########################################################################################################
+
+  $.fn.ebtable = function (opts, data, hasMoreResults) {
+
+    var stateUtil = {// saving/loading state
       getStateAsJSON: function () {
         return JSON.stringify({
           bodyWidth: $(selgridid + '.ebtable').width(),
@@ -318,41 +343,40 @@
           colwidths: $(selgridid + 'th').map(function (i, o) {
             var id = $(o).prop('id');
             var w = $(o).width();
-            var name = (_.findWhere(myopts.columns, {id: id}) || {}).name;
-            log($(o).prop('id'), w, name);
-            var ret = {};
-            ret[name] = w;
+            var name = util.colNameFromId(id);
+            util.log($(o).prop('id'), w, name);
+            var ret = {name: name, w: w};
             return ret;
           }).toArray().filter(function (o) {
-            return !o.undefined;
-          }).reduce(function (acc, o) {
-            return o ? _.extend(acc, o) : acc;
-          }, {})
+            return o.name;
+          })
         });
       },
       saveState: function saveState(s) {
         localStorage[localStorageKey] = s;
       },
+      getState: function getState() {
+        return localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null;
+      },
       loadState: function loadState(state) {
         if (!state)
           return;
         myopts.rowsPerPage = state.rowsPerPage;
-        // XXXXXXXX myopts.bodyWidth = state.tableWidth;
         myopts.colorder = [];
         state.colorderByName.forEach(function (colname) {
-          var n = util.indexOfCol(colname);
+          var n = util.colIdxFromName(colname);
           if (n >= 0) {
             myopts.colorder.push(n);
           }
         });
         myopts.columns.forEach(function (coldef, idx) {
-          !_.contains(state.colorderByName, coldef.name) && myopts.colorder.push(idx);
+          if (!_.contains(state.colorderByName, coldef.name))
+            myopts.colorder.push(idx);
         });
-        myopts.columns.forEach(function (coldef, idx) {
-          // XXXXX !_.contains(state.colwidths, coldef.name) && (coldef.css = 'width:' + state.colwidths[coldef.name] + 'px');
-        });
+        myopts.bodyWidth = state.bodyWidth;
+        myopts.colwidths = state.colwidths;
         state.invisibleColnames.forEach(function (colname) {
-          var n = util.indexOfCol(colname);
+          var n = util.colIdxFromName(colname);
           if (n >= 0) {
             myopts.columns[n].invisible = true;
           }
@@ -360,29 +384,72 @@
       }
     };
 
+    var sessionStateUtil = {// saving/loading state
+      getSessionStateAsJSON: function getSessionStateAsJSON() {
+        return JSON.stringify({
+          pageCur: pageCur,
+          sortcolname: myopts.sortcolname,
+          sortState: myopts.columns.map(function (col) {
+            var ret = {};
+            ret[col.name] = col.order;
+            return ret;
+          }),
+          filters: self.getFilterValues()
+        });
+      },
+      getSessionState: function getSessionState() {
+        return sessionStorage[localStorageKey] ? JSON.parse(sessionStorage[localStorageKey]) : null;
+      },
+      saveSessionState: function saveSessionState(s) {
+        sessionStorage[localStorageKey] = s || sessionStateUtil.getSessionStateAsJSON();
+      },
+      loadSessionState: function loadSessionState(s) {
+        s = s || sessionStateUtil.getSessionState();
+        if (!s)
+          return;
+        myopts.pageCur = s.pageCur;
+        myopts.sortcolname = s.sortcolname;
+        myopts.columns.forEach(function (coldef) {
+          coldef.order = s.sortState[coldef.name];
+        });
+        $(selgridid).ebtable(opts, data, hasMoreResults);
+      }
+    };
+
+    // ##############################################################################
+
     var util = {
-      indexOfCol: function indexOfCol(colname) {
+      translate: function translate(str) {
+        return $.fn.ebtable.lang[myopts.lang][str] || str;
+      },
+      log: function log() {
+        opts.debug && console.log.apply(console, [].slice.call(arguments, 0));
+      },
+      colIdxFromName: function colIdxFromName(colname) {
         return _.findIndex(myopts.columns, function (o) {
           return o.name === colname;
         });
       },
-      colNameFromColid: function colNameFromColid(colid) {
-        return  _.findWhere(myopts.columns, {id: colid}).name;
+      colDefFromName: function (colname) {
+        return _.findWhere(myopts.columns, {name: colname});
       },
-      colColIdFromName: function colNameFromColid(colname) {
-        return  _.findWhere(myopts.columns, {name: colname}).id;
+      colIdFromName: function colNameFromId(colname) {
+        return util.colDefFromName(colname).id;
+      },
+      colNameFromId: function colNameFromId(colid) {
+        return  (_.findWhere(myopts.columns, {id: colid}) || {}).name;
       },
       colIsInvisible: function colIsInvisible(colname) {
-        return _.findWhere(myopts.columns, {name: colname}).invisible;
+        return util.colDefFromName(colname).invisible;
       },
       colIsTechnical: function colIsTechnical(colname) {
-        return _.findWhere(myopts.columns, {name: colname}).technical;
+        return util.colDefFromName(colname).technical;
       },
       getRender: function getRender(colname) {
-        return _.findWhere(myopts.columns, {name: colname}).render;
+        return util.colDefFromName(colname).render;
       },
       getMatch: function getMatch(colname) {
-        var matcher = _.findWhere(myopts.columns, {name: colname}).match;
+        var matcher = util.colDefFromName(colname).match;
         if (!matcher)
           return $.fn.ebtable.matcher['starts-with-matches'];
         return _.isString(matcher) ? $.fn.ebtable.matcher[matcher] : matcher;
@@ -399,7 +466,6 @@
           coldef.mandatory = coldef.mandatory || false;
           coldef.order = coldef.order || 'asc';
         });
-
         if (origData[0] && origData[0].length !== myopts.columns.length) {
           alert('Data definition and column definition don\'t match!');
           localStorage[localStorageKey] = '';
@@ -419,40 +485,302 @@
         });
       }
     };
-// ##############################################################################
+
+    // ##############################################################################
+
+    var selectionFcts = {
+      selectRow: function selectRow(rowNr, row, b) { // b = true/false ~ on/off
+        if (!row)
+          return;
+        row.selected = b;
+        var gc = myopts.groupdefs;
+        var groupid = row[gc.groupid];
+        if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
+          util.log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
+          origData.getGroupRows(gc, groupid).forEach(function (o) {
+            o.selected = b;
+          });
+          for (var i = 0; i < tblData.length; i++) {
+            if (tblData[i][gc.groupid] === groupid) {
+              $(selgridid + '#check' + i).prop('checked', b);
+            }
+          }
+        } else {
+          util.log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
+          $(selgridid + '#check' + rowNr).prop('checked', b);
+        }
+        myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData);
+      },
+      selectRows: function selectRows(event) { // select row
+        util.log('selectRows', event);
+        var checked = $(event.target).prop('checked');
+        if (event.target.id === 'checkAll') {
+          tblData.forEach(function (row, rowNr) {
+            selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
+          });
+        } else {
+          if (myopts.selectionCol && myopts.selectionCol.singleSelection) {
+            tblData.forEach(function (row, rowNr) {
+              if (row.selected)
+                selectionFcts.selectRow(rowNr, row, false);
+            });
+          }
+          var rowNr = event.target.id.replace('check', '');
+          selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
+          $(selgridid + '#checkAll').prop('checked', false);
+        }
+      },
+      deselectAllRows: function deselectAllRows() {
+        if (myopts.selectionCol && myopts.selectionCol.onSelection) {
+          origData.forEach(function (row, rowNr) {
+            if (row.selected) {
+              selectionFcts.selectRow(rowNr, row, false);
+            }
+          });
+        }
+        $(selgridid + '#data input[type=checkbox]').prop('checked', false);
+        origData.forEach(function (row) {
+          row.selected = false;
+        });
+      },
+      iterateSelectedValues: function iterateSelectedValues(fct) {
+        tblData.filter(function (row) {
+          return row.selected;
+        }).forEach(fct);
+      },
+      getSelectedRows: function getSelectedRows() {
+        return tblData.filter(function (row) {
+          return row.selected;
+        });
+      },
+      unselect: function unselect() {
+        tblData.forEach(function (row) {
+          row.selected = false;
+        });
+        redraw(pageCur);
+      }
+    };
+
+    var sortingFcts = {
+      showSortingIndicators: function showSortingIndicators() {
+        var colid = util.colIdFromName(myopts.sortcolname);
+        var colidx = util.colIdxFromName(myopts.sortcolname);
+        var coldef = myopts.columns[colidx];
+        var bAsc = coldef.order === 'asc';
+        $(selgridid + 'thead div span').removeClass();
+        $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
+      },
+      getSortState: function getSortState() {
+        var colidx = util.colIdxFromName(myopts.sortcolname);
+        var coldef = myopts.columns[colidx];
+        var coldefs = $.extend([], coldef.sortmaster || myopts.sortmaster);
+        if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
+          coldefs.push({col: colidx, order: coldef.order});
+        }
+        return coldefs;
+      },
+      sortToggle: function sortToggle() {
+        var sortToggleS = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
+        sortingFcts.getSortState().forEach(function (o) {
+          myopts.columns[o.col].order = sortToggleS[myopts.columns[o.col].order] || 'asc';
+        });
+      },
+      sorting: function sorting(event) { // sorting
+        var colid = event.currentTarget.id;
+        if (colid && myopts.flags.withsorting) {
+          selectionFcts.deselectAllRows();
+          myopts.sortcolname = util.colNameFromId(colid);
+          sortingFcts.sortToggle();
+          if (myopts.hasMoreResults && myopts.reloadData) {
+            myopts.reloadData();
+          } else {
+            sortingFcts.doSort();
+            pageCur = 0;
+            redraw(pageCur);
+          }
+        }
+      },
+      doSort: function doSort() { // sorting
+        if (myopts.sortcolname) {
+          sortingFcts.showSortingIndicators();
+          var colidx = util.colIdxFromName(myopts.sortcolname);
+          var coldef = myopts.columns[colidx];
+          var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
+          if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
+            coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+          }
+          coldefs.forEach(function (o) {
+            o.order = myopts.columns[o.col].order || 'desc';
+          });
+          tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
+          util.log('sorting', myopts.sortcolname);
+        }
+      }
+    };
+
+    var filteringFcts = {
+      getFilterValues: function getFilterValues() {
+        var filter = {};
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          if ($.trim($(o).val()))
+            filter[o.id] = $(o).val().trim();
+        });
+        return filter;
+      },
+      setFilterValues: function setFilterValues(filter, n) {
+        n = n || 0;
+        if (_.keys(filter).length === 0)
+          return this;
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          $(o).val(filter[o.id]);
+        });
+        filteringFcts.filterData();
+        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+        pageCur = n;
+        redraw(pageCur);
+        return this;
+      },
+      filterData: function filterData() {
+        var filters = [];
+        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
+          var val = $(o).val();
+          if (val && val.trim()) {
+            var colid = $(o).attr('id');
+            var colname = util.colNameFromId(colid);
+            var col = util.colIdxFromName(colname);
+            var ren = util.getRender(colname);
+            var mat = util.getMatch(colname);
+            filters.push({col: col, searchtext: val.trim(), render: ren, match: mat});
+          }
+        });
+        tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groupsdata));
+        tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
+        pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+        sortingFcts.doSort();
+      },
+      filtering: function filtering(event) { // filtering
+        util.log('filtering', event);
+        selectionFcts.deselectAllRows();
+        filteringFcts.filterData();
+        pageCur = 0;
+        redraw(pageCur);
+      }
+    };
+
+    // ##############################################################################
+
+    var gridid = this[0].id;
+    var self = this;
+    var selgridid = '#' + gridid + ' ';
+    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
 
     var defopts = {
       columns: [],
-      flags: {filter: true, pagelenctrl: true, config: true, withsorting: true},
+      flags: {
+        filter: true,
+        pagelenctrl: true,
+        config: true,
+        withsorting: true,
+        clearFilter: false,
+        colsResizable: false,
+        jqueryuiTooltips: true,
+      },
       bodyHeight: Math.max(200, $(window).height() - 100),
-      bodyWidth: '', // Math.max(200, $(window).width() - 10) + 'px',
+      bodyWidth: '',
       rowsPerPageSelectValues: [10, 25, 50, 100],
       rowsPerPage: 10,
+      pageCur: 0,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
-      colsResizable: false,
-      selection: false,
-      singleSelection: false,
-      saveState: state.saveState,
-      loadState: state.loadState,
+      selectionCol: false, // or true or  { singleSelection = true/false,  render = function(origData, row, checked)....  }
+      saveState: stateUtil.saveState,
+      loadState: stateUtil.loadState,
+      getState: stateUtil.getState,
       sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       hasMoreResults: hasMoreResults,
-      jqueryuiTooltips: true,
+      clickOnRowHandler: function (rowData, row) { // just for docu
+        //util.log(rowData, row);
+      },
       lang: 'de'
     };
-    opts.flags = _.extend(defopts.flags, opts.flags);
+
+    { // trimming opts param
+      opts.flags = _.extend(defopts.flags, opts.flags);
+      opts.saveState = opts.saveState || opts.flags.colsResizable;
+      opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? stateUtil.saveState : opts.saveState;
+      opts.colwidths = [];
+    }
+
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     var tblData = mx(origData.slice());
-    var pageCur = 0;
-    var pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
+    var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+    var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
+    util.checkConfig();
+
+    if (myopts.saveState && myopts.getState) {
+      myopts.loadState(myopts.getState());
+    }
+    myopts.columns.forEach(function (coldef) {
+      coldef.id = coldef.name.replace(/[^\d\w]/g, '');
+    });
+    initGrid(this);
+    initActions();
+
+    function initGrid(a) {
+      pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+      var tableTemplate = _.template("\
+        <div class='ebtable'>\n\
+          <div class='ctrl'>\n\
+            <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
+            <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
+            <div id='ctrlClearFilter' style='float: left;'><%= clearFilter  %></div>\n\
+            <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
+          </div>\n\
+          <div id='data' style='overflow-y:auto;overflow-x:auto; max-height:<%= bodyHeight %>px; width:100%'>\n\
+            <table <%= tblClass %>>\n\
+              <thead><tr><%= head %></tr></thead>\n\
+              <tbody><%= data %></tbody>\n\
+            </table>\n\
+          </div>\n\
+          <div class='ctrl'>\n\
+            <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
+            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content' hidden><%= addInfo %></div>\n\
+            <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
+          </div>\n\
+        </div>");
+      a.html(tableTemplate({
+        head: tableHead(),
+        data: tableData(pageCur),
+        selectLen: selectLenCtrl(),
+        configBtn: configBtn(),
+        clearFilter: clearFilterBtn(),
+        browseBtns: pageBrowseCtrl(),
+        info: ctrlInfo(),
+        addInfo: ctrlAddInfo(),
+        bodyWidth: myopts.bodyWidth,
+        bodyHeight: myopts.bodyHeight,
+        tblClass: myopts.flags.colsResizable ? 'class="ebtablefix"' : ''
+      }));
+      filteringFcts.filterData();
+      redraw(pageCur);
+
+      myopts.colwidths && myopts.colwidths.forEach(function (o) {
+        var id = util.colIdFromName(o.name);
+        $(selgridid + 'table th>#' + id).parent().width(o.w);
+      });
+    }
 
     function configBtn() {
-      return !myopts.flags.config ? '' : '<button id ="configBtn">' + translate('Anpassen') + ' <span class = "ui-icon ui-icon-shuffle"></button>';
+      return myopts.flags.config ? '<button id="configBtn">' + util.translate('Anpassen') + ' <span class="ui-icon ui-icon-shuffle"></button>' : '';
+    }
+
+    function clearFilterBtn() {
+      return myopts.flags.filter && myopts.flags.clearFilter ? '<button id="clearFilterBtn"><span class="ui-icon ui-icon-minus" title="' + util.translate('Alle Filter entfernen') + '"></button>' : '';
     }
 
     function tableHead() {
-      var res = myopts.selection ? '<th class="selectCol"><input id="checkAll" type="checkbox"></th>' : '';
+      var res = myopts.selectionCol ? '<th class="selectCol"><input id="checkAll" type="checkbox"></th>' : '';
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
@@ -461,7 +789,7 @@
             var t_inputfld = '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>';
             var t_selectfld = '<select id="<%=colid%>"><%=opts%></select>';
             var opts = (coldef.valuelist || []).reduce(function (acc, o) {
-              return acc + '<option ' + o.v + '>' + o.txt + '</option>';
+              return acc + '<option>' + o + '</option>';
             }, '');
             var t = coldef.valuelist ? t_selectfld : t_inputfld;
             fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip});
@@ -469,7 +797,7 @@
           var style = coldef.css ? ' style="' + coldef.css + '"' : '';
           var tt = '\
             <th id="<%=colid%>" <%=style%> >\n\
-              <div class="sort_wrapper"><span/><%=colname%></div>\n\
+              <div class="sort_wrapper">&nbsp;&nbsp;<%=colname%>&nbsp;&nbsp<span/></div>\n\
               <%=fld%>\n\
              </th>';
           // &#8209; = non breakable hyphen : &#0160; = non breakable space
@@ -487,7 +815,7 @@
 
     function tableData(pageNr) {
       if (origData[0] && origData[0].length !== myopts.columns.length) {
-        log('Definition and Data dont match!');
+        util.log('Definition and Data dont match!');
         return '';
       }
 
@@ -496,22 +824,21 @@
       var gc = myopts.groupdefs;
       for (var r = startRow; r < Math.min(startRow + myopts.rowsPerPage, tblData.length); r++) {
         var row = tblData[r];
-
-        if (gc && row.isGroupElement && !origData.groups[tblData[r][gc.groupid]].isOpen)
+        if (gc && row.isGroupElement && !origData.groupsdata[tblData[r][gc.groupid]].isOpen)
           continue;
-
         var cls = row.isGroupElement ? 'class="group"' : '';
         cls = row.isGroupHeader ? 'class="groupheader"' : cls;
         res += '<tr>';
-
         var checked = !!tblData[r].selected ? ' checked="checked" ' : ' ';
-        if (myopts.selection && myopts.selection.render) {
-          var x = '<td ' + cls + '>' + myopts.selection.render(origData, row, checked) + '</td>';
-          res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
-        } else if (myopts.selection && myopts.singleSelection) {
-          res += '<td ' + cls + '><input id="check' + r + '" type="radio"' + checked + '/></td>';
-        } else if (myopts.selection && !myopts.singleSelection) {
-          res += '<td ' + cls + '><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
+        if (myopts.selectionCol) {
+          if (myopts.selectionCol.render) {
+            var x = '<td ' + cls + '>' + myopts.selectionCol.render(origData, row, checked) + '</td>';
+            res += x.replace('input type', 'input id="check' + r + '"' + checked + ' type');
+          } else if (myopts.selectionCol.singleSelection) {
+            res += '<td ' + cls + '><input id="check' + r + '" type="radio"' + checked + '/></td>';
+          } else if (!myopts.selectionCol.singleSelection) {
+            res += '<td ' + cls + '><input id="check' + r + '" type="checkbox"' + checked + '/></td>';
+          }
         }
 
         var order = myopts.colorder;
@@ -520,7 +847,7 @@
           if (!coldef.invisible) {
             var xx = tblData[r][order[c]];
             var v = _.isNumber(xx) ? xx : (xx || '');
-            var val = coldef.render ? coldef.render(v, row, r) : v;
+            var val = coldef.render ? coldef.render(v, row, r, origData) : v;
             var style = coldef.css ? ' style="' + coldef.css + '"' : '';
             res += '<td ' + cls + style + '>' + val + '</td>';
           }
@@ -550,8 +877,8 @@
     function ctrlInfo() {
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
-      var filtered = origData.length === tblData.length ? '' : _.template(translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
-      var templ = _.template(translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
+      var filtered = origData.length === tblData.length ? '' : _.template(util.translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
+      var templ = _.template(util.translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
       return label;
     }
@@ -560,139 +887,10 @@
       return (myopts.addInfo && myopts.addInfo(myopts)) || '';
     }
 
-    function selectRow(rowNr, row, b) { // b = true/false ~ on/off
-      if (!row)
-        return;
-      row.selected = b;
-      var gc = myopts.groupdefs;
-      var groupid = row[gc.groupid];
-      if (gc && groupid && row[gc.grouplabel] === gc.grouphead) {
-        log('Groupheader ' + (b ? 'selected!' : 'unselected!'), groupid, row[gc.grouplabel]);
-        origData.getGroupRows(gc, groupid).forEach(function (o) {
-          o.selected = b;
-        });
-        for (var i = 0; i < tblData.length; i++) {
-          if (tblData[i][gc.groupid] === groupid) {
-            $(selgridid + '#check' + i).prop('checked', b);
-          }
-        }
-      } else {
-        log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
-        $(selgridid + '#check' + rowNr).prop('checked', b);
-      }
-      myopts.onSelection && myopts.onSelection(rowNr, row, origData);
-    }
-
-    function selectRows(event) { // select row
-      log('selectRows', event);
-      var checked = $(event.target).prop('checked');
-      if (event.target.id === 'checkAll') {
-        tblData.forEach(function (row, rowNr) {
-          selectRow(rowNr, tblData[rowNr], checked);
-        });
-      } else {
-        if (myopts.singleSelection) {
-          tblData.forEach(function (row, rowNr) {
-            if (row.selected)
-              selectRow(rowNr, row, false);
-          });
-        }
-        var rowNr = event.target.id.replace('check', '');
-        selectRow(rowNr, tblData[rowNr], checked);
-        $('#checkAll').prop('checked', false);
-      }
-    }
-
-    function deselectAllRows() {
-      $(selgridid + '#data input[type=checkbox]').prop('checked', false);
-      if (myopts.onSelection) {
-        origData.forEach(function (row, rowNr) {
-          if (row.selected) {
-            selectRow(rowNr, row, false);
-          }
-        });
-      }
-    }
-
-    function showSortingIndicators() {
-      var colid = util.colColIdFromName(myopts.sortcolname);
-      var colidx = util.indexOfCol(myopts.sortcolname);
-      var coldef = myopts.columns[colidx];
-      var bAsc = coldef.order === 'asc';
-      $(selgridid + 'thead div span').removeClass();
-      $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
-    }
-
-    function sortToggle() {
-      var sortToggleS = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
-      var colidx = util.indexOfCol(myopts.sortcolname);
-      var coldef = myopts.columns[colidx];
-      var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-      if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
-        coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
-      }
-      coldefs.forEach(function (o) {
-        myopts.columns[o.col].order = sortToggleS[myopts.columns[o.col].order] || 'asc';
-      });
-    }
-
-    function sorting(event) { // sorting
-      var colid = event.currentTarget.id;
-      if (colid && myopts.flags.withsorting) {
-        deselectAllRows();
-        myopts.sortcolname = util.colNameFromColid(colid);
-        sortToggle();
-        if (myopts.hasMoreResults && myopts.reloadData) {
-          var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
-          var sortcrit = {};
-          sortcrit[coldef.dbcol] = coldef.order;
-          myopts.reloadData(sortcrit);
-        } else {
-          doSort();
-        }
-      }
-    }
-
-    function doSort() { // sorting
-      if (myopts.sortcolname) {
-        showSortingIndicators();
-        var colidx = util.indexOfCol(myopts.sortcolname);
-        var coldef = myopts.columns[colidx];
-        var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
-        if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
-          coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
-        }
-        coldefs.forEach(function (o) {
-          o.order = myopts.columns[o.col].order || 'desc';
-        });
-        tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
-        pageCur = 0;
-        redraw(pageCur);
-        log('sorting', myopts.sortcolname);
-      }
-    }
-
-    function filtering(event) { // filtering
-      log('filtering', event, event.which);
-      deselectAllRows();
-      filterData();
-      pageCur = 0;
-      pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-      redraw(pageCur);
-    }
-
-    function reloading(event) { // reloading
+    function reloading(event) { // reloading on <CR> in filter fields
       if (event.which === 13 && myopts.reloadData) {
-        log('reloading', event, event.which);
-        var coldef = myopts.columns[util.indexOfCol(myopts.sortcolname)];
-        var sortcrit = {};
-        if (coldef)
-          sortcrit[coldef.dbcol] = coldef.order;
-        if (myopts.reloadData(sortcrit)) {
-//          pageCur = 0;
-//          pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-//          redraw(pageCur);
-        }
+        util.log('reloading', event, event.which);
+        myopts.reloadData();
         event.preventDefault();
       }
     }
@@ -705,256 +903,157 @@
 // ##############################################################################
 
     function adjustLayout() {
-      //log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
-      //adjust();
-      //$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
-      //$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
-      //$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
-      //$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
+//util.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
+//adjust();
+//$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
+//$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
+//$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
+//$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
     }
 
 // ##############################################################################
 
-    function filterData() {
-      var filters = [];
-      $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
-        var val = $(o).val().trim();
-        if (val) {
-          var colid = $(o).attr('id');
-          var colname = util.colNameFromColid(colid);
-          var col = util.indexOfCol(colname);
-          var ren = util.getRender(colname);
-          var mat = util.getMatch(colname);
-          filters.push({col: col, searchtext: $.trim(val), render: ren, match: mat});
-        }
-      });
-      tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groups));
-      tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
-      doSort();
-    }
 
     function redraw(pageCur, withHeader) {
+      if (withHeader) {
+        $(selgridid + 'thead tr').html(tableHead());
+        initHeaderActions();
+      }
       $(selgridid + '#ctrlInfo').html(ctrlInfo());
       $(selgridid + '#ctrlAddInfo').html(ctrlAddInfo());
       $(selgridid + '#data tbody').html(tableData(pageCur));
-      if (withHeader) {
-        $(selgridid + 'thead tr').html(tableHead());
-        $(selgridid + 'thead th').off().on('click', sorting);
-        $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
-        $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
-      }
-      $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
-      $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
-      myopts.singleSelection && $(selgridid + '#checkAll').hide();
+      $(selgridid + '#data input[type=checkbox]').off().on('change', selectionFcts.selectRows);
+      $(selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
+      $(selgridid + '.ebtable').width(myopts.bodyWidth);
+      myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }
 
-    // ##############################################################################
+// #################################################################
+// Actions
+// #################################################################
 
-    function initGrid(a) {
-      state.loadState(localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null);
-      if (opts.getState)
-        state.loadState(opts.getState());
-      util.checkConfig();
-
-      myopts.columns = myopts.columns.map(function (coldef) {
-        coldef.id = coldef.name.replace(/[^\d\w]/g, '');
-        return coldef;
-      });
-
-      pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-      var tableTemplate = _.template("\
-        <div class='ebtable'>\n\
-          <div class='ctrl'>\n\
-            <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
-            <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
-            <div id='ctrlPage1'  style='float: right;'><%= browseBtns %></div>\n\
-          </div>\n\
-          <div id='data' style='overflow-y:auto;overflow-x:auto; max-height:<%= bodyHeight %>px; width:100%'>\n\
-            <table>\n\
-              <thead><tr><%= head %></tr></thead>\n\
-              <tbody><%= data %></tbody>\n\
-            </table>\n\
-          </div>\n\
-          <div class='ctrl'>\n\
-            <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
-            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content' hidden><%= addInfo %></div>\n\
-            <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
-          </div>\n\
-        </div>");
-
-      a.html(tableTemplate({
-        head: tableHead(),
-        data: tableData(pageCur),
-        selectLen: selectLenCtrl(),
-        configBtn: configBtn(),
-        browseBtns: pageBrowseCtrl(),
-        info: ctrlInfo(),
-        addInfo: ctrlAddInfo(),
-        bodyWidth: myopts.bodyWidth,
-        bodyHeight: myopts.bodyHeight
-      }));
-      filterData();
-      redraw(0);
+    function initHeaderActions() {
+      $(selgridid + 'thead th').off().on('click', sortingFcts.sorting);
+      $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filteringFcts.filtering).on('click', ignoreSorting);
+      $(selgridid + 'thead select').off().on('change', filteringFcts.filtering).on('click', ignoreSorting);
+      if (myopts.flags.colsResizable) {
+        var resizeDef = {
+          handles: 'e',
+          stop: function () {
+            myopts.saveState(stateUtil.getStateAsJSON());
+            $(selgridid).ebtable(opts, data, hasMoreResults);
+          }
+        };
+        $(selgridid + '.ebtable').resizable(resizeDef);
+        $(selgridid + '.ebtable th').slice(myopts.selectionCol ? 1 : 0).resizable(resizeDef);
+      }
     }
 
-    initGrid(this);
-
-    // #################################################################
-    // Actions
-    // #################################################################
-
-    $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
-        log('change rowsPerPage', event, data.item.value);
-        myopts.rowsPerPage = Number(data.item.value);
-        pageCur = 0;
-        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-        redraw(pageCur);
-        myopts.saveState && myopts.saveState(state.getStateAsJSON());
-      }
-    });
-    $(selgridid + '.firstBtn').button().on('click', function () {
-      pageCur = 0;
-      redraw(pageCur);
-    });
-    $(selgridid + '.backBtn').button().on('click', function () {
-      pageCur = Math.max(0, pageCur - 1);
-      redraw(pageCur);
-    });
-    $(selgridid + '.nextBtn').button().on('click', function () {
-      pageCur = Math.min(pageCur + 1, pageCurMax);
-      redraw(pageCur);
-    });
-    $(selgridid + '.lastBtn').button().on('click', function () {
-      pageCur = pageCurMax;
-      redraw(pageCur);
-    });
-    $(selgridid + 'thead th').off().on('click', sorting);
-    $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filtering).on('click', ignoreSorting);
-    $(selgridid + 'thead select').off().on('change', filtering).on('click', ignoreSorting);
-    $(selgridid + '#data input[type=checkbox]').off().on('change', selectRows);
-    $(selgridid + '#data input[type=radio]').off().on('change', selectRows);
-    $(selgridid + '#configBtn').button().off().on('click', function () {
-      dlgConfig(gridid);
-    });
-    myopts.colsResizable && $(selgridid + '.ebtable,' + selgridid + '.ebtable th').resizable({
-      handles: 'e',
-      stop: function (evt, ui) {
-        log('stopping resize!');
-        myopts.saveState && myopts.saveState(state.getStateAsJSON());
-        evt.stopPropagation();
-      }
-    });
-
-    myopts.singleSelection && $(selgridid + '#checkAll').hide();
-
-    $(window).on('resize', function () {
-      //log('resize!!!');
-      //adjustLayout();
-    });
-
-// ##########  Exports ############  
-    $.extend(this, {
-      toggleGroupIsOpen: function (groupid) {
-        var pc = pageCur;
-        origData.groups[groupid].isOpen = !origData.groups[groupid].isOpen;
-        filterData();
-        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-        pageCur = Math.min(pc, pageCurMax);
-        redraw(pageCur);
-      },
-      groupIsOpen: function (groupName) {
-        return _.property('isOpen')(origData.groups[groupName]);
-      },
-      getFilterValues: function getFilterValues() {
-        var filter = {};
-        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
-          if ($.trim($(o).val()))
-            filter[o.id] = $(o).val().trim();
-        });
-        return filter;
-      },
-      setFilterValues: function setFilterValues(filter) {
-        $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
-          $(o).val(filter[o.id]);
-        });
-        filterData();
-        pageCurMax = Math.floor((tblData.length - 1) / myopts.rowsPerPage);
-        pageCur = 0;
-        redraw(pageCur);
-        return this;
-      },
-      getStateAsJSON: state.getStateAsJSON,
-      loadState: state.loadState,
-      iterateSelectedValues: function (fct) {
-        tblData.filter(function (row) {
-          return row.selected;
-        }).forEach(fct);
-      },
-      getSelectedRows: function () {
-        return tblData.filter(function (row) {
-          return row.selected;
-        });
-      }
-    });
-
-    var dlgConfig = function (gridid) {
-      $('#' + gridid + 'configDlg').remove();
-      var list = myopts.colorder.reduce(function (res, idx) {
+    function initActions() {
+      $(selgridid + '#lenctrl').selectmenu({change: function (event, data) {
+          util.log('change rowsPerPage', event, data.item.value);
+          myopts.rowsPerPage = Number(data.item.value);
+          pageCur = 0;
+          pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+          redraw(pageCur);
+          myopts.saveState && myopts.saveState(stateUtil.getStateAsJSON());
+        }
+      });
+      $(selgridid + '#configBtn').button().off().on('click', function () {
         var t = '<li id="<%=name%>" class="ui-widget-content <%=cls%>"><%=name%></li>';
-        var coldef = myopts.columns[idx];
-        var cls = coldef.invisible ? 'invisible' : 'visible';
-        return res + (coldef.technical || coldef.mandatory ? '' : _.template(t)({name: coldef.name, cls: cls}));
-      }, '');
-      var t = '\
-        <div id="<%=gridid%>configDlg">\n\
-          <ol id="<%=gridid%>selectable" class="ebtableSelectable"> <%= list %> </ol>\n\
-        </div>';
-
-      var dlg = $(_.template(t)({list: list, gridid: gridid}));
-      var dlgopts = {
-        open: function () {
-          $('button:contains(Abbrechen)').text(translate('Abbrechen'));
-          $('ol#' + gridid + 'selectable').sortable();
-          $('#' + gridid + 'configDlg li').off('click').on('click', function (event) {
-            $('#' + gridid + 'configDlg [id="' + event.target.id + '"]').toggleClass('invisible').toggleClass('visible');
-            log('change visibility', event.target.id, 'now visible:', !col.invisible);
-          });
-        },
-        position: {my: "left top", at: "left bottom", of: selgridid + '#configBtn'},
-        width: 250,
-        modal: true,
-        resizable: true,
-        closeText: 'Schlie\u00dfen',
-        buttons: {
-          "OK": function () {
-            var colnames = [];
+        var list = myopts.colorder.reduce(function (acc, idx) {
+          var coldef = myopts.columns[idx];
+          return acc + (coldef.technical || coldef.mandatory ? '' : _.template(t)({name: coldef.name, cls: coldef.invisible ? 'invisible' : 'visible'}));
+        }, '');
+        var dlgopts = {
+          list: list,
+          gridid: gridid,
+          cancelstring: util.translate('Abbrechen'),
+          anchor: '#' + gridid + ' #configBtn',
+          callBack: function () {
             $('#' + gridid + 'configDlg li.visible').each(function (idx, o) {
-              myopts.columns[util.indexOfCol($(o).prop('id'))].invisible = false;
+              myopts.columns[util.colIdxFromName($(o).prop('id'))].invisible = false;
             });
             $('#' + gridid + 'configDlg li.invisible').each(function (idx, o) {
-              myopts.columns[util.indexOfCol($(o).prop('id'))].invisible = true;
+              myopts.columns[util.colIdxFromName($(o).prop('id'))].invisible = true;
             });
+            var colnames = [];
             $('#' + gridid + 'configDlg li').each(function (idx, o) {
               colnames.push($(o).prop('id'));
             });
             myopts.colorder = myopts.columns.map(function (col, idx) {
-              return col.technical || col.mandatory ? idx : util.indexOfCol(colnames.shift());
+              return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
             });
-            myopts.saveState && myopts.saveState(state.getStateAsJSON());
-            redraw(pageCur, true);
-            $(this).dialog("close");
-          },
-          'Abbrechen': function () {
-            $(this).dialog("close");
+            myopts.saveState && myopts.saveState(stateUtil.getStateAsJSON());
+            $('#' + gridid).ebtable(opts, data, hasMoreResults);
           }
-        }
-      };
-      dlg.dialog(dlgopts).parent().find('.ui-widget-header').hide();
-    };
+        };
+        dlgConfig(dlgopts);
+      });
+      $(selgridid + '.firstBtn').button().on('click', function () {
+        pageCur = 0;
+        redraw(pageCur);
+      });
+      $(selgridid + '.backBtn').button().on('click', function () {
+        pageCur = Math.max(0, pageCur - 1);
+        redraw(pageCur);
+      });
+      $(selgridid + '.nextBtn').button().on('click', function () {
+        pageCur = Math.min(pageCur + 1, pageCurMax);
+        redraw(pageCur);
+      });
+      $(selgridid + '.lastBtn').button().on('click', function () {
+        pageCur = pageCurMax;
+        redraw(pageCur);
+      });
+      $(selgridid + '#clearFilterBtn').button().off().on('click', function () {
+        $(selgridid + 'thead input[type=text]').val('');
+        filteringFcts.filtering();
+      });
+      $(selgridid + ' table tbody tr').off().on('click', function () {
+        var rowData = tblData[ pageCur * myopts.rowsPerPage + $(this).index()];
+        myopts.clickOnRowHandler(rowData, $(this));
+      });
+      $(selgridid + '#data input[type=checkbox]', selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
 
-    return !myopts.jqueryuiTooltips ? this : this.tooltip();
+      initHeaderActions();
+    }
+
+// ##########  Exports ############  
+    this.util = util;
+    $.extend(this, {
+      getFilterValues: filteringFcts.getFilterValues,
+      setFilterValues: filteringFcts.setFilterValues,
+      iterateSelectedValues: selectionFcts.iterateSelectedValues,
+      getSelectedRows: selectionFcts.getSelectedRows,
+      unselect: selectionFcts.unselect,
+      saveSessionState: sessionStateUtil.saveSessionState,
+      loadSessionState: sessionStateUtil.loadSessionState,
+
+      toggleGroupIsOpen: function (groupid) {
+        origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
+        filteringFcts.filterData();
+        pageCur = Math.min(pageCur, pageCurMax);
+        redraw(pageCur);
+      },
+      groupIsOpen: function (groupid) {
+        return _.property('isOpen')(origData.groupsdata[groupid]);
+      },
+      setSortColname: function (colname) {
+        myopts.sortcolname = colname;
+      },
+      getSortColname: function () {
+        return myopts.sortcolname;
+      },
+      getPageCur: function () {
+        return pageCur;
+      }
+    });
+    return !myopts.flags.jqueryuiTooltips ? this : this.tooltip();
   };
+
+  // ##########  sortformats ############  
 
   $.fn.ebtable.sortformats = {
     'date-de': function (a) { // '01.01.2013' -->   '20130101' 
@@ -974,22 +1073,25 @@
     }
   };
 
-  function getFormatedDate(date) {
-    var d = ('0' + date.getDate()).slice(-2);
-    var m = ('0' + (date.getMonth() + 1)).slice(-2);
-    var y = date.getFullYear();
-    var hs = ('0' + date.getHours()).slice(-2);
-    var ms = ('0' + date.getMinutes()).slice(-2);
-    var ss = ('0' + date.getSeconds()).slice(-2);
-    return d + '.' + m + '.' + y + ' ' + hs + ':' + ms + ':' + ss;
-  }
+  // ##########  matcher ############ 
 
   $.fn.ebtable.matcher = {
+    util: {
+      getFormatedDate: function getFormatedDate(date) {
+        var d = ('0' + date.getDate()).slice(-2);
+        var m = ('0' + (date.getMonth() + 1)).slice(-2);
+        var y = date.getFullYear();
+        var hs = ('0' + date.getHours()).slice(-2);
+        var ms = ('0' + date.getMinutes()).slice(-2);
+        var ss = ('0' + date.getSeconds()).slice(-2);
+        return d + '.' + m + '.' + y + ' ' + hs + ':' + ms + ':' + ss;
+      }
+    },
     'contains': function (cellData, searchTxt) {
-      return cellData.indexOf(searchTxt) >= 0;
+      return cellData.toLowerCase().indexOf(searchTxt.toLowerCase()) >= 0;
     },
     'starts-with': function (cellData, searchTxt) {
-      return cellData.indexOf(searchTxt) === 0;
+      return cellData.toLowerCase().indexOf(searchTxt.toLowerCase()) === 0;
     },
     'matches': function (cellData, searchTxt) {
       return cellData.match(new RegExp('.*' + searchTxt, 'i'));
@@ -998,13 +1100,13 @@
       return cellData.match(new RegExp('^' + searchTxt.replace(/\*/g, '.*'), 'i'));
     },
     'matches-date': function (cellData, searchTxt) {
-      return getFormatedDate(new Date(parseInt(cellData))).substr(10).indexOf(searchTxt) >= 0;
+      return $.fn.ebtable.matcher.util.getFormatedDate(new Date(parseInt(cellData))).substr(10).indexOf(searchTxt) >= 0;
     },
     'matches-date-time': function (cellData, searchTxt) {
-      return getFormatedDate(new Date(parseInt(cellData))).substr(16).indexOf(searchTxt) >= 0;
+      return $.fn.ebtable.matcher.util.getFormatedDate(new Date(parseInt(cellData))).substr(16).indexOf(searchTxt) >= 0;
     },
     'matches-date-time-sec': function (cellData, searchTxt) {
-      return getFormatedDate(new Date(parseInt(cellData))).indexOf(searchTxt) >= 0;
+      return $.fn.ebtable.matcher.util.getFormatedDate(new Date(parseInt(cellData))).indexOf(searchTxt) >= 0;
     }
   };
 
@@ -1015,6 +1117,7 @@
       '(<%=len%> Eintr\u00e4ge insgesamt)': '(<%=len%> entries)',
       '<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>': '<%=start%> to <%=end%> of <%=count%> shown entries <%= filtered %>',
       'Anpassen': 'Configuration',
+      'Alle Filter entfernen': 'Remove all filter',
       'Abbrechen': 'Cancel'
     }
   };
@@ -1208,7 +1311,7 @@ if(typeof $ !== 'undefined') $.extend({
 /*####  public_html/js/eblib/mx.js #####*/
 /*#########################################*/
 
-/* global _, $ */
+/* global _ */
 //  2-dimensional array -- m(atri)x
 var mx = function mx(m, groupdef) {  //groupdef see below 
   var basicapi = {
@@ -1272,7 +1375,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
             var f = filters[i];
             var cellData = $.trim(row[f.col]);
             var matchfct = f.match || $.fn.ebtable.matcher['starts-with-matches'];
-            b = b && matchfct(cellData, f.searchtext, row);
+            b = b && matchfct(cellData, f.searchtext, row, m);
           }
           return b;
         };
@@ -1299,29 +1402,32 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       initGroups: function initGroups(groupdefs) {
         if (!groupdefs.groupid)
           return;
-        var groups = {}, row, r, groupId;
-        for ( r = 0; r < this.length; r++) {
+        var row, groupId;
+        var groupsdata = this.groupsdata || {};
+        for (var r = 0; r < this.length; r++) {
           row = this[r];
           groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
           row.isGroupHeader = row[groupdefs.grouplabel] === groupdefs.grouphead;
           row.isGroupElement = groupId && !row.isGroupHeader;
-          if (groupId && !groups[groupId]) {
-            groups[groupId] = {isOpen: false, name: $.trim(row[groupdefs.groupname])};
+          if (groupId && !groupsdata[groupId]) {
+            groupsdata[groupId] = {isOpen: false, groupname: $.trim(row[groupdefs.groupname])};
           }
         }
-        for ( r = 0; r < this.length; r++) {
+        for (r = 0; r < this.length; r++) {
           row = this[r];
           groupId = fcts.normalizeGroupId(row[groupdefs.groupid]);
-          row[groupdefs.groupsortstring] = groupId ? (groups[groupId].name + ' ' + groupId) : row[groupdefs.groupname];
+          row[groupdefs.groupsortstring] = groupId ? (groupsdata[groupId].groupname + ' ' + groupId) : row[groupdefs.groupname];
         }
-        this.groups = groups;
+        this.groupsdata = groupsdata;
         return this;
       },
-      filterGroups: function filterGroups(groupdefs, groups) {
-        return _.filter(this, function (row) {
+      filterGroups: function filterGroups(groupdefs, groupsdata) {
+        var filteredData = _.filter(this, function (row) {
           var groupId = fcts.normalizeGroupId((row[groupdefs.groupid]));
-          return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groups[groupId].isOpen);
+          return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groupsdata[groupId].isOpen);
         });
+        filteredData.groupsdata = this.groupsdata;
+        return filteredData;
       },
       getGroupRows: function getGroupRows(groupdefs, groupid) {
         return _.filter(this, function (row) {
@@ -1406,7 +1512,8 @@ var mx = function mx(m, groupdef) {  //groupdef see below
   //#####################################################################
 
   var res = _.extend(m, basicapi, sorting, filtering, grouping);
-  if (groupdef)
+  if (groupdef) {
     res.initGroups(groupdef);
+  }
   return res;
 };

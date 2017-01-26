@@ -1,4 +1,4 @@
-/* global _ */
+/* global _ *//* jshint multistr: true */
 var dlgSelectExperts = function (onTakeOverCallback, opts) {
 
   var utils = {
@@ -14,8 +14,8 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
         url: "mima.do?action=get-experts",
         async: false,
         success: function (res) {
-          if (res['error-html'] || res['error']) {
-            $.alert('Fehler beim Lesen der Vorgangspaketnamen', res['error-html'] || res['error'] || '????');
+          if (res['error-html'] || res.error ) {
+            $.alert('Fehler beim Lesen der Vorgangspaketnamen', res['error-html'] || res.error || '????');
           } else {
             console.log(res.experts);
             ret = res.experts;
@@ -41,7 +41,7 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
         $.alert('Hinweis', 'Bitte einen Eintrag ausw\u00e4hlen');
         return false;
       } else {
-        var id =  rows[0][0]
+        var id =  rows[0][0];
         var expert = _.findWhere(experts, {userid:id});
         return onTakeOverCallback({
           userid: id,
@@ -84,15 +84,14 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
     modal: true,
     buttons: {
       '\u00dcbernehmen': function () {
-        utils.takeover() && $(this).dialog("close");
+        if( utils.takeover() ) $(this).dialog("destroy");
       },
       'Abbrechen': function () {
-        $(this).dialog("close");
+        $(this).dialog("destroy");
       }
     }
   };
 
-  $('#dlgSelectExperts,#expertsgridconfigDlg').remove();
   var dlg = $("\
     <div id='dlgSelectExperts'>\n\
       <div>\n\

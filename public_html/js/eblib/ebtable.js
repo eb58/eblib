@@ -91,7 +91,7 @@
       var saveSessionState = function () {
         var sortcolidx = util.colIdxFromName(myopts.sortcolname);
         sessionStorage[sessionStorageKey] = JSON.stringify({
-          pageCur: pageCur,
+          pageCur: self.getPageCur(),
           sortcolname: myopts.sortcolname,
           sortdirection: myopts.columns[sortcolidx].sortorder,
           filters: filteringFcts.getFilterValues(),
@@ -99,7 +99,7 @@
         });
       };
       return {// api
-        saveSessionState: saveSessionState,
+        saveSessionState: saveSessionState
       };
     })();
 
@@ -146,7 +146,7 @@
           return !o.invisible;
         });
       },
-      checkConfig: function checkConfig() {
+      checkConfig: function checkConfig(myopts,origData) {
         myopts.columns.forEach(function (coldef) { // set reasonable defaults for coldefs
           coldef.technical = coldef.technical || false;
           coldef.invisible = coldef.invisible || false;
@@ -353,7 +353,7 @@
           }
         });
         tblData = mx(origData.filterGroups(myopts.groupdefs, origData.groupsdata));
-        tblData = mx(filters.length === 0 ? tblData : tblData.filterData(filters));
+        tblData = mx(tblData.filterData(filters));
         pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
         sortingFcts.doSort();
       },
@@ -407,6 +407,7 @@
     }
 
     var gridid = this[0].id;
+    var self = this;
     var selgridid = '#' + gridid + ' ';
     var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
     var myopts = $.extend({}, defopts, opts);
@@ -414,10 +415,10 @@
     myopts.openGroups.forEach(function(gid){
       origData.groupsdata[gid].isOpen=true;
     });
-    var tblData = mx(origData.slice());
-    var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
+    var tblData = origData;
+    var pageCurMax = Math.floor(Math.max(0, origData.length - 1) / myopts.rowsPerPage);
     var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
-    util.checkConfig();
+    util.checkConfig(myopts,origData);
 
     if (myopts.saveState && myopts.getState) {
       myopts.loadState(myopts.getState());
@@ -438,7 +439,6 @@
     }
 
     function initGrid(a) {
-      pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
       var tableTemplate = _.template("\
         <div class='ebtable'>\n\
           <div class='ctrl'>\n\
@@ -461,7 +461,7 @@
         </div>");
       a.html(tableTemplate({
         head: tableHead(),
-        data: tableData(pageCur),
+        data: '',//tableData(pageCur),
         selectLen: selectLenCtrl(),
         configBtn: configBtn(),
         clearFilter: clearFilterBtn(),
@@ -615,12 +615,12 @@
         $(selgridid + 'thead tr').html(tableHead());
         initHeaderActions();
       }
+      $(selgridid + '.ebtable').width(myopts.bodyWidth);
       $(selgridid + '#ctrlInfo').html(ctrlInfo());
       $(selgridid + '#ctrlAddInfo').html(ctrlAddInfo());
       $(selgridid + '#data tbody').html(tableData(pageCur));
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectionFcts.selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
-      $(selgridid + '.ebtable').width(myopts.bodyWidth);
       myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }

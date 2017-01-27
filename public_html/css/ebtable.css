@@ -30,21 +30,12 @@
   padding: 5px 2px 5px 2px;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 20px;
 }
 
 .ebtable #data th input[type=text], .ebtable #data th select {
   width: 95%;
   box-sizing: border-box;
-}
-
-.ebtable #data th div.sort_wrapper {
-  position: relative;
-}
-
-.ebtable #data th div.sort_wrapper span {
-  position: absolute;
-  margin-top: -4px;
-  right: -7px;
 }
 
 .ebtable #data td{ 
@@ -64,14 +55,23 @@
   padding: 2px 1px 2px 1px;
 }
 
-.ebtablefix, .ebtablefix th, .ebtablefix td, .ebtablefix th .sort_wrapper{ 
-  table-layout:fixed;
-  overflow:hidden;
-  xwhite-space: nowrap;
+.ebtablefix, .ebtablefix th, .ebtablefix td{ 
+  table-layout: fixed;
+  overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.ebtable>div.ui-resizable-e {
+  cursor: e-resize;
+  width: 10px;
+  right: -15px;
+}
+.ebtable th .ui-resizable-e {
+  cursor: col-resize;
+  width: 10px;
 }
 
 /* ConfigDlg */
 .ebtableSelectable { list-style-type: none; padding: 0px; width: 100%; }
-.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px; font-size: 10px; font-weight: bold; background-color:#e8e8d4; }
+.ebtableSelectable li.visible  { margin: 3px 0 0 0;  padding: 3px; font-size: 10px; font-weight: bold; background-color:#c6c6b6; }
 .ebtableSelectable li.invisible{ margin: 3px 0 0 0;  padding: 3px; font-size: 10px; font-weight: bold; background-color:#f8f8ea; }

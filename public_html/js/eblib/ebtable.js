@@ -2,6 +2,7 @@
 
 (function ($) {
   "use strict";
+  var sessionStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-v1.0';
 
   var dlgConfig = function (opts) {
     var t = '\
@@ -51,20 +52,11 @@
               acc.push(o.name);
             return acc;
           }, []),
-          colwidths: $(selgridid + 'th').map(function (i, o) {
-            var id = $(o).prop('id');
-            var w = $(o).width();
-            var name = util.colNameFromId(id);
-            util.log($(o).prop('id'), w, name);
-            var ret = {name: name, w: w};
-            return ret;
-          }).toArray().filter(function (o) {
-            return o.name;
-          })
+          colwidths: util.getColWidths()
         });
       },
       saveState: function saveState(s) {
-        localStorage[localStorageKey] = s;
+        localStorage[localStorageKey] = stateUtil.getStateAsJSON();
       },
       getState: function getState() {
         return localStorage[localStorageKey] ? JSON.parse(localStorage[localStorageKey]) : null;
@@ -95,35 +87,21 @@
       }
     };
 
-    var sessionStateUtil = {// saving/loading state
-      getSessionStateAsJSON: function getSessionStateAsJSON() {
-        return JSON.stringify({
+    var sessionStateUtil = (function () {// saving/loading state
+      var saveSessionState = function () {
+        var sortcolidx = util.colIdxFromName(myopts.sortcolname);
+        sessionStorage[sessionStorageKey] = JSON.stringify({
           pageCur: pageCur,
           sortcolname: myopts.sortcolname,
-          sortState: myopts.columns.map(function (col) {
-            var ret = {};
-            ret[col.name] = col.order;
-            return ret;
-          }),
-          filters: self.getFilterValues()
+          sortdirection: myopts.columns[sortcolidx].sortorder,
+          filters: filteringFcts.getFilterValues(),
+          openGroups: getOpenGroups()
         });
-      },
-      saveSessionState: function saveSessionState(s) {
-        sessionStorage[localStorageKey] = s || sessionStateUtil.getSessionStateAsJSON();
-      },
-      loadSessionState: function loadSessionState(s) {
-        s = s || sessionStorage[localStorageKey] ? JSON.parse(sessionStorage[localStorageKey]) : null;
-        if (!s)
-          return;
-        myopts.pageCur = s.pageCur;
-        myopts.sortcolname = s.sortcolname;
-        myopts.columns.forEach(function (coldef) {
-          coldef.order = s.sortState[coldef.name];
-        });
-        grid = $(selgridid).ebtable(myopts, data, hasMoreResults);
-        grid.setFilterValues(s.filters);
-      }
-    };
+      };
+      return {// api
+        saveSessionState: saveSessionState,
+      };
+    })();
 
     // ##############################################################################
 
@@ -173,7 +151,7 @@
           coldef.technical = coldef.technical || false;
           coldef.invisible = coldef.invisible || false;
           coldef.mandatory = coldef.mandatory || false;
-          coldef.order = coldef.order || 'asc';
+          coldef.sortorder = coldef.sortorder || 'asc';
         });
         if (origData[0] && origData[0].length !== myopts.columns.length) {
           alert('Data definition and column definition don\'t match!');
@@ -191,6 +169,18 @@
             alert(coldef.name + ": technical column must be invisble!");
           if (coldef.mandatory && coldef.invisible)
             alert(coldef.name + ": mandatory column must be visble!");
+        });
+      },
+      getColWidths: function getColWidths() {
+        return $(selgridid + 'th').toArray().map(function (o) {
+          var id = $(o).prop('id');
+          var w = Math.max(20, $(o).width());
+          var name = util.colNameFromId(id);
+          util.log($(o).prop('id'), w, name);
+          var ret = {name: name, w: w};
+          return ret;
+        }).filter(function (o) {
+          return o.name;
         });
       }
     };
@@ -275,7 +265,7 @@
         var colid = util.colIdFromName(myopts.sortcolname);
         var colidx = util.colIdxFromName(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
-        var bAsc = coldef.order === 'asc';
+        var bAsc = coldef.sortorder === 'asc';
         $(selgridid + 'thead div span').removeClass();
         $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
       },
@@ -284,14 +274,14 @@
         var coldef = myopts.columns[colidx];
         var coldefs = $.extend([], coldef.sortmaster || myopts.sortmaster);
         if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
-          coldefs.push({col: colidx, order: coldef.order});
+          coldefs.push({col: colidx, sortorder: coldef.sortorder});
         }
         return coldefs;
       },
       sortToggle: function sortToggle() {
         var sortToggleS = {'desc': 'asc', 'asc': 'desc', 'desc-fix': 'desc-fix', 'asc-fix': 'asc-fix'};
         sortingFcts.getSortState().forEach(function (o) {
-          myopts.columns[o.col].order = sortToggleS[myopts.columns[o.col].order] || 'asc';
+          myopts.columns[o.col].sortorder = sortToggleS[myopts.columns[o.col].sortorder] || 'asc';
         });
       },
       sorting: function sorting(event) { // sorting
@@ -316,10 +306,10 @@
           var coldef = myopts.columns[colidx];
           var coldefs = $.extend([], coldef.sortmaster ? coldef.sortmaster : myopts.sortmaster);
           if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
-            coldefs.push({col: colidx, sortformat: coldef.sortformat, order: coldef.order});
+            coldefs.push({col: colidx, sortformat: coldef.sortformat, sortorder: coldef.sortorder});
           }
           coldefs.forEach(function (o) {
-            o.order = myopts.columns[o.col].order || 'desc';
+            o.sortorder = myopts.columns[o.col].sortorder || 'desc';
           });
           tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
           util.log('sorting', myopts.sortcolname);
@@ -378,11 +368,6 @@
 
     // ##############################################################################
 
-    var gridid = this[0].id;
-    var self = this;
-    var selgridid = '#' + gridid + ' ';
-    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
-
     var defopts = {
       columns: [],
       flags: {
@@ -404,8 +389,9 @@
       saveState: stateUtil.saveState,
       loadState: stateUtil.loadState,
       getState: stateUtil.getState,
-      sortmaster: [], //[{col:1,order:asc,sortformat:fct1},{col:2,order:asc-fix}]
+      sortmaster: [], //[{col:1,sortorder:asc,sortformat:fct1},{col:2,sortorder:asc-fix}]
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
+      openGroups: [],
       hasMoreResults: hasMoreResults,
       clickOnRowHandler: function (rowData, row) { // just for docu
         //util.log(rowData, row);
@@ -420,8 +406,14 @@
       opts.colwidths = [];
     }
 
+    var gridid = this[0].id;
+    var selgridid = '#' + gridid + ' ';
+    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
+    myopts.openGroups.forEach(function(gid){
+      origData.groupsdata[gid].isOpen=true;
+    });
     var tblData = mx(origData.slice());
     var pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
     var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
@@ -435,6 +427,15 @@
     });
     initGrid(this);
     initActions();
+
+    function getOpenGroups() {
+      return _.reduce(origData.groupsdata, function (acc, val, key) {
+        if (val.isOpen){
+          acc.push(parseInt(key));
+        }
+        return acc;
+      }, []);
+    }
 
     function initGrid(a) {
       pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
@@ -476,7 +477,7 @@
 
       myopts.colwidths && myopts.colwidths.forEach(function (o) {
         var id = util.colIdFromName(o.name);
-        $(selgridid + 'table th>#' + id).parent().width(o.w);
+        $(selgridid + 'table th#' + id).width(o.w);
       });
     }
 
@@ -495,22 +496,22 @@
         if (!coldef.invisible) {
           var fld = '';
           if (myopts.flags.filter) {
-            var t_inputfld = '<input type="text" id="<%=colid%>" title="<%=tooltip%>"/>';
-            var t_selectfld = '<select id="<%=colid%>"><%=opts%></select>';
+            var t_inputfld = '<input type="text" id="<%=colid%>" value="<%=filter%> "title="<%=tooltip%>"/>';
+            var t_selectfld = '<select id="<%=colid%>" value="<%=filter%>"><%=opts%></select>';
             var opts = (coldef.valuelist || []).reduce(function (acc, o) {
-              return acc + '<option>' + o + '</option>';
+              return acc + '<option>' + o + '</option>\n';
             }, '');
             var t = coldef.valuelist ? t_selectfld : t_inputfld;
-            fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip});
+            fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip, filter: coldef.filter});
           }
           var style = coldef.css ? ' style="' + coldef.css + '"' : '';
-          var tt = '\
+          var hdrTemplate = '\
             <th id="<%=colid%>" <%=style%> >\n\
-              <div class="sort_wrapper">&nbsp;&nbsp;<%=colname%>&nbsp;&nbsp<span/></div>\n\
-              <%=fld%>\n\
+              <div style="display:inline-flex" ><%=colname%><span style="float:left"></span></div>\n\
+              <div><%=fld%></div>\n\
              </th>';
           // &#8209; = non breakable hyphen : &#0160; = non breakable space
-          res += _.template(tt)({
+          res += _.template(hdrTemplate)({
             colname: coldef.name.replace(/-/g, '&#8209;').replace(/ /g, '&#0160;'),
             colid: coldef.id,
             fld: fld,
@@ -550,11 +551,11 @@
           }
         }
 
-        var order = myopts.colorder;
+        var colorder = myopts.colorder;
         for (var c = 0; c < myopts.columns.length; c++) {
-          var coldef = myopts.columns[order[c]];
+          var coldef = myopts.columns[colorder[c]];
           if (!coldef.invisible) {
-            var xx = tblData[r][order[c]];
+            var xx = tblData[r][colorder[c]];
             var v = _.isNumber(xx) ? xx : (xx || '');
             var val = coldef.render ? coldef.render(v, row, r, origData) : v;
             var style = coldef.css ? ' style="' + coldef.css + '"' : '';
@@ -633,15 +634,18 @@
       $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filteringFcts.filtering).on('click', ignoreSorting);
       $(selgridid + 'thead select').off().on('change', filteringFcts.filtering).on('click', ignoreSorting);
       if (myopts.flags.colsResizable) {
-        var resizeDef = {
+        $(selgridid + '.ebtable').resizable({
           handles: 'e',
-          stop: function () {
-            myopts.saveState(stateUtil.getStateAsJSON());
-            $(selgridid).ebtable(opts, data, hasMoreResults);
-          }
-        };
-        $(selgridid + '.ebtable').resizable(resizeDef);
-        $(selgridid + '.ebtable th').slice(myopts.selectionCol ? 1 : 0).resizable(resizeDef);
+          minWidth: 200,
+          stop: function (evt, ui) {
+            myopts.saveState();
+            myopts.bodyWidth = ui.size.width;
+          }});
+        $(selgridid + '.ebtable th').slice(myopts.selectionCol ? 1 : 0).resizable({
+          handles: 'e',
+          minWidth: 20,
+          stop: myopts.saveState
+        });
       }
     }
 
@@ -652,7 +656,7 @@
           pageCur = 0;
           pageCurMax = Math.floor(Math.max(0, tblData.length - 1) / myopts.rowsPerPage);
           redraw(pageCur);
-          myopts.saveState && myopts.saveState(stateUtil.getStateAsJSON());
+          myopts.saveState && myopts.saveState();
         }
       });
       $(selgridid + '#configBtn').button().off().on('click', function () {
@@ -680,7 +684,7 @@
             myopts.colorder = myopts.columns.map(function (col, idx) {
               return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
             });
-            myopts.saveState && myopts.saveState(stateUtil.getStateAsJSON());
+            myopts.saveState && myopts.saveState();
             $('#' + gridid).ebtable(opts, data, hasMoreResults);
           }
         };
@@ -711,6 +715,17 @@
         myopts.clickOnRowHandler(rowData, $(this));
       });
       $(selgridid + '#data input[type=checkbox]', selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
+      $(selgridid + '.ctrl').off().on('dblclick', function (evt) {
+        $(selgridid + '#data table').removeClass('ebtablefix');
+        $(selgridid + '#data table th').removeAttr('style');
+        var colWidths = util.getColWidths();
+        colWidths && colWidths.forEach(function (o) {
+          var id = util.colIdFromName(o.name);
+          $(selgridid + 'table th#' + id).width(o.w);
+        });
+        $(selgridid + '#data table').addClass('ebtablefix');
+        stateUtil.saveState();
+      });
 
       initHeaderActions();
     }
@@ -724,7 +739,6 @@
       getSelectedRows: selectionFcts.getSelectedRows,
       unselect: selectionFcts.unselect,
       saveSessionState: sessionStateUtil.saveSessionState,
-      loadSessionState: sessionStateUtil.loadSessionState,
 
       toggleGroupIsOpen: function (groupid) {
         origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
@@ -805,6 +819,7 @@
     }
   };
 
+  // ##########  langs ############ 
   $.fn.ebtable.lang = {
     'de': {
     },
@@ -816,4 +831,10 @@
       'Abbrechen': 'Cancel'
     }
   };
+
+  $.fn.ebtable.loadSessionState = function () {
+    var x = sessionStorage[sessionStorageKey];
+    return x ? JSON.parse(x) : {};
+  };
+
 })(jQuery);

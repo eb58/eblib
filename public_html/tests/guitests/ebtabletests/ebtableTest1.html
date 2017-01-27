@@ -22,17 +22,17 @@
       var basketTestdata = [
         ['  ', 1, -1, 'Wolperdinger', '31.08.1915', 'Herder, Johann Gottfried', 5],
         ['  ', 1, -1, 'Yeti        ', '31.08.2016', 'Lichtenberg, Georg Christoph ', 31],
-        ['GA', 5, 10, 'Säugetiere  ', '', '', 0],
-        ['GB', 1, 10, 'Esel        ', '05.08.2011', 'Liebig, Ellen,', 1],
-        ['GB', 1, 10, 'Affe        ', '10.06.2013', 'Heine, Heinrich', 2],
-        ['GB', 1, 10, 'Maus        ', '15.09.2014', 'Manne, Antonia', 4],
-        ['GB', 1, 10, 'Hase        ', '15.09.2014', 'Liebig, Gustav', 8],
-        ['GB', 1, 10, 'Hund        ', '31.08.2015', 'Mann, Heinrich Gustav Friedhelm', 16],
-        ['GA', 4, 20, 'Insekten    ', '', '', 0],
-        ['GB', 1, 20, 'Fliege      ', '31.08.2009', 'Mann, Thomas', 0],
-        ['GB', 1, 20, 'Biene       ', '31.08.2001', 'Lessing, Gottfried', 7],
-        ['GB', 1, 20, 'Hummel      ', '01.08.1759', 'Schiller, Friedrich', 0],
-        ['GB', 1, 20, 'Wespe       ', '31.06.1900', 'Storm, Theodor', 0],
+//        ['GA', 5, 10, 'Säugetiere  ', '', '', 0],
+//        ['GB', 1, 10, 'Esel        ', '05.08.2011', 'Liebig, Ellen,', 1],
+//        ['GB', 1, 10, 'Affe        ', '10.06.2013', 'Heine, Heinrich', 2],
+//        ['GB', 1, 10, 'Maus        ', '15.09.2014', 'Manne, Antonia', 4],
+//        ['GB', 1, 10, 'Hase        ', '15.09.2014', 'Liebig, Gustav', 8],
+//        ['GB', 1, 10, 'Hund        ', '31.08.2015', 'Mann, Heinrich Gustav Friedhelm', 16],
+//        ['GA', 4, 20, 'Insekten    ', '', '', 0],
+//        ['GB', 1, 20, 'Fliege      ', '31.08.2009', 'Mann, Thomas', 0],
+//        ['GB', 1, 20, 'Biene       ', '31.08.2001', 'Lessing, Gottfried', 7],
+//        ['GB', 1, 20, 'Hummel      ', '01.08.1759', 'Schiller, Friedrich', 0],
+//        ['GB', 1, 20, 'Wespe       ', '31.06.1900', 'Storm, Theodor', 0],
         ['GA', 2, 30, 'Fische      ', '', '', 0],
         ['GB', 1, 30, 'Karpfen     ', '31.08.2009', 'Mann, Thomas', 0],
         ['GB', 1, 30, 'Forelle     ', '31.08.2001', 'Lessing, Gottfried', 7],
@@ -103,8 +103,10 @@
       });
 
       var opts = {
+        sortmaster: [{col: idx.gid}, {col: idx.gtyp}], //[{col:1,sortorder:'asc',sortType:'date-de'},{col:2,sortorder:'desc'}]
+        sortcolname: 'Tierart',
         columns: [
-          {name: "Grouping", invisible: true, technical: true, order: 'asc-fix'},
+          {name: "Grouping", invisible: true, technical: true, sortorder: 'asc-fix'},
           {name: "GroupCnt", invisible: true, technical: true},
           {name: "GroupIds", invisible: true, technical: true},
           {name: "GroupSort", invisible: true, technical: true},
@@ -115,7 +117,7 @@
         ],
         rowsPerPageSelectValues: [5, 10, 25, 50, 100],
         bodyHeight: 500,
-        flags:{
+        flags: {
           colsResizable: true
         },
         selectionCol: {
@@ -128,23 +130,27 @@
             console.log('onSelection', rowNr, row);
           }
         },
-        sortmaster: [{col: idx.gid}, {col: idx.gtyp}], //[{col:1,order:'asc',sortType:'date-de'},{col:2,order:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
-        sortcolname: 'Tierart',
         reloadData: function () {
-          grid = $('#grid').ebtable(opts, basketTestdata, true);
+          grid = $('#grid').ebtable(opts, basketTestdata);
         },
         lang: 'en',
       };
       var grid;
       $().ready(function () {
-        grid = $('#grid').ebtable(opts, basketTestdata, true);
-        $('#aaa').button();
+        grid = $('#grid').ebtable(opts, basketTestdata);
+        $('#saveGridStatus').on('click', grid.saveSessionState)
+        $('#loadGridStatus').on('click', function () {
+          var mixopts = _.extend({}, opts, $.fn.ebtable.loadSessionState());
+          grid = $('#grid').ebtable(mixopts, basketTestdata).setFilterValues(mixopts.filters);
+        })
+
       });
     </script>
   </head>
   <body>
     <div id="grid"></div>
-    <button id="aaa">TEST</button>
+    <button id="saveGridStatus">SaveGridStatus</button>
+    <button id="loadGridStatus">LoadGridStatus</button>
   </body>
 </html>

@@ -37,21 +37,21 @@ QUnit.test('testset: sorting functions', function (assert) {
   var m = mx([['11', '12', '13'], ['31', '32', '33'], ['21', '22', '23']]);
   assert.deepEqual(m.length, 3);
   assert.deepEqual(m.sort(), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 1, order: 'desc'})), [['31', '32', '33'], ['21', '22', '23'], ['11', '12', '13']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 1, order: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 3, order: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 1, sortorder: 'desc'})), [['31', '32', '33'], ['21', '22', '23'], ['11', '12', '13']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 1, sortorder: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 3, sortorder: 'asc'})), [['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33']]);
 
   var m = mx([['04.01.2011'], ['01.01.2015'], ['03.01.2013'], ['17.01.2001']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', sortformat: 'date-de'})), [['17.01.2001'], ['04.01.2011'], ['03.01.2013'], ['01.01.2015']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'date-de'})), [['01.01.2015'], ['03.01.2013'], ['04.01.2011'], ['17.01.2001']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, sortorder: 'asc', sortformat: 'date-de'})), [['17.01.2001'], ['04.01.2011'], ['03.01.2013'], ['01.01.2015']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, sortorder: 'desc', sortformat: 'date-de'})), [['01.01.2015'], ['03.01.2013'], ['04.01.2011'], ['17.01.2001']]);
 
   var m = mx([['04.01.2011 12:34'], ['03.01.2013 13:35'], ['01.01.2015 13:34'], ['03.01.2013 13:36'], ['17.01.2001 07:30']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', sortformat: 'datetime-de'})), [['17.01.2001 07:30'], ['04.01.2011 12:34'], ['03.01.2013 13:35'], ['03.01.2013 13:36'], ['01.01.2015 13:34']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'datetime-de'})), [["01.01.2015 13:34"], ["03.01.2013 13:36"], ["03.01.2013 13:35"], ["04.01.2011 12:34"], ["17.01.2001 07:30"]]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, sortorder: 'asc', sortformat: 'datetime-de'})), [['17.01.2001 07:30'], ['04.01.2011 12:34'], ['03.01.2013 13:35'], ['03.01.2013 13:36'], ['01.01.2015 13:34']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, sortorder: 'desc', sortformat: 'datetime-de'})), [["01.01.2015 13:34"], ["03.01.2013 13:36"], ["03.01.2013 13:35"], ["04.01.2011 12:34"], ["17.01.2001 07:30"]]);
 
   var m = mx([['04.01.2011 12:34:33'], ['03.01.2013 13:35:59']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'asc', sortformat: 'datetime-sec-de'})), [['04.01.2011 12:34:33'], ['03.01.2013 13:35:59']]);
-  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, order: 'desc', sortformat: 'datetime-sec-de'})), [['03.01.2013 13:35:59'], ['04.01.2011 12:34:33']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, sortorder: 'asc', sortformat: 'datetime-sec-de'})), [['04.01.2011 12:34:33'], ['03.01.2013 13:35:59']]);
+  assert.deepEqual(m.sort(m.rowCmpCols({col: 0, sortorder: 'desc', sortformat: 'datetime-sec-de'})), [['03.01.2013 13:35:59'], ['04.01.2011 12:34:33']]);
 
 });
 

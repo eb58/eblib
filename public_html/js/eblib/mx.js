@@ -135,22 +135,22 @@ var mx = function mx(m, groupdef) {  //groupdef see below
       toLower: function toLower(o) {
         return _.isString(o) ? o.toLowerCase() : o;
       },
-      prepareItem: function prepareItem(row, col, fmt, groups, order) {
+      prepareItem: function prepareItem(row, col, fmt, groups, sortorder) {
         var v = row[col] || '';
-        return fcts.toLower(fmt ? fmt(v, row, groups, order) : v);
+        return fcts.toLower(fmt ? fmt(v, row, groups, sortorder) : v);
       },
       rowCmpCols: function rowCmpCols(coldefs, groups) {
-        coldefs = _.isArray(coldefs) ? coldefs : [coldefs]; // [ {col:1,order:asc,sortformat:fmtfct1},{col:3, order:desc, sortformat:fmtfct2},... ]  
+        coldefs = _.isArray(coldefs) ? coldefs : [coldefs]; // [ {col:1,sortorder:asc,sortformat:fmtfct1},{col:3, sortorder:desc, sortformat:fmtfct2},... ]  
         return function (r1, r2) {
           for (var i = 0; i < coldefs.length; i++) {
             var cdef = coldefs[i];
             var fmt = cdef.sortformat ? $.fn.ebtable.sortformats[cdef.sortformat] : undefined;
-            var x = fcts.prepareItem(r1, cdef.col, fmt, groups, cdef.order);
-            var y = fcts.prepareItem(r2, cdef.col, fmt, groups, cdef.order);
+            var x = fcts.prepareItem(r1, cdef.col, fmt, groups, cdef.sortorder);
+            var y = fcts.prepareItem(r2, cdef.col, fmt, groups, cdef.sortorder);
             var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
             //console.log(i, 'ret', ret, "x:", x, " y:", y);
             if (ret !== 0) {
-              var bAsc = !cdef.order || cdef.order.indexOf('desc') < 0;
+              var bAsc = !cdef.sortorder || cdef.sortorder.indexOf('desc') < 0;
               return bAsc ? ret : -ret;
             }
           }

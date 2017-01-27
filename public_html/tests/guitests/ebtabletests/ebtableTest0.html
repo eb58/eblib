@@ -46,9 +46,9 @@
           colsResizable: true,
         },
         columns: [
-          {name: "Tierart", match: 'contains', order: 'desc'},
+          {name: "Tierart", match: 'contains', sortorder: 'desc', valuelist: ['', 'Karpfen', 'Forelle']},
           {name: "Datum", sortformat: 'date-de', css: 'text-align: center'},
-          {name: "Name"},
+          {name: "Name", filter: '*e*'},
           {name: "Flag"}
         ],
         sortcolname: 'Tierart',
@@ -58,12 +58,10 @@
       var grid;
       $().ready(function () {
         grid = $('#grid').ebtable(opts, basketTestdata);
-        $('#saveGridStatus').on('click', function () {
-          console.log('AAA')
-          grid.saveSessionState();
-        })
+        $('#saveGridStatus').on('click', grid.saveSessionState)
         $('#loadGridStatus').on('click', function () {
-          grid.loadSessionState();
+          var mixopts = _.extend({}, opts, $.fn.ebtable.loadSessionState());
+          grid = $('#grid').ebtable(mixopts, basketTestdata).setFilterValues(mixopts.filters);
         })
       });
     </script>

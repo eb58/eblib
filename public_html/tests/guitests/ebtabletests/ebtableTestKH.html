@@ -236,7 +236,7 @@
           colsResizable: true,
         },
         columns: [
-          {name: "Grouping", technical: true, invisible: true, order: 'asc-fix'},
+          {name: "Grouping", technical: true, invisible: true, sortorder: 'asc-fix'},
           {name: "GroupCnt", technical: true, invisible: true},
           {name: "GroupIds", technical: true, invisible: true},
           {name: "GroupSort", technical: true, invisible: true},
@@ -266,7 +266,7 @@
           {name: "KHFrist"},
         ],
         selectionCol: true,
-        sortmaster: [{col: 2}, {col: 0}], //[{col:1, order:'asc', sortType:'date-de'},{col:2, order:'desc'}]
+        sortmaster: [{col: 2}, {col: 0}], //[{col:1, sortorder:'asc', sortType:'date-de'},{col:2, sortorder:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idx.wnm, grouphead: 'C', groupelem: 'W'}
 
       };

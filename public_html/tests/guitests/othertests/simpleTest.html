@@ -16,8 +16,15 @@ and open the template in the editor.
     <style>
       * {font-family:Arial;color: black;font-size: 10px;      }
       body { max-width: 800px; }
+      .container
+   {
+       display: inline-flex;
+   }
+   .slide
+   {
+      float: left;
+   }
     </style>
-
 
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
@@ -27,21 +34,21 @@ and open the template in the editor.
     <script>
 
       var basketTestdata = [
-      ['Wolperdinger', '', 'AAAAAAAAAAA AAAAAAAAAAAAAAAAAA'],
+        ['Wolperdinger', '', 'AAAAAAAAAAA AAAAAAAAAAAAAAAAAA'],
       ];
       //#######################################################################
 
       var opts = {
-      debug: true,
+        debug: true,
         columns: [
-        {name: "TierartXXXXXXXXXXXXXX", match: 'contains'},
-        {name: "Überschrift für ein breite Spalte", match: 'contains'},
-        {name: "Überschrift für ein WEITERE Spalte", match: 'contains'}
+          {name: "TierartXXXXXXXXXXXXXX", match: 'contains'},
+          {name: "Überschrift für ein breite Spalte", match: 'contains'},
+          {name: "Überschrift für ein WEITERE Spalte", match: 'contains'}
         ]
       };
       var grid;
       $(document).ready(function () {
-      grid = $('#grid').ebtable(opts, basketTestdata);
+        grid = $('#grid').ebtable(opts, basketTestdata);
       });
     </script>
 
@@ -52,14 +59,56 @@ and open the template in the editor.
     <div class="ebtable">
       <div id="data" style="overflow-y:auto;overflow-x:auto; max-height:770px; width:100%">
         <table>
-          <thead><tr>            <th id="Tierart">
-                <div class="sort_wrapper">
+          <thead>
+            <tr>
+              <th id="Tierart">
+                <div class='container'>
                   Tierart
-                  <span class="ui-icon ui-icon-arrow-1-n"></span>
-                  <input type="text" id="Tierart" title="">
+                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
                 </div>
-              </th></tr></thead>
-          <tbody><tr><td>Wolperdinger</td></tr>
+                <input type="text" id="Tierart" title="">
+              </th>
+              <th id="Tierart"">
+                <div class='container'>
+                  XXXXXXXXXX
+                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
+                </div>
+                <input type="text" id="Tierart" title="">
+              </th>
+              <th id="Tierart">
+                <div class='container'>
+                  XXXXXXXXXX
+                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
+                </div>
+                <input type="text" id="Tierart" title="">
+              </th>
+              <th id="Tierart">
+                <div class='container'>
+                  XXXXXXXXXX
+                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
+                </div>
+                <input type="text" id="Tierart" title="">
+              </th>
+              <th id="Tierart">
+                <div class='container'>
+                  XXXXXXXXXX
+                  <span class="ui-icon ui-icon-arrow-1-n"></span>
+                </div>
+                <input type="text" id="Tierart" title="">
+              </th>
+              <th id="Tierart">
+                <div class='container'>
+                  XXXXXXXXXX
+                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
+                </div>
+                <input type="text" id="Tierart" title="">
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Wolperdinger</td><td>Wolperdinger</td>
+            </tr>
           </tbody>
         </table>
       </div>

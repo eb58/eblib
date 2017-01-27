@@ -82,18 +82,18 @@
           var xopts = $.extend(true, {}, opts); // deep copy
 
           xopts.sortcolname = 'Flag';
-          xopts.columns[2].order = 'asc';
+          xopts.columns[2].sortorder = 'asc';
           reinit('grid', xopts, data);
           assert.deepEqual(getCol('grid', 4), ['5','31']);
-          xopts.columns[2].order = 'desc';
+          xopts.columns[2].sortorder = 'desc';
           reinit('grid', xopts, data);
           assert.deepEqual(getCol('grid', 4), ['31','5']);
         
           xopts.sortcolname = 'Datum';
-          xopts.columns[1].order = 'asc';
+          xopts.columns[1].sortorder = 'asc';
           reinit('grid', xopts, data);
           assert.deepEqual(getCol('grid', 3), ["31.08.1915","31.08.2016"]);
-          xopts.columns[1].order = 'desc';
+          xopts.columns[1].sortorder = 'desc';
           reinit('grid', xopts, data);
           assert.deepEqual(getCol('grid', 3), ["31.08.2016", "31.08.1915"]);
         });

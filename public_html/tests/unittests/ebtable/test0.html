@@ -34,12 +34,12 @@
           colsResizable: false
         },
         columns: [
-          {name: "Tierart" },
+          {name: "Tierart"},
           {name: "Datum", sortformat: 'date-de'},
           {name: "Flag"}
         ],
         sortcolname: 'Tierart',
-        selectionCol:true,
+        selectionCol: true,
         //lang:'en'
       };
 
@@ -58,31 +58,57 @@
         });
         QUnit.test('testset: paging', function (assert) {
           reinit('grid', opts, data);
-          assert.equal(getCol('grid',2).length, 2, 'page works');
+          assert.equal(getCol('grid', 2).length, 2, 'page works');
           $('.nextBtn').click();
-          assert.equal(getCol('grid',2).length, 2, 'next page works');
+          assert.equal(getCol('grid', 2).length, 2, 'next page works');
           $('.backBtn').click();
-          assert.equal(getCol('grid',2).length, 2, 'back page works');
+          assert.equal(getCol('grid', 2).length, 2, 'back page works');
         });
-        QUnit.test('testset: sorting', function (assert) {
+        QUnit.test('testset: sorting1', function (assert) {
           reinit('grid', opts, data);
           var tierartHead = $('th#Tierart');
-          assert.deepEqual(getCol('grid',2), ["Wolperdinger","Yeti"]);
+          var datumHead = $('th#Datum');
+          assert.deepEqual(getCol('grid', 2), ["Wolperdinger", "Yeti"]);
           tierartHead.click();
-          assert.deepEqual(getCol('grid',2), ["Yeti", "Wolperdinger"]);
+          assert.deepEqual(getCol('grid', 2), ["Yeti", "Wolperdinger"]);
           tierartHead.click();
-          assert.deepEqual(getCol('grid',2), ["Wolperdinger","Yeti"]);
+          assert.deepEqual(getCol('grid', 2), ["Wolperdinger", "Yeti"]);
+          datumHead.click();
+          assert.deepEqual(getCol('grid', 3), ["31.08.2016", "31.08.1915"]);
+          datumHead.click();
+          assert.deepEqual(getCol('grid', 3), ["31.08.1915","31.08.2016"]);
         });
+        QUnit.test('testset: sorting2', function (assert) {
+          var xopts = $.extend(true, {}, opts); // deep copy
+
+          xopts.sortcolname = 'Flag';
+          xopts.columns[2].order = 'asc';
+          reinit('grid', xopts, data);
+          assert.deepEqual(getCol('grid', 4), ['5','31']);
+          xopts.columns[2].order = 'desc';
+          reinit('grid', xopts, data);
+          assert.deepEqual(getCol('grid', 4), ['31','5']);
+        
+          xopts.sortcolname = 'Datum';
+          xopts.columns[1].order = 'asc';
+          reinit('grid', xopts, data);
+          assert.deepEqual(getCol('grid', 3), ["31.08.1915","31.08.2016"]);
+          xopts.columns[1].order = 'desc';
+          reinit('grid', xopts, data);
+          assert.deepEqual(getCol('grid', 3), ["31.08.2016", "31.08.1915"]);
+        });
+        
         QUnit.test('testset: filtering', function (assert) {
           reinit('grid', opts, data);
           var tierartInput = $('#Tierart input');
           tierartInput.val('Yeti').trigger($.Event("keyup", {keyCode: 13}));
-          assert.deepEqual(getCol('grid',2), ['Yeti'], 'filtering for Yeti ok');
+          assert.deepEqual(getCol('grid', 2), ['Yeti'], 'filtering for Yeti ok');
           tierartInput.val('y').trigger($.Event("keyup", {keyCode: 13}));
-          assert.deepEqual(getCol('grid',2), ['Yeti'], 'filtering for y ok');
+          assert.deepEqual(getCol('grid', 2), ['Yeti'], 'filtering for y ok');
           tierartInput.val('e').trigger($.Event("keyup", {keyCode: 13}));
-          assert.deepEqual(getCol('grid',2), [], 'filtering for y ok');
+          assert.deepEqual(getCol('grid', 2), [], 'filtering for y ok');
         });
+        clearLocalStorage();
       });
     </script>
   </head>

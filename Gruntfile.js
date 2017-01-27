@@ -73,7 +73,7 @@ module.exports = function (grunt) {
     },
     watch: {
       files: ['<%= jshint.files %>', 'public_html/css/*.css', 'public_html/tests/**/*.html', 'public_html/tests/**/*.js'],
-      tasks: ['jshint', 'qunit', 'concat', 'uglify', 'cssmin']
+      tasks: ['jshint', 'qunit']
     }
 
   });

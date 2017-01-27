@@ -46,29 +46,23 @@
           colsResizable: true,
         },
         columns: [
-          {name: "Tierart", match: 'contains', order:'desc'},
+          {name: "Tierart", match: 'contains', order: 'desc'},
           {name: "Datum", sortformat: 'date-de', css: 'text-align: center'},
           {name: "Name"},
           {name: "Flag"}
         ],
         sortcolname: 'Tierart',
-        saveSessionState: true,
-        selectionCol: {singleSelection:true},
+        selectionCol: {singleSelection: true},
         //lang:'en'
       };
       var grid;
       $().ready(function () {
         grid = $('#grid').ebtable(opts, basketTestdata);
-        $('#xgrid table').colResizable({
-          liveDrag: true,
-          gripInnerHtml: "<div class='grip'></div>",
-          draggingClass: "dragging",
-          resizeMode: 'overflow'
-        });
-        $('#saveGridStatus').on('click', function(){
+        $('#saveGridStatus').on('click', function () {
+          console.log('AAA')
           grid.saveSessionState();
         })
-        $('#loadGridStatus').on('click', function(){
+        $('#loadGridStatus').on('click', function () {
           grid.loadSessionState();
         })
       });

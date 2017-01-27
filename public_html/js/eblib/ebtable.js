@@ -108,14 +108,11 @@
           filters: self.getFilterValues()
         });
       },
-      getSessionState: function getSessionState() {
-        return sessionStorage[localStorageKey] ? JSON.parse(sessionStorage[localStorageKey]) : null;
-      },
       saveSessionState: function saveSessionState(s) {
         sessionStorage[localStorageKey] = s || sessionStateUtil.getSessionStateAsJSON();
       },
       loadSessionState: function loadSessionState(s) {
-        s = s || sessionStateUtil.getSessionState();
+        s = s || sessionStorage[localStorageKey] ? JSON.parse(sessionStorage[localStorageKey]) : null;
         if (!s)
           return;
         myopts.pageCur = s.pageCur;
@@ -123,7 +120,8 @@
         myopts.columns.forEach(function (coldef) {
           coldef.order = s.sortState[coldef.name];
         });
-        $(selgridid).ebtable(opts, data, hasMoreResults);
+        grid = $(selgridid).ebtable(myopts, data, hasMoreResults);
+        grid.setFilterValues(s.filters);
       }
     };
 
@@ -611,20 +609,6 @@
       return false; // ignore - sorting
     }
 
-// ##############################################################################
-
-    function adjustLayout() {
-//util.log('>>>adjustLayout window-width=', $(window).width(), 'body-width:', $('body').width());
-//adjust();
-//$(selgridid + '#head,#data').width(Math.floor($(window).width() - 30));
-//$(selgridid + '#divdata').width($(selgridid+'#data').width() + 14);
-//$(selgridid + '#ctrlPage1').css('position', 'absolute').css('right', "5px");
-//$(selgridid + '#ctrlPage2').css('position', 'absolute').css('right', "5px");
-    }
-
-// ##############################################################################
-
-
     function redraw(pageCur, withHeader) {
       if (withHeader) {
         $(selgridid + 'thead tr').html(tableHead());
@@ -640,9 +624,9 @@
       myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }
 
-// #################################################################
-// Actions
-// #################################################################
+    // #################################################################
+    // Actions
+    // #################################################################
 
     function initHeaderActions() {
       $(selgridid + 'thead th').off().on('click', sortingFcts.sorting);

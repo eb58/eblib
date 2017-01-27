@@ -14,5 +14,5 @@ function getCol(gridname, n) {
 }
 function reinit(gridname, opts, data) {
   clearLocalStorage();
-  grid = $('#' + gridname).ebtable(opts, data);
+  $('#' + gridname).ebtable(opts, data);
 }

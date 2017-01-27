@@ -109,7 +109,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
         return this;
       },
       filterGroups: function filterGroups(groupdefs, groupsdata) {
-        var filteredData = _.filter(this, function (row) {
+        var filteredData = this.filter( function (row) {
           var groupId = fcts.normalizeGroupId((row[groupdefs.groupid]));
           return(!groupId || fcts.isGroupingHeader(row, groupdefs) || groupsdata[groupId].isOpen);
         });
@@ -117,7 +117,7 @@ var mx = function mx(m, groupdef) {  //groupdef see below
         return filteredData;
       },
       getGroupRows: function getGroupRows(groupdefs, groupid) {
-        return _.filter(this, function (row) {
+        return this.filter( function (row) {
           return row[groupdefs.groupid] === groupid;
         });
       }

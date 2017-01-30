@@ -18,8 +18,10 @@
     <script src="/js/eblib/ebtable.js"></script>
     <script src="/js/eblib/ebselect.js"></script>
     <script src="/js/dlgs/dlgIcd.js"></script>  
+    <script src="/js/dlgs/dlgOrderInfo.js"></script>  
     <script src="/js/dlgs/dlgTestEbselect.js"></script>  
     <script src="/data/icddata.js"></script>  
+    <script src="/data/orderinfoData.js"></script>  
     <script>
       function takeover(o) {
         console.log(o);
@@ -34,12 +36,17 @@
         $('#testIcd').on('click', function () {
           dlgIcd(icddata, takeover, {icdCode: 'A'});
         })
-        dlgTestEbselect();
+        $('#testOrderInfo').on('click', function () {
+          dlgOrderInfo({name: 'Rita Rotkohl', wid: '50000008536'}, orderinfoData);
+        })
+        //dlgTestEbselect();
+        dlgOrderInfo({name: 'Rita Rotkohl', wid: '50000008536'}, orderinfoData);
       });
     </script>
   </head>
   <body>
-    <button id="testSelect">Test Ebselect</button>
-    <button id="testIcd">Test Icd</button>
+    <button id="testSelect">Ebselect</button>
+    <button id="testIcd">Icd</button>
+    <button id="testOrderInfo">Orderinfo</button>
   </body>
 </html>

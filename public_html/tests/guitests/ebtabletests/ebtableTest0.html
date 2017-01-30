@@ -9,6 +9,7 @@
     <style>
       * {font-family:Arial;color: black;font-size: 12px;      }
       body { background:#FAFAF0; margin: 10px 10px 10px 10px; width: 400px; }
+      .ui-icon { transform: scale(1.2); margin: 1px; padding: 1px;}
     </style>
 
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
@@ -47,9 +48,9 @@
         },
         columns: [
           {name: "Tierart", match: 'contains', sortorder: 'desc', valuelist: ['', 'Karpfen', 'Forelle']},
-          {name: "Datum", sortformat: 'date-de', css: 'text-align: center'},
-          {name: "Name", filter: '*e*'},
-          {name: "Flag"}
+          {name: "Datum", sortformat: 'date-de', width:'150px', css: 'text-align: center'},
+          {name: "Name" },
+          {name: "Flag", css: 'text-align: left'}
         ],
         sortcolname: 'Tierart',
         selectionCol: {singleSelection: true},

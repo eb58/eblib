@@ -55,7 +55,7 @@
           colwidths: util.getColWidths()
         });
       },
-      saveState: function saveState(s) {
+      saveState: function saveState() {
         localStorage[localStorageKey] = stateUtil.getStateAsJSON();
       },
       getState: function getState() {
@@ -77,7 +77,10 @@
             myopts.colorder.push(idx);
         });
         myopts.bodyWidth = state.bodyWidth;
-        myopts.colwidths = state.colwidths;
+        state.colwidths && _.isArray(state.colwidths) && state.colwidths.forEach(function(col){
+          var coldef = util.colDefFromName(col.name);
+          coldef.width = col.width + 'px';
+        });
         state.invisibleColnames.forEach(function (colname) {
           var n = util.colIdxFromName(colname);
           if (n >= 0) {
@@ -146,7 +149,7 @@
           return !o.invisible;
         });
       },
-      checkConfig: function checkConfig(myopts,origData) {
+      checkConfig: function checkConfig(myopts, origData) {
         myopts.columns.forEach(function (coldef) { // set reasonable defaults for coldefs
           coldef.technical = coldef.technical || false;
           coldef.invisible = coldef.invisible || false;
@@ -172,12 +175,12 @@
         });
       },
       getColWidths: function getColWidths() {
-        return $(selgridid + 'th').toArray().map(function (o) {
+        return $(selgridid + '.ebtable th').toArray().map(function (o) {
           var id = $(o).prop('id');
           var w = Math.max(20, $(o).width());
           var name = util.colNameFromId(id);
           util.log($(o).prop('id'), w, name);
-          var ret = {name: name, w: w};
+          var ret = {name: name, width: w};
           return ret;
         }).filter(function (o) {
           return o.name;
@@ -266,8 +269,8 @@
         var colidx = util.colIdxFromName(myopts.sortcolname);
         var coldef = myopts.columns[colidx];
         var bAsc = coldef.sortorder === 'asc';
-        $(selgridid + 'thead div span').removeClass();
-        $(selgridid + 'thead #' + colid + ' div span').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
+        $(selgridid + 'thead div span.ui-icon').removeClass().addClass('ui-icon ui-icon-blank');
+        $(selgridid + 'thead #' + colid + ' div span.ui-icon:nth-child(2)').addClass('ui-icon ui-icon-arrow-1-' + (bAsc ? 'n' : 's'));
       },
       getSortState: function getSortState() {
         var colidx = util.colIdxFromName(myopts.sortcolname);
@@ -401,9 +404,9 @@
 
     { // trimming opts param
       opts.flags = _.extend(defopts.flags, opts.flags);
-      opts.saveState = opts.saveState || opts.flags.colsResizable;
-      opts.saveState = typeof opts.saveState === 'boolean' && opts.saveState ? stateUtil.saveState : opts.saveState;
-      opts.colwidths = [];
+      if (opts.flags.colsResizable)
+        opts.saveState = defopts.saveState;
+      opts.saveState = typeof opts.saveState === 'boolean' ? stateUtil.saveState : opts.saveState;
     }
 
     var gridid = this[0].id;
@@ -412,13 +415,13 @@
     var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
-    myopts.openGroups.forEach(function(gid){
-      origData.groupsdata[gid].isOpen=true;
+    myopts.openGroups.forEach(function (gid) {
+      origData.groupsdata[gid].isOpen = true;
     });
     var tblData = origData;
     var pageCurMax = Math.floor(Math.max(0, origData.length - 1) / myopts.rowsPerPage);
     var pageCur = Math.min(Math.max(0, myopts.pageCur), pageCurMax);
-    util.checkConfig(myopts,origData);
+    util.checkConfig(myopts, origData);
 
     if (myopts.saveState && myopts.getState) {
       myopts.loadState(myopts.getState());
@@ -431,7 +434,7 @@
 
     function getOpenGroups() {
       return _.reduce(origData.groupsdata, function (acc, val, key) {
-        if (val.isOpen){
+        if (val.isOpen) {
           acc.push(parseInt(key));
         }
         return acc;
@@ -461,7 +464,7 @@
         </div>");
       a.html(tableTemplate({
         head: tableHead(),
-        data: '',//tableData(pageCur),
+        data: '', //tableData(pageCur),
         selectLen: selectLenCtrl(),
         configBtn: configBtn(),
         clearFilter: clearFilterBtn(),
@@ -474,11 +477,6 @@
       }));
       filteringFcts.filterData();
       redraw(pageCur);
-
-      myopts.colwidths && myopts.colwidths.forEach(function (o) {
-        var id = util.colIdFromName(o.name);
-        $(selgridid + 'table th#' + id).width(o.w);
-      });
     }
 
     function configBtn() {
@@ -504,10 +502,15 @@
             var t = coldef.valuelist ? t_selectfld : t_inputfld;
             fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip, filter: coldef.filter});
           }
-          var style = coldef.css ? ' style="' + coldef.css + '"' : '';
+          var thwidth = coldef.width ? 'width:' + coldef.width + ';' : '';
+          var thstyle = coldef.css || coldef.width ? ' style="' + thwidth + ' ' + (coldef.css?coldef.css:'') +  '"' : '';
           var hdrTemplate = '\
-            <th id="<%=colid%>" <%=style%> >\n\
-              <div style="display:inline-flex" ><%=colname%><span style="float:left"></span></div>\n\
+            <th id="<%=colid%>"<%=thstyle%> >\n\
+              <div style="display:inline-flex">\n\
+              <span style="float:left" class="ui-icon ui-icon-blank"></span>\n\
+              <%=colname%>\n\
+              <span style="float:right" class="ui-icon ui-icon-blank"></span>\n\
+              </div>\n\
               <div><%=fld%></div>\n\
              </th>';
           // &#8209; = non breakable hyphen : &#0160; = non breakable space
@@ -515,7 +518,7 @@
             colname: coldef.name.replace(/-/g, '&#8209;').replace(/ /g, '&#0160;'),
             colid: coldef.id,
             fld: fld,
-            style: style,
+            thstyle: thstyle,
             tooltip: coldef.tooltip
           });
         }
@@ -636,7 +639,7 @@
       if (myopts.flags.colsResizable) {
         $(selgridid + '.ebtable').resizable({
           handles: 'e',
-          minWidth: 200,
+          minWidth: 150,
           stop: function (evt, ui) {
             myopts.saveState();
             myopts.bodyWidth = ui.size.width;
@@ -685,7 +688,9 @@
               return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
             });
             myopts.saveState && myopts.saveState();
-            $('#' + gridid).ebtable(opts, data, hasMoreResults);
+            var filters = self.getFilterValues();
+            redraw(pageCur, true);
+            self.setFilterValues(filters);
           }
         };
         dlgConfig(dlgopts);
@@ -716,15 +721,17 @@
       });
       $(selgridid + '#data input[type=checkbox]', selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
       $(selgridid + '.ctrl').off().on('dblclick', function (evt) {
-        $(selgridid + '#data table').removeClass('ebtablefix');
-        $(selgridid + '#data table th').removeAttr('style');
-        var colWidths = util.getColWidths();
-        colWidths && colWidths.forEach(function (o) {
-          var id = util.colIdFromName(o.name);
-          $(selgridid + 'table th#' + id).width(o.w);
-        });
-        $(selgridid + '#data table').addClass('ebtablefix');
-        stateUtil.saveState();
+        if ($(selgridid + '#data table.ebtablefix').length) {
+          $(selgridid + '#data table').removeClass('ebtablefix');
+          $(selgridid + '#data table th').removeAttr('style');
+          var colWidths = util.getColWidths();
+          colWidths && colWidths.forEach(function (o) {
+            var id = util.colIdFromName(o.name);
+            $(selgridid + 'table th#' + id).width(o.width);
+          });
+          $(selgridid + '#data table').addClass('ebtablefix');
+          stateUtil.saveState();
+        }
       });
 
       initHeaderActions();

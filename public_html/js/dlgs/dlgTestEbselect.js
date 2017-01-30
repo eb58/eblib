@@ -26,10 +26,10 @@ var dlgTestEbselect = function (opts) {
     buttons: {
       'OK': function () {
         console.log('yy', select.getSelectedValues().join());
-        //$(this).dialog("close");
+        $(this).dialog("destroy");
       },
       'Abbrechen': function () {
-        $(this).dialog("close");
+        $(this).dialog("destroy");
       }
     }
   };

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <title>Hilfsmittel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <link rel="stylesheet" href="/css/ebselect.css">
+    <link rel="stylesheet" href="/css/ebtable.css">
+    <style>
+      * {font-family:Arial; color: black; font-size: 12px;}
+      body{ margin: 20px 20px 20px 20px; }
+      table, td { border: 1px solid lightgrey; border-collapse: collapse;padding: 5px 3px ;}
+
+      textarea{ width:100%;}
+      textarea[readonly]{ background-color: #e3e0e0; }
+
+      .textfield{ margin: 15px 1px 15px 1px; width:99%;}
+
+      .ui-dialog-content label { display: inline-block; vertical-align: baseline; width: 80px;  margin: 5px 2px; font-weight: bold}
+      .ui-dialog-content input[type=text] { display: inline-block; vertical-align: baseline; width: 550px; margin: 5px 2px;}
+
+      .ui-selectmenu-button {width:300px;}
+      .ui-selectmenu-menu {height:250px; overflow:auto}
+
+      #orderresponseX { width:500px; }
+      #himilist{ margin: 5px 1px 5px 1px; width: 100%;}
+      #orderattr{ margin: 5px 1px 5px 1px;  float: left; width: 100%; }
+
+      .qastbl td:nth-child(1) { width: 80%;}
+      .qastbl td:nth-child(2) { width: 20%;}
+      .qastbl td { background-color: #dfdfdf;  }
+
+      #grid table{ width:100%}
+
+      #diagnosen { width: 500px;  float: left; }
+      #diagnosen table, td { border: 1px solid lightgrey; border-collapse: collapse;}
+      #diagnosen td:nth-child(1) { width: 10px }   
+      #diagnosen td:nth-child(2) { width: 50px }
+      #diagnosen td:nth-child(2) input { width: 45px }
+      #diagnosen td:nth-child(3) { width: 380px   }
+      #diagnosen td:nth-child(3) input { width: 100% }
+      #diagnosen td:nth-child(4) { width: 10px  }
+      #diagnosen td{ padding: 3px; }
+      #diagnosen input{ border: 0px; }
+
+      #versandeinstellungen {  float: right }
+      #versandeinstellungen td, #versandeinstellungen table{ border: 0px;   }
+      #auftraggeberX, #leistungserbringerX, #sanitaetshausX { width:100%; }
+
+      #suggkeysX { width:500px; }
+
+      #dlgHimi>table td { border-style: none; margin: 0px; padding: 1px 0px 1px 0px;}
+      #dlgHimi { background-color: #eeeee0; }
+
+      div .errors > ul { margin:2px; padding:1px; }
+
+      .cnt{ font-size: 10px}
+
+    </style>
+    <script src="/vendor/underscore-1.8.3/underscore.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+    <script src="/vendor/numeric.js"></script>
+    <script src="/vendor/moment.min.js"></script>
+    <script src="/js/eblib/ebutils.js"></script>  
+    <script src="/js/eblib/ebdropdown.js"></script>  
+    <script src="/js/eblib/ebtextarea.js"></script>  
+    <script src="/js/eblib/mx.js"></script>  
+    <script src="/js/eblib/ebtable.js"></script>  
+    <script src="/js/eblib/ebbind.js"></script>  
+    <script src='/js/dlgs/dlgIcd.js'></script>
+    <script src='./himi.js'></script>
+    <script src='./himiDlgQas.js'></script>
+    <script src='/data/icddata.js'></script>
+    <script src='/data/himilists.js'></script>
+    <script src='/data/himidata.js'></script>
+    <script>
+
+      var dialogName = 'himis';
+      var setOrderParameter = function () {
+        return true;
+      };
+
+      var validateDialogValues = function () {
+        return '';
+      };
+
+      function getIcdCodeFromNumber(code) {
+        var x = _.find(icdlist, function (o) {
+          return o[2] === code;
+        });
+        return x ? {id: x[0], text: x[1]} : null;
+      }
+
+      function setTextAreaCounter(o) {
+        var maxByte = $(o).attr('maxlen');
+        var bc = ebutils.byteCount($(o).val());
+        $(o).parent().find('.cnt').text('(' + bc + '/' + maxByte + ')');
+      }
+
+      var
+        himis,
+        icds,
+        acthimirow,
+        actqasrow,
+        readonly = false,
+        isSFB = 1;
+
+      answs = isSFB ? answs : _.reject(answs, function (o) {
+        return o['answer-number'] === '4';
+      });
+
+      var deliveryLeistungserbringer = _.filter(delivery, function (o) {
+        return o.flags & 1;
+      });
+      var deliverySanitaetshaus = _.filter(delivery, function (o) {
+        return o.flags & 2;
+      });
+      var deliveryAuftraggeber = _.filter(delivery, function (o) {
+        return o.flags & 4;
+      });
+
+      var himis, icds, acthimirow, actqasrow;
+      var readonly = false; // 
+      var isSFB = false; // parseInt(parent.$('input:hidden[name=IsSFBProduct]').val()) || 0;
+
+      answs = isSFB ? answs : _.reject(answs, function (o) {
+        return o['answer-number'] === '4';
+      });
+      var answsQas = _.filter(answs, function (o) {
+        return o.applydlg & 1 || o['answer-id'] === null;
+      });
+      var answsHimi = _.filter(answs, function (o) {
+        return o.applydlg & 2 || o['answer-id'] === null;
+      });
+      var answsAuftrag = _.filter(answs, function (o) {
+        return o.applydlg & 4 || o['answer-id'] === null;
+      });
+      var answerAndereAntwortId = _.findWhere(answs, {"answer-number": '3'})["answer-id"];  // '3' === 'Andere Antwort' in answs
+
+      // ##########################################################################################################
+      // Himitabelle
+      // ##########################################################################################################
+      var rendererHimi = {
+        lfdnr: function (data, row, r) {
+          return data;
+        },
+        item: function (data, row) {
+          return himiutils.qasTable(row);
+        },
+        edit: function (data, row, r) {
+          return "<span id='himi" + r + "' class='ui-icon ui-icon-pencil'></span>";
+        },
+        info: function (data, row, r) {
+          return "<span id='himi" + r + "' class='ui-icon ui-icon-info'></span>";
+        },
+        del: function (data, row, r) {
+          var isdigital = row[0];
+          return isdigital ? "" : "<span id='himi" + r + "' class='ui-icon ui-icon-trash'></span>";
+        }
+      };
+
+      var himilistopts_edit = {
+        columns: [
+          {name: "Digital", invisible: true},
+          {render: rendererHimi.lfdnr},
+          {render: rendererHimi.item},
+          {render: rendererHimi.edit},
+          {render: rendererHimi.del}
+        ]
+      };
+      var himilistopts_readonly = {
+        columns: [
+          {name: "Digital", invisible: true},
+          {render: rendererHimi.lfdnr},
+          {render: rendererHimi.item},
+          {render: rendererHimi.info}
+        ]
+      };
+
+      var himilistopts = readonly ? himilistopts_readonly : himilistopts_edit;
+
+      // ##########################################################################################################
+      // QAS-Tabelle
+      // ##########################################################################################################
+      var rendererQas = {
+        motivation: function (data, row) {
+          data = data || '';
+          return data.length < 500 ? data : (data.substring(0, 500) + '...');
+        },
+        edit: function (data, row, r) {
+          return "<span id='qas" + r + "' class='ui-icon ui-icon-pencil'></span>";
+        },
+        info: function (data, row, r) {
+          return "<span id='qas" + r + "' class='ui-icon ui-icon-info'></span>";
+        },
+        del: function (data, row, r) {
+          var isdigital = row[0];
+          return isdigital ? "" : "<span id='qas" + r + "' class='ui-icon ui-icon-trash'></span>";
+        }
+      };
+      var qaslistopts_edit = {
+        columns: [
+          {name: "Digital", invisible: true},
+          {name: "Nummer"},
+          {name: "Frage"},
+          {name: "Erläuterung Frage", render: rendererQas.motivation},
+          {name: "Antwort"},
+          {name: "Begründung Antwort", render: rendererQas.motivation},
+          {name: '', render: rendererQas.edit},
+          {name: '', render: rendererQas.del}
+        ]
+      };
+      var qaslistopts_readonly = {
+        columns: [
+          {name: "Digital", invisible: true},
+          {name: "Nummer"},
+          {name: "Frage"},
+          {name: "Erläuterung Frage", render: rendererQas.motivation},
+          {name: "Antwort"},
+          {name: "Begründung Antwort", render: rendererQas.motivation},
+          {name: '', render: rendererQas.info}
+        ]
+      };
+      var qaslistopts = readonly ? qaslistopts_readonly : qaslistopts_edit;
+
+      // ##########################################################################################################
+
+      function initBegruendungToolTips() {
+        $(".qastbl tr").off().on('mouseenter', function (e) {
+          var erlauterungFrage = $('td:nth-child(3)', e.currentTarget).text().trim();
+          var begruendungAntwort = $('td:nth-child(4)', e.currentTarget).text().trim();
+          if (erlauterungFrage === '' && begruendungAntwort === '')
+            return;
+          if (erlauterungFrage === 'null')
+            erlauterungFrage = '&lt;keine&gt;';
+          if (begruendungAntwort === 'null')
+            begruendungAntwort = '&lt;keine&gt;';
+          var t = _.template("<b>Erläuterung Frage:</b><br><\%=b1%><br><b>Begründung Antwort:</b><br><\%=b2%>")
+            ({
+              b1: erlauterungFrage,
+              b2: begruendungAntwort
+            });
+
+          $('#tooltipdlg').dialog({
+            title: 'Erläuterung/Begründung',
+            closeText: 'Schlie\u00dfen',
+            position: {
+              my: 'left top',
+              //at: 'right top',
+              of: $("body")
+            },
+            open: function () {
+              $(".ui-dialog-titlebar-close", $(this).closest('.ui-dialog')).hide();
+            } // hide x in titlebar for closing
+          }).dialog('open').html(t);
+        });
+        $(".qastbl tr").on('mouseleave', function () {
+          $('#tooltipdlg').dialog().dialog('close');
+        });
+      }
+
+      function initHimiTable(himis) {
+        var himidata = _.map(himis, function (h) {
+          var answ = _.findWhere(answs, {'answer-id': h['answer-id']});
+          var answtext = answ ? answ['answer-text'] : '';
+          return [h.digital, h['lfd-nr'], h.number + ' ### ' + h.text + ' ### ' + answtext, h.qas];
+        });
+        $('#grid').himitable(himilistopts, himidata);
+        $('#addHimi.ui-icon-circle-plus').toggle(!(readonly || himis.length >= 10));
+        initActionsForHimilist();
+        initBegruendungToolTips();
+      }
+
+      function initQasTable(qas) {
+        var qasdata = _.map(qas, function (qa) {
+          var answ = _.findWhere(answs, {'answer-id': qa['answer-id']});
+          var answtext = answ ? answ['answer-text'] : '';
+          return [qa.digital, qa['question-number'], qa['question-text'], qa['motivation-question'], answtext, qa['motivation-answer']];
+        });
+        $('#qastable').himitable(qaslistopts, qasdata);
+        $('#addQas.ui-icon-circle-plus').toggle(!(readonly || qas.length >= 14)); // max. 14 Qas
+        initActionsForQaslist(qas);
+      }
+
+      function initIcdTable(icds) {
+        for (var i = 1; i <= 5; i++) {
+          var icd = icds[i - 1] || {};
+          var code = $($('#icdcode' + i)).val().trim().toUpperCase();
+          $('#icdcode' + i).val(icd['icd-code-number']);
+          $('#icdtext' + i).val(icd['text']).prop('readonly', code !== '' && code !== '---.-');
+          $('#icdsrch' + i).toggle(!icd.digital);
+        }
+        initActionsForIcdlist();
+      }
+      // ##########################################################################################################
+
+      function initActionsForHimilist() { // Actions for Himilist
+        $('.himitable .ui-icon-trash').off().on('click', function (ev) { // delete himi
+          $.confirm('Frage', 'Sind Sie sicher, dass Sie das Hilfsmittel löschen wollen?', function () {
+            var r = parseInt(ev.target.id.replace('himi', ''));
+            himis.splice(r, 1);
+            initHimiTable(himis);
+          });
+        });
+        $('#himilist .ui-icon-pencil, #himilist .ui-icon-info').off().on('click', function (ev) { // edit himi
+          var r = parseInt(ev.target.id.replace('himi', ''));
+          $('#dlgHimi').dialog('option', 'title', 'Hilfsmittel ' + himis[r].text).dialog('open');
+          $('#dlgHimi input#himinumber').val(himis[r].number);
+          $('#dlgHimi input#himiname').val(himis[r].text);
+
+          $('#dlgHimi #himiresponse').html(himiutils.selectBox('himiresponseX', answsHimi));
+          $('#dlgHimi #himiresponseX option[value=' + himis[r]['answer-id'] + ']').attr('selected', true);
+          $('#dlgHimi select#himiresponseX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+
+          initQasTable(himis[r].qas);
+          acthimirow = r;
+        });
+        $('#himilist #addHimi').off().on('click', function () { // add himi
+          var nhimi = himiutils.createHimi('', '');
+          nhimi.isnew = true;
+          himis.push(nhimi);
+          $('#dlgHimi').dialog('option', 'title', 'Neues Hilfsmittel').dialog('open');
+          $('#dlgHimi input#himinumber').val('');
+          $('#dlgHimi input#himiname').val('');
+          $('#dlgHimi #himiresponse').html(himiutils.selectBox('himiresponseX', answsHimi));
+
+          var r = himis.length - 1;
+          initQasTable(himis[r].qas);
+          acthimirow = r;
+        });
+      }
+
+      function initActionsForQaslist(qas) {   // Actions for Qaslist
+        var closeCallback = function () {
+          himis[acthimirow].qas = _.reject(himis[acthimirow].qas, {isnew: true});
+        };
+        var okCallback = function () {
+          himis[acthimirow].qas[actqasrow]['motivation-question'] = $('#dlgQas #motivation-question').val();
+          himis[acthimirow].qas[actqasrow]['motivation-answer'] = $('#dlgQas #motivation-answer').val();
+          _.extend(himis[acthimirow].qas[actqasrow],
+            _.findWhere(quests, {'question-id': parseInt($('#dlgQas select#quests option:selected').val()) || null}),
+            _.findWhere(answs, {'answer-id': parseInt($('#dlgQas select#answs  option:selected').val()) || null})
+            );
+          delete himis[acthimirow].qas[actqasrow].isnew;
+          initQasTable(himis[acthimirow].qas);
+        }
+
+        $('#qastable .ui-icon-trash').off().on('click', function (ev) { // delete qas
+          $.confirm('Frage', 'Sind Sie sicher, dass Sie die Frage zum Hilfsmittel löschen wollen?', function () {
+            var r = parseInt(ev.target.id.replace('qas', ''));
+            var qas = himis[acthimirow].qas;
+            qas.splice(r, 1);
+            initQasTable(qas);
+          });
+        });
+        $('#qastable .ui-icon-pencil, #qastable .ui-icon-info').off().on('click', function (ev) { // edit qas
+          var r = parseInt(ev.target.id.replace('qas', ''));
+          var actqas = qas[r];
+          actqasrow = r;
+          himiDlgQas(actqas, {
+            title: 'Frage ' + (r + 1),
+            quests: quests,
+            answs: answs,
+            isSFB: isSFB
+          }, okCallback, closeCallback);
+        });
+        $('#addQas').off().on('click', function () {  // add qas
+          var nqa = himiutils.createQas(-1, $('#dlgQas #motivation-question').val(), $('#dlgQas #motivation-answer').val(), quests[0], answsQas[0]);
+          nqa.isnew = true;
+          if (isSFB) {
+            nqa['answer-id'] = answerAndereAntwortId;
+            nqa['motivation-answer'] = 'Siehe Beurteilung';
+          }
+          himis[acthimirow].qas.push(nqa);
+          actqasrow = himis[acthimirow].qas.length - 1;
+          himiDlgQas(actqas, {
+            title: 'Neue Frage',
+            quests: quests,
+            answs: answs,
+            isSFB: isSFB}, okCallback, closeCallback);
+        });
+      }
+
+      function initActionsForIcdlist() {   // Actions for Icdlist
+        $('#diagnosen .ui-icon-trash').off().on('click', function (event) { // delete icd
+          $.confirm('Frage', 'Sind Sie sicher, dass Sie die Diagnose löschen wollen?', function () {
+            var n = event.target.id.replace('icdtrash', '') - 1;
+            icds.splice(n, 1);
+            icds.push({'icd-code-id': null, 'icd-code-number': null, digital: false});
+            initIcdTable(icds);
+          });
+        });
+        $('#diagnosen .ui-icon-search').on('click', function (event) {
+          var n = event.target.id.replace('icdsrch', '');
+          var opts = {icdCode: $('#icdcode' + n).val()};
+          dlgIcd(icddata, function (code, text, id) {
+            icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
+            icds[n - 1]['icd-code-id'] = id;
+            icds[n - 1]['icd-code-number'] = code;
+            icds[n - 1]['text'] = code === '---.-' ? $('#icdtext' + n).val() : text;
+            $('#icdcode' + n).val(icds[n - 1]['icd-code-number']);
+            $('#icdtext' + n).val(icds[n - 1]['text']).prop('readonly', code !== '---.-');
+            return true;
+          }, opts);
+        });
+        for (var i = 1; i <= 5; i++) {
+          $('#diagnosen #icdcode' + i).on('blur', function (event) {
+            var n = event.target.id.replace('icdcode', '');
+            var icdCodeNumber = $('#icdcode' + n).val().trim().toUpperCase();
+            if (!icdCodeNumber)
+              return;
+            var icdCode = getIcdCodeFromNumber(icdCodeNumber);
+            if (icdCode) {
+              icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
+              icds[n - 1]['icd-code-id'] = icdCode.id;
+              icds[n - 1]['icd-code-number'] = icdCodeNumber;
+              icds[n - 1]['text'] = icdCodeNumber === '---.-' ? $('#icdtext' + n).val() : icdCode.text;
+              $('#icdtext' + n).val(icds[n - 1]['text']).prop('readonly', icdCodeNumber !== '---.-');
+            }
+          });
+          $('#icdtext' + i).on('change', function (event) {
+            var n = parseInt(event.target.id.replace('icdtext', ''));
+            icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
+            icds[n - 1]['text'] = $('#icdtext' + n).val();
+            var code = $('#icdcode' + n).val().trim().toUpperCase();
+            $('#icdtext' + n).prop('readonly', code !== '' && code !== '---.-');
+          });
+        }
+      }
+
+      function initDialog(data) {
+
+        initHimiTable(data.himis);
+        initIcdTable(data.icds);
+        // Select Auftrags-Antwort
+        $('#orderresponse').html(himiutils.selectBox('orderresponseX', answsAuftrag));
+        $('#orderresponseX option[value=' + data['global-answer-id'] + ']').attr('selected', true);
+        $('#orderresponseX').selectmenu({change: function (event, ui) {
+            var a = answsAuftrag[ui.item.index];
+            data['global-answer-id'] = a['answer-id'];
+            if (parent.resultList) {
+              var result = _.findWhere(parent.resultList, {id: a['result-id']});
+              parent.$('input[name=Resultid]:hidden').val(result ? result.id : 0);
+              top.objectIsChanged = true;
+            }
+          }
+        });
+        $('#medical-base').val(data['medical-base']);
+        $('#anamnesis').val(data['anamnesis']);
+        $('#indication').val(data['indication']);
+        $('#evaluation').val(data['evaluation']);
+        $('#suggestion-add').val(data['suggestion-add']);
+        $('#suggkeys').html(himiutils.selectBox('suggkeysX', sugg));
+        $('#suggkeysX option[value=' + data['suggestion-id'] + ']').attr('selected', true);
+        $('#suggkeysX').selectmenu({change: function (event, ui) {
+            data['suggestion-id'] = sugg[ui.item.index]['himi_suggestion_id'];
+          }});
+        data['delivery-config-ag'] = data['delivery-config-ag'] || deliveryAuftraggeber.himi_delivery_config_id;
+        $('#auftraggeber').html(himiutils.selectBox('auftraggeberX', deliveryAuftraggeber));
+        $('#auftraggeberX option[value=' + data['delivery-config-ag'] + ']').attr('selected', true);
+        $('#auftraggeberX').selectmenu({
+          change: function (event, ui) {
+            var selval = $(event.currentTarget).text().trim();
+            data['delivery-config-ag'] = _.findWhere(delivery, {'himi_delivery_config_text': selval})['himi_delivery_config_id'];
+          }
+        });
+        data['delivery-config-le'] = data['delivery-config-le'] || deliveryLeistungserbringer.himi_delivery_config_id;
+        $('#leistungserbringer').html(himiutils.selectBox('leistungserbringerX', deliveryLeistungserbringer));
+        $('#leistungserbringerX option[value=' + data['delivery-config-le'] + ']').attr('selected', true);
+        $('#leistungserbringerX').selectmenu({
+          change: function (event, ui) {
+            var selval = $(event.currentTarget).text().trim();
+            data['delivery-config-le'] = _.findWhere(delivery, {'himi_delivery_config_text': selval})['himi_delivery_config_id'];
+          }
+        });
+        data['delivery-config-sa'] = data['delivery-config-sa'] || deliverySanitaetshaus.himi_delivery_config_id;
+        $('#sanitaetshaus').html(himiutils.selectBox('sanitaetshausX', deliverySanitaetshaus));
+        $('#sanitaetshausX option[value=' + data['delivery-config-sa'] + ']').attr('selected', true);
+        $('#sanitaetshausX').selectmenu({
+          change: function (event, ui) {
+            var selval = $(event.currentTarget).text().trim();
+            data['delivery-config-sa'] = _.findWhere(delivery, {'himi_delivery_config_text': selval})['himi_delivery_config_id'];
+          }
+        });
+        // isSFB
+        if (isSFB && !$('#icdcode1').val() && !$('#icdtext1').val()) {
+          $('#icdtext1').val('Hilfsmitteldiagnose');
+          data.icds.push({'icd-code-id': null, 'icd-code-number': null, text: 'Hilfsmitteldiagnose', digital: false});
+        }
+
+        // HIMI-Dialog
+        $('#dlgHimi').dialog({title: 'Hilfsmittel', autoOpen: false, height: 450, width: 700, closeText: 'Schlie\u00dfen', modal: true,
+          close: function () {
+            himis = _.reject(himis, {isnew: true});
+          },
+          buttons: {
+            Ok: function () {
+              var err = '';
+              err += $('#dlgHimi input#himinumber').val() ? '' : 'Nummer darf nicht leer sein!<br>';
+              err += $('#dlgHimi input#himiname').val() ? '' : 'Bezeichnung darf nicht leer sein!<br>';
+              if (err) {
+                return $.alert('Fehler', err);
+              }
+
+              himis[acthimirow]['text'] = $('#dlgHimi input#himiname').val();
+              himis[acthimirow]['number'] = $('#dlgHimi input#himinumber').val();
+              himis[acthimirow]['answer-id'] = parseInt($('#dlgHimi :selected').val()) || null;
+              delete himis[acthimirow].isnew;
+              initHimiTable(himis);
+              $(this).dialog("close");
+            },
+            Abbrechen: function () {
+              $(this).dialog("close");
+            }
+          }
+        });
+        if (readonly) {
+          $("input").prop('disabled', true);
+          $("textarea").prop('disabled', false).prop('readonly', true).on('keydown', function (evt) {
+            evt.preventDefault();
+          });
+          $('option:not(:selected)').attr('disabled', true);
+          $('#diagnosen td:nth-child(1), #diagnosen td:nth-child(4), #diagnosen td:nth-child(5)').hide();
+          $('#orderresponseX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('#suggkeysX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('#auftraggeberX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('#leistungserbringerX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('#sanitaetshausX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('h1:contains(*)').each(function (idx, o) {
+            $(o).text($(o).text().replace('(*)', '').replace('*', ''));
+          });
+        }
+
+
+        $('textarea[maxlen]').on("keyup", function () {
+          var maxByte = $(this).attr('maxlen');
+          var s = $(this).val();
+          var bc = ebutils.byteCount(s);
+          if (bc > maxByte) {
+            $.alert('Warnung', 'Maximal erlaubte Textl\u00e4nge erreicht.\nText wird abgeschnitten.');
+            while ((bc = ebutils.byteCount(s)) > maxByte) {
+              s = s.slice(0, -1);
+            }
+            $(this).val(s);
+          }
+          $(this).parent().find('.cnt').text('(' + bc + '/' + maxByte + ')');
+          //console.log($(this), bc, maxByte);
+        }).each(function (idx, o) {
+          setTextAreaCounter(o);
+        });
+        taopts = {title: {text: '', fontSize: '8px', pos: 'bottom'}, maxByte: 1000};
+        $('#medical-base').ebtextarea({text: '', fontSize: '8px', pos: 'bottom', maxByte: 1000});
+        $('#medical-base,#anamnesis,#indication,#evaluation,#suggestion-add').ebtable
+          .on("keyup", function (ev) {
+            data[ev.target.id] = $('#' + ev.target.id).val();
+          })
+          .on('change', function (ev) {
+            data[ev.target.id] = $('#' + ev.target.id).val();
+          });
+      }
+
+      function doSave(data) {
+        var ret = '';
+        $.ajax({
+          url: "/ISmed/ajax/workspace/himi.do?action=save-himi-data&ajax=1",
+          async: false,
+          data: {data: JSON.stringify(data)},
+          type: "POST",
+          success: function (result) {
+            handleAjaxResult(result, {cbErr: function () {
+                ret = 'ERROR';
+              }, errortitle: 'Fehler beim Speichern'});
+          },
+          error: function (request, status, error) {
+            console.log(request, status, error);
+            ret = 'ERROR';
+          }
+        });
+        return ret;
+      }
+
+      $(document).ready(function () {
+        top.DialogID = "himi";
+        $(".positive-integer").numeric({decimal: false, negative: false});
+        himis = result.data.himis;
+        icds = result.data.icds = result.data.icds.filter(function (o) {
+          return !!o['icd-code-id'];
+        });
+        if (isSFB) {  // initialisiere digitale QAS mit Vorbelegung
+          himis.forEach(function (himi) {
+            himi.qas.forEach(function (qa) {
+              if (!qa["answer-id"]) {
+                qa["answer-id"] = answerAndereAntwortId;
+                qa["answer-number"] = '3';
+                qa["motivation-answer"] = 'Siehe Beurteilung';
+              }
+            });
+          });
+        }
+
+        initDialog(result.data);
+        setOrderParameter = function () {
+          console.log('setOrderParameter');
+          result.data.himis = himis;
+          result.data.icds = _.compact(icds);
+          return doSave(result.data);
+        };
+      });
+    </script>
+
+  </head>
+  <body style="background:#F0F0F0">
+
+    <div id='himilist'>
+      <table style='border: none;'>
+        <tr>
+          <td style='border: none;'><h1>Hilfsmittel:</h1></td>
+          <td style='border: none;'><span id='addHimi' class='ui-icon ui-icon-circle-plus'></span></td>
+        </tr>
+      </table>
+      <div id='grid'></div>
+    </div>
+
+    <div id='diagnosen'>
+      <h1>Diagnosen:</h1>
+      <table>
+        <tbody>
+          <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icdsrch1' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash1' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icdsrch2' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash2' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icdsrch3' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash3' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icdsrch4' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash4' class='ui-icon ui-icon-trash'></span></td></tr>
+          <tr><td> </td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icdsrch5' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash5' class='ui-icon ui-icon-trash'></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id='versandeinstellungen'>
+      <h1>Versandeinstellungen:</h1>
+      <table>
+        <tr><td>Auftraggeber:     </td><td><div id='auftraggeber'>       </div></td>
+        <tr><td>Leistungserbringer</td><td><div id='leistungserbringer'> </div></td>
+        <tr><td>Sanitätshaus      </td><td><div id='sanitaetshaus'>      </div></td>
+      </table>
+    </div>
+
+    <div id='orderattr'>
+      <div class='textfield'><h1>Medizinische Unterlagen:(*)</h1><div id='medical-base' rows='10' maxlen="4000"></div></div>
+      <div class='textfield'><h1>Anamnese:(*)               </h1><div id='anamnesis'    rows='10' maxlen="4000"></div></div>
+      <div class='textfield'><h1>Befund:(*)                 </h1><div id='indication'   rows='10' maxlen="4000"></div></div>
+      <div class='textfield'><h1>Beurteilung:(*)            </h1><div id='evaluation'   rows='10' maxlen="10000"></div></div>
+
+      <h1>Auftrags-Antwort:</h1>
+      <div id='orderresponse'></div>
+      <h1>Empfehlung:</h1>
+      <div id='suggkeys'></div>
+      <div class='textfield'><textarea id='suggestion-add' rows='10' maxlen='4000'></textarea><div class="cnt"></div></div>
+    </div>
+
+    <div id='dlgHimi'>
+      <table style="border-style:none">
+        <tr><td>Hilfsmittel-Nummer:</td><td><input id='himinumber' type='text' class='positive-integer' maxlength="10"/></td></tr>
+        <tr><td>Bezeichnung:       </td><td><input id='himiname' type='text'/></td></tr>
+        <tr><td>Hilfsmittel-Antwort:</td><td><div id='himiresponse'></div></td></tr>
+      </table>
+      <br>
+      <table style='border: none;'>
+        <tr>
+          <td style='border: none;'><h1>Fragen:&nbsp;&nbsp;&nbsp;</h1></td>
+          <td style='border: none;'><span id='addQas' class='ui-icon ui-icon-circle-plus'></span></td>
+        </tr>
+      </table>
+      <div id="qastable"></div>
+    </div>
+
+    <div id='tooltipdlg'></div>
+  </body>
+</html>

@@ -15,17 +15,31 @@
     <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
     <script src="/js/polyfills.js"></script>
     <script src="/js/eblib/mx.js"></script>
+    <script src="/js/eblib/ebutils.js"></script>
     <script src="/js/eblib/ebtable.js"></script>
     <script src="/js/eblib/ebselect.js"></script>
+    <script src="/js/eblib/ebtextarea.js"></script>
     <script src="/js/dlgs/dlgIcd.js"></script>  
     <script src="/js/dlgs/dlgOrderInfo.js"></script>  
     <script src="/js/dlgs/dlgTestEbselect.js"></script>  
+    <script src="/tests/guitests/himi/himi.js"></script>  
+    <script src="/tests/guitests/himi/himiDlgQas.js"></script>  
     <script src="/data/icddata.js"></script>  
+    <script src="/data/himilists.js"></script>  
     <script src="/data/orderinfoData.js"></script>  
     <script>
       function takeover(o) {
         console.log(o);
         return true;
+      }
+
+      var actqas = {};
+
+      var qasopts = {
+        title: 'FRAGE',
+        quests: quests,
+        answs: answs,
+        isSFB: false,
       }
 
       $().ready(function () {
@@ -39,8 +53,10 @@
         $('#testOrderInfo').on('click', function () {
           dlgOrderInfo({name: 'Rita Rotkohl', wid: '50000008536'}, orderinfoData);
         })
-        //dlgTestEbselect();
-        dlgOrderInfo({name: 'Rita Rotkohl', wid: '50000008536'}, orderinfoData);
+        $('#testQas').on('click', function () {
+          dlgQas(actqas, qasopts);
+        })
+        dlgQas(actqas, qasopts);
       });
     </script>
   </head>
@@ -48,5 +64,6 @@
     <button id="testSelect">Ebselect</button>
     <button id="testIcd">Icd</button>
     <button id="testOrderInfo">Orderinfo</button>
+    <button id="testQas">QAS</button>
   </body>
 </html>

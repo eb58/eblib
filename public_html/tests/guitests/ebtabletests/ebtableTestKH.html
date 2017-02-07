@@ -20,7 +20,7 @@
     <script src="/js/eblib/ebtable.js"></script>
     <!--<script src="/data/ebTableGroupExternalSmall.js"></script>-->
     <script src="/data/ebTableTestDataKhbasketSmall.js"></script>
-    <script src="/data/ebTableTestDataKhbasketLarge.js"></script>
+    <!--<script src="/data/ebTableTestDataKhbasketLarge.js"></script>-->
 
     <script>
       'use strict';
@@ -266,6 +266,7 @@
           {name: "KHFrist"},
         ],
         selectionCol: true,
+        sortcolname:'Frist',
         sortmaster: [{col: 2}, {col: 0}], //[{col:1, sortorder:'asc', sortformat:'date-de'},{col:2, sortorder:'desc'}]
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: idx.wnm, grouphead: 'C', groupelem: 'W'}
 
@@ -274,10 +275,17 @@
       $().ready(function () {
         preprocessData(basketTestdataKH);
         grid = $('#grid').ebtable(opts, basketTestdataKH);
+        $('#saveGridStatus').on('click', grid.saveSessionState)
+        $('#loadGridStatus').on('click', function () {
+          var mixopts = _.extend({}, opts, $.fn.ebtable.loadSessionState());
+          grid = $('#grid').ebtable(mixopts, basketTestdataKH).setFilterValues(mixopts.filters);
+        })
       });
     </script>
   </head>
   <body>
     <div id="grid"></div>
+    <button id="saveGridStatus">SaveGridStatus</button>
+    <button id="loadGridStatus">LoadGridStatus</button>
   </body>
 </html>

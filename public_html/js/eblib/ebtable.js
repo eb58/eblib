@@ -2,7 +2,8 @@
 
 (function ($) {
   "use strict";
-  var sessionStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-v1.0';
+  var doctitle = $(document).prop('title').replace(' ', '');
+  var sessionStorageKey = 'ebtable-' + doctitle + '-v1.0';
 
   var dlgConfig = function (opts) {
     var t = '\
@@ -41,8 +42,7 @@
 
     var stateUtil = {// saving/loading state
       getStateAsJSON: function () {
-        return JSON.stringify({
-          bodyWidth: $(selgridid + '.ebtable').width(),
+        var stateGeneral = {
           rowsPerPage: myopts.rowsPerPage,
           colorderByName: myopts.colorder.map(function (idx) {
             return myopts.columns[idx].name;
@@ -51,9 +51,14 @@
             if (o.invisible && !o.technical)
               acc.push(o.name);
             return acc;
-          }, []),
-          colwidths: util.getColWidths()
-        });
+          }, [])
+        };
+        var stateWidth = {
+          bodyWidth: $(selgridid + '.ebtable').width(),
+          colwidths:  util.getColWidths()
+        };
+        var state = _.extend({}, stateGeneral, myopts.flags.colsResizable ? stateWidth : {})
+        return JSON.stringify(state);
       },
       saveState: function saveState() {
         localStorage[localStorageKey] = stateUtil.getStateAsJSON();
@@ -76,11 +81,15 @@
           if (!_.contains(state.colorderByName, coldef.name))
             myopts.colorder.push(idx);
         });
-        myopts.bodyWidth = state.bodyWidth;
-        state.colwidths && _.isArray(state.colwidths) && state.colwidths.forEach(function(col){
-          var coldef = util.colDefFromName(col.name);
-          coldef.width = col.width + 'px';
-        });
+        if (myopts.flags.colsResizable) {
+          myopts.bodyWidth = state.bodyWidth;
+          state.colwidths && _.isArray(state.colwidths) && state.colwidths.forEach(function (col) {
+            var coldef = util.colDefFromName(col.name);
+            if (coldef) {
+              coldef.width = col.width + 'px';
+            }
+          });
+        }
         state.invisibleColnames.forEach(function (colname) {
           var n = util.colIdxFromName(colname);
           if (n >= 0) {
@@ -412,11 +421,12 @@
     var gridid = this[0].id;
     var self = this;
     var selgridid = '#' + gridid + ' ';
-    var localStorageKey = 'ebtable-' + $(document).prop('title').replace(' ', '') + '-' + gridid + '-v1.0';
+    var localStorageKey = 'ebtable-' + doctitle + '-' + gridid + '-v1.0';
     var myopts = $.extend({}, defopts, opts);
     var origData = mx(data, myopts.groupdefs);
     myopts.openGroups.forEach(function (gid) {
-      origData.groupsdata[gid].isOpen = true;
+      if (origData.groupsdata[gid])
+        origData.groupsdata[gid].isOpen = true;
     });
     var tblData = origData;
     var pageCurMax = Math.floor(Math.max(0, origData.length - 1) / myopts.rowsPerPage);
@@ -458,7 +468,7 @@
           </div>\n\
           <div class='ctrl'>\n\
             <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
-            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content' hidden><%= addInfo %></div>\n\
+            <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content'><%= addInfo %></div>\n\
             <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
           </div>\n\
         </div>");
@@ -469,8 +479,8 @@
         configBtn: configBtn(),
         clearFilter: clearFilterBtn(),
         browseBtns: pageBrowseCtrl(),
-        info: ctrlInfo(),
-        addInfo: ctrlAddInfo(),
+        info: '', //ctrlInfo(),
+        addInfo: '', //ctrlAddInfo(),
         bodyWidth: myopts.bodyWidth,
         bodyHeight: myopts.bodyHeight,
         tblClass: myopts.flags.colsResizable ? 'class="ebtablefix"' : ''
@@ -503,7 +513,7 @@
             fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip, filter: coldef.filter});
           }
           var thwidth = coldef.width ? 'width:' + coldef.width + ';' : '';
-          var thstyle = coldef.css || coldef.width ? ' style="' + thwidth + ' ' + (coldef.css?coldef.css:'') +  '"' : '';
+          var thstyle = coldef.css || coldef.width ? ' style="' + thwidth + ' ' + (coldef.css ? coldef.css : '') + '"' : '';
           var hdrTemplate = '\
             <th id="<%=colid%>"<%=thstyle%> >\n\
               <div style="display:inline-flex">\n\
@@ -618,9 +628,10 @@
         $(selgridid + 'thead tr').html(tableHead());
         initHeaderActions();
       }
+      var addInfo = ctrlAddInfo();
       $(selgridid + '.ebtable').width(myopts.bodyWidth);
       $(selgridid + '#ctrlInfo').html(ctrlInfo());
-      $(selgridid + '#ctrlAddInfo').html(ctrlAddInfo());
+      $(selgridid + '#ctrlAddInfo').toggle(!!addInfo).html(addInfo);
       $(selgridid + '#data tbody').html(tableData(pageCur));
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectionFcts.selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
@@ -688,9 +699,9 @@
               return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
             });
             myopts.saveState && myopts.saveState();
-            var filters = self.getFilterValues();
+            //var filters = self.getFilterValues();
             redraw(pageCur, true);
-            self.setFilterValues(filters);
+            //self.setFilterValues(filters);
           }
         };
         dlgConfig(dlgopts);
@@ -841,7 +852,10 @@
 
   $.fn.ebtable.loadSessionState = function () {
     var x = sessionStorage[sessionStorageKey];
-    return x ? JSON.parse(x) : {};
+    return x ? JSON.parse(x) : null;
+  };
+  $.fn.ebtable.removeSessionState = function () {
+    delete sessionStorage[sessionStorageKey];
   };
 
 })(jQuery);

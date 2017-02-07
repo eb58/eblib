@@ -42,18 +42,19 @@
 
       var opts = {
         debug: true,
+        bodyWidth: '700px',
         flags: {
           clearFilter: true,
           colsResizable: true,
         },
         columns: [
           {name: "Tierart", match: 'contains', sortorder: 'desc', valuelist: ['', 'Karpfen', 'Forelle']},
-          {name: "Datum", sortformat: 'date-de', width:'150px', css: 'text-align: center'},
-          {name: "Name" },
+          {name: "Datum", sortformat: 'date-de', width: '150px', css: 'text-align: center'},
+          {name: "Name"},
           {name: "Flag", css: 'text-align: left'}
         ],
         sortcolname: 'Tierart',
-        selectionCol: {singleSelection: true},
+        selectionCol: true,
         //lang:'en'
       };
       var grid;

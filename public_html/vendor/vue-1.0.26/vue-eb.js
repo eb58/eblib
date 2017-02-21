@@ -5,7 +5,7 @@ Vue.directive('datepicker', {
     var vm = this.vm;
     var key = this.expression;
     var opts = _.extend({}, datepickerOptions, {
-      showOn: 'both', // --> 'focus' and 'button'
+      showOn: 'button', // --> --> 'focus', 'button' or 'both'
       onClose: function (date) {
         var getFullDate = function (date) { // 1.3.58 -> 01.03.1958 | 1.3.1958 -> 01.03.1958
           var arr = date.split('.');
@@ -27,6 +27,17 @@ Vue.directive('datepicker', {
       }
     });
     $(this.el).datepicker(opts);
+    $(this.el)
+            .on('keyup', function (evt) {
+              evt.keyCode===13 && opts.onClose(evt.target.value);
+            })
+            .on('blur', function (evt) {
+              opts.onClose(evt.target.value);
+            })
+            .on('focus', function (evt) {
+              $(evt.target).select();
+            });
+
   },
   update: function (val) {
     $(this.el).datepicker('setDate', val);
@@ -37,9 +48,7 @@ Vue.directive('selectmenu', {
   bind: function () {
     var vm = this.vm;
     var key = this.expression;
-    $(this.el).selectmenu({change: function (evt, ui) {
-        vm.$set(key, ui.item.value);
-      }});
+    $(this.el).selectmenu({change: function (evt, ui) {vm.$set(key, ui.item.value);}});
   },
   update: function (val) {
     $(this.el).selectmenu().val(val).selectmenu('refresh');
@@ -50,9 +59,7 @@ Vue.directive('radio', {
   bind: function () {
     var vm = this.vm;
     var key = this.expression;
-    $(this.el).checkboxradio().on('change', function (evt, ui) {
-      vm.$set(key, evt.target.id);
-    });
+    $(this.el).checkboxradio().on('change', function (evt, ui) {vm.$set(key, evt.target.id);});
   },
   update: function (val) {
     $(this.el).prop("checked", $(this.el).val() === val).checkboxradio().checkboxradio("refresh");

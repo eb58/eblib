@@ -32,14 +32,14 @@
       });
     } else if ($('textarea', this).length) {
       var $ta = $('textarea', this);
-      $ta.val(data[key], this).off().on('keyup', function () {
+      $ta.val(data[key], this).on('keyup', function () {
         data[key] = $ta.val();
         console.log('textarea changed ' + id, data[key], data);
       });
       this.setTextAreaCounter();
     } else if ($('.ebselect', this).length) {
       var $sel = $('input:checkbox', this);
-      if(data[key] ) data[key].forEach(function (v) {
+      data[key] && data[key].forEach(function (v) {
         if (_.isNumber(v)) {
           $($sel[v]).prop('checked', true);
         } else {

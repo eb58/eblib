@@ -1,9 +1,9 @@
 /* global _,jQuery,mx *//* jshint multistr: true */ /* jshint expr: true */
-
 (function ($) {
   "use strict";
   var doctitle = $(document).prop('title').replace(' ', '');
   var sessionStorageKey = 'ebtable-' + doctitle + '-v1.0';
+  var suppressSorting = 0;
 
   var dlgConfig = function (opts) {
     var t = '\
@@ -55,7 +55,7 @@
         };
         var stateWidth = {
           bodyWidth: $(selgridid + '.ebtable').width(),
-          colwidths:  util.getColWidths()
+          colwidths: util.getColWidths()
         };
         var state = _.extend({}, stateGeneral, myopts.flags.colsResizable ? stateWidth : {})
         return JSON.stringify(state);
@@ -221,6 +221,7 @@
           $(selgridid + '#check' + rowNr).prop('checked', b);
         }
         myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData);
+        $(selgridid + '#ctrlInfo').html(ctrlInfo());
       },
       selectRows: function selectRows(event) { // select row
         util.log('selectRows', event);
@@ -298,7 +299,7 @@
       },
       sorting: function sorting(event) { // sorting
         var colid = event.currentTarget.id;
-        if (colid && myopts.flags.withsorting) {
+        if ( !suppressSorting && colid && myopts.flags.withsorting) {
           selectionFcts.deselectAllRows();
           myopts.sortcolname = util.colNameFromId(colid);
           sortingFcts.sortToggle();
@@ -310,6 +311,7 @@
             redraw(pageCur);
           }
         }
+        suppressSorting = false;
       },
       doSort: function doSort() { // sorting
         if (myopts.sortcolname) {
@@ -598,11 +600,13 @@
     }
 
     function ctrlInfo() {
+      var cntSel = selectionFcts.getSelectedRows().length;
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
       var filtered = origData.length === tblData.length ? '' : _.template(util.translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
-      var templ = _.template(util.translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%= filtered %>"));
-      var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered});
+      var cntSelected = (!cntSel || !myopts.selectionCol || myopts.selectionCol.singleSelection) ? '': _.template(util.translate('(<%=len%> ausgewählt)'))({len: cntSel });
+      var templ = _.template(util.translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%=filtered%> <%=cntsel%>"));
+      var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered, cntsel:cntSelected});
       return label;
     }
 
@@ -658,7 +662,10 @@
         $(selgridid + '.ebtable th').slice(myopts.selectionCol ? 1 : 0).resizable({
           handles: 'e',
           minWidth: 20,
-          stop: myopts.saveState
+          stop: function(){ 
+            suppressSorting = true;
+            myopts.saveState();
+          }
         });
       }
     }
@@ -699,7 +706,7 @@
               return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
             });
             myopts.saveState && myopts.saveState();
-            myopts.bodyWidth = $(window).width()-20;
+            myopts.bodyWidth = Math.min(myopts.bodyWidth, $(window).width() - 20);
             //var filters = self.getFilterValues();
             redraw(pageCur, true);
             //self.setFilterValues(filters);
@@ -725,6 +732,7 @@
       });
       $(selgridid + '#clearFilterBtn').button().off().on('click', function () {
         $(selgridid + 'thead input[type=text]').val('');
+        myopts.reloadData && myopts.reloadData()
         filteringFcts.filtering();
       });
       $(selgridid + ' table tbody tr').off().on('click', function () {

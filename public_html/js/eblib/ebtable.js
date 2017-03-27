@@ -3,7 +3,7 @@
   "use strict";
   var doctitle = $(document).prop('title').replace(' ', '');
   var sessionStorageKey = 'ebtable-' + doctitle + '-v1.0';
-  var suppressSorting = 0;
+  var suppressSorting = false;
 
   var dlgConfig = function (opts) {
     var t = '\
@@ -299,7 +299,7 @@
       },
       sorting: function sorting(event) { // sorting
         var colid = event.currentTarget.id;
-        if ( !suppressSorting && colid && myopts.flags.withsorting) {
+        if (!suppressSorting && colid && myopts.flags.withsorting) {
           selectionFcts.deselectAllRows();
           myopts.sortcolname = util.colNameFromId(colid);
           sortingFcts.sortToggle();
@@ -311,7 +311,6 @@
             redraw(pageCur);
           }
         }
-        suppressSorting = false;
       },
       doSort: function doSort() { // sorting
         if (myopts.sortcolname) {
@@ -604,9 +603,9 @@
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
       var filtered = origData.length === tblData.length ? '' : _.template(util.translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
-      var cntSelected = (!cntSel || !myopts.selectionCol || myopts.selectionCol.singleSelection) ? '': _.template(util.translate('(<%=len%> ausgewählt)'))({len: cntSel });
+      var cntSelected = (!cntSel || !myopts.selectionCol || myopts.selectionCol.singleSelection) ? '' : _.template(util.translate('(<%=len%> ausgewählt)'))({len: cntSel});
       var templ = _.template(util.translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%=filtered%> <%=cntsel%>"));
-      var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered, cntsel:cntSelected});
+      var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered, cntsel: cntSelected});
       return label;
     }
 
@@ -662,9 +661,12 @@
         $(selgridid + '.ebtable th').slice(myopts.selectionCol ? 1 : 0).resizable({
           handles: 'e',
           minWidth: 20,
-          stop: function(){ 
+          stop: function () {
             suppressSorting = true;
             myopts.saveState();
+            setTimeout(function () {
+              suppressSorting = false;
+            }, 500);
           }
         });
       }

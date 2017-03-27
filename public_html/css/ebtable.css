@@ -37,7 +37,7 @@
 /* resize handle for table */
 .ebtable>div.ui-resizable-e { cursor: e-resize; width: 15px;  right: -20px; }
 /* resize handle for head of columns */
-.ebtable #data th .ui-resizable-e { cursor:col-resize; width:6px; height: 100%;}
+.ebtable #data th .ui-resizable-e { cursor:col-resize; width:10px; height: 100%;}
 
 /* ConfigDlg */
 .ebtableSelectable { list-style-type: none; padding: 0px; width: 100%; }

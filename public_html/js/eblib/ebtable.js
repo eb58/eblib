@@ -706,7 +706,7 @@
               return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
             });
             myopts.saveState && myopts.saveState();
-            myopts.bodyWidth = Math.min(myopts.bodyWidth, $(window).width() - 20);
+            myopts.bodyWidth = Math.min(myopts.bodyWidth || $(window).width() - 20, $(window).width() - 20);
             //var filters = self.getFilterValues();
             redraw(pageCur, true);
             //self.setFilterValues(filters);

@@ -16,8 +16,8 @@
 
       .textfield{ margin: 15px 1px 15px 1px; width:99%;}
 
-      .ui-dialog-content label { display: inline-block; vertical-align: baseline; width: 80px;  margin: 5px 2px; font-weight: bold}
-      .ui-dialog-content input[type=text] { display: inline-block; vertical-align: baseline; width: 550px; margin: 5px 2px;}
+      #dlgHimi.ui-dialog-content label { display: inline-block; vertical-align: baseline; width: 80px;  margin: 5px 2px; font-weight: bold}
+      #dlgHimi.ui-dialog-content input[type=text] { display: inline-block; vertical-align: baseline; width: 550px; margin: 5px 2px;}
 
       .ui-selectmenu-button {width:300px;}
       .ui-selectmenu-menu {height:250px; overflow:auto}
@@ -76,7 +76,6 @@
     <script src='/data/himilists.js'></script>
     <script src='/data/himidata.js'></script>
     <script>
-
       var dialogName = 'himis';
       var setOrderParameter = function () {
         return true;
@@ -87,9 +86,7 @@
       };
 
       function getIcdCodeFromNumber(code) {
-        var x = _.find(icdlist, function (o) {
-          return o[2] === code;
-        });
+        var x = _.find(icdlist, function (o) {return o[2] === code;});
         return x ? {id: x[0], text: x[1]} : null;
       }
 
@@ -99,44 +96,41 @@
         $(o).parent().find('.cnt').text('(' + bc + '/' + maxByte + ')');
       }
 
-      var
-        himis,
-        icds,
-        acthimirow,
-        actqasrow,
-        readonly = false,
-        isSFB = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       answs = isSFB ? answs : _.reject(answs, function (o) {
         return o['answer-number'] === '4';
       });
 
-      var deliveryLeistungserbringer = _.filter(delivery, function (o) {
-        return o.flags & 1;
-      });
-      var deliverySanitaetshaus = _.filter(delivery, function (o) {
-        return o.flags & 2;
-      });
-      var deliveryAuftraggeber = _.filter(delivery, function (o) {
-        return o.flags & 4;
-      });
+      var deliveryLeistungserbringer = _.filter( delivery, function(o){ return o.flags & 1; } );
+      var deliverySanitaetshaus      = _.filter( delivery, function(o){ return o.flags & 2; } );
+      var deliveryAuftraggeber       = _.filter( delivery, function(o){ return o.flags & 4; } );
 
       var himis, icds, acthimirow, actqasrow;
       var readonly = false; // 
-      var isSFB = false; // parseInt(parent.$('input:hidden[name=IsSFBProduct]').val()) || 0;
+      var isSFB = true; // parseInt(parent.$('input:hidden[name=IsSFBProduct]').val()) || 0;
 
-      answs = isSFB ? answs : _.reject(answs, function (o) {
-        return o['answer-number'] === '4';
-      });
-      var answsQas = _.filter(answs, function (o) {
-        return o.applydlg & 1 || o['answer-id'] === null;
-      });
-      var answsHimi = _.filter(answs, function (o) {
-        return o.applydlg & 2 || o['answer-id'] === null;
-      });
-      var answsAuftrag = _.filter(answs, function (o) {
-        return o.applydlg & 4 || o['answer-id'] === null;
-      });
+      answs = isSFB ? answs : _.reject( answs, function(o){ return o['answer-number']==='4';});
+      var answsQas     = _.filter( answs, function(o){ return o.applydlg & 1 || o['answer-id']=== null; } );
+      var answsHimi    = _.filter( answs, function(o){ return o.applydlg & 2 || o['answer-id']=== null; } );
+      var answsAuftrag = _.filter( answs, function(o){ return o.applydlg & 4 || o['answer-id']=== null; } );
       var answerAndereAntwortId = _.findWhere(answs, {"answer-number": '3'})["answer-id"];  // '3' === 'Andere Antwort' in answs
 
       // ##########################################################################################################
@@ -231,12 +225,9 @@
         $(".qastbl tr").off().on('mouseenter', function (e) {
           var erlauterungFrage = $('td:nth-child(3)', e.currentTarget).text().trim();
           var begruendungAntwort = $('td:nth-child(4)', e.currentTarget).text().trim();
-          if (erlauterungFrage === '' && begruendungAntwort === '')
-            return;
-          if (erlauterungFrage === 'null')
-            erlauterungFrage = '&lt;keine&gt;';
-          if (begruendungAntwort === 'null')
-            begruendungAntwort = '&lt;keine&gt;';
+          if( erlauterungFrage==='' && begruendungAntwort==='' ) return;
+          if( erlauterungFrage==='null') erlauterungFrage='&lt;keine&gt;';
+          if( begruendungAntwort==='null') begruendungAntwort='&lt;keine&gt;';
           var t = _.template("<b>Erläuterung Frage:</b><br><\%=b1%><br><b>Begründung Antwort:</b><br><\%=b2%>")
             ({
               b1: erlauterungFrage,
@@ -287,9 +278,8 @@
       function initIcdTable(icds) {
         for (var i = 1; i <= 5; i++) {
           var icd = icds[i - 1] || {};
-          var code = $($('#icdcode' + i)).val().trim().toUpperCase();
           $('#icdcode' + i).val(icd['icd-code-number']);
-          $('#icdtext' + i).val(icd['text']).prop('readonly', code !== '' && code !== '---.-');
+          $('#icdtext' + i).val(icd['text']);
           $('#icdsrch' + i).toggle(!icd.digital);
         }
         initActionsForIcdlist();
@@ -388,20 +378,20 @@
           $.confirm('Frage', 'Sind Sie sicher, dass Sie die Diagnose löschen wollen?', function () {
             var n = event.target.id.replace('icdtrash', '') - 1;
             icds.splice(n, 1);
-            icds.push({'icd-code-id': null, 'icd-code-number': null, digital: false});
+            icds.push({'icd-code-id': null, 'icd-code-number': null, text:  icds.length ===0 && isSFB? 'Hilfsmitteldiagnose':'', digital: false});
             initIcdTable(icds);
           });
         });
         $('#diagnosen .ui-icon-search').on('click', function (event) {
           var n = event.target.id.replace('icdsrch', '');
           var opts = {icdCode: $('#icdcode' + n).val()};
-          dlgIcd(icddata, function (code, text, id) {
+          dlgIcd(icdlist, function (code, text, id) {
             icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
             icds[n - 1]['icd-code-id'] = id;
             icds[n - 1]['icd-code-number'] = code;
             icds[n - 1]['text'] = code === '---.-' ? $('#icdtext' + n).val() : text;
             $('#icdcode' + n).val(icds[n - 1]['icd-code-number']);
-            $('#icdtext' + n).val(icds[n - 1]['text']).prop('readonly', code !== '---.-');
+            $('#icdtext' + n).val(icds[n - 1]['text']);
             return true;
           }, opts);
         });
@@ -417,15 +407,14 @@
               icds[n - 1]['icd-code-id'] = icdCode.id;
               icds[n - 1]['icd-code-number'] = icdCodeNumber;
               icds[n - 1]['text'] = icdCodeNumber === '---.-' ? $('#icdtext' + n).val() : icdCode.text;
-              $('#icdtext' + n).val(icds[n - 1]['text']).prop('readonly', icdCodeNumber !== '---.-');
+              $('#icdtext' + n).val(icds[n-1]['text']);
             }
           });
           $('#icdtext' + i).on('change', function (event) {
             var n = parseInt(event.target.id.replace('icdtext', ''));
             icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
             icds[n - 1]['text'] = $('#icdtext' + n).val();
-            var code = $('#icdcode' + n).val().trim().toUpperCase();
-            $('#icdtext' + n).prop('readonly', code !== '' && code !== '---.-');
+          
           });
         }
       }
@@ -434,6 +423,7 @@
 
         initHimiTable(data.himis);
         initIcdTable(data.icds);
+
         // Select Auftrags-Antwort
         $('#orderresponse').html(himiutils.selectBox('orderresponseX', answsAuftrag));
         $('#orderresponseX option[value=' + data['global-answer-id'] + ']').attr('selected', true);
@@ -447,6 +437,7 @@
             }
           }
         });
+
         $('#medical-base').val(data['medical-base']);
         $('#anamnesis').val(data['anamnesis']);
         $('#indication').val(data['indication']);
@@ -454,9 +445,8 @@
         $('#suggestion-add').val(data['suggestion-add']);
         $('#suggkeys').html(himiutils.selectBox('suggkeysX', sugg));
         $('#suggkeysX option[value=' + data['suggestion-id'] + ']').attr('selected', true);
-        $('#suggkeysX').selectmenu({change: function (event, ui) {
-            data['suggestion-id'] = sugg[ui.item.index]['himi_suggestion_id'];
-          }});
+        $('#suggkeysX').selectmenu({change: function (event, ui) {data['suggestion-id'] = sugg[ui.item.index]['himi_suggestion_id'];} });
+
         data['delivery-config-ag'] = data['delivery-config-ag'] || deliveryAuftraggeber.himi_delivery_config_id;
         $('#auftraggeber').html(himiutils.selectBox('auftraggeberX', deliveryAuftraggeber));
         $('#auftraggeberX option[value=' + data['delivery-config-ag'] + ']').attr('selected', true);
@@ -466,6 +456,7 @@
             data['delivery-config-ag'] = _.findWhere(delivery, {'himi_delivery_config_text': selval})['himi_delivery_config_id'];
           }
         });
+
         data['delivery-config-le'] = data['delivery-config-le'] || deliveryLeistungserbringer.himi_delivery_config_id;
         $('#leistungserbringer').html(himiutils.selectBox('leistungserbringerX', deliveryLeistungserbringer));
         $('#leistungserbringerX option[value=' + data['delivery-config-le'] + ']').attr('selected', true);
@@ -475,6 +466,7 @@
             data['delivery-config-le'] = _.findWhere(delivery, {'himi_delivery_config_text': selval})['himi_delivery_config_id'];
           }
         });
+
         data['delivery-config-sa'] = data['delivery-config-sa'] || deliverySanitaetshaus.himi_delivery_config_id;
         $('#sanitaetshaus').html(himiutils.selectBox('sanitaetshausX', deliverySanitaetshaus));
         $('#sanitaetshausX option[value=' + data['delivery-config-sa'] + ']').attr('selected', true);
@@ -484,6 +476,7 @@
             data['delivery-config-sa'] = _.findWhere(delivery, {'himi_delivery_config_text': selval})['himi_delivery_config_id'];
           }
         });
+
         // isSFB
         if (isSFB && !$('#icdcode1').val() && !$('#icdtext1').val()) {
           $('#icdtext1').val('Hilfsmitteldiagnose');
@@ -507,6 +500,7 @@
               himis[acthimirow]['text'] = $('#dlgHimi input#himiname').val();
               himis[acthimirow]['number'] = $('#dlgHimi input#himinumber').val();
               himis[acthimirow]['answer-id'] = parseInt($('#dlgHimi :selected').val()) || null;
+
               delete himis[acthimirow].isnew;
               initHimiTable(himis);
               $(this).dialog("close");
@@ -518,9 +512,7 @@
         });
         if (readonly) {
           $("input").prop('disabled', true);
-          $("textarea").prop('disabled', false).prop('readonly', true).on('keydown', function (evt) {
-            evt.preventDefault();
-          });
+          $("textarea").prop('disabled', false).prop('readonly', true).on('keydown', function(evt){ evt.preventDefault(); } );
           $('option:not(:selected)').attr('disabled', true);
           $('#diagnosen td:nth-child(1), #diagnosen td:nth-child(4), #diagnosen td:nth-child(5)').hide();
           $('#orderresponseX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
@@ -528,11 +520,8 @@
           $('#auftraggeberX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
           $('#leistungserbringerX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
           $('#sanitaetshausX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
-          $('h1:contains(*)').each(function (idx, o) {
-            $(o).text($(o).text().replace('(*)', '').replace('*', ''));
-          });
+          $('h1:contains(*)').each( function(idx,o){ $(o).text($(o).text().replace('(*)','').replace('*','')); });
         }
-
 
         $('textarea[maxlen]').on("keyup", function () {
           var maxByte = $(this).attr('maxlen');
@@ -547,18 +536,10 @@
           }
           $(this).parent().find('.cnt').text('(' + bc + '/' + maxByte + ')');
           //console.log($(this), bc, maxByte);
-        }).each(function (idx, o) {
-          setTextAreaCounter(o);
-        });
-        taopts = {title: {text: '', fontSize: '8px', pos: 'bottom'}, maxByte: 1000};
-        $('#medical-base').ebtextarea({text: '', fontSize: '8px', pos: 'bottom', maxByte: 1000});
-        $('#medical-base,#anamnesis,#indication,#evaluation,#suggestion-add').ebtable
-          .on("keyup", function (ev) {
-            data[ev.target.id] = $('#' + ev.target.id).val();
-          })
-          .on('change', function (ev) {
-            data[ev.target.id] = $('#' + ev.target.id).val();
-          });
+        }).each(function (idx, o) {          setTextAreaCounter(o);        });
+        $('#medical-base,#anamnesis,#indication,#evaluation,#suggestion-add')
+            .on("keyup", function (ev) {data[ev.target.id] =  $('#' + ev.target.id).val();})
+            .on('change', function (ev) {data[ev.target.id] =  $('#' + ev.target.id).val();});
       }
 
       function doSave(data) {
@@ -569,9 +550,7 @@
           data: {data: JSON.stringify(data)},
           type: "POST",
           success: function (result) {
-            handleAjaxResult(result, {cbErr: function () {
-                ret = 'ERROR';
-              }, errortitle: 'Fehler beim Speichern'});
+            handleAjaxResult(result, {cbErr:function (){ ret = 'ERROR';}, errortitle:'Fehler beim Speichern'} );
           },
           error: function (request, status, error) {
             console.log(request, status, error);
@@ -585,26 +564,28 @@
         top.DialogID = "himi";
         $(".positive-integer").numeric({decimal: false, negative: false});
         himis = result.data.himis;
-        icds = result.data.icds = result.data.icds.filter(function (o) {
-          return !!o['icd-code-id'];
-        });
+        icds = result.data.icds = result.data.icds.filter( function(o){ return !!o['icd-code-id']; } );
+              
         if (isSFB) {  // initialisiere digitale QAS mit Vorbelegung
           himis.forEach(function (himi) {
             himi.qas.forEach(function (qa) {
               if (!qa["answer-id"]) {
                 qa["answer-id"] = answerAndereAntwortId;
                 qa["answer-number"] = '3';
-                qa["motivation-answer"] = 'Siehe Beurteilung';
+                qa["motivation-answer"] = '';
               }
             });
           });
         }
 
         initDialog(result.data);
+
         setOrderParameter = function () {
           console.log('setOrderParameter');
           result.data.himis = himis;
-          result.data.icds = _.compact(icds);
+                result.data.icds = _.compact(icds).filter( function(o){ 
+                  return !!o['icd-code-id'];
+                });
           return doSave(result.data);
         };
       });

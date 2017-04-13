@@ -95,24 +95,24 @@ var result = {
         "text": "Legionellose ohne Pneumonie [Pontiac-Fieber]",
         "digital": false
       },
-      {
-        "icd-code-id": 141968,
-        "icd-code-number": "A00.9",
-        "text": null,
-        "digital": false
-      },
-      {
-        "icd-code-id": 141968,
-        "icd-code-number": "A00.9",
-        "text": "xxx",
-        "digital": false
-      },
-      {
-        "icd-code-id": null,
-        "icd-code-number": null,
-        "text": "Vortäuscheritis",
-        "digital": false
-      }
+//      {
+//        "icd-code-id": 141968,
+//        "icd-code-number": "A00.9",
+//        "text": null,
+//        "digital": false
+//      },
+//      {
+//        "icd-code-id": 141968,
+//        "icd-code-number": "A00.9",
+//        "text": "xxx",
+//        "digital": false
+//      },
+//      {
+//        "icd-code-id": null,
+//        "icd-code-number": null,
+//        "text": "Vortäuscheritis",
+//        "digital": false
+//      }
     ]
   },
   "error": null,

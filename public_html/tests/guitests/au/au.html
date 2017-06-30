@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <title>Hilfsmittel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <link rel="stylesheet" href="/css/ebselect.css">
+    <link rel="stylesheet" href="/css/ebtable.css">
+    <style>
+      * {font-family:Arial; color: black; font-size: 12px;}
+      body{ margin: 20px 20px 20px 20px; }
+      textarea{ width:100%;}
+      textarea[readonly]{ background-color: #e3e0e0; }
+
+    </style>
+    <script src="/vendor/underscore-1.8.3/underscore.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+    <script src="/vendor/numeric.js"></script>
+    <script src="/vendor/moment.min.js"></script>
+    <script src="/js/eblib/ebutils.js"></script>  
+    <script src="/js/eblib/ebdropdown.js"></script>  
+    <script src="/js/eblib/ebtextarea.js"></script>  
+    <script src="/js/eblib/mx.js"></script>  
+    <script src="/js/eblib/ebtable.js"></script>  
+    <script src="/js/eblib/ebbind.js"></script>  
+    <script src='/js/dlgs/dlgIcd.js'></script>
+    <script src='/data/icddata.js'></script>
+    <script src='/data/aulists.js'></script>
+    <script src='/data/audata.js'></script>
+    <!--<script src='./au.js'></script>-->
+    <script>
+
+      var readonly = false;
+      var dialogName = 'au';
+
+      var setOrderParameter = function () {
+        return true;
+      };
+
+      var validateDialogValues = function () {
+        return '';
+      };
+
+      var utils = {
+        statementList: function statementList() {
+          return auListStatement.map(function (o) {
+            return {v: o['au_statement_id'], txt: o['au_statement_text']};
+          })
+        },
+        effortList: function statementList() {
+          return auListEffort.map(function (o) {
+            return {v: o['au_effort_id'], txt: o['au_effort_text']};
+          })
+        },
+        resultList: function resultList() {
+          return [
+            {v: null, txt: 'keine Auswahl'},
+            {v: 1, txt: 'Ja'},
+            {v: 0, txt: 'Nein'},
+          ]
+        }
+      }
+
+      function doSave(data) {
+//        var ret = '';
+//        $.ajax({
+//          url: "/ISmed/ajax/workspace/himi.do?action=save-himi-data&ajax=1",
+//          async: false,
+//          data: {data: JSON.stringify(data)},
+//          type: "POST",
+//          success: function (result) {
+//            handleAjaxResult(result, {cbErr: function () {
+//                ret = 'ERROR';
+//              }, errortitle: 'Fehler beim Speichern'});
+//          },
+//          error: function (request, status, error) {
+//            console.log(request, status, error);
+//            ret = 'ERROR';
+//          }
+//        });
+//        return ret;
+      }
+
+      function initDialog(data) {
+
+        //initAuTable(data.himis);
+        //initIcdTable(data.icds);
+        var taopts4000 = {title: {text: '', fontSize: '12px', pos: 'top'}, counter: {fontSize: '10px', pos: 'bottom'}, maxByte: 4000};
+        var taopts10000 = {title: {text: '', fontSize: '12px', pos: 'top'}, counter: {fontSize: '10px', pos: 'bottom'}, maxByte: 4000};
+
+        $('#au-since').datepicker(datepickerOptions).ebbind(data);
+        $('#medical-base').ebtextarea(taopts4000).ebbind(data);
+        $('#anamnesis').ebtextarea(taopts10000).ebbind(data);
+        $('#practice').ebtextarea(taopts4000).ebbind(data);
+        $('#profile').ebtextarea(taopts4000).ebbind(data);
+        $('#statement').ebdropdown({}, utils.statementList()).ebbind(data);
+        $('#agency-start-date').datepicker(datepickerOptions).ebbind(data);
+        $('#effort').ebdropdown({}, utils.effortList()).ebbind(data);
+        $('#indication').ebtextarea(taopts10000).ebbind(data);
+        $('#summary').ebtextarea(taopts4000).ebbind(data);
+        $('#rating').ebtextarea(taopts10000).ebbind(data);
+        $('#accordance').ebtextarea(taopts4000).ebbind(data);
+        $('#result').ebdropdown({}, utils.resultList()).ebbind(data);
+
+        if (readonly) {
+          $("input").prop('disabled', true);
+          $("textarea").prop('disabled', false).prop('readonly', true).on('keydown', function (evt) {
+            evt.preventDefault();
+          });
+          //??$('option:not(:selected)').attr('disabled', true);
+          $('#statementX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('#effortX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('#resultX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+
+          $('h1:contains(*)').each(function (idx, o) {
+            $(o).text($(o).text().replace('(*)', '').replace('*', ''));
+          });
+          //$('img.ui-datepicker-trigger').hide();
+        } else {
+          //$('img.ui-datepicker-trigger').show();
+        }
+        $('img.ui-datepicker-trigger').toggle(!readonly);
+      }
+
+
+      $(document).ready(function () {
+        top.DialogID = "au";
+        $(".positive-integer").numeric({decimal: false, negative: false});
+        aus = result.data.aus;
+        icds = result.data.icds = result.data.icds.filter(function (o) {
+          return !!o['icd-code-id'];
+        });
+
+        initDialog(result.data);
+
+        setOrderParameter = function () {
+          console.log('setOrderParameter');
+          result.data.aus = aus;
+          result.data.icds = _.compact(icds).filter(function (o) {
+            return !!o['icd-code-id'];
+          });
+          return doSave(result.data);
+        };
+      });
+    </script>
+
+  </head>
+  <body style="background:#F0F0F0">
+
+
+    <div id='orderattr'>
+
+      <div id='aulist'>
+        <table style='border: none;'>
+          <tr>
+            <td style='border: none;'><h1>AU Fragen:</h1></td>
+            <td style='border: none;'><span id='addAuQuest' class='ui-icon ui-icon-circle-plus'></span></td>
+          </tr>
+        </table>
+        <div id='gridAuQuests'></div>
+      </div>
+
+      <div><h1>Datum                                          </h1> <input id='au-since'></div>
+      <div><h1>Medizinische Unterlagen:(*)                    </h1> <div   id='medical-base'></div></div>
+      <div><h1>Anamnese:(*)                                   </h1> <div   id='anamnesis' ></div></div>
+      <div><h1>Rehabilitations- und Rentenverfahren, GdB, GdS </h1> <div   id='practice'></div></div>
+      <div><h1>Anforderungsprofil der Bezugstätigkeit(*)      </h1> <div   id='profile'></div></div>
+      <div><h1>Nach Angaben:                                  </h1> <div   id='statement'></div></div>
+      <div><h1>Bei der Arbeitsagentur in Vermittlung seit:    </h1> <input id='agency-start-date'></div>
+      <div><h1>Zeitlicher Vermittlungsaufwand:                </h1> <div   id='effort'></div></div>
+      <div><h1>Befund:(*)                                     </h1> <div   id='indication'></div></div>
+
+      <div id='diagnosen'>
+        <h1>Diagnosen:</h1>
+        <table>
+          <tbody>
+            <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icdsrch1' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash1' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icdsrch2' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash2' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icdsrch3' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash3' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icdsrch4' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash4' class='ui-icon ui-icon-trash'></span></td></tr>
+            <tr><td> </td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icdsrch5' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash5' class='ui-icon ui-icon-trash'></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div><h1>Zusammenfassung:                                 </h1> <div   id='summary'></div></div>
+      <div><h1>Sozialmedizinische Beurteilung der AU:           </h1> <div   id='rating'></div></div>
+      <div><h1>Übereinstimmung von Leistungsvermögen mit Anforderungsprofil 
+          der zuletzt ausgeübten/maßgeblichen Tätigkeit'        </h1> <div   id='accordance'></div></div>
+      <div><h1>Ergebnis                                         </h1> <div   id='result'></div></div>
+      <div><h1>Erledigungszeit in Minuten                       </h1> <input id='duration' type='text'></div>
+      <div><h1>Rüstzeit in Minuten                              </h1> <input id='setup-time' type='text'></div>
+      <div><h1>Begutachtungsdatum                               </h1> <input id='expertise-date'></div>
+      <div><h1> Gefährdung/Minderung der Erwerbsfähigkeit       </h1> <input id='au-reduction'></div>
+      <div><h1>Sozialmedizinische Empfehlung                    </h1> <input id='au-suggestion'></div>
+
+      <!--    
+      
+          'au-reduction': 10, //  Gefährdung/Minderung der Erwerbsfähigkeit
+          'au-suggestion': 13, //Sozialmedizinische Empfehlung
+      -->  
+    </div>
+
+
+    <div id='versandeinstellungen'>
+      <h1>Versandeinstellungen:</h1>
+      <table>
+        <tr><td>Auftraggeber:     </td><td><div id='auftraggeber'>       </div></td>
+        <tr><td>Leistungserbringer</td><td><div id='leistungserbringer'> </div></td>
+        <tr><td>Sanitätshaus      </td><td><div id='sanitaetshaus'>      </div></td>
+      </table>
+    </div>
+
+  </body>
+</html>

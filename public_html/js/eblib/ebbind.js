@@ -1,5 +1,6 @@
 /* global _ ,jQuery*/
-(function ($) { "use strict";
+(function ($) {
+  "use strict";
   $.fn.ebbind = function (data, key) {
     var id = this[0].id;
     var type = this[0].type;
@@ -21,8 +22,8 @@
       });
     } else if ($('select', this).length) {
       this.setSelectedValue(data[key]).off().on("selectmenuchange", function () {
-        var v = parseInt( self.getSelectedValue() );
-        data[key] = v || self.getSelectedValue();
+        var v = parseInt(self.getSelectedValue());
+        data[key] = !_.isNaN(v) ? v : self.getSelectedValue();
         console.log('select changed ' + id, data[key], data);
       });
     } else if ($('input:radio', this).length) {

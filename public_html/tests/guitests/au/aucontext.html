@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <title>Zusammenhangsfrage</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <link rel="stylesheet" href="/css/ebselect.css">
+    <link rel="stylesheet" href="/css/ebtable.css">
+    <style>
+      * {font-family:Arial; color: black; font-size: 12px;}
+      body{ margin: 20px 20px 20px 20px; }
+    </style>
+    <script src="/vendor/underscore-1.8.3/underscore.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+    <script src="/vendor/numeric.js"></script>
+    <script src="/vendor/moment.min.js"></script>
+    <script src="/js/eblib/ebutils.js"></script>  
+    <script src="/js/eblib/ebdropdown.js"></script>  
+    <script src="/js/eblib/ebtextarea.js"></script>  
+    <script src="/js/eblib/mx.js"></script>  
+    <script src="/js/eblib/ebtable.js"></script>  
+    <script src="/js/eblib/ebbind.js"></script>  
+    <script src='/js/dlgs/dlgIcd.js'></script>
+    <script src='/data/icddata.js'></script>
+    <script src='/data/aulists.js'></script>
+    <script src='/data/audata.js'></script>
+    <!--<script src='./au.js'></script>-->
+    <script>
+
+      ///////////////////////////////////////////////////
+      var dialogName = 'aucontext';
+
+      var setOrderParameter = function () {
+        return true;
+      };
+      setOrderParameter = function () {
+        console.log('setOrderParameter');
+        result.data.aus = aus;
+        result.data.icds = _.compact(icds).filter(function (o) {
+          return !!o['icd-code-id'];
+        });
+        return doSave(result.data);
+      };
+
+      var validateDialogValues = function () {
+        return '';
+      };
+
+      ///////////////////////////////////////////////////
+    </script>
+
+  </head>
+  <body style="background:#F0F0F0">
+    <div><h1>Diagnosen zur Zusammenhängigkeit von der Kasse gefragt:</h1> </div>
+    <div id="gridDiag"></div>
+    <div><h1>Vorangegangene Diagnosen:</h1></div>
+    <div id="gridDiagPreceding"></div>
+  </body>
+</html>

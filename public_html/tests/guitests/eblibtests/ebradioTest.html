@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TODO supply a title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <link rel="stylesheet" href="/css/ebselect.css">
+    <style>
+      * {font-family:Arial;color: black;font-size: 12px; }
+      img.ui-datepicker-trigger{ vertical-align: bottom  } 
+    </style>
+    <script src="/vendor/underscore-1.8.3/underscore.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+    <script src="/js/polyfills.js"></script>
+    <script src="/js/eblib/ebutils.js"></script>
+    <script src="/js/eblib/ebbind.js"></script>
+    <script src="/js/eblib/ebradio.js"></script>
+    <script>
+      var data = {
+        choice1: 2,
+        choice2: 3,
+      };
+
+      var radios = [
+        {v: 1, text: 'An'},
+        {v: 2, text: 'Aus'},
+      ];
+
+      $(document).ready(function () {
+        $('#choice1').ebradio({}, radios).ebbind(data);
+        $('#choice2').ebradio({}, radios).ebbind(data);
+      })
+    </script>
+  </head>
+  <body>
+    <table>
+      <tr><td>Auswahl1:</td><td><div id='choice1'></div></td></tr>
+      <tr><td>Auswahl2:</td><td><div id='choice2'></div></td></tr>
+    </table>
+  </body>
+</html>

@@ -1,4 +1,6 @@
 var module = (function () {
+  'use strict';
+
   var aaa = 's';
 
   function f1() {    console.log('f1');  }

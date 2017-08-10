@@ -10,23 +10,24 @@ var ebutils = (function () {
     return (parseFloat((bytes / Math.pow(k, i)).toFixed(decimals || 2)) + ' ' + sizes[i]).replace('.', ',');
   }
 
-  function byteCount(str) {
     function fixedCharCodeAt(str, idx) {
-      idx = idx || 0;
-      var code = str.charCodeAt(idx);
-      if (0xD800 <= code && code <= 0xDBFF) { // High surrogate (could change last hex to 0xDB7F to treat high private surrogates as single characters)
-        var hi = code;
-        var low = str.charCodeAt(idx + 1);
-        if (isNaN(low))
-          throw 'Kein g\u00fcltiges Schriftzeichen oder Speicherfehler!';
-        return ((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000;
+    idx = idx || 0;
+    var code = str.charCodeAt(idx);
+    if (0xD800 <= code && code <= 0xDBFF) { // High surrogate (could change last hex to 0xDB7F to treat high private surrogates as single characters)
+      var hi = code;
+      var low = str.charCodeAt(idx + 1);
+      if (isNaN(low)) {
+        throw 'Kein g\u00fcltiges Schriftzeichen oder Speicherfehler!';
       }
-      if (0xDC00 <= code && code <= 0xDFFF) { // Low surrogate
-        return false;
-      }
-      return code;
+      return ((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000;
     }
+    if (0xDC00 <= code && code <= 0xDFFF) { // Low surrogate
+      return false;
+    }
+    return code;
+  }
 
+  function byteCount(str) {
     var result = 0;
     for (var n = 0; n < str.length; n++) {
       var charCode = fixedCharCodeAt(str, n);
@@ -49,75 +50,11 @@ var ebutils = (function () {
     return result;
   }
 
-  function getMimetypeByExt(ext) {
-    var extToMimes = {
-      'img': 'image/jpeg',
-      'gif': 'image/gif',
-      'png': 'image/png',
-      'tif': 'image/tif',
-      'tiff': 'image/tiff',
-      'jpg': 'image/jpg',
-      'jepg': 'image/jepg',
-      'pdf': 'application/pdf',
-      'txt': 'text/plain',
-      'doc': 'application/msword',
-      'xls': 'application/msexcel',
-      'docx': 'application/vnd.openxmlformats-officedocument'
-    };
-    return extToMimes[ext] || 'unknown';
-  }
 
+  // API
   return {
     byteCount: byteCount,
-    formatBytes: formatBytes,
-    getMimeByExt: getMimetypeByExt,
+    formatBytes: formatBytes
   };
 })();
-
-if(typeof $ !== 'undefined')  $.extend({
-  alert: function (title, message) {
-    message = message || '';
-    $("<div id='dlgAlert'></div>").dialog({
-      buttons: {
-        "Ok": function () {
-          $(this).dialog("close");
-        }
-      },
-      close: function () {
-        $(this).remove();
-      },
-      title: title,
-      modal: true,
-      closeText: 'Schlie\u00dfen'
-    }).html('<br>' + message.replace(/\n/g, '<br>'));
-  }
-});
-
-if(typeof $ !== 'undefined') $.extend({
-  confirm: function (title, question, callbackYes, callbackNo) {
-    question = question || '';
-    callbackYes = callbackYes || function () {
-      console.log('$.confirm:please provide callback!');
-    };
-    $("<div id='dlgConfirm'></div>").dialog({
-      buttons: {
-        "Ja": function () {
-          callbackYes && (callbackYes());
-          $(this).dialog("close");
-        },
-        "Nein": function () {
-          callbackNo && (callbackNo());
-          $(this).dialog("close");
-        }
-      },
-      close: function () {
-        $(this).remove();
-      },
-      title: title,
-      modal: true,
-      closeText: 'Schlie\u00dfen'
-    }).html('<br>' + question.replace(/\n/g, '<br>'));
-  }
-});
-
 

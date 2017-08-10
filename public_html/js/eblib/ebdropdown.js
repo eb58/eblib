@@ -3,7 +3,7 @@
   $.fn.ebdropdown = function (opts, values, selected) {
     // values = ['val1', 'val2', 'val3' ];
     // values = [{v:1, txt:'val1'}, {v:2, txt:'val2'} ];
-    if( !this || !this[0] ){
+    if (!this || !this[0]) {
       return;
     }
     var id = this[0].id;
@@ -16,27 +16,32 @@
     };
     var myopts = $.extend({}, defopts, opts);
     var idX = '#' + myopts.id;
-    
-    var setSelectedValue = function (v) {
-      if (v) {
-        var cmp = '' + (v.txt || v.v || v);
-        $(idX + ' option').filter(function (i, o) {
-          if (v.txt){
-            return $(o).text() === v.txt;
-          }else if (v.v){
-            return $(o).val() === v.v;
-          }else{
-            return $(o).text() === cmp || $(o).val() === cmp;
-          }
-        }).prop("selected", "selected");
-        myopts.jqueryui && $(idX).selectmenu().selectmenu('refresh');
-      }
-      return this;
-    };
-    var getSelectedValue = function () {
-      var v = $(idX).val();
-      return v && v !== 'null' ? v : null;
-    };
+
+    var api = {
+      setSelectedValue: function setSelectedValue(v) {
+        if (v !== undefined && v !== null) {
+          var cmp = '' + (v.txt || v.v || v);
+          $(idX + ' option').filter(function (i, o) {
+            if (v.txt) {
+              return $(o).text() === v.txt;
+            } else if (v.v) {
+              return $(o).val() === v.v;
+            } else {
+              return $(o).text() === cmp || $(o).val() === cmp;
+            }
+          }).prop("selected", "selected");
+          myopts.jqueryui && $(idX).selectmenu().selectmenu('refresh');
+        }
+        return this;
+      },
+      getSelectedValue: function getSelectedValue() {
+        var v = $(idX).val();
+        return v && v !== 'null' ? v : null;
+      },
+      disable: function disable(b) {
+        $(idX).selectmenu(b?'disable':'enable');
+      },
+    }
 
     var init = function init(a) {
       var options = _.map(values, function (o) {
@@ -45,8 +50,8 @@
         return '<option' + val + '>' + txt + '</option>';
       }).join('\n');
       var t = _.template('<select id="<%=id%>" name="<%=id%>" size="1"><%= o %> </select>');
-      a.html(t({id: myopts.id, w: myopts.width, o: options}));
-      setSelectedValue(selected);
+      a.html(t({id: myopts.id, o: options}));
+      api.setSelectedValue(selected);
       if (myopts.jqueryui) {
         $(idX).selectmenu().selectmenu(myopts);
         myopts.disabled && $(idX).selectmenu('disable');
@@ -56,8 +61,6 @@
       }
     };
     init(this);
-    this.setSelectedValue = setSelectedValue;
-    this.getSelectedValue = getSelectedValue;
-    return this;
+    return _.extend(this, api);
   };
 })(jQuery);

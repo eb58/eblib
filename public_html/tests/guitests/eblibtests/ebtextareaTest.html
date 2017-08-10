@@ -13,26 +13,34 @@
     <script src="/js/eblib/ebutils.js"></script>
     <script src="/js/eblib/ebtextarea.js"></script>
     <script>
-      
+
       var data = {
-        test3Textarea:'aaa'
+        test3Textarea: '1\n2\n3\n4\n5\n6\n7\n8\n9\n10'
       };
-      
+
       $(document).ready(function () {
-        opts1 = {title: {text: 'Text1', fontSize: '12px', pos: 'top'}, counter: {fontSize: '12px', pos: 'top'}, maxByte: 550};
-        opts2 = {title: {text: 'Text2', fontSize: '12px', pos: 'top'}, maxByte: 30};
-        opts3 = {
-          title: {text: 'Noch ein Test', fontSize: '8px', pos: 'bottom'}, 
-          width:'90%', 
-          height:'300px', 
-          maxByte: 30, 
+        var opts1 = {
+          title: {text: 'Text1', fontSize: '14px', pos: 'top'},
+          counter: {fontSize: '8px', pos: 'top'},
+          maxByte: 550,
+          maxNrOfVisibleRows: 10,
+        };
+        var opts2 = {
+          title: {text: 'Text2', pos: 'top'},
+          counter: {fontSize: '8px', pos: 'top'},
+          maxByte: 30
+        };
+        var opts3 = {
+          title: {text: 'Noch ein Test', fontSize: '8px', pos: 'bottom'},
+          width: '90%',
+          maxByte: 30,
+          maxNrOfVisibleRows: 10,
           //disabled:true
         };
-        opts1 = {title: {text: 'Text1', fontSize: '12px', pos: 'top'}, counter: {fontSize: '12px', pos: 'top'}, maxByte: 550};
         $('#test1Textarea').ebtextarea(opts1);
         $('#test2Textarea').ebtextarea(opts2);
         $('#test3Textarea').ebtextarea(opts3).ebbind(data)
-        $('#btnEnableTextareaField').on('click', function(){
+        $('#btnEnableTextareaField').on('click', function () {
           $('#test3Textarea').ebtextarea().disable(true);
         });
       });

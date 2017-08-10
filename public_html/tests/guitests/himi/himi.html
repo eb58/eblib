@@ -86,7 +86,7 @@
       };
 
       function getIcdCodeFromNumber(code) {
-        var x = _.find(icdlist, function (o) {return o[2] === code;});
+        var x = _.find(icddata, function (o) {return o[2] === code;});
         return x ? {id: x[0], text: x[1]} : null;
       }
 
@@ -385,7 +385,7 @@
         $('#diagnosen .ui-icon-search').on('click', function (event) {
           var n = event.target.id.replace('icdsrch', '');
           var opts = {icdCode: $('#icdcode' + n).val()};
-          dlgIcd(icdlist, function (code, text, id) {
+          dlgIcd(icddata, function (code, text, id) {
             icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
             icds[n - 1]['icd-code-id'] = id;
             icds[n - 1]['icd-code-number'] = code;

@@ -16,6 +16,14 @@ var auListQuests = [
   {'au_question_id': 60, 'qnumber': '99', 'qtext': 'Sonstige Fragestellung 99'}
 ];
 
+var auListAnswers = [
+    {"answer-id": null, "answer-number": '', "answer-text": 'keine Auswahl'},
+    {"answer-id": 0,    "answer-number": "1", "answer-text": "ja"},
+    {"answer-id": 1,    "answer-number": "2", "answer-text": "nein"},
+    {"answer-id": 33,   "answer-number": "3", "answer-text": "Andere Antwort"},
+    {"answer-id": 3,    "answer-number": "4", "answer-text": "Begutachtung empfohlen"}
+];
+
 var auListEffort = [
   {'au_effort_id': 13, 'au_effort_text': '0 bis unter 3 Stunden'},
   {'au_effort_id': 14, 'au_effort_text': '3 bis unter 6 Stunden'},
@@ -42,6 +50,39 @@ var auListSuggestion = [
   {'au_suggestion_id': 15, 'au_suggestion_text': 'Leistungen zur Teilhabe am Arbeitsleben (LTA)'},
   {'au_suggestion_id': 16, 'au_suggestion_text': 'sonstige'}
 ];
+
+var lists = {
+  //   {'au_question_id': 46, 'qnumber': '01', 'qtext': 'Dauer der AU / Besteht Arbeitsunfähigkeit? (Zweifel der Krankenkasse)'},
+
+  questionList: function questionList() {
+    return auListQuests.map(function (o) {
+      return {v: o['au_question_id'], txt: o['qtext']};
+    })
+  },
+  answList: function answList() {
+    return auListAnswers.map(function (o) {
+      return {v: o['answer-id'], txt: o['answer-text']};
+    })
+  },
+  statementList: function statementList() {
+    return auListStatement.map(function (o) {
+      return {v: o['au_statement_id'], txt: o['au_statement_text']};
+    })
+  },
+  effortList: function statementList() {
+    return auListEffort.map(function (o) {
+      return {v: o['au_effort_id'], txt: o['au_effort_text']};
+    })
+  },
+  resultList: function resultList() {
+    return [
+      {v: null, txt: 'keine Auswahl'},
+      {v: 1, txt: 'Ja'},
+      {v: 0, txt: 'Nein'},
+      {v: 2, txt: 'Vielleicht'},
+    ]
+  }
+}
 
 
 

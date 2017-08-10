@@ -1,8 +1,9 @@
 var result = {
   data: {
     'aus': [
+      {'au_question_id': 52, 'qnumber': '07', 'qtext': 'Besteht Arbeitsunfähigkeit? (Zweifel des Arbeitgebers)', explanation: 'Der Arbeitgeber möchte das genauer wissen!!!', 'answer-id': 0},
+      {'au_question_id': 53, 'qnumber': '08', 'qtext': 'Besteht Arbeitsunfähigkeit? (Zweifel des Jobcenters)', explanation: 'Das Jobcenter möchte das genauer wissen.', 'answer-id': 2}, 
     ],
-
     'au-since': '01.01.2017', // Arbeitsunfähig seit
 
     'medical-base': 'Medizinische Unterlagen', // Medizinische Unterlagen
@@ -20,13 +21,12 @@ var result = {
         'icd-code-id': 141968,
         'icd-code-number': 'A48.2',
         'text': 'Legionellose ohne Pneumonie [Pontiac-Fieber]',
-        'digital': false
+        'digital': true
       },
     ],
     'summary': 'Zusammenfassung', //Zusammenfassung
     'rating': 'Sozialmedizinische Beurteilung der AU', // Sozialmedizinische Beurteilung der AU
     'accordance': 'Übereinstimmung von Leistungsvermögen mit Anforderungsprofil der zuletzt ausgeübten/maßgeblichen Tätigkeit',
-
     'result': null, //Ergebnis 0/1
     'duration': 10, // Erledigungszeit in Minuten
     'setup-time': 120, //Rüstzeit in Minuten
@@ -45,3 +45,4 @@ var result = {
   error: null,
   errorCode: null
 };
+

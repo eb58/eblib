@@ -1,9 +1,4 @@
 <!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
 <html>
   <head>
     <title></title>
@@ -13,106 +8,33 @@ and open the template in the editor.
     <link rel="stylesheet" href="/css/ebselect.css">
     <link rel="stylesheet" href="/css/eblist.css">
     <link rel="stylesheet" href="/css/ebtable.css">
+    <link rel="stylesheet" href="/vendor/jQuery-toggles/css/toggles-full.css">
     <style>
       * {font-family:Arial;color: black;font-size: 10px;      }
       body { max-width: 800px; }
-      .container
-   {
-       display: inline-flex;
-   }
-   .slide
-   {
-      float: left;
-   }
     </style>
 
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
     <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="/vendor/jQuery-toggles/toggles.js"></script>
     <script src="/js/eblib/mx.js"></script>
     <script src="/js/eblib/ebtable.js"></script>
     <script>
 
-      var basketTestdata = [
-        ['Wolperdinger', '', 'AAAAAAAAAAA AAAAAAAAAAAAAAAAAA'],
-      ];
-      //#######################################################################
-
-      var opts = {
-        debug: true,
-        columns: [
-          {name: "TierartXXXXXXXXXXXXXX", match: 'contains'},
-          {name: "Überschrift für ein breite Spalte", match: 'contains'},
-          {name: "Überschrift für ein WEITERE Spalte", match: 'contains'}
-        ]
-      };
-      var grid;
       $(document).ready(function () {
-        grid = $('#grid').ebtable(opts, basketTestdata);
+        $('.toggle').toggles({
+          text: {on: 'JA', off: 'NEIN'},
+          on: true, // is the toggle ON on init
+          width: 60, // width used if not set in css
+          height: 20, // height if not set in css
+        });
       });
+
     </script>
 
   </head>
   <body>
-    <div id="grid"></div>
-
-    <div class="ebtable">
-      <div id="data" style="overflow-y:auto;overflow-x:auto; max-height:770px; width:100%">
-        <table>
-          <thead>
-            <tr>
-              <th id="Tierart">
-                <div class='container'>
-                  Tierart
-                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
-                </div>
-                <input type="text" id="Tierart" title="">
-              </th>
-              <th id="Tierart"">
-                <div class='container'>
-                  XXXXXXXXXX
-                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
-                </div>
-                <input type="text" id="Tierart" title="">
-              </th>
-              <th id="Tierart">
-                <div class='container'>
-                  XXXXXXXXXX
-                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
-                </div>
-                <input type="text" id="Tierart" title="">
-              </th>
-              <th id="Tierart">
-                <div class='container'>
-                  XXXXXXXXXX
-                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
-                </div>
-                <input type="text" id="Tierart" title="">
-              </th>
-              <th id="Tierart">
-                <div class='container'>
-                  XXXXXXXXXX
-                  <span class="ui-icon ui-icon-arrow-1-n"></span>
-                </div>
-                <input type="text" id="Tierart" title="">
-              </th>
-              <th id="Tierart">
-                <div class='container'>
-                  XXXXXXXXXX
-                  <span class="ui-icon ui-icon-arrow-1-n slide"></span>
-                </div>
-                <input type="text" id="Tierart" title="">
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Wolperdinger</td><td>Wolperdinger</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
+    <div class="toggle toggle-modern"></div>
   </body>
 </html>

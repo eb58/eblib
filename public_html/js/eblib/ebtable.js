@@ -166,13 +166,13 @@
           coldef.sortorder = coldef.sortorder || 'asc';
         });
         if (origData[0] && origData[0].length !== myopts.columns.length) {
-          alert('Data definition and column definition don\'t match!');
+          alert('Data definition and column definition don\'t match! ' + origData[0].length + ' ' + myopts.columns.length);
           localStorage[localStorageKey] = '';
           myopts = $.extend({}, defopts, opts);
         }
         var ls = localStorage[localStorageKey];
         if (ls && ls.colorder && ls.colorder.length !== myopts.columns.length) {
-          alert('Column definition and LocalStorage don\'t match!');
+          alert('Column definition and LocalStorage don\'t match!' + ls.colorder.length + ' ' + myopts.columns.length);
           localStorage[localStorageKey] = '';
           myopts = $.extend({}, defopts, opts);
         }
@@ -539,7 +539,7 @@
 
     function tableData(pageNr) {
       if (origData[0] && origData[0].length !== myopts.columns.length) {
-        util.log('Definition and Data dont match!');
+        util.log('Definition and Data dont match!', origData[0].length, myopts.columns.length);
         return '';
       }
 
@@ -768,7 +768,6 @@
       getSelectedRows: selectionFcts.getSelectedRows,
       unselect: selectionFcts.unselect,
       saveSessionState: sessionStateUtil.saveSessionState,
-
       toggleGroupIsOpen: function (groupid) {
         origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
         filteringFcts.filterData();

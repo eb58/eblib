@@ -9,6 +9,7 @@
     <style>
       * {font-family:Arial;color: black;font-size: 12px; }
       img.ui-datepicker-trigger{ vertical-align: bottom  } 
+      table { background-color: #CCCCCC;}
     </style>
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
@@ -23,8 +24,16 @@
     <script src="/js/eblib/ebselect.js"></script>
     <script src="/js/eblib/eblist.js"></script>
     <script>
-      var radios = ['Radio1', 'Radio2', 'Radio3'];
-      var keywords = ['Server1', 'Server2', 'Server3', 'Server4', 'Server5', 'Server6', 'Server7'];
+     var taopts1000 = {title: {}, counter: {}, maxByte: 1000, width:'400px', maxNrOfVisibleRows:10};
+
+      var radios = [
+        {v: 1, text: 'Radio1'},
+        {v: 2, text: 'Radio2'},
+        {v: 3, text: 'Radio3'}
+      ];
+
+
+      var server = ['Server1', 'Server2', 'Server3', 'Server4', 'Server5', 'Server6', 'Server7'];
       var haircolor = ['blond', 'braun', 'rot', 'weiß'];
       var data = {
         usr: 'ebrandl',
@@ -32,9 +41,9 @@
         date: '28.01.2011',
         sec: true,
         srv: 'Server4',
-        txt: 'Das ist ein Test',
-        choice1: 'Radio2',
-        choice2: 'Radio2',
+        txt: 'Das ist ein Test\nDas ist ein Test\nDas ist ein Test\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA',
+        choice1: 1,
+        choice2: 3,
         haircolor1: [2, 3],
         haircolor2: ['blond', 'weiß']
       };
@@ -49,7 +58,7 @@
         } else if ($('select', x).length) {
           $('select', x).selectmenu().val(v).selectmenu('refresh');
         } else if ($('input:radio', x).length) {
-          $('input:radio#' + v, x).prop('checked',true);
+          $('input:radio#' + v, x).prop('checked', true);
           $('input:radio', x).checkboxradio('refresh');
         } else if ($('select', x).length) {
           // TODO
@@ -79,10 +88,10 @@
         $('#pwd').ebbind(vm);
         $('#sec').ebbind(vm);
         $('#date').datepicker(datepickerOptions).ebbind(vm);
-        $('#srv').ebdropdown({}, keywords).ebbind(vm);
+        $('#srv').ebdropdown({width:'400px'}, server).ebbind(vm);
         $('#choice1').ebradio({}, radios).ebbind(vm);
         $('#choice2').ebradio({}, radios).ebbind(vm);
-        $('#txt').ebtextarea({title: {}, maxByte: 30}).ebbind(vm);
+        $('#txt').ebtextarea(taopts1000).ebbind(vm);
         $('#haircolor1').ebselect({values: haircolor}).ebbind(vm);
         $('#haircolor2').ebselect({values: haircolor}).ebbind(vm);
       });

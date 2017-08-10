@@ -5,28 +5,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <style>
+      ul.ui-menu { max-height: 420px !important; }
+    </style>
 
     <script src="/vendor/underscore-1.8.3//underscore.min.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
     <script src="/vendor/jQueryUI-1.12.0/jquery-ui.min.js"></script>
-    <script src="/dist/eblib.js"></script>
+    <script src="/js/polyfills.js"></script>
+    <script src="/js/eblib/ebbind.js"></script>
+    <script src="/js/eblib/ebutils.js"></script>
+    <script src="/js/eblib/ebdropdown.js"></script>
+
     <script>
       var dd1, dd2, dd3;
+      var values1 = ['', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7'];
+      var values2 = [
+        {v: -1, txt: ''},
+        {v: 1, txt: 'Besonderheit1'},
+        {v: 2, txt: 'Besonderheit2'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 1, txt: 'Besonderheit1'},
+        {v: 2, txt: 'Besonderheit2'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 1, txt: 'Besonderheit1'},
+        {v: 2, txt: 'Besonderheit2'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 1, txt: 'Besonderheit1'},
+        {v: 2, txt: 'Besonderheit2'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 1, txt: 'Besonderheit1'},
+        {v: 2, txt: 'Besonderheit2'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+        {v: 3, txt: 'Besonderheit3'},
+        {v: 4, txt: 'Besonderheit4'},
+        {v: 5, txt: 'Besonderheit5'},
+      ];
+      var reasons = [
+        {"id": -1, "text": "", "number": "", "ordertypeid": 0},
+        {"id": 999, "text": "test", "number": "####", "ordertypeid": 0},
+        {"id": 115, "text": "Sonstige Anlässe", "number": "000", "ordertypeid": 0},
+        {"id": 69, "text": "Aus medizinischer Sicht Ende der AU innerhalb von 14 Tagen", "number": "010", "ordertypeid": 0},
+        {"id": 129, "text": "Das Ergebnis entnehmen Sie bitte dem Erläuterungstext", "number": "070", "ordertypeid": 0},
+        {"id": 67, "text": "Sonstige Anlässe in der Einzelfallbegutachtung", "number": "090", "ordertypeid": 0},
+        {"id": 68, "text": "Chronische Erkrankung", "number": "091", "ordertypeid": 0},
+        {"id": 116, "text": "Arbeitsunfähigkeit", "number": "100", "ordertypeid": 0},
+        {"id": 70, "text": "Sicherung des Heilerfolges / Dauer der AU / ohne nähere Angaben", "number": "110", "ordertypeid": 0},
+        {"id": 500, "text": "Petra Doppelte Nummer", "number": "120", "ordertypeid": 0},
+        {"id": 73, "text": "Einleitung von Rehabilitationsmaßnahmen/§51 Abs. 1 SGB V130 erfüllt", "number": "130", "ordertypeid": 0}
+      ];
+
       $(document).ready(function () {
 
-        var values1 = ['', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7'];
+        // Test1
         dd1 = $('#dd1').ebdropdown({width: '400px'}, values1, 'test3');
-        var values2 = [
-          {v: -1, txt: ''},
-          {v: 1, txt: 'Besonderheit1'},
-          {v: 2, txt: 'Besonderheit2'},
-          {v: 3, txt: 'Besonderheit3'},
-          {v: 4, txt: 'Besonderheit4'},
-          {v: 5, txt: 'Besonderheit5'}
-        ];
+
+        // Test2
         var dd2opts = {
-          jqueryui: false,
-          disabled: true,
           width: '400px',
           change: function (evt, ui) {
             console.log('Change', dd2.getSelectedValue());
@@ -34,25 +91,13 @@
         };
         dd2 = $('#dd2').ebdropdown(dd2opts, values2, 4);
         console.log(dd2.getSelectedValue());
-       
-    var reasons = [
-          {"id": -1, "text": "", "number": "", "ordertypeid": 0},
-          {"id": 999, "text": "test", "number": "####", "ordertypeid": 0},
-          {"id": 115, "text": "Sonstige Anlässe", "number": "000", "ordertypeid": 0},
-          {"id": 69, "text": "Aus medizinischer Sicht Ende der AU innerhalb von 14 Tagen", "number": "010", "ordertypeid": 0},
-          {"id": 129, "text": "Das Ergebnis entnehmen Sie bitte dem Erläuterungstext", "number": "070", "ordertypeid": 0},
-          {"id": 67, "text": "Sonstige Anlässe in der Einzelfallbegutachtung", "number": "090", "ordertypeid": 0},
-          {"id": 68, "text": "Chronische Erkrankung", "number": "091", "ordertypeid": 0},
-          {"id": 116, "text": "Arbeitsunfähigkeit", "number": "100", "ordertypeid": 0},
-          {"id": 70, "text": "Sicherung des Heilerfolges / Dauer der AU / ohne nähere Angaben", "number": "110", "ordertypeid": 0},
-          {"id": 500, "text": "Petra Doppelte Nummer", "number": "120", "ordertypeid": 0},
-          {"id": 73, "text": "Einleitung von Rehabilitationsmaßnahmen/§51 Abs. 1 SGB V130 erfüllt", "number": "130", "ordertypeid": 0}
-        ];
-        var reasonsForDD = reasons.map( function(o){ return { v:o.id, txt:o.number + ' ' + o.text };} );
 
+        // Test3
+        var reasonsForDD = reasons.map(function (o) {
+          return {v: o.id, txt: o.number + ' ' + o.text};
+        });
         var dd3opts = {
           id: 'AAA',
-          jqueryui: false,
           disabled: false,
           width: '400px',
           change: function (evt, ui) {
@@ -61,6 +106,14 @@
         };
         dd3 = $('#dd3').ebdropdown(dd3opts, reasonsForDD, 116);
         console.log(dd3.getSelectedValue());
+        dd3.setSelectedValue(500);
+        
+        var b = true;
+        $('#btnDisable').on('click',function(){
+          dd3.disable(b);
+          b = !b;
+          
+        })
       })
     </script>
   </head>
@@ -68,5 +121,6 @@
     <div id="dd1"></div>
     <div id="dd2"></div>
     <div id="dd3"></div>
+    <button id="btnDisable">Toggle</button>
   </body>
 </html>

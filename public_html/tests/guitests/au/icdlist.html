@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <title>Zusammenhangsfrage</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <link rel="stylesheet" href="/css/ebtable.css">
+    <style>
+      * {font-family:Arial; color: black; font-size: 12px;}
+      body{ margin: 20px 20px 20px 20px; background-color: #F9F9F9; }
+    </style>
+    <script src="/vendor/underscore-1.8.3/underscore.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+    <script src="/vendor/numeric.js"></script>
+    <script src="/vendor/moment.min.js"></script>
+
+    <script src='/data/icddata.js'></script>
+    <script src='/data/au/audata3.js'></script>
+
+    <script src="/js/polyfill.js"></script>  
+    <script src="/js/eblib/ebutils.js"></script>  
+    <script src="/js/eblib/ebdropdown.js"></script>  
+    <script src="/js/eblib/ebtextarea.js"></script>  
+    <script src="/js/eblib/mx.js"></script>  
+    <script src="/js/eblib/ebtable.js"></script>  
+    <script src="/js/eblib/ebbind.js"></script>  
+    <script src='/js/dlgs/dlgIcdcode.js'></script>
+    <script src='/js/components/icdlist.js'></script>
+    <script src='/js/icdUtils.js'></script>
+    <script>
+
+      var result = audata3;
+      var readonly = false;
+      var isDta = false;
+
+      function initDialog(icddata) {
+        $('#icdlistAU').icdlist(icddata, {type: 'AU', disable: readonly, isDta: isDta})
+        $('#icdlistZO').icdlist(icddata, {type: 'ZO', disable: readonly, isDta: isDta})
+        $('#icdlistZU').icdlist(icddata, {type: 'ZU', disable: readonly, isDta: isDta})
+      }
+
+      $(document).ready(function () {
+        initDialog(result.icds);
+        $('#btnReload').on('click', function () {
+          initDialog(result.icds);
+        })
+      });
+    </script>
+
+  </head>
+  <body >
+    <h1>AU</h1>
+    <div id='icdlistAU'></div>
+    <h1>ZUS</h1>
+    <div id='icdlistZO'></div>
+    <br>
+    <div id='icdlistZU'></div>
+    <button id="btnReload">Aktualisieren</button>
+  </body>
+</html>

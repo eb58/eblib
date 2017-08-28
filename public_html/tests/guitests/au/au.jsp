@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<!-- himi.jsp (<%=org.slf4j.MDC.get("Request")%>) -->
-<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" errorPage="appError.jsp"%>
+<!-- au.jsp (<%=org.slf4j.MDC.get("Request")%>) -->
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"
+         import="de.mdk.ismed.constants.OrderType"
+         errorPage="/appError.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <html lang='de'>
   <head>
     <title>Arbeitsunfähigkeit</title>
@@ -9,14 +12,12 @@
     <link rel='stylesheet' href='css/ebtable.css'/>
     <link rel='stylesheet' href='css/eblib.css'/>
     <style>
-      * {font-family:Arial; color: black; font-size: 12px;}
-      body{ margin: 20px 20px 20px 20px; }
-      textarea{ width:100%;}
-      textarea[readonly]{ background-color: #e3e0e0; }
-      .ui-datepicker-trigger {vertical-align:bottom;}
-      #questionsTable .ebtable .ctrl { display: none}
-      #questionsTable thead { display: none}
+      textarea[readonly]{ background-color: #efefe0; }
+      .ui-datepicker-trigger {vertical-align:bottom; }
 
+      #questionsTable .ebtable td:nth-child(3) { vertical-align:top; width:260px;}
+      #questionsTable .ebtable .ctrl { display: none}
+      #questionsTable .ebtable thead { display: none}
     </style>
     <script src='vendor/Underscore-1.8.3/underscore-1.8.3.min.js'></script>
     <script src='vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
@@ -24,131 +25,136 @@
     <script src='vendor/jquery.numeric.min.js'></script>
     <script src='vendor/moment.min.js'></script>
 
-    <script src='javascript/data/icddata.js'></script>
-    <script src='javascript/data/audata.js'></script>
-    <script src='javascript/data/aulists.js'></script>
-    
     <script src='javascript/polyfill.js'></script>
-    
-    <script src='javascript/ebutils.js'></script>
-    <script src='javascript/ebbind.js'></script>
-    <script src='javascript/ebdropdown.js'></script>  
-    <script src='javascript/ebselect.js'></script>  
-    <script src='javascript/ebtextarea.js'></script>  
-    <script src='javascript/ebtable/mx.js'></script>
-    <script src='javascript/ebtable/ebtable.js'></script>  
 
+    <script src='javascript/eblib/ebutils.js'></script>
+    <script src='javascript/eblib/ebbind.js'></script>
+    <script src='javascript/eblib/ebdropdown.js'></script>  
+    <script src='javascript/eblib/ebselect.js'></script>  
+    <script src='javascript/eblib/ebtextarea.js'></script>  
+    <script src='javascript/eblib/mx.js'></script>
+    <script src='javascript/eblib/ebtable.js'></script>  
+
+    <script src='javascript/components/icdlist.js'></script>  
+
+    <script src='javascript/icdUtils.js'></script>
     <script src='javascript/dialogs/dlgIcdcode.js'></script>
     <script src='javascript/jquery-ui-datepicker-de.js'></script>
 
     <script src='javascript/jquery-ismed.js'></script>
     <script src='javascript/ismed_script.js'></script>
+    <script src='javascript/order_script.js'></script>
     <script src='javascript/help_caller.js'></script>
     <script src='javascript/context.js'></script>
+    <script src='javascript/au.js'></script>
 
     <script>
+      var taopts1000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 1000, maxNrOfVisibleRows: 10};
+      var taopts4000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 4000, maxNrOfVisibleRows: 10};
+      var taopts10000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 10000, maxNrOfVisibleRows: 10};
+
+      var auListQuests = [];
+      <c:forEach var="row" items="${context.valuelist['au:questions:valid']}">auListQuests.push({'question-id': ${row.auQuestionId}, 'question-number': '${row.questionNumber}', 'question-text': '${row.questionText}'})
+      </c:forEach>
+        var auListAnswers = [];
+      <c:forEach var="row" items="${context.valuelist['au:answers:valid']}">auListAnswers.push({'answer-id': ${row.auAnswerId}, 'answer-number': '${row.answerNumber}', 'answer-text': '${row.answerText}'})
+      </c:forEach>
+        var auListEffort = [];
+      <c:forEach var="row" items="${context.valuelist['au:efforts']}">auListEffort.push({'effort-id': ${row.auEffortId}, 'effort-text': '${row.auEffortText}'})
+      </c:forEach>
+        var auListReduction = [];
+      <c:forEach var="row" items="${context.valuelist['au:reductions']}">auListReduction.push({'reduction-id': ${row.auReductionId}, 'reduction-text': '${row.auReductionText}'})
+      </c:forEach>
+        var auListStatement = [];
+      <c:forEach var="row" items="${context.valuelist['au:statements']}">auListStatement.push({'statement-id': ${row.auStatementId}, 'statement-text': '${row.auStatementText}'})
+      </c:forEach>
+        var auListSuggestion = [];
+      <c:forEach var="row" items="${context.valuelist['au:suggestions']}">auListSuggestion.push({'suggestion-id': ${row.auSuggestionId}, 'suggestion-text': '${row.auSuggestionText}'})
+      </c:forEach>
+        var auListDeliveryConfig = []
+      <c:forEach var="row" items="${context.valuelist['au:delivery-config']}">auListDeliveryConfig.push({'delivery-config-id': ${row.deliveryConfigId}, 'delivery-config-text': '${row.text}', 'flags':${row.recipient}})
+      </c:forEach>
+        var result = [];
+      <c:forEach var = "r" items = "${context.valuelist['results:valid']}" >result.push({id:${r.resultid}, number: '${r.resultnumber}', text: '${r.resulttext}'})
+      </c:forEach>
+        var product2result = [];
+      <c:forEach var = "r" items = "${context.valuelist['product-result-relation']}" >product2result.push({productid:${r.productid}, resultid:${r.resultid}})
+      </c:forEach>
+
+        function mkDropdownList(vals, id, text, bWithNullVal) {
+          bWithNullVal = bWithNullVal === undefined ? true : bWithNullVal;
+          var listVals = vals.map(function (o) {
+            return {v: o[id], txt: o[text]};
+          });
+          return bWithNullVal ? [{v: null, txt: 'keine Auswahl'}].concat(listVals) : listVals;
+        }
+        function mkDropdownList2(vals, id, number, text, bWithNullVal) {
+          bWithNullVal = bWithNullVal === undefined ? true : bWithNullVal;
+          var listVals = vals.map(function (o) {
+            return {v: o[id], txt: o[number] + ' ' + o[text]};
+          });
+          return bWithNullVal ? [{v: null, txt: 'keine Auswahl'}].concat(listVals) : listVals;
+        }
+
+        var attrconfig = [
+          <c:forEach var="row" items="${context.valuelist['product-attrtab-conf']}"><c:if test="${ row.tabid  == 'au'}">{'prodid':${row.productid},'fieldid':"${row.attrid}",'label':"${row.label}", 'effect':${row.effects}},</c:if>
+          </c:forEach>
+        ];
+
+        var ddlists = {
+          questionList: mkDropdownList2(auListQuests, 'question-id', 'question-number', 'question-text', false),
+          answerList: mkDropdownList(auListAnswers, 'answer-id', 'answer-text'),
+          statementList: mkDropdownList(auListStatement, 'statement-id', 'statement-text'),
+          reductionList: mkDropdownList(auListReduction, 'reduction-id', 'reduction-text'),
+          effortList: mkDropdownList(auListEffort, 'effort-id', 'effort-text'),
+          suggestionList: mkDropdownList(auListSuggestion, 'suggestion-id', 'suggestion-text'),
+          deliveryConfigLeistungserbringerList: mkDropdownList(_.filter(auListDeliveryConfig, function (o) {
+            return o.flags & 1;
+          }), 'delivery-config-id', 'delivery-config-text'),
+          deliveryConfigAuftraggeberList: mkDropdownList(_.filter(auListDeliveryConfig, function (o) {
+            return o.flags & 4;
+          }), 'delivery-config-id', 'delivery-config-text'),
+          resultList: (function resultList() {
+            var productid = Number(top.frames[2].$('input[name=Productid]:hidden').val());
+            var ids = _.pluck(_.where(product2result, {productid: productid}), 'resultid');
+            var res = _.compact(ids.map(function (o) {
+              return _.findWhere(result, {id: o});
+            }));
+            return mkDropdownList2(res, 'id', 'number', 'text', true);
+          })()
+        };
+        var icddata = icdUtils.getIcdData();
+    </script>
+    <script>
+      var dialogName = 'au';
+      var readonly = ${context.workspace.state eq 'show'};
+      var isDta = top.frames[2].isDtaOrder;
+      var isSFB = Number(top.frames[2].$('input:hidden[name=IsSFBProduct]').val()||0);
+      var audata;
 
       ///////////////////////////////////////////////////
-      var dialogName = 'au';
-      var isSFB = true;
 
-      var setOrderParameter = function () {
-        return true;
-      };
-      setOrderParameter = function () {
-        console.log('setOrderParameter');
-        result.data.aus = aus;
-        result.data.icds = _.compact(icds).filter(function (o) {
-          return !!o['icd-code-id'];
-        });
-        return doSave(result.data);
+      var setOrderParameter = function () { // just stub, will be overwritten in 'doLoad'
       };
 
       var validateDialogValues = function () {
         return '';
       };
 
-      ///////////////////////////////////////////////////
-
-      var readonly = false;
-
-      var icdfct = (function () {
-        function getIcdCodeFromNumber(code) {
-          var x = _.find(icddata, function (o) {
-            return o[2] === code;
-          });
-          return x ? {id: x[0], text: x[1]} : null;
-        }
-        function initIcdTable(icds) {
-          for (var i = 1; i <= 5; i++) {
-            var icd = icds[i - 1] || {};
-            $('#icdcode' + i).val(icd['icd-code-number']);
-            $('#icdtext' + i).val(icd['text']);
-            $('#icdsrch' + i).toggle(!icd.digital);
-          }
-          initActionsForIcdlist();
-        }
-        function initActionsForIcdlist() {   // Actions for Icdlist
-          $('#diagnosen .ui-icon-trash').off().on('click', function (event) { // delete icd
-            $.confirm('Frage', 'Sind Sie sicher, dass Sie die Diagnose löschen wollen?', function () {
-              var n = event.target.id.replace('icdtrash', '') - 1;
-              icds.splice(n, 1);
-              icds.push({'icd-code-id': null, 'icd-code-number': null, text: '', digital: false});
-              initIcdTable(icds);
-            });
-          });
-          $('#diagnosen .ui-icon-search').on('click', function (event) {
-            var n = event.target.id.replace('icdsrch', '');
-            var opts = {icdCode: $('#icdcode' + n).val()};
-            dlgIcd(icddata, function (code, text, id) {
-              icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
-              icds[n - 1]['icd-code-id'] = id;
-              icds[n - 1]['icd-code-number'] = code;
-              icds[n - 1]['text'] = code === '---.-' ? $('#icdtext' + n).val() : text;
-              $('#icdcode' + n).val(icds[n - 1]['icd-code-number']);
-              $('#icdtext' + n).val(icds[n - 1]['text']);
-              return true;
-            }, opts);
-          });
-          for (var i = 1; i <= 5; i++) {
-            $('#diagnosen #icdcode' + i).on('blur', function (event) {
-              var n = event.target.id.replace('icdcode', '');
-              var icdCodeNumber = $('#icdcode' + n).val().trim().toUpperCase();
-              if (!icdCodeNumber)
-                return;
-              var icdCode = getIcdCodeFromNumber(icdCodeNumber);
-              if (icdCode) {
-                icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
-                icds[n - 1]['icd-code-id'] = icdCode.id;
-                icds[n - 1]['icd-code-number'] = icdCodeNumber;
-                icds[n - 1]['text'] = icdCodeNumber === '---.-' ? $('#icdtext' + n).val() : icdCode.text;
-                $('#icdtext' + n).val(icds[n - 1]['text']);
-              }
-            });
-            $('#icdtext' + i).on('change', function (event) {
-              var n = parseInt(event.target.id.replace('icdtext', ''));
-              icds[n - 1] = icds[n - 1] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
-              icds[n - 1]['text'] = $('#icdtext' + n).val();
-
-            });
-          }
-        }
-        // API
-        return {
-          initIcdTable: initIcdTable
-        };
-      })();
-
       var auquests = (function () {
+        var grid;
         var renderers = {
-          question: function question(data, row) {
-            return data + ' <br>Erläuterung: ' + row[0].explanation;
+          question: function question(data, row, r) {
+            var isLead = row[0].lead;
+            var s = isLead ? '<b>' + data + '</b>' : data;
+            return s + '<div id="qas-ta' + r + '" class="question-comment"></div>';
           },
           answer: function answer(data, row) {
-            return '<div class="answer" id="answ_au' + row[0]['au_question_id'] + '"></div>';
+            return '<div class="answer" id="answ_au' + row[0]['question-id'] + '"></div>';
           },
           deleteItem: function deleteItem(data, row) {
-            return "<span id='au" + row[0]['au_question_id'] + "' class='ui-icon ui-icon-trash'></span>";
+            var isDta = row[0].dta;
+            return isDta ? "<span class='ui-icon ui-icon-blank'></span>" : "<span id='au" + row[0]['question-id'] + "' class='ui-icon ui-icon-trash'></span>";
           }
 
         };
@@ -156,188 +162,266 @@
           rowsPerPage: 200,
           columns: [
             {name: "quest", invisible: true},
-            {name: "questionnumber" },
-            {name: "question", render: renderers.question},
-            {name: "answer", render: renderers.answer},
-            {name: "delete", render: renderers.deleteItem}
+            {name: "Code"},
+            {name: "Frage", render: renderers.question},
+            {name: "Antwort", render: renderers.answer},
+            {name: "", render: renderers.setIsLeading},
+            {name: "", render: renderers.deleteItem},
           ],
           flags: {filter: false, pagelenctrl: false, config: false, withsorting: false},
-          sortcolname: 'questionnumber'
         };
-        var grid;
         // API
         return {
-          initQuestionsTable: function initQuestionsTable(data) {
-            var d = data.aus.map(function (row) {
-              return [row, row.qnumber, row.qtext, row.answ, ''];
+          initQuestionsTable: function initQuestionsTable(audata) {
+
+            var d = audata.qas.sort(function (q1, q2) {
+              if (q1.lead)
+                return -1;
+              return Number(q1['question-number']) - Number(q2['question-number']);
+            }).map(function (q) {
+              return [q, q['question-number'], q['question-text'], q['question-comment'],  q['lead'],''];
             });
+
             grid = $('#questionsTable').ebtable(opts, d);
             $('.answer').each(function (idx, a) {
               var id = Number($(a).prop('id').replace('answ_au', '').replace('X', ''));
-              var o = _.findWhere(data.aus, {'au_question_id': id});
-              $(a).ebdropdown({width: '150px'}, lists.resultList()).ebbind(o, 'answer-id');
+              var o = _.findWhere(audata.qas, {'question-id': id});
+              $(a).ebdropdown({disabled: readonly, width: '260px'}, ddlists.answerList).ebbind(o, 'answer-id');
             });
-            $('#questionsTable .ui-icon-trash').on('click', function () {
+            $('#questionsTable .ui-icon-trash').on('click', function () { // Lösche Eintrag
               var id = Number($(this).prop('id').replace('au', ''));
-              data.aus = data.aus.filter(function (item) {
-                return item.au_question_id !== id;
-              })
-              initQuestionsTable(data);
-              ddQuestions = $('#questions').ebdropdown({}, lists.questionList().filter(function (q) {
-                return !_.findWhere(data.aus, {au_question_id: q.v});
+              audata.qas = audata.qas.filter(function (item) {
+                return item['question-id'] !== id;
+              });
+              initQuestionsTable(audata);
+              ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
+                return !_.findWhere(audata.qas, {'question-id': q.v});
               }));
-
+              if (id === 49) { // ~ number '04' 
+                top.frames[2].associatedAU = audata.associated = false;
+                top.frames[2].checkTabs4Enabling(<%=OrderType.au.id%>);
+              }
             });
-          },
-          addQuestion: function addQuestion(aaa) {
-            console.log(aaa);
+            $('.question-comment').each(function (idx, elem) {
+              var taopts = {title: {text: 'Erläuterung:', fontSize: '12px', pos: 'top'}, counter: {fontSize: '8px', pos: 'top'}, maxByte: 1000, maxNrOfVisibleRows: 10, width: '98%', nrRows: 3};
+              var taid = $(elem).attr('id');
+              $('#' + taid).ebtextarea(_.extend(taopts,{disabled:audata.qas[idx].dta})).ebbind(audata.qas[idx], 'question-comment');
+            });
           }
         };
       })();
 
-      function doSave(data) {
-//        var ret = '';
-//        $.ajax({
-//          url: "/ISmed/ajax/workspace/au.do?action=save-au-data&ajax=1",
-//          async: false,
-//          data: {data: JSON.stringify(data)},
-//          type: "POST",
-//          success: function (result) {
-//            handleAjaxResult(result, {cbErr: function () {
-//                ret = 'ERROR';
-//              }, errortitle: 'Fehler beim Speichern'});
-//          },
-//          error: function (request, status, error) {
-//            console.log(request, status, error);
-//            ret = 'ERROR';
-//          }
-//        });
-//        return ret;
+
+      function applyTabConfig() {
+        prodid =  $('input[name="Productid"]', parent.document).val();
+        if (prodid == '' || prodid == '-1')
+          return;
+        $.each( attrconfig, function( key, confLine ) {
+          if (confLine.prodid == prodid) {
+            if (confLine.label != '') {
+              var currLabel = $('#' + confLine.fieldid + ' h1:first').text();
+              var newLabel = confLine.label;
+              if (currLabel.indexOf("(*)") > -1)
+                newLabel += "(*)";
+              $('#' + confLine.fieldid + ' h1:first').text(newLabel);
+            }
+            if (confLine.effect == 1)
+              $('#' + confLine.fieldid).hide();
+            if (confLine.effect == 2)
+              $('#' + confLine.fieldid).prop("readonly",true);
+          }
+        });
       }
 
+      function initDialog(audata) {
+        $('.positive-integer').numeric({decimal: false, negative: false});
 
-
-      function initDialog(data) {
-        //initAuTable(data.himis);
-        auquests.initQuestionsTable(data);
-        icdfct.initIcdTable(data.icds);
-        var taopts4000 = {counter: {fontSize: '8px', pos: 'bottom'}, maxByte: 4000, maxNrOfVisibleRows:10};
-        var taopts10000 = {counter: {fontSize: '8px', pos: 'bottom'}, maxByte: 10000, maxNrOfVisibleRows:10};
-        var ddQuestions = $('#questions').ebdropdown({}, lists.questionList().filter(function (q) {
-          return !_.findWhere(data, {au_question_id: q.v});
+        var ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
+          return !_.findWhere(audata, {'question-id': q.v});
         }));
+        auquests.initQuestionsTable(audata);
+        $('#diags').icdlist(audata.icds, {type: 'AU', disable: readonly, isDta: isDta});
+
         $('#addAuQuest').on('click', function () {
           var questId = Number(ddQuestions.getSelectedValue());
-          console.log(questId);
-          var q = _.extend(_.findWhere(auListQuests, {au_question_id: questId}), {explanation: '', 'answer-id': null});
-          data.aus.push(q);
-          auquests.initQuestionsTable(data);
-          ddQuestions = $('#questions').ebdropdown({}, lists.questionList().filter(function (q) {
-            return !_.findWhere(data.aus, {au_question_id: q.v});
+          if (!questId)
+            return;
+          var q = _.extend(_.findWhere(auListQuests, {'question-id': questId}), {'question-comment': '', 'answer-id': null});
+          audata.qas.push(q);
+          ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
+            return !_.findWhere(audata.qas, {'question-id': q.v});
           }));
-        })
-        $('#au-since').datepicker(datepickerOptions).ebbind(data);
-        $('#medical-base').ebtextarea(taopts4000).ebbind(data);
-        $('#anamnesis').ebtextarea(taopts10000).ebbind(data);
-        $('#practice').ebtextarea(taopts4000).ebbind(data);
-        $('#profile').ebtextarea(taopts4000).ebbind(data);
-        $('#statement').ebdropdown({}, lists.statementList()).ebbind(data);
-        $('#agency-start-date').datepicker(datepickerOptions).ebbind(data);
-        $('#effort').ebdropdown({}, lists.effortList()).ebbind(data);
-        $('#indication').ebtextarea(taopts10000).ebbind(data);
-        $('#summary').ebtextarea(taopts4000).ebbind(data);
-        $('#rating').ebtextarea(taopts10000).ebbind(data);
-        $('#accordance').ebtextarea(taopts4000).ebbind(data);
-        $('#result').ebdropdown({}, lists.resultList()).ebbind(data);
-        $('#duration').ebbind(data);
-        $('#setup-time').ebbind(data);
-        $('#expertise-date').datepicker(datepickerOptions).ebbind(data);
-        $(".positive-integer").numeric({decimal: false, negative: false});
+          auquests.initQuestionsTable(audata);
+
+          if (q['question-number'] === '04') {
+            top.frames[2].associatedAU = audata.associated = true;
+            top.frames[2].checkTabs4Enabling(<%=OrderType.au.id%>);
+          }
+        });
+        $('#start-date').datepicker(datepickerOptions).ebbind(audata);
+
+        var sAccordance = 'Übereinstimmung von Leistungsvermögen mit Anforderungsprofil der zuletzt ausgeübten/maßgeblichen Tätigkeit';
+        var sHint = 'Hinweise auf besondere Ursachen / mögliche andere Leistungsträger';
+        $('#medical-base').ebtextarea(_.extend({title: {text: 'Medizinische Unterlagen:(*)', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#anamnesis').ebtextarea(_.extend({title: {text: 'Anamnese:(*)', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts10000)).ebbind(audata);
+        $('#practice').ebtextarea(_.extend({title: {text: 'Rehabilitations- und Rentenverfahren, GdB, GdS', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#profile').ebtextarea(_.extend({title: {text: 'Anforderungsprofil der Bezugstätigkeit(*)', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#indication').ebtextarea(_.extend({title: {text: 'Befund:(*)', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#indicationInformation').ebtextarea(_.extend({title: {text: 'Erforderliche Angaben über den Befund', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#summary').ebtextarea(_.extend({title: {text: 'Zusammenfassung:', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#rating').ebtextarea(_.extend({title: {text: 'Sozialmedizinische Beurteilung der AU', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#accordance').ebtextarea(_.extend({title: {text: sAccordance, fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#suggestion-comment').ebtextarea(_.extend({title: {text: 'Erläuterung Sozialmedizinische Empfehlung', fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+        $('#hints').ebtextarea(_.extend({title: {text: sHint, fontSize: '16px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
+
+        $('#statement-id').ebdropdown({disabled: readonly}, ddlists.statementList).ebbind(audata);
+        $('#agency-start-date').datepicker(datepickerOptions).ebbind(audata);
+        $('#effort-id').ebdropdown({disabled: readonly}, ddlists.effortList).ebbind(audata);
+
+        var cbChangeResult = function cbChangeResult(event, ui) {
+          var result = ddlists.resultList[ui.item.index];
+          top.frames[2].$('input[name=Resultid]:hidden').val(result ? result.v : 0);
+          top.objectIsChanged = true;
+        }
+        $('#result').ebdropdown({disabled: readonly, change: cbChangeResult}, ddlists.resultList).ebbind(audata);
+        $('#duration').ebbind(audata, 'duration', function () {
+          var t = Number($('#duration').val() || '0');
+          top.frames[2].$('input[name=TimetoproduceproductHours]:hidden').val(('00' + Math.floor(t / 60)).substr(-2));
+          top.frames[2].$('input[name=TimetoproduceproductMinutes]:hidden').val(('00' + (t % 60)).substr(-2));
+          top.objectIsChanged = true;
+        });
+        $('#setup-time').ebbind(audata, 'setup-time', function () {
+          var t = Number($('#setup-time').val() || '0');
+          top.frames[2].$('input[name=TotalworkingtimeHours]:hidden').val(('00' + Math.floor(t / 60)).substr(-2));
+          top.frames[2].$('input[name=TotalworkingtimeMinutes]:hidden').val(('00' + (t % 60)).substr(-2));
+          top.objectIsChanged = true;
+        });
+        $('#expertise-date').datepicker(datepickerOptions).ebbind(audata, 'expertise-date', function () {
+          top.frames[2].$('input[name=Resultdate]:hidden').val($('#expertise-date').val());
+          top.objectIsChanged = true;
+        });
+
+        $('#suggestion-id').ebdropdown({disabled: readonly}, ddlists.suggestionList).ebbind(audata);
+        $('#reduction-id').ebdropdown({disabled: readonly}, ddlists.reductionList).ebbind(audata);
+        $('#notification').ebbind(audata);
+
+        $('#reminder').ebbind(audata, 'reminder', function () {
+          $('#reminder-comment').toggle($('#reminder').val());
+        });
+        $('#reminder-comment').ebtextarea(_.extend({title: {text: 'Erläuterung, wenn erneute Vorlage', fontSize: '16px', pos: 'top'}}, taopts4000)).ebbind(audata);
+        if (!$('#reminder').prop('checked')) {
+          $('#reminder-comment').hide();
+        }
+
+        $('#preventSrInformation').ebbind(audata, 'preventSrInformation', function () {
+          if ($('#preventSrInformation').prop('checked')) {
+            ddLE.setSelectedValue(6);// 6 -> „Eingeschränkt (Ohne Anamnese & Befund, ohne Erforderliche Angaben über den Befund)“
+          }
+        });
+
+        $('#delivery-config-ag').ebdropdown({disabled: readonly}, ddlists.deliveryConfigAuftraggeberList).ebbind(audata);
+        var ddLE = $('#delivery-config-le').ebdropdown({disabled: readonly}, ddlists.deliveryConfigLeistungserbringerList).ebbind(audata);
 
         if (readonly) {
           $("input").prop('disabled', true);
+          $('#addAuQuest').hide();
           $("textarea").prop('disabled', false).prop('readonly', true).on('keydown', function (evt) {
             evt.preventDefault();
           });
-          //??$('option:not(:selected)').attr('disabled', true);
-          $('#statementX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
-          $('#effortX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
-          $('#resultX').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          $('#questionsTable td:nth-child(4)').hide();
           $('h1:contains(*)').each(function (idx, o) {
             $(o).text($(o).text().replace('(*)', '').replace('*', ''));
           });
-          //$('img.ui-datepicker-trigger').hide();
-        } else {
-          //$('img.ui-datepicker-trigger').show();
+          $('img.ui-datepicker-trigger').hide();
         }
-        $('img.ui-datepicker-trigger').toggle(!readonly);
+        if (isDta) {
+          $('#divresult,#divduration,#divsetuptime').hide();
+        }
       }
 
-
       $(document).ready(function () {
+        $('body').hide();
         top.DialogID = "au";
-        $(".positive-integer").numeric({decimal: false, negative: false});
-        aus = result.data.aus;
-        icds = result.data.icds = result.data.icds.filter(function (o) {
-          return !!o['icd-code-id'];
+        auUtils.doLoad(function (result) {
+          audata = result.data;
+          audata.icds = audata.icds.filter(function (o) {
+            return !!o['icd-code-id'];
+          });
+
+          // get Values from first TAB (Auftrag-TAB)
+          audata['result'] = top.frames[2].$('input[name=Resultid]:hidden').val();
+          audata['duration'] = Number(top.frames[2].$('input[name=TimetoproduceproductHours]:hidden').val()) * 60 + Number(top.frames[2].$('input[name=TimetoproduceproductMinutes]:hidden').val());
+          audata['setup-time'] = Number(top.frames[2].$('input[name=TotalworkingtimeHours]:hidden').val()) * 60 + Number(top.frames[2].$('input[name=TotalworkingtimeMinutes]:hidden').val());
+          audata['expertise-date'] = top.frames[2].$('input[name=Resultdate]:hidden').val() || null;
+
+          if (isSFB) {  // ???
+          }
+
+          initDialog(audata);
+          $('body').show();
+
+          setOrderParameter = function () {
+            audata.icds = _.compact(audata.icds);
+            return auUtils.doSave(audata);
+          };
         });
-        initDialog(result.data);
+        applyTabConfig();
+
       });
     </script>
 
   </head>
-  <body style="background:#F0F0F0">
+  <body>
 
     <div id='orderattr'>
 
-      <div><h1>AU Fragen:                                     </h1> <span   id='questions'></span>&nbsp;<span id='addAuQuest' class='ui-icon ui-icon-circle-plus'></span></div>
-      <div><h1>Vorhandene AU Fragen:                          </h1> <div   id='questionsTable'></div></div>
+      <div><h1>AU Fragen                                      </h1> <span  id='questions'></span>&nbsp;<span id='addAuQuest' class='ui-icon ui-icon-circle-plus'></span></div>
+      <div><h1>Vorhandene AU Fragen                           </h1> <div   id='questionsTable'></div></div>
 
-      <div><h1>Datum                                          </h1> <input id='au-since'></div>
-      <div><h1>Medizinische Unterlagen:(*)                    </h1> <div   id='medical-base'></div></div>
-      <div><h1>Anamnese:(*)                                   </h1> <div   id='anamnesis' ></div></div>
-      <div><h1>Rehabilitations- und Rentenverfahren, GdB, GdS </h1> <div   id='practice'></div></div>
-      <div><h1>Anforderungsprofil der Bezugstätigkeit(*)      </h1> <div   id='profile'></div></div>
-      <div><h1>Nach Angaben:                                  </h1> <div   id='statement'></div></div>
-      <div><h1>Bei der Arbeitsagentur in Vermittlung seit:    </h1> <input id='agency-start-date'></div>
-      <div><h1>Zeitlicher Vermittlungsaufwand:                </h1> <div   id='effort'></div></div>
-      <div><h1>Befund:(*)                                     </h1> <div   id='indication'></div></div>
+      <div><h1>Arbeitsunfähigkeit seit                        </h1> <input id='start-date'></div>
+      <div id='medical-base'></div>
+      <div id='anamnesis' ></div>
+      <div id='practice'></div>
+      <div id='profile'></div>
+      <div id='div-statement-id'><h1>Nach Angaben             </h1> <div   id='statement-id'></div></div>
+      <div id='div-agency-start-date'><h1>Bei der Arbeitsagentur in Vermittlung seit     </h1> <input id='agency-start-date'></div>
+      <div id='div-effort-id'><h1>Zeitlicher Vermittlungsaufwand                 </h1> <div   id='effort-id'></div></div>
+      <div id='indication'></div>
 
       <div id='diagnosen'>
-        <h1>Diagnosen:</h1>
-        <table>
-          <tbody>
-            <tr><td>*</td><td><input id='icdcode1' type='text'/></td><td><input id='icdtext1' type='text'/></td><td><span id='icdsrch1' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash1' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode2' type='text'/></td><td><input id='icdtext2' type='text'/></td><td><span id='icdsrch2' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash2' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode3' type='text'/></td><td><input id='icdtext3' type='text'/></td><td><span id='icdsrch3' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash3' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode4' type='text'/></td><td><input id='icdtext4' type='text'/></td><td><span id='icdsrch4' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash4' class='ui-icon ui-icon-trash'></span></td></tr>
-            <tr><td> </td><td><input id='icdcode5' type='text'/></td><td><input id='icdtext5' type='text'/></td><td><span id='icdsrch5' class='ui-icon ui-icon-search'></span></td><td><span id='icdtrash5' class='ui-icon ui-icon-trash'></span></td></tr>
-          </tbody>
-        </table>
+        <h1>Diagnosen</h1>
+        <div id='diags'></div>
       </div>
 
-      <div><h1>Zusammenfassung:                                 </h1> <div   id='summary'></div></div>
-      <div><h1>Sozialmedizinische Beurteilung der AU:           </h1> <div   id='rating'></div></div>
-      <div><h1>Übereinstimmung von Leistungsvermögen mit Anforderungsprofil der zuletzt ausgeübten/maßgeblichen Tätigkeit'        
-        </h1> <div   id='accordance'></div></div>
-      <div><h1>Ergebnis                                         </h1> <div   id='result'></div></div>
-      <div><h1>Erledigungszeit in Minuten                       </h1> <input id='duration' class='positive-integer' type='text'></div>
-      <div><h1>Rüstzeit in Minuten                              </h1> <input id='setup-time' class='positive-integer' type='text'></div>
+      <div id='summary'></div>
+      <div id='indicationInformation'></div>
+      <div id='rating'></div>
+      <div id='accordance'></div>
+      <div id='divresult'><h1>Ergebnis                          </h1> <div   id='result'></div></div>
+      <div id='divduration'><h1>Erledigungszeit in Minuten      </h1> <input id='duration' class='positive-integer' type='text'></div>
+      <div id='divsetuptime'><h1>Rüstzeit in Minuten            </h1> <input id='setup-time' class='positive-integer' type='text'></div>
       <div><h1>Begutachtungsdatum                               </h1> <input id='expertise-date'></div>
-      <div><h1>Gefährdung/Minderung der Erwerbsfähigkeit        </h1> <input id='au-reduction'></div>
-      <div><h1>Sozialmedizinische Empfehlung                    </h1> <input id='au-suggestion'></div>
+      <div id='div-reduction-id'><h1>Gefährdung/Minderung der Erwerbsfähigkeit        </h1> <div id='reduction-id'></div></div>
+      <div id='div-suggestion-id'><h1>Sozialmedizinische Empfehlung                    </h1> <div id='suggestion-id'></div></div>
+      <div id='suggestion-comment'></div>
+      <div id='hints'></div>
 
+      <div id='div-notification'><h1>Das Begutachtungsergebnis wurde der/dem 
+          Versicherten mitgeteilt                               </h1> <input id='notification' type="checkbox"></div>
+      <div id='div-reminder'><h1>Erneute Vorlage                </h1> <input id='reminder' type="checkbox"></div>
+      <div id='reminder-comment'></div>
+      <div><h1>Der Versicherte hat der Mitteilung über den 
+          Befund an die Leistungserbringer widersprochen        </h1> <input id='preventSrInformation' type="checkbox"></div>
 
-    </div>
-
-    <div id='versandeinstellungen'>
-      <h1>Versandeinstellungen:</h1>
-      <table>
-        <tr><td>Auftraggeber:     </td><td><div id='auftraggeber'>       </div></td>
-        <tr><td>Leistungserbringer</td><td><div id='leistungserbringer'> </div></td>
-        <tr><td>Sanitätshaus      </td><td><div id='sanitaetshaus'>      </div></td>
-      </table>
-    </div>
+      <div id='versandeinstellungen'>
+        <h1>Versandeinstellungen</h1>
+        <table>
+          <tr><td>Auftraggeber      </td><td><div id='delivery-config-ag'></div></td>
+          <tr><td>Leistungserbringer</td><td><div id='delivery-config-le'></div></td>
+        </table>
+      </div>
+      <!--  Platz unten reservieren, damit Klapplist voll aufgeklappt werden kann-->
+      <div style='height:150px'></div> 
 
   </body>
 </html>

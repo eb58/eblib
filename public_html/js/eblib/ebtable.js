@@ -353,7 +353,7 @@
         return this;
       },
       filterData: function filterData() {
-        var filters = [];
+        var filters = _.extend(_.isArray(myopts.predefinedFilters) ? [] : {}, myopts.predefinedFilters);
         $(selgridid + 'thead th input[type=text],' + selgridid + 'thead th select').each(function (idx, o) {
           var val = $(o).val();
           if (val && val.trim()) {
@@ -406,10 +406,10 @@
       groupdefs: {}, // {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
       openGroups: [],
       hasMoreResults: hasMoreResults,
-      clickOnRowHandler: function (rowData, row) { // just for docu
-        //util.log(rowData, row);
-      },
-      lang: 'de'
+      clickOnRowHandler: function (rowData, row) {}, // just for docu
+      lang: 'de',
+      afterRedraw: null,
+      predefinedFilters: [],
     };
 
     { // trimming opts param
@@ -503,34 +503,32 @@
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
         if (!coldef.invisible) {
-          var fld = '';
-          if (myopts.flags.filter) {
-            var t_inputfld = '<input type="text" id="<%=colid%>" value="<%=filter%> "title="<%=tooltip%>"/>';
-            var t_selectfld = '<select id="<%=colid%>" value="<%=filter%>"><%=opts%></select>';
-            var opts = (coldef.valuelist || []).reduce(function (acc, o) {
-              return acc + '<option>' + o + '</option>\n';
-            }, '');
-            var t = coldef.valuelist ? t_selectfld : t_inputfld;
-            fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip, filter: coldef.filter});
-          }
+          var t_inputfld = '<input type="text" id="<%=colid%>" value="<%=filter%> "title="<%=tooltip%>"/>';
+          var t_selectfld = '<select id="<%=colid%>" value="<%=filter%>"><%=opts%></select>';
+          var opts = (coldef.valuelist || []).reduce(function (acc, o) {
+            return acc + '<option>' + o + '</option>\n';
+          }, '');
+          var t = coldef.valuelist ? t_selectfld : t_inputfld;
+          var fld = _.template(t)({colid: coldef.id, opts: opts, tooltip: coldef.tooltip, filter: coldef.filter});
           var thwidth = coldef.width ? 'width:' + coldef.width + ';' : '';
           var thstyle = coldef.css || coldef.width ? ' style="' + thwidth + ' ' + (coldef.css ? coldef.css : '') + '"' : '';
           var hdrTemplate = '\
-            <th id="<%=colid%>"<%=thstyle%> >\n\
+            <th id="<%=colid%>"<%=thstyle%>  >\n\
               <div style="display:inline-flex">\n\
-              <span style="float:left" class="ui-icon ui-icon-blank"></span>\n\
-              <%=colname%>\n\
-              <span style="float:right" class="ui-icon ui-icon-blank"></span>\n\
+                <span style="float:left" class="ui-icon ui-icon-blank"></span>\n\
+                <%=colname%>\n\
+                <span style="float:right" class="ui-icon ui-icon-blank"></span>\n\
               </div>\n\
-              <div><%=fld%></div>\n\
-             </th>';
+              <div<%=filtersvisible%>><%=fld%></div>\n\
+            </th>';
           // &#8209; = non breakable hyphen : &#0160; = non breakable space
           res += _.template(hdrTemplate)({
             colname: coldef.name.replace(/-/g, '&#8209;').replace(/ /g, '&#0160;'),
             colid: coldef.id,
             fld: fld,
             thstyle: thstyle,
-            tooltip: coldef.tooltip
+            tooltip: coldef.tooltip,
+            filtersvisible: (myopts.flags.filter ? '' : ' style="display:none"'),
           });
         }
       }

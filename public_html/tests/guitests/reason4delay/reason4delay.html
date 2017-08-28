@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang='de'>
+  <head>
+    <title>Verzögerungsgründe</title>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
+    <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+    <link rel='stylesheet' href='/css/ebtable.css'/>
+    <link rel='stylesheet' href='/css/eblib.css'/>
+    <style>
+      textarea[readonly]{ background-color: #efefe0; }
+      h1 {font-size: 14px;}
+      #r4dTable .ebtable .ctrl { display: none}
+      #r4dTable .ebtable td:nth-child(1) { vertical-align:top;}
+    </style>
+    <script src='/vendor/Underscore-1.8.3/underscore.min.js'></script>
+    <script src='/vendor/jQuery-1.11.3/jquery.min.js'></script>
+    <script src='/vendor/jQueryUI-1.12.0/jquery-ui.js'></script>
+    <script src='/vendor/numeric.js'></script>
+    <script src='/vendor/moment.min.js'></script>
+
+    <script src='/js/polyfill.js'></script>
+
+    <script src='/js/eblib/ebutils.js'></script>
+    <script src='/js/eblib/ebbind.js'></script>
+    <script src='/js/eblib/ebdropdown.js'></script>  
+    <script src='/js/eblib/ebselect.js'></script>  
+    <script src='/js/eblib/ebtextarea.js'></script>  
+    <script src='/js/eblib/mx.js'></script>
+    <script src='/js/eblib/ebtable.js'></script>  
+
+    <script src='/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js'></script>
+
+    <script src='/data/reason4delay/data1.js'></script>    
+    <script src='/data/reason4delay/caringReason4DelayList.js'></script>    
+
+    <script>
+
+      function mkDropdownList2(vals, id, number, text, bWithNullVal) {
+        bWithNullVal = bWithNullVal === undefined ? true : bWithNullVal;
+        var listVals = vals.map(function (o) {
+          return {v: o[id], txt: o[number] + ' ' + o[text]};
+        });
+        return bWithNullVal ? [{v: null, txt: 'keine Auswahl'}].concat(listVals) : listVals;
+      }
+      var ddlists = {
+        r4dList: mkDropdownList2(caringReason4DelayList, 'id', 'number', 'text'),
+      };
+
+    </script>
+    <script>
+      var dialogName = 'reason4Delay';
+      var readonly = false;// ${context.workspace.state eq 'show'};
+      var r4dData;
+
+      ///////////////////////////////////////////////////
+
+      var validateDialogValues = function () {
+        return '';
+      };
+
+      var r4dTable = (function () {
+        var grid;
+        var renderers = {
+          id: function reason4delay(data, row, r) {
+            return '<div id="r4d' + r + '" class="r4d"></div>';
+          },
+          text: function text(data, row, r) {
+            return '<div id="text' + r + '" class="r4d-text"></div>';
+          },
+          deleteItem: function deleteItem(data, row, r) {
+            return readonly ? "&nbsp;" : "&nbsp;<i id='r4d" + r + "' class='fa fa-trash fa-lg' title='Lösche Verzögerungsgrund'></i>";
+          }
+        };
+        var tableOpts = {
+          rowsPerPage: 200,
+          columns: [
+            {name: "r4d", invisible: true},
+            {name: "Verzögerungsgrund", render: renderers.id, width: '200px'},
+            {name: "Erläuterungstext", render: renderers.text},
+            {name: "Erfassung", width: '70px'},
+            {name: "Erstellung", width: '70px'},
+            {name: "Versand", width: '70px'},
+            {name: "", render: renderers.deleteItem, width: '16px'},
+          ],
+          flags: {filter: false, pagelenctrl: false, config: false, withsorting: false},
+        };
+        // API
+        return {
+          initR4dTable: function initR4dTable(r4dData) {
+
+            var d = r4dData.r4d.map(function (r4d) {
+              return [r4d, r4d['id'], r4d['text'], r4d['dateCapture'], r4d['dateCreate'], r4d['dateShipping'], ''];
+            });
+
+            grid = $('#r4dTable').ebtable(tableOpts, d);
+            $('#r4dTable .r4d').each(function (idx, a) {
+              $(a).ebdropdown({disabled: readonly, width: '200px'}, ddlists.r4dList).ebbind(r4dData.r4d[idx], 'id');
+            });
+            $('#r4dTable .fa-trash').off().on('click', function () { // Lösche Eintrag
+              var idx = Number($(this).prop('id').replace('r4d', ''));
+              r4dData.r4d.splice(idx, 1)
+              initR4dTable(r4dData);
+            });
+            $('.r4d-text').each(function (idx, elem) {
+              var taopts1000 = {counter: null, title: null, maxByte: 1000, width: '99%', nrRows: 2, maxNrOfVisibleRows: 10, margin: '0px 0px 0px 0px', disabled: readonly};
+              $(elem).ebtextarea(taopts1000).ebbind(r4dData.r4d[idx], 'text');
+            });
+          }
+        };
+      })();
+
+      function initDialog(r4dData) {
+        r4dTable.initR4dTable(r4dData);
+        $('#addR4d').off().on('click', function () {
+          var r = {
+            id: null,
+            text: '',
+            dateCapture: null,
+            dateCreate: null,
+            dateShipping: null,
+            idIsmed3: null,
+          };
+          r4dData.r4d.push(r);
+          r4dTable.initR4dTable(r4dData);
+        });
+
+        $('#addR4d').toggle(!readonly);
+//        if (readonly) {
+//          $('#addR4d').hide();
+//        }
+//        else{
+//          $('#addR4d').show();
+//        }
+        $('#isReadonly').off().on('change', function (evt) {
+          var checked = $(evt.target).prop('checked');
+          console.log(checked);
+          readonly = checked;
+          initDialog(r4dData);
+        })
+      }
+
+      $(document).ready(function () {
+        $('body').hide();
+        top.DialogID = "r4d";
+        r4dData = dataReasons4Delay;
+        initDialog(r4dData);
+        $('body').show();
+
+        setOrderParameter = function () {
+          return r4dUtils.doSave(r4dData);
+        };
+      });
+    </script>
+  </head>
+  <body>
+    <div id='orderattr'>
+      <i id='addR4d' class='fa fa-plus-circle fa-2x' title='Verzögerungsgrund hinzufügen'></i>
+      <div id="r4dTable"></div>
+      Readonly:<input id='isReadonly' type='checkbox' />
+    </div>
+  </body>
+</html>

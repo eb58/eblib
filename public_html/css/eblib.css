@@ -1,0 +1,20 @@
+/* 
+    Created on : 02.11.2016, 16:27:40
+    Author     : eb
+*/
+
+* { font-family:Arial; color: black; font-size: 12px; }
+body { background:#F9F9F9; margin: 10px 10px 10px 10px;}
+h1 {font-size: 16px;}
+
+textarea[readonly]{ background-color: #e3e0e0; }
+
+#dlgAlert   ul { margin:1px; padding:0px 10px 0px 10px; }
+#dlgConfirm ul { margin:1px; padding:0px 10px 0px 10px; }
+
+table .subheading { font-size: 100%; font-weight: bold; text-align: left; text-indent: 0; background: linear-gradient(#e8e8d4,#d6d6d6); border-color: #d6d6d6; }
+
+/* jquery-ui overrides */
+.ui-icon { transform: scale(1.2); margin: 1px; padding: 1px;}
+.ui-button { color: black; text-decoration: none; border-color: #aaa; }
+.ui-selectmenu-button { height: 14px;}

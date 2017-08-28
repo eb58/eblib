@@ -15,6 +15,7 @@
       height: '',
       disabled: false,
       maxNrOfVisibleRows: 10,
+      margin:'8px 0px 0px 0px',
     };
     var myopts = $.extend({}, defopts, opts);
 
@@ -85,7 +86,7 @@
       myopts.title && $('#' + id + ' .ebtextareatitle').css('font-size', myopts.title.fontSize || 8);
       myopts.title && $('#' + id + ' .ebtextareatitle').css('font-weight', myopts.title.fontWeight || 'normal');
       myopts.counter && $('#' + id + '.ebtextareacnt').css('font-size', myopts.counter.fontSize || 8);
-      $('#' + id + ' .ebtextarea').css({'margin': '8px 0px 0px 0px'});
+      $('#' + id + ' .ebtextarea').css({'margin': myopts.margin});
     }
     return _.extend(this, api);
   };

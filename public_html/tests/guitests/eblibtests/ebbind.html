@@ -4,12 +4,14 @@
     <title>TODO supply a title</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
     <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
     <link rel="stylesheet" href="/css/ebselect.css">
     <style>
       * {font-family:Arial;color: black;font-size: 12px; }
-      img.ui-datepicker-trigger{ vertical-align: bottom  } 
       table { background-color: #CCCCCC;}
+      .ui-datepicker-trigger{ border:none; background:none; }
     </style>
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
@@ -24,7 +26,7 @@
     <script src="/js/eblib/ebselect.js"></script>
     <script src="/js/eblib/eblist.js"></script>
     <script>
-     var taopts1000 = {title: {}, counter: {}, maxByte: 1000, width:'400px', maxNrOfVisibleRows:10};
+      var taopts1000 = {title: {}, counter: {}, maxByte: 1000, width: '400px', maxNrOfVisibleRows: 10};
 
       var radios = [
         {v: 1, text: 'Radio1'},
@@ -88,7 +90,7 @@
         $('#pwd').ebbind(vm);
         $('#sec').ebbind(vm);
         $('#date').datepicker(datepickerOptions).ebbind(vm);
-        $('#srv').ebdropdown({width:'400px'}, server).ebbind(vm);
+        $('#srv').ebdropdown({width: '400px'}, server).ebbind(vm);
         $('#choice1').ebradio({}, radios).ebbind(vm);
         $('#choice2').ebradio({}, radios).ebbind(vm);
         $('#txt').ebtextarea(taopts1000).ebbind(vm);

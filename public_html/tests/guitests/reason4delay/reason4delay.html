@@ -1,12 +1,7 @@
 <!DOCTYPE html>
-
-
-
-
-
 <html lang='de'>
   <head>
-    <title>Verzögerungsgründe</title>
+    <title>Zwischennachrichten</title>
     <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
     <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
     <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
@@ -17,10 +12,15 @@
       h1 {font-size: 14px;}
       #r4dTable .ebtable .ctrl { display: none}
       #r4dTable .ebtable td:nth-child(1) { vertical-align:top;}
+      input.hasDatepicker { width:60px; margin-top: 2px; }
+      input.r4d-timeMeeting { width:42px; margin-top: 2px; }
+      .ui-datepicker-trigger{ border:none; background:none; }
+      ul.ui-menu {max-height: 200px; }
     </style>
     <script src='/vendor/Underscore-1.8.3/underscore.min.js'></script>
     <script src='/vendor/jQuery-1.11.3/jquery.min.js'></script>
     <script src='/vendor/jQueryUI-1.12.0/jquery-ui.js'></script>
+    <script src='/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js'></script>
     <script src='/vendor/numeric.js'></script>
     <script src='/vendor/moment.min.js'></script>
 
@@ -34,10 +34,9 @@
     <script src='/js/eblib/mx.js'></script>
     <script src='/js/eblib/ebtable.js'></script>  
 
-    <script src='/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js'></script>
 
+    <script src='/data/reason4delay/lists.js'></script>    
     <script src='/data/reason4delay/data1.js'></script>    
-    <script src='/data/reason4delay/caringReason4DelayList.js'></script>    
 
     <script>
 
@@ -50,6 +49,7 @@
       }
       var ddlists = {
         r4dList: mkDropdownList2(caringReason4DelayList, 'id', 'number', 'text'),
+        helpdeskList: mkDropdownList2(helpdeskList, 'id', 'number', 'text'),
       };
 
     </script>
@@ -64,59 +64,111 @@
         return '';
       };
 
-      var r4dTable = (function () {
+      var utils = {
+        getNumberFromIdInR4dList: function getNumberFromIdInR4dList(id) {
+          var cr = _.findWhere(caringReason4DelayList, {id: id});
+          return cr ? cr.number : null;
+        },
+        isReasonWithMeeting: function isReasonWithMeeting(r4d) {
+          var number = utils.getNumberFromIdInR4dList(r4d.id);
+          return number === '06' || number === '07';
+        }
+      }
+
+      var r4dTable = function (r4dData) {
         var grid;
         var renderers = {
-          id: function reason4delay(data, row, r) {
-            return '<div id="r4d' + r + '" class="r4d"></div>';
+          r4dlist: function r4dlist(data, row, r) {
+            return '<div id="r4dlist-' + r + '" class="r4d-list"></div>';
           },
           text: function text(data, row, r) {
             return '<div id="text' + r + '" class="r4d-text"></div>';
           },
+          termin: function termin(data, row, r) {
+            if (!utils.isReasonWithMeeting(row[0]))
+              return '';
+            return '<span id="helpdeskMeeting-' + r + '" class="r4d-helpdeskMeeting"></span>'
+              + '<input id="dateMeeting-' + r + '" class="r4d-dateMeeting" type="text"/>'
+              + '<input id="timeMeeting-' + r + '" class="r4d-timeMeeting" type="text" placeholder="HH:MM"/>';
+          },
           deleteItem: function deleteItem(data, row, r) {
-            return readonly ? "&nbsp;" : "&nbsp;<i id='r4d" + r + "' class='fa fa-trash fa-lg' title='Lösche Verzögerungsgrund'></i>";
+            return readonly ? "&nbsp;" : "&nbsp;<i id='r4dtrash-" + r + "' class='fa fa-trash fa-lg' title='Lösche Verzögerungsgrund'></i>";
           }
         };
         var tableOpts = {
           rowsPerPage: 200,
           columns: [
             {name: "r4d", invisible: true},
-            {name: "Verzögerungsgrund", render: renderers.id, width: '200px'},
+            {name: "Verzögerungsgrund", render: renderers.r4dlist, width: '200px'},
             {name: "Erläuterungstext", render: renderers.text},
             {name: "Erfassung", width: '70px'},
             {name: "Erstellung", width: '70px'},
             {name: "Versand", width: '70px'},
+            {name: "Termin", render: renderers.termin, width: '200px', invisible: !r4dData.au },
+            {name: "ISmed3-Id", width: '30px'},
             {name: "", render: renderers.deleteItem, width: '16px'},
           ],
           flags: {filter: false, pagelenctrl: false, config: false, withsorting: false},
         };
         // API
         return {
-          initR4dTable: function initR4dTable(r4dData) {
-
+          initR4dTable: function initR4dTable() {
             var d = r4dData.r4d.map(function (r4d) {
-              return [r4d, r4d['id'], r4d['text'], r4d['dateCapture'], r4d['dateCreate'], r4d['dateShipping'], ''];
+              return [
+                r4d,
+                r4d['id'],
+                r4d['text'],
+                r4d['dateCapture'],
+                r4d['dateCreate'],
+                r4d['dateShipping'],
+                '', // placeholder for meeting
+                r4d['idIsmed3'],
+                '', // placeholder for 
+              ];
             });
 
             grid = $('#r4dTable').ebtable(tableOpts, d);
-            $('#r4dTable .r4d').each(function (idx, a) {
-              $(a).ebdropdown({disabled: readonly, width: '200px'}, ddlists.r4dList).ebbind(r4dData.r4d[idx], 'id');
+
+            // init actions in columns
+            $('#r4dTable .r4d-list').each(function (idx, elem) {
+              var idx = Number($(elem).prop('id').replace('r4dlist-', ''));
+              $(elem).ebdropdown({disabled: readonly, width: '200px', change: function (evt, ui) {
+                  var num = Number($(evt.target).parent().prop('id').replace('r4dlist-', ''));
+                  if (!utils.isReasonWithMeeting(r4dData.r4d[num])) {
+                    r4dData.r4d[num].idhelpdeskMeeting = null;
+                    r4dData.r4d[num].dateMeeting = null;
+                    r4dData.r4d[num].timeMeeting = null;
+                  }
+                  initR4dTable()
+                }}, ddlists.r4dList).ebbind(r4dData.r4d[idx], 'id')
             });
-            $('#r4dTable .fa-trash').off().on('click', function () { // Lösche Eintrag
-              var idx = Number($(this).prop('id').replace('r4d', ''));
-              r4dData.r4d.splice(idx, 1)
-              initR4dTable(r4dData);
-            });
-            $('.r4d-text').each(function (idx, elem) {
-              var taopts1000 = {counter: null, title: null, maxByte: 1000, width: '99%', nrRows: 2, maxNrOfVisibleRows: 10, margin: '0px 0px 0px 0px', disabled: readonly};
+            $('#r4dTable .r4d-text').each(function (idx, elem) {
+              var taopts1000 = {counter: null, title: null, maxByte: 1000, width: '99%', nrRows: 2, maxNrOfVisibleRows: 5, margin: '0px 0px 0px 0px', disabled: readonly};
               $(elem).ebtextarea(taopts1000).ebbind(r4dData.r4d[idx], 'text');
+            });
+            $('#r4dTable .r4d-helpdeskMeeting').each(function (idx, elem) {
+              var idx = Number($(elem).prop('id').replace('helpdeskMeeting-', ''));
+              $(elem).ebdropdown({disabled: readonly, width: '200px'}, ddlists.helpdeskList).ebbind(r4dData.r4d[idx], 'idhelpdeskMeeting');
+            });
+            $('#r4dTable .r4d-dateMeeting').each(function (idx, elem) {
+              var idx = Number($(elem).prop('id').replace('dateMeeting-', ''));
+              $(elem).datepicker(datepickerOptions).ebbind(r4dData.r4d[idx], 'dateMeeting');
+            });
+            $('#r4dTable .r4d-timeMeeting').each(function (idx, elem) {
+              var idx = Number($(elem).prop('id').replace('timeMeeting-', ''));
+              $(elem).ebbind(r4dData.r4d[idx], 'timeMeeting');
+            });
+            $('#r4dTable .fa-trash').off().on('click', function (idx) { // Lösche Eintrag
+              var idx = Number($(this).prop('id').replace('r4dtrash-', ''));
+              r4dData.r4d.splice(idx, 1)
+              initR4dTable();
             });
           }
         };
-      })();
+      };
 
       function initDialog(r4dData) {
-        r4dTable.initR4dTable(r4dData);
+        r4dTable(r4dData).initR4dTable();
         $('#addR4d').off().on('click', function () {
           var r = {
             id: null,
@@ -125,21 +177,18 @@
             dateCreate: null,
             dateShipping: null,
             idIsmed3: null,
+            dateDate: null,
+            dateTime: null,
+            helpdesk: null,
           };
           r4dData.r4d.push(r);
-          r4dTable.initR4dTable(r4dData);
+          r4dTable(r4dData).initR4dTable();
         });
 
         $('#addR4d').toggle(!readonly);
-//        if (readonly) {
-//          $('#addR4d').hide();
-//        }
-//        else{
-//          $('#addR4d').show();
-//        }
-        $('#isReadonly').off().on('change', function (evt) {
+
+        $('#isReadonly').off().on('change', function (evt) { // just for test
           var checked = $(evt.target).prop('checked');
-          console.log(checked);
           readonly = checked;
           initDialog(r4dData);
         })

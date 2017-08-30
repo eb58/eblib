@@ -16,7 +16,7 @@ var dlgMimaAssignDocuments = function (opts) {
     }
 
     function initMimaGrid(mimas) {
-      var mimaTblData = _.map(mimas, function (o) {
+      var mimaTblData = mimas.map(function (o) {
         return [o.id, utils.getEntryType(o), utils.formatIpName(o), o.applicantName, o.applicantReference,
           o.servicerendererName, utils.getServiceType(o), o.packageName, utils.formatPerformerName(o)];
       });
@@ -48,7 +48,7 @@ var dlgMimaAssignDocuments = function (opts) {
     }
 
     function initDoclist(docs) {
-      var docsdata = _.map(docs, function (o) {
+      var docsdata = docs.map(function (o) {
         return [o.crypteddocid, o.name, o.tab.name, o.doctype.doctypetext, o.extension, o.docdate, ''];
       });
       var actions = {

@@ -392,7 +392,7 @@ var tblopts = {
 };
 
 function getTableDataFromResult(result) {
-  return _.map(result, function (o) {
+  return result.map(function (o) {
     return [
       o.type,
       o.id,

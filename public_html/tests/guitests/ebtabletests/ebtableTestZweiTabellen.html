@@ -17,9 +17,16 @@
     <script src="/js/eblib/ebtable.js"></script>
     <script src="/data/infoData.js"></script>
     <script>
-      var tblData1 = mx(_.map(adata.workorderComments, function (o) {
-        return _.values(o);
-      })).cols([2, 4, 5]);
+            "workorderCommentsId": 9,
+      "workorderid": 50000005139,
+      "creationDate": "11.07.2013",
+      "author": 50000000055000,
+      "authorName": "Eins Gutachter",
+      "addComment": "uns jetzt sts"
+
+      var tblData1 = adata.workorderComments.map(function (o) {
+        return [o.creationDate, o.authorName. o.addComment};
+      });
       var tblData2 = tblData1.slice(0);
 
       $(document).ready(function () {

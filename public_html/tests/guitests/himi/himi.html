@@ -274,7 +274,7 @@
       }
 
       function initHimiTable(himis) {
-        var himidata = _.map(himis, function (h) {
+        var himidata = himis.map(function (h) {
           var answ = _.findWhere(answs, {'answer-id': h['answer-id']});
           var answtext = answ ? answ['answer-text'] : '';
           return [h.digital, h['lfd-nr'], h.number + ' ### ' + h.text + ' ### ' + answtext, h.qas];
@@ -286,7 +286,7 @@
       }
 
       function initQasTable(qas) {
-        var qasdata = _.map(qas, function (qa) {
+        var qasdata = qas.map(function (qa) {
           var answ = _.findWhere(answs, {'answer-id': qa['answer-id']});
           var answtext = answ ? answ['answer-text'] : '';
           return [qa.digital, qa['question-number'], qa['question-text'], qa['motivation-question'], answtext, qa['motivation-answer']];

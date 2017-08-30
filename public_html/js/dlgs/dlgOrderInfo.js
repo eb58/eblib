@@ -9,6 +9,8 @@ var dlgOrderInfo = function (opts, data) {
         <div id='workorderComments'></div>\n\
         <h1>Ergebnis</h1>\n\
         <div id='resulttext' style='width:100%; height:75px; overflow-y:auto; border:1px solid #aaa; padding:3px;'></div>\n\
+        <div id='xxx' style='width:100%; height:75px; overflow-y:auto; border:1px solid #aaa; padding:3px; display:none'></div>\n\
+        <button id='test'>test</button>\n\
     </div>");
   var defopts = {
     open: function ( ) {
@@ -29,17 +31,21 @@ var dlgOrderInfo = function (opts, data) {
         rowsPerPage: 1000, // all?
         saveState: false
       };
-      var tblData = mx(_.map(data.workorderComments, function (o) {
-        return _.values(o);
-      })).cols([1, 2, 3]);
+      var tblData = data.workorderComments.map(function (o) {
+        return [o.verfasser, o.Hinweis, o.datum];
+      })
 
       $('#workorderComments').ebtable(infoopts, tblData);
       $('#workorderComments .ctrl').hide();
       $('#addComment').text(data.addComment ? data.addComment : '');
       $('#resulttext').text(data.resulttext ? data.resulttext : '');
+      $('#test').on('click', function () {
+        $('#xxx').show();
+      })
     },
     title: 'Info Auftrag - ' + opts.name + ' (' + opts.wid + ')',
-    height: 600, width: 600,
+    height:'auto',
+    width: 600,
     closeText: 'Schlie\u00dfen',
     modal: true,
     buttons: {

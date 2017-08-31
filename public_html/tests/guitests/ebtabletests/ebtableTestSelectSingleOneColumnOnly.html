@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/ebtable.css">
     <style>
       * { font-family:Arial; color: black; font-size: 12px; }
-      #grid .ebtable .ctrl { display: none}
+      #xgrid .ebtable .ctrl { display: none}
       #grid .ebtable thead { display: none}
 
     </style>
@@ -45,18 +45,21 @@
 
       var opts = {
         debug: true,
-        rowsPerPage: 200,
+        rowsPerPage: 100,
         bodyWidth: '200px',
         columns: [
           {name: "mdkid", invisible: true},
-          {name: "Mdk"},
+          {name: "Mdkname"},
         ],
-        selectionCol: {singleSelection: true},
-        flags: {filter: false, pagelenctrl: false, config: false, withsorting: false},
+        selectionCol: {singleSelection: true, selectOnRowClick: true},
+        flags: {filter: false, withsorting: false, ctrls: false},
       };
       var grid;
       $().ready(function () {
         grid = $('#grid').ebtable(opts, mdks.map(mdk => [mdk.mdkid, mdk.mdkname]));
+        grid.setSelectedRows(function(row){
+          return row[0] === 11
+        })
       });
     </script>
   </head>

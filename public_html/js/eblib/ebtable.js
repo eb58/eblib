@@ -221,15 +221,22 @@
           $(selgridid + '#check' + rowNr).prop('checked', b);
         }
         myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData);
-        $(selgridid + '#ctrlInfo').html(ctrlInfo());
+        $(selgridid + ' #ctrlInfo').html(ctrlInfo());
       },
       selectRows: function selectRows(event) { // select row
         util.log('selectRows', event);
+        if (!myopts.selectionCol)
+          return;
+
         var checked = $(event.target).prop('checked');
         if (event.target.id === 'checkAll') {
-          tblData.forEach(function (row, rowNr) {
-            selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
-          });
+          if (checked || !myopts.selectionCol.onUnselectAll) {
+            tblData.forEach(function (row, rowNr) {
+              selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
+            });
+          } else {
+            selectionFcts.deselectAllRows();
+          }
         } else {
           if (myopts.selectionCol && myopts.selectionCol.singleSelection) {
             tblData.forEach(function (row, rowNr) {
@@ -243,7 +250,11 @@
         }
       },
       deselectAllRows: function deselectAllRows() {
-        if (myopts.selectionCol && myopts.selectionCol.onSelection) {
+        if (!myopts.selectionCol)
+          return;
+        if (myopts.selectionCol.onUnselectAll) {
+          myopts.selectionCol.onUnselectAll();
+        } else if (myopts.selectionCol.onSelection) {
           origData.forEach(function (row, rowNr) {
             if (row.selected) {
               selectionFcts.selectRow(rowNr, row, false);
@@ -265,11 +276,16 @@
           return row.selected;
         });
       },
-      unselect: function unselect() {
+      setSelectedRows: function setSelectedRows(predicateFct) {
         tblData.forEach(function (row) {
-          row.selected = false;
+          row.selected = predicateFct(row);
         });
         redraw(pageCur);
+      },
+      unselect: function unselect() {
+        selectionFcts.setSelectedRows(function () {
+          return false;
+        });
       }
     };
 
@@ -391,6 +407,7 @@
         clearFilter: false,
         colsResizable: false,
         jqueryuiTooltips: true,
+        ctrls: true,
       },
       bodyHeight: Math.max(200, $(window).height() - 100),
       bodyWidth: '',
@@ -455,7 +472,7 @@
     function initGrid(a) {
       var tableTemplate = _.template("\
         <div class='ebtable'>\n\
-          <div class='ctrl'>\n\
+          <div class='ctrl' <%=ctrlStyle%>>\n\
             <div id='ctrlLength' style='float: left;'><%= selectLen  %></div>\n\
             <div id='ctrlConfig' style='float: left;'><%= configBtn  %></div>\n\
             <div id='ctrlClearFilter' style='float: left;'><%= clearFilter  %></div>\n\
@@ -467,7 +484,7 @@
               <tbody><%= data %></tbody>\n\
             </table>\n\
           </div>\n\
-          <div class='ctrl'>\n\
+          <div class='ctrl' <%=ctrlStyle%>>\n\
             <div id='ctrlInfo'    style='float: left;' class='ui-widget-content'><%= info %></div>\n\
             <div id='ctrlAddInfo' style='float: left;' class='ui-widget-content'><%= addInfo %></div>\n\
             <div id='ctrlPage2'   style='float: right;' ><%= browseBtns %></div>\n\
@@ -482,6 +499,7 @@
         browseBtns: pageBrowseCtrl(),
         info: '', //ctrlInfo(),
         addInfo: '', //ctrlAddInfo(),
+        ctrlStyle: myopts.flags.ctrls ? '' : 'style="display:none"',
         bodyWidth: myopts.bodyWidth,
         bodyHeight: myopts.bodyHeight,
         tblClass: myopts.flags.colsResizable ? 'class="ebtablefix"' : ''
@@ -513,7 +531,7 @@
           var thwidth = coldef.width ? 'width:' + coldef.width + ';' : '';
           var thstyle = coldef.css || coldef.width ? ' style="' + thwidth + ' ' + (coldef.css ? coldef.css : '') + '"' : '';
           var hdrTemplate = '\
-            <th id="<%=colid%>"<%=thstyle%>  >\n\
+            <th id="<%=colid%>"<%=thstyle%> >\n\
               <div style="display:inline-flex">\n\
                 <span style="float:left" class="ui-icon ui-icon-blank"></span>\n\
                 <%=colname%>\n\
@@ -636,6 +654,9 @@
       $(selgridid + '#data tbody').html(tableData(pageCur));
       $(selgridid + '#data input[type=checkbox]').off().on('change', selectionFcts.selectRows);
       $(selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
+      myopts.selectionCol && myopts.selectionCol.selectOnRowClick && $(selgridid + '#data tr td:not(:first-child)').off().on('click', function (evt) {
+        $(event.target).parent().find('input').trigger('click');
+      });
       myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }
@@ -764,8 +785,10 @@
       setFilterValues: filteringFcts.setFilterValues,
       iterateSelectedValues: selectionFcts.iterateSelectedValues,
       getSelectedRows: selectionFcts.getSelectedRows,
+      setSelectedRows: selectionFcts.setSelectedRows,
       unselect: selectionFcts.unselect,
       saveSessionState: sessionStateUtil.saveSessionState,
+
       toggleGroupIsOpen: function (groupid) {
         origData.groupsdata[groupid].isOpen = !origData.groupsdata[groupid].isOpen;
         filteringFcts.filterData();

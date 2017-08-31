@@ -74,7 +74,7 @@
         if (bc > myopts.maxByte) {
           $.alert('Warnung', 'Maximal erlaubte Textl\u00e4nge erreicht.\nText wird abgeschnitten.');
           while ((bc = ebutils.byteCount(s)) > myopts.maxByte) {
-            s = s.slice(0, -1);
+            s = s.slice(0, -Math.max(1,Math.floor((bc-myopts.maxByte)/2)));
           }
           $(this).val(s);
         }

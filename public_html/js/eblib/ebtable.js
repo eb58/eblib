@@ -57,7 +57,7 @@
           bodyWidth: $(selgridid + '.ebtable').width(),
           colwidths: util.getColWidths()
         };
-        var state = _.extend({}, stateGeneral, myopts.flags.colsResizable ? stateWidth : {})
+        var state = _.extend({}, stateGeneral, myopts.flags.colsResizable ? stateWidth : {});
         return JSON.stringify(state);
       },
       saveState: function saveState() {
@@ -220,7 +220,7 @@
           util.log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
           $(selgridid + '#check' + rowNr).prop('checked', b);
         }
-        myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData);
+        myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData, b);
         $(selgridid + ' #ctrlInfo').html(ctrlInfo());
       },
       selectRows: function selectRows(event) { // select row
@@ -619,7 +619,7 @@
       var startRow = Math.min(myopts.rowsPerPage * pageCur + 1, tblData.length);
       var endRow = Math.min(startRow + myopts.rowsPerPage - 1, tblData.length);
       var filtered = origData.length === tblData.length ? '' : _.template(util.translate('(<%=len%> Eintr\u00e4ge insgesamt)'))({len: origData.length});
-      var cntSelected = (!cntSel || !myopts.selectionCol || myopts.selectionCol.singleSelection) ? '' : _.template(util.translate('(<%=len%> ausgewählt)'))({len: cntSel});
+      var cntSelected = (!cntSel || !myopts.selectionCol || myopts.selectionCol.singleSelection) ? '' : _.template(util.translate('(<%=len%> ausgew\u00e4hlt)'))({len: cntSel});
       var templ = _.template(util.translate("<%=start%> bis <%=end%> von <%=count%> Zeilen <%=filtered%> <%=cntsel%>"));
       var label = templ({start: startRow, end: endRow, count: tblData.length, filtered: filtered, cntsel: cntSelected});
       return label;
@@ -753,7 +753,7 @@
       });
       $(selgridid + '#clearFilterBtn').button().off().on('click', function () {
         $(selgridid + 'thead input[type=text]').val('');
-        myopts.reloadData && myopts.reloadData()
+        myopts.reloadData && myopts.reloadData();
         filteringFcts.filtering();
       });
       $(selgridid + ' table tbody tr').off().on('click', function () {

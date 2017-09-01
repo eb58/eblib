@@ -19,7 +19,9 @@
   text-overflow: ellipsis;
   min-width: 20px;
 }
-.ebtable #data th div .ui-icon { transform: scale(1.0); margin: 0px; padding: 0px; width:11px; }
+.ebtable #data th div .ui-icon ui-icon-blank{ transform: scale(1.0); margin: 0px; padding: 0px; width:11px; }
+.ebtable #data th div .ui-icon  ui-icon-arrow-1-s{ transform: scale(1.0); margin: 0px; padding: 0px; width:11px; }
+.ebtable #data th div .ui-icon  ui-icon-arrow-1-n{ transform: scale(1.0); margin: 0px; padding: 0px; width:11px; }
 .ebtable #data th div{ height: 16px;}
 .ebtable #data th input[type=text], .ebtable #data th select {  width: 95%;  box-sizing: border-box;}
 

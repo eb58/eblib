@@ -15,7 +15,9 @@
     <script>
 
       var data = {
-        test3Textarea: '1\n2\n3\n4\n5\n6\n7\n8\n9\n10'
+        test1Textarea: 'Testfeld11111',
+        test2Textarea: 'Textfeld2\nTextfeld2\nTextfeld2\nTextfeld2\nTextfeld2\nTextfeld2\n',
+        test3Textarea: '1\n2\n3\n4\n5\n6\n7\n8\n9\n10',
       };
 
       $(document).ready(function () {
@@ -32,16 +34,17 @@
         };
         var opts3 = {
           title: {text: 'Noch ein Test', fontSize: '8px', pos: 'bottom'},
-          width: '90%',
+          width: '50%',
           maxByte: 30000,
-          maxNrOfVisibleRows: 10,
+          maxNrOfVisibleRows: 20,
           //disabled:true
         };
-        $('#test1Textarea').ebtextarea(opts1);
-        $('#test2Textarea').ebtextarea(opts2);
-        $('#test3Textarea').ebtextarea(opts3).ebbind(data)
-        $('#btnEnableTextareaField').on('click', function () {
-          $('#test3Textarea').ebtextarea().disable(true);
+        var ta1 = $('#test1Textarea').ebtextarea(opts1).ebbind(data);
+        var ta2 = $('#test2Textarea').ebtextarea(opts2).ebbind(data);
+        var ta3 = $('#test3Textarea').ebtextarea(opts3).ebbind(data);
+        
+        $('#btnDisableTextareaField').on('click', function (evt) {
+          ta3.disable($(evt.target).prop('checked'));
         });
       });
 
@@ -54,6 +57,6 @@
     <div id='test2Textarea'></div>
     <hr>
     <div id='test3Textarea'></div>
-    <button id="btnEnableTextareaField">Enable Field</button>
+    Disable Field:<input id="btnDisableTextareaField" type="checkbox"/>
   </body>
 </html>

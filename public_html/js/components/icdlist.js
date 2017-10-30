@@ -1,4 +1,4 @@
-/* global _, jQuery, datepickerOptions, icddata, icdUtils */ /* jshint multistr: true *//* jshint expr: true */
+/* global _, jQuery, datepickerOptions, icdUtils */ /* jshint multistr: true *//* jshint expr: true */
 (function ($) {
   "use strict";
   $.fn.icdlist = function (icds, opts) {
@@ -8,18 +8,19 @@
 //	- effective = true 
 //		- icdForAssoc = true  -> ZUS  die eine Diagnose oben auf Reiter
 //		- icdForAssoc = true oder false -> AU
+//		- icd is founding = true oder false -> AU
 
     var predefinedFilters = {
       ZU: [{col: 2, searchtext: '0'}, {col: 3, searchtext: '0'}], // ZUS unten 'Vorangegangen Diagnosen'          : effective:false,
-      ZO: [{col: 2, searchtext: '1'}, {col: 3, searchtext: '1'}], // ZUS oben  'Diagnose zur Zusammenhängigkeit'  : effective:true, icdForAssoc:true
+      ZO: [{col: 2, searchtext: '1'}, {col: 3, searchtext: '1'}], // ZUS oben  'Diagnose zur ZusammenhÃ¤ngigkeit'  : effective:true, icdForAssoc:true
       AU: [{col: 2, searchtext: '1'}], // Au                                                                      : effective:true, icdForAssoc:egal 
-    }
+    };
 
     var invisibleColumns = {
-      ZU: [],
-      ZO: [5],
+      ZU: [7],
+      ZO: [5, 7],
       AU: [1, 2, 5, 6],
-    }
+    };
 
     var defopts = {
       additem: true,
@@ -40,19 +41,19 @@
           return icd.effective && icd.icdForAssoc;
         });
         if (myopts.isDta) {
-          $('#' + id + ' .ui-icon-circle-plus').hide()
+          $('#' + id + ' .fa-plus-circle').hide();
           if (validIcds4ZO.length > 0 && validIcds4ZO[0].digital) {
             myopts.disable = true;
           }
         }
         if (validIcds4ZO.length > 0) {
-          $('#' + id + ' .ui-icon-circle-plus').hide()
+          $('#' + id + ' .fa-plus-circle').hide();
         } else {
-          $('#' + id + ' .ui-icon-circle-plus').show()
+          $('#' + id + ' .fa-plus-circle').show();
         }
       }
       if (myopts.type === 'ZU' && myopts.isDta) {
-        $('#' + id + ' .ui-icon-circle-plus').hide()
+        $('#' + id + ' .fa-plus-circle').hide();
       }
 
       tbldata = icds.map(function (icd, idx) {
@@ -68,26 +69,28 @@
           icd['text'],
           icd['associated'],
           icd['servicerenderer-fullname'],
+          icd['founding'],
           'trash'
         ];
       });
 
       $('#icd' + id + 'grid').ebtable(tblopts, tbldata);
 
-      $('#' + id + ' .ui-icon-circle-plus').off().on('click', function () {
-        var icdForAssoc = myopts.type === 'ZO'
+      $('#' + id + ' .fa-plus-circle').off().on('click', function () {
+        var icdForAssoc = myopts.type === 'ZO';
         var effective = myopts.type !== 'ZU';
         var newicd = {
           'icd-code-id': null,
-          'icd-code-number': '',
-          'text': '',
+          'icd-code-number': null,
+          'text': null,
           'digital': false,
           'icdForAssoc': icdForAssoc,
           'effective': effective,
           'begin': null,
           'end': null,
           'associated': false,
-          'servicerenderer-fullname': ''
+          'servicerenderer-fullname': '',
+          'founding': false
         };
         icds.push(newicd);
         initTable(icds);
@@ -103,7 +106,7 @@
           var icd = icds[rownr];
           icd[type] = $(elem).val();
           tbldata[rownr] = $(elem).val();
-        })
+        });
       });
       $('#' + id + ' .diagnosecode').each(function (idx, elem) {
         $(elem).off().on('blur', function (evt) {
@@ -117,14 +120,14 @@
             icds[n]['icd-code-id'] = icdCode.id;
             icds[n]['icd-code-number'] = icdCodeNumber;
             icds[n]['text'] = icdCodeNumber === '---.-' ? ('#' + id + 'icdtext-' + n).val() : icdCode.text;
-            $('#' + id + 'icdtext-' + n).val(icdCode.text)
+            $('#' + id + 'icdtext-' + n).val(icdCode.text);
           }
         });
       });
-      $('#' + id + ' span.ui-icon-search').each(function (idx, elem) {
+      $('#' + id + ' i.fa-search').each(function (idx, elem) {
         $(elem).off().on('click', function (evt) {
           var n = Number(evt.target.id.replace(/.*-/, ''));
-          dlgIcd(icddata, function (code, text, icdid) {
+          dlgIcd( icdUtils.getIcdData(), function (code, text, icdid) {
             icds[n] = icds[n] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
             icds[n]['icd-code-id'] = icdid;
             icds[n]['icd-code-number'] = code;
@@ -141,52 +144,55 @@
       });
       $('#' + id + ' .diagnosetext').each(function (idx, elem) {
         $(elem).off().on('change', function (evt) {
-          var arr = evt.target.id.split('-');
-          var n = Number(arr[1]);
+          var n = Number(evt.target.id.replace(/.*-/, ''));
           icds[n]['text'] = $(elem).val();
         });
       });
       $('#' + id + ' .arzt').each(function (idx, elem) {
         $(elem).off().on('change', function (evt) {
-          var arr = evt.target.id.split('-');
-          var n = Number(arr[1]);
+          var n = Number(evt.target.id.replace(/.*-/, ''));
           icds[n]['servicerenderer-fullname'] = $(elem).val();
         });
       });
       $('#' + id + ' .zshg').each(function (idx, elem) {
-        $(elem).off().on('change', function (evt) {
-          var arr = evt.target.id.split('-');
-          var n = Number(arr[1]);
+        $(elem).off().on('click', function (evt) {
+          var n = Number(evt.target.id.replace(/.*-/,''));
           icds[n]['associated'] = $(elem).prop('checked');
         });
       });
-      $('#' + id + ' span.ui-icon-trash').each(function (idx, elem) {
+      $('#' + id + ' .founding').each(function (idx, elem) {
         $(elem).off().on('click', function (evt) {
-          var arr = evt.target.id.split('-');
-          var n = Number(arr[1]);
+          var n = Number(evt.target.id.replace(/.*-/,''));
+          icds[n]['founding'] = $(elem).prop('checked');
+        });
+      });
+      $('#' + id + ' i.fa-trash-o').each(function (idx, elem) {
+        $(elem).off().on('click', function (evt) {
+          var n = Number(evt.target.id.replace(/.*-/, ''));
           icds.splice(n, 1);
           initTable(icds);
         });
       });
-      $('#icd' + id + 'grid .ebtable td:nth-child(1) input').css('width', '70%')
-      $('#icd' + id + 'grid .ebtable td:nth-child(2) input').css('width', '70%')
-      $('#icd' + id + 'grid .ebtable td:nth-child(3) input').css('width', '70%')
-      $('#icd' + id + 'grid .ebtable td:nth-child(4) input').css('width', '99%')
-      $('#icd' + id + 'grid .ebtable td:nth-child(5) input').css('width', '99%')
-      $('#icd' + id + 'grid .ebtable td:nth-child(6) input').css('width', '99%')
-      $('#icd' + id + 'grid .ebtable td:nth-child(1)').css('width', '90px')
-      $('#icd' + id + 'grid .ebtable td:nth-child(2)').css('width', '90px')
-      $('#icd' + id + 'grid .ebtable td:nth-child(3)').css('width', '80px')
-      $('#icd' + id + 'grid .ebtable td:nth-child(5)').css('width', '50px')
-      $('#icd' + id + 'grid .ebtable td:nth-child(7)').css('width', '16px')
-      $('#icd' + id + 'grid .ebtable .ui-datepicker-trigger').css('vertical-align', 'bottom')
-      $('#icd' + id + 'grid .ebtable .ctrl').hide()
+      $('#icd' + id + 'grid .ebtable td:nth-child(1) input').css('width', '66%');
+      $('#icd' + id + 'grid .ebtable td:nth-child(2) input').css('width', '66%');
+      $('#icd' + id + 'grid .ebtable td:nth-child(3) input').css('width', '70%');
+      $('#icd' + id + 'grid .ebtable td:nth-child(4) input').css('width', '99%');
+      $('#icd' + id + 'grid .ebtable td:nth-child(5) input').css('width', '99%');
+      $('#icd' + id + 'grid .ebtable td:nth-child(6) input').css('width', '99%');
+      $('#icd' + id + 'grid .ebtable td:nth-child(7) input').css('width', '40%');
+      $('#icd' + id + 'grid .ebtable td:nth-child(1)').css('width', '105px');
+      $('#icd' + id + 'grid .ebtable td:nth-child(2)').css('width', '105px');
+      $('#icd' + id + 'grid .ebtable td:nth-child(3)').css('width', '90px');
+      $('#icd' + id + 'grid .ebtable td:nth-child(5)').css('width', '50px');
+      $('#icd' + id + 'grid .ebtable td:nth-child(7)').css('width', '16px');
+      $('#icd' + id + 'grid .ebtable td:nth-child(8)').css('width', '16px');
+      $('#icd' + id + 'grid .ebtable .ctrl').hide();
 
       var invisCols = invisibleColumns[myopts.type];
       invisCols.forEach(function (col) {
-        $('#icd' + id + 'grid .ebtable th:nth-child(' + col + ')').css('display', 'none')
-        $('#icd' + id + 'grid .ebtable td:nth-child(' + col + ')').css('display', 'none')
-      })
+        $('#icd' + id + 'grid .ebtable th:nth-child(' + col + ')').css('display', 'none');
+        $('#icd' + id + 'grid .ebtable td:nth-child(' + col + ')').css('display', 'none');
+      });
 
       if (myopts.disable) {
         $('#' + id + ' input').prop('disabled', true);
@@ -197,7 +203,7 @@
         $('#' + id + ' input:checkbox').prop('disabled', false);
         $('#' + id + ' img.ui-datepicker-trigger').hide();
       }
-    }
+    };
 
     var renderer = {
       audatefrom: function (data, row) {
@@ -207,20 +213,23 @@
         return '<input class="datum" type="text" id="' + id + 'audateuntil-' + row[0] + '" value="' + data + '">';
       },
       diagnose: function (data, row) {
-        return '<input class="diagnosecode" type="text" id="' + id + 'icdcode-' + row[0] + '" value="' + data + '">' + (myopts.disable || row[1].digital ? '' : '<span id="icdsearch-' + row[0] + '" class="ui-icon ui-icon-search">');
+        return '<input class="diagnosecode" type="text" id="' + id + 'icdcode-' + row[0] + '" value="' + data + '">' + (myopts.disable || row[1].digital ? '' : '&nbsp;<i id="icdsearch-' + row[0] + '" class="fa fa-search fa-lg"></i>');
       },
       diagnosetext: function (data, row) {
-        return '<input class="diagnosetext" type="text" id="' + id + 'icdtext-' + row[0] + '" value="' + data + '">'
+        return '<input class="diagnosetext" type="text" id="' + id + 'icdtext-' + row[0] + '" value="' + data + '">';
       },
       zshg: function (data, row) {
-        return '<input class="zshg" type="checkbox" id="' + id + 'zshg-' + row[0] + '" value="' + data + '">'
+        return '<input class="zshg" type="checkbox" id="' + id + 'zshg-' + row[0] + '" ' +  (data ?' checked="true"':'') + '">';
+      },
+      founding: function (data, row) {
+        return '<input class="founding" type="checkbox" id="' + id + 'founding-' + row[0] + '" ' +  (data ?' checked="true"':'') + '">';
       },
       arzt: function (data, row) {
-        return '<input class="arzt" type="text" id="' + id + 'arzt-' + row[0] + '" value="' + data + '">'
+        return '<input class="arzt" type="text" id="' + id + 'arzt-' + row[0] + '" value="' + data + '">';
       },
       trash: function (data, row) {
         var isZusAU = myopts.type === 'AU' && row[1].effective && row[1].icdForAssoc;
-        return row[1].digital || myopts.disable || isZusAU ? '<span class="ui-icon ui-icon-blank"></span>' : '<span id="' + id + 'icdtrash-' + row[0] + '" class="ui-icon ui-icon-trash"></span>';
+        return row[1].digital || myopts.disable || isZusAU ? '<span>&nbsp;</span>' : '&nbsp;<i id="' + id + 'icdtrash-' + row[0] + '" class="fa fa-trash-o fa-lg"></i>';
       },
     };
 
@@ -238,6 +247,7 @@
         {name: 'Diagnosetext', render: renderer.diagnosetext},
         {name: 'Zshg', render: renderer.zshg},
         {name: 'Arzt', render: renderer.arzt},
+        {name: 'AU begr\u00fcndend', render: renderer.founding},
         {name: '', render: renderer.trash},
       ],
       afterRedraw: afterRedraw,
@@ -246,7 +256,7 @@
 
     this.id = id;
     (function (a) {
-      var addBtn = myopts.disable || (myopts.type !== 'AU' && myopts.isDta) ? '' : '<span class="ui-icon ui-icon-circle-plus"></span>';
+      var addBtn = myopts.disable || (myopts.type !== 'AU' && myopts.isDta) ? '' : '<i class="fa fa-plus-circle fa-lg"></i>';
       var s = _.template('\
         <div>\n\
           <div id="icd<%=id%>grid"></div>\n\
@@ -257,5 +267,5 @@
     })(this);
 
     afterRedraw();
-  }
+  };
 })(jQuery);

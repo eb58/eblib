@@ -1,7 +1,7 @@
 /* global ebutils, _, jQuery*/ /* jshint multistr: true */
 
 (function ($) {
-  "use strict";
+  'use strict';
 
   $.fn.ebtextarea = function (opts) {
     var id = this[0].id;
@@ -15,7 +15,8 @@
       height: '',
       disabled: false,
       maxNrOfVisibleRows: 10,
-      margin:'8px 0px 0px 0px',
+      margin: '8px 0px 0px 0px',
+      charsNotAllowed: /[^\S\n\r\t\x20-\xFF]+/,
     };
     var myopts = $.extend({}, defopts, opts);
 
@@ -26,12 +27,37 @@
         if (cntNL >= $ta.prop('rows') || cntNL <= myopts.maxNrOfVisibleRows) {
           $('#' + id + ' textarea').prop('rows', Math.max(myopts.nrRows, Math.min(cntNL, myopts.maxNrOfVisibleRows)));
         }
+      },
+      handleChanges: function () {
+        setTimeout(function () {
+          var ta = $('#' + id + ' textarea');
+          var s = ta.val();
+          var msg = '';
+          
+          if (s.match(myopts.charsNotAllowed)) { 
+            s = s.replace(myopts.charsNotAllowed, '');
+            ta.val(s);
+          }
+          
+          var bc = ebutils.byteCount(s);
+          if (bc > myopts.maxByte) { 
+            while ((bc = ebutils.byteCount(s)) > myopts.maxByte) {
+              s = s.slice(0, -Math.max(1, Math.floor((bc - myopts.maxByte) / 2)));
+            }
+            ta.val(s);
+            msg += 'Maximal erlaubte Textl\u00e4nge erreicht.\nText wurde abgeschnitten.\n\n';
+          }
+          
+          msg && $.alert('Warnung', msg);
+          api.setTextAreaCounter();
+          utils.adjustVisibleHeight()
+        }, 0);
       }
     }
 
     var api = {
       setTextarea: function setTextarea(s) {
-        $('#' + id + ' textarea').text(s||'');
+        $('#' + id + ' textarea').text(s || '');
         utils.adjustVisibleHeight();
         return this;
       },
@@ -68,19 +94,10 @@
     if (!$('#' + id + ' textarea').length) {
       $(this).html(s);
       $('#' + id + ' textarea').prop('disabled', myopts.disabled)
-      $('#' + id + ' textarea').on("keyup", function (evt) {
-        var s = $('#' + id + ' textarea').val();
-        var bc = ebutils.byteCount(s);
-        if (bc > myopts.maxByte) {
-          $.alert('Warnung', 'Maximal erlaubte Textl\u00e4nge erreicht.\nText wird abgeschnitten.');
-          while ((bc = ebutils.byteCount(s)) > myopts.maxByte) {
-            s = s.slice(0, -Math.max(1,Math.floor((bc-myopts.maxByte)/2)));
-          }
-          $(this).val(s);
-        }
-        api.setTextAreaCounter();
-        utils.adjustVisibleHeight()
-      });
+      $('#' + id + ' textarea')
+        .off()
+        .on('keyup', utils.handleChanges)
+        .on('paste', utils.handleChanges);
       api.setTextAreaCounter();
       utils.adjustVisibleHeight();
       myopts.title && $('#' + id + ' .ebtextareatitle').css('font-size', myopts.title.fontSize || 8);

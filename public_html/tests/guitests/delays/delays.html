@@ -35,8 +35,8 @@
     <script src='/js/eblib/ebtable.js'></script>  
 
 
-    <script src='/data/reason4delay/lists.js'></script>    
-    <script src='/data/reason4delay/data1.js'></script>    
+    <script src='/data/delays/lists.js'></script>    
+    <script src='/data/delays/data1.js'></script>    
 
     <script>
 
@@ -104,7 +104,7 @@
             {name: "Erfassung", width: '70px'},
             {name: "Erstellung", width: '70px'},
             {name: "Versand", width: '70px'},
-            {name: "Termin", render: renderers.termin, width: '200px', invisible: !r4dData.au },
+            {name: "Termin", render: renderers.termin, width: '200px', invisible: !r4dData.au},
             {name: "ISmed3-Id", width: '30px'},
             {name: "", render: renderers.deleteItem, width: '16px'},
           ],
@@ -149,6 +149,10 @@
             $('#r4dTable .r4d-helpdeskMeeting').each(function (idx, elem) {
               var idx = Number($(elem).prop('id').replace('helpdeskMeeting-', ''));
               $(elem).ebdropdown({disabled: readonly, width: '200px'}, ddlists.helpdeskList).ebbind(r4dData.r4d[idx], 'idhelpdeskMeeting');
+              $(elem).prop('title', 'aaaa' + idx);
+              $(elem).tooltip({
+                show: { delay: 2000}
+              });
             });
             $('#r4dTable .r4d-dateMeeting').each(function (idx, elem) {
               var idx = Number($(elem).prop('id').replace('dateMeeting-', ''));

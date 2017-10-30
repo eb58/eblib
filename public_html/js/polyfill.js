@@ -43,6 +43,8 @@ if (typeof $ !== 'undefined')
         },
         title: title,
         modal: true,
+        height: 'auto',
+        width: 'auto',
         closeText: 'Schlie\u00dfen'
       }).html('<br>' + message.replace(/\n/g, '<br>'));
     }
@@ -71,6 +73,7 @@ if (typeof $ !== 'undefined')
         },
         title: title,
         modal: true,
+        height: 'auto',
         closeText: 'Schlie\u00dfen'
       }).html('<br>' + question.replace(/\n/g, '<br>'));
     }

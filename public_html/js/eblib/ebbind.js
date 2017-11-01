@@ -11,15 +11,15 @@
       this.val(data[key]).off().on('change', function () {
         data[key] = self.val();
         onChange && onChange(self);
-        if( $(this).prop('class').contains('hasDatepicker') && data[key]==='' ) {
-          data[key] = null
+        if( $(this).prop('class').contains('hasDatepicker') && data[key].trim()==='' ) {
+          data[key] = null;
         }
         console.log('text changed ' + id, data[key]);
       }).on('keyup', function () {
         data[key] = self.val();
         onChange && onChange(self);
-        if( $(this).prop('class').contains('hasDatepicker') && data[key]==='' ) {
-          data[key] = null
+        if( $(this).prop('class').contains('hasDatepicker') && data[key].trim()==='' ) {
+          data[key] = null;
         }
         console.log('text keyup ' + id, data[key]);
       });
@@ -50,10 +50,10 @@
       });
     } else if ($('textarea', this).length) {
       var $ta = $('textarea', this);
-      this.setTextarea(data[key]).on('keyup', function () {
+      this.val(data[key]).on('keyup', function () {
         data[key] = $ta.val().trim();
         onChange && onChange(self);
-        console.log('textarea changed ' + id);
+        console.log('textarea changed --- id:' + id);
       });
       this.setTextAreaCounter();
     } else if ($('.ebselect', this).length) {

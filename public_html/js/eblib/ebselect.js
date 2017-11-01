@@ -26,7 +26,7 @@
     var myopts = $.extend({}, defopts, opts);
 
     this.id = id;
-    myopts.values = myopts.values.map(function (key, val) {
+    myopts.values = _.map(myopts.values, function (key, val) {
       return _.isString(key) ? {v: val, txt: key} : key;
     });
     if( selected.length ){
@@ -57,7 +57,7 @@
       return _.pluck($('.ebselect input:checked',self), 'value');
     };
     this.getSelectedValuesAsString = function getSelectedValues() {
-      return this.getSelectedValues().map(function (o, idx) {
+      return _.map(this.getSelectedValues(), function (o, idx) {
         return _.findWhere(myopts.values,{v:parseInt(o)}).txt;
       });
     };

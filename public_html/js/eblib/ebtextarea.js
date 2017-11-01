@@ -66,6 +66,7 @@
       },
       disable: function disable(b) {
         $('#' + id + ' textarea').prop('disabled', b)
+        $('#' + id + ' .ebtextareaboilerplates').toggle(!b);
       },
       val: function val(s) {
         $('#' + id + ' textarea').val(s || '');
@@ -78,12 +79,12 @@
     var top =
       (myopts.title && myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
       (myopts.counter && myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"></span>' : '') +
-      (myopts.boilerplates && myopts.boilerplates.pos === 'top' ? '&nbsp;<i class="ebtextareaboilerplates fa fa-plus-circle" style="font-size: ' + (myopts.boilerplates['font-size'] || '8px') + ';"></i>' : '');
+      (myopts.boilerplates && myopts.boilerplates.pos === 'top' ? '&nbsp;<i class="ebtextareaboilerplates fa fa-plus-circle" title="Textbausteine einfügen" style="font-size: ' + (myopts.boilerplates['font-size'] || '8px') + ';"></i>' : '');
 
     var bottom =
-      (myopts.title && myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '') +
+      (myopts.title && myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
       (myopts.counter && myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '') +
-      (myopts.boilerplates && myopts.boilerplates.pos === 'bottom' ? '&nbsp;<i class="ebtextareaboilerplates fa fa-plus-circle" style="font-size: ' + (myopts.boilerplates['font-size'] || '8px') + ';"></i>' : '');
+      (myopts.boilerplates && myopts.boilerplates.pos === 'bottom' ? '&nbsp;<i class="ebtextareaboilerplates fa fa-plus-circle" title="Textbausteine einfügen" style="font-size: ' + (myopts.boilerplates['font-size'] || '8px') + ';"></i>' : '');
 
     var s = _.template('\
       <div class="ebtextarea">\n\
@@ -116,6 +117,7 @@
         },
         items: myopts.boilerplates.items
       });
+      
       api.setTextAreaCounter();
       utils.adjustVisibleHeight();
       myopts.title && $('#' + id + ' .ebtextareatitle').css('font-size', myopts.title.fontSize || 8);

@@ -1,8 +1,6 @@
 /* global ebutils, _, jQuery*/ /* jshint multistr: true */
-
 (function ($) {
   'use strict';
-
   $.fn.ebtextarea = function (opts) {
     var id = this[0].id;
     var defopts = {
@@ -17,6 +15,14 @@
       maxNrOfVisibleRows: 10,
       margin: '8px 0px 0px 0px',
       charsNotAllowed: /[^\S\n\r\t\x20-\xFF]+/,
+      boilerplates: null, // {  
+      //{
+      //  pos:'top',  
+      //  items:{ 
+      //    1: { name: 'item1', text:'Das ist ein superlanger Text ....' }
+      //    2: { name: 'item2', text:'Das ist noch ein superlangerer Text ....' }
+      //  ];
+      //};
     };
     var myopts = $.extend({}, defopts, opts);
 
@@ -29,54 +35,57 @@
         }
       },
       handleChanges: function () {
-        setTimeout(function () {
-          var ta = $('#' + id + ' textarea');
-          var s = ta.val();
-          var msg = '';
-          
-          if (s.match(myopts.charsNotAllowed)) { 
-            s = s.replace(myopts.charsNotAllowed, '');
-            ta.val(s);
+        var ta = $('#' + id + ' textarea');
+        var s = ta.val();
+        var msg = '';
+
+        if (s.match(myopts.charsNotAllowed)) {
+          s = s.replace(myopts.charsNotAllowed, '');
+          ta.val(s);
+        }
+
+        var bc = ebutils.byteCount(s);
+        if (bc > myopts.maxByte) {
+          while ((bc = ebutils.byteCount(s)) > myopts.maxByte) {
+            s = s.slice(0, -Math.max(1, Math.floor((bc - myopts.maxByte) / 2)));
           }
-          
-          var bc = ebutils.byteCount(s);
-          if (bc > myopts.maxByte) { 
-            while ((bc = ebutils.byteCount(s)) > myopts.maxByte) {
-              s = s.slice(0, -Math.max(1, Math.floor((bc - myopts.maxByte) / 2)));
-            }
-            ta.val(s);
-            msg += 'Maximal erlaubte Textl\u00e4nge erreicht.\nText wurde abgeschnitten.\n\n';
-          }
-          
-          msg && $.alert('Warnung', msg);
-          api.setTextAreaCounter();
-          utils.adjustVisibleHeight()
-        }, 0);
+          ta.val(s);
+          msg += 'Maximal erlaubte Textl\u00e4nge erreicht.\nText wurde abgeschnitten.\n\n';
+        }
+
+        msg && $.alert('Warnung', msg);
+        api.setTextAreaCounter();
+        utils.adjustVisibleHeight()
       }
     }
 
     var api = {
-      setTextarea: function setTextarea(s) {
-        $('#' + id + ' textarea').text(s || '');
-        utils.adjustVisibleHeight();
-        return this;
-      },
       setTextAreaCounter: function setTextAreaCounter() {
         var bc = ebutils.byteCount($('#' + id + ' textarea').val());
         $('#' + id + ' .ebtextareacnt').text('(' + bc + '/' + myopts.maxByte + ')');
       },
       disable: function disable(b) {
         $('#' + id + ' textarea').prop('disabled', b)
+        $('#' + id + ' .ebtextareaboilerplates').toggle(!b);
       },
       val: function val(s) {
-        $('#' + id + ' textarea').val(s);
-        setTextAreaCounter();
+        $('#' + id + ' textarea').val(s || '');
+        api.setTextAreaCounter();
+        utils.adjustVisibleHeight();
         return this;
       },
     }
 
-    var top = (myopts.title && myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '') + (myopts.counter && myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"><span>' : '');
-    var bottom = (myopts.title && myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;&nbsp;</span>' : '') + (myopts.counter && myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '');
+    var top =
+      (myopts.title && myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
+      (myopts.counter && myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"></span>' : '') +
+      (myopts.boilerplates && myopts.boilerplates.pos === 'top' ? '&nbsp;<i class="ebtextareaboilerplates fa fa-plus-circle" title="Textbausteine einfügen" style="font-size: ' + (myopts.boilerplates['font-size'] || '8px') + ';"></i>' : '');
+
+    var bottom =
+      (myopts.title && myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
+      (myopts.counter && myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '') +
+      (myopts.boilerplates && myopts.boilerplates.pos === 'bottom' ? '&nbsp;<i class="ebtextareaboilerplates fa fa-plus-circle" title="Textbausteine einfügen" style="font-size: ' + (myopts.boilerplates['font-size'] || '8px') + ';"></i>' : '');
+
     var s = _.template('\
       <div class="ebtextarea">\n\
         <div><%=top%></div>\n\
@@ -98,11 +107,22 @@
         .off()
         .on('keyup', utils.handleChanges)
         .on('paste', utils.handleChanges);
+      
+      myopts.boilerplates && $.contextMenu({
+        selector: '#' + id + ' .ebtextareaboilerplates',
+        trigger: 'left',
+        callback: function (key) {
+          $('#' + id + ' textarea').val( myopts.boilerplates.items[key].text);
+          utils.handleChanges()
+        },
+        items: myopts.boilerplates.items
+      });
+      
       api.setTextAreaCounter();
       utils.adjustVisibleHeight();
       myopts.title && $('#' + id + ' .ebtextareatitle').css('font-size', myopts.title.fontSize || 8);
       myopts.title && $('#' + id + ' .ebtextareatitle').css('font-weight', myopts.title.fontWeight || 'normal');
-      myopts.counter && $('#' + id + '.ebtextareacnt').css('font-size', myopts.counter.fontSize || 8);
+      myopts.counter && $('#' + id + ' .ebtextareacnt').css('font-size', myopts.counter.fontSize || 8);
       $('#' + id + ' .ebtextarea').css({'margin': myopts.margin});
     }
     return _.extend(this, api);

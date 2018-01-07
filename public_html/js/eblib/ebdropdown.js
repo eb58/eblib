@@ -44,7 +44,7 @@
     }
 
     var init = function init(a) {
-      var options = values.map(function (o) {
+      var options = _.map(values, function (o) {
         var val = typeof o.txt !== 'undefined' ? ' value=' + o.v : '';
         var txt = typeof o.txt !== 'undefined' ? o.txt : o;
         return '<option' + val + '>' + txt + '</option>';

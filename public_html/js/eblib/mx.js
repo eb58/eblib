@@ -147,8 +147,13 @@ var mx = function mx(m, groupdef) {  //groupdef see below
             var fmt = cdef.sortformat ? $.fn.ebtable.sortformats[cdef.sortformat] : undefined;
             var x = fcts.prepareItem(r1, cdef.col, fmt, groups, cdef.sortorder);
             var y = fcts.prepareItem(r2, cdef.col, fmt, groups, cdef.sortorder);
-            var ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
-            //console.log(i, 'ret', ret, "x:", x, " y:", y);
+            var ret = 0;
+            if( typeof x === 'string' && typeof y === 'string' ){
+              ret = x.localeCompare(y);
+            }
+            else{
+              ret = (x < y) ? -1 : ((x > y) ? 1 : 0);
+            }
             if (ret !== 0) {
               var bAsc = !cdef.sortorder || cdef.sortorder.indexOf('desc') < 0;
               return bAsc ? ret : -ret;

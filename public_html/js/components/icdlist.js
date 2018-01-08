@@ -11,8 +11,8 @@
 //		- icd is founding = true oder false -> AU
 
     var predefinedFilters = {
-      ZU: [{col: 2, searchtext: '0'}, {col: 3, searchtext: '0'}], // ZUS unten 'Vorangegangen Diagnosen'          : effective:false,
-      ZO: [{col: 2, searchtext: '1'}, {col: 3, searchtext: '1'}], // ZUS oben  'Diagnose zur ZusammenhÃ¤ngigkeit'  : effective:true, icdForAssoc:true
+      ZU: [{col: 2, searchtext: '0'}, {col: 3, searchtext: '0'}], // ZUS unten 'Vorangegangene Diagnosen'         : effective:false,
+      ZO: [{col: 2, searchtext: '1'}, {col: 3, searchtext: '1'}], // ZUS oben  'Diagnose zur Zusammenhaengigkeit' : effective:true, icdForAssoc:true
       AU: [{col: 2, searchtext: '1'}], // Au                                                                      : effective:true, icdForAssoc:egal 
     };
 
@@ -111,16 +111,23 @@
       $('#' + id + ' .diagnosecode').each(function (idx, elem) {
         $(elem).off().on('blur', function (evt) {
           var icdCodeNumber = evt.target.value.trim().toUpperCase();
-          if (!icdCodeNumber)
-            return;
           var n = Number(evt.target.id.replace(/.*-/, ''));
           var icdCode = icdUtils.getIcdCodeFromNumber(icdCodeNumber);
+          icdCode = icdCode || icdUtils.getIcdCodeFromNumber(icdCodeNumber+'-');
+          icdCode = icdCode || icdUtils.getIcdCodeFromNumber(icdCodeNumber+'.-');
           if (icdCode) {
             icds[n] = icds[n] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
             icds[n]['icd-code-id'] = icdCode.id;
-            icds[n]['icd-code-number'] = icdCodeNumber;
+            icds[n]['icd-code-number'] = icdCode.code;
             icds[n]['text'] = icdCodeNumber === '---.-' ? ('#' + id + 'icdtext-' + n).val() : icdCode.text;
+            $('#' + id + 'icdcode-' + n).val(icdCode.code);
             $('#' + id + 'icdtext-' + n).val(icdCode.text);
+            $('#' + id + 'founding-' + n ).prop('disabled', false );
+          } else{
+            icds[n]['icd-code-id'] = null;
+            icds[n]['icd-code-number'] = icdCodeNumber;
+            icds[n]['text'] = '';
+            $('#' + id + 'founding-' + n ).prop('disabled', true ).prop('checked', false );
           }
         });
       });
@@ -134,6 +141,7 @@
             icds[n]['text'] = code === '---.-' ? $('#icdtext' + n).val() : text;
             $('#' + id + 'icdcode-' + n).val(icds[n]['icd-code-number']);
             $('#' + id + 'icdtext-' + n).val(icds[n]['text']);
+            $('#' + id + 'founding-' + n ).prop('disabled', false );
             return true;
           }, {
             icdCode: $('#' + id + 'icdcode-' + n).val(),
@@ -213,16 +221,22 @@
         return '<input class="datum" type="text" id="' + id + 'audateuntil-' + row[0] + '" value="' + data + '">';
       },
       diagnose: function (data, row) {
-        return '<input class="diagnosecode" type="text" id="' + id + 'icdcode-' + row[0] + '" value="' + data + '">' + (myopts.disable || row[1].digital ? '' : '&nbsp;<i id="icdsearch-' + row[0] + '" class="fa fa-search fa-lg"></i>');
+        var disabled = myopts.disable || row[1].digital;
+        return '<input class="diagnosecode" type="text" id="' + id + 'icdcode-' + row[0] + '" value="' + data + '" ' +  (disabled?'disabled':'') + '>' 
+                + (disabled ? '' : '&nbsp;<i id="icdsearch-' + row[0] + '" class="fa fa-search fa-lg"></i>');
       },
       diagnosetext: function (data, row) {
         return '<input class="diagnosetext" type="text" id="' + id + 'icdtext-' + row[0] + '" value="' + data + '">';
       },
       zshg: function (data, row) {
-        return '<input class="zshg" type="checkbox" id="' + id + 'zshg-' + row[0] + '" ' +  (data ?' checked="true"':'') + '">';
+        return '<input class="zshg" type="checkbox" id="' + id + 'zshg-' + row[0] + '" ' +  (data ?' checked="true"':'') + '>';
       },
       founding: function (data, row) {
-        return '<input class="founding" type="checkbox" id="' + id + 'founding-' + row[0] + '" ' +  (data ?' checked="true"':'') + '">';
+        return '<input class="founding" type="checkbox" id="' 
+                + id + 'founding-' + row[0] + '" ' 
+                + (data ?' checked="true"':'') 
+                + (row[1]['icd-code-id'] ? '' :  ' disabled=true' ) 
+                + '>';
       },
       arzt: function (data, row) {
         return '<input class="arzt" type="text" id="' + id + 'arzt-' + row[0] + '" value="' + data + '">';
@@ -243,9 +257,9 @@
         {name: 'icdcode', invisible: true},
         {name: 'AU seit', render: renderer.audatefrom},
         {name: 'AU bis', render: renderer.audateuntil},
-        {name: 'Code', render: renderer.diagnose},
+        {name: 'ICD-10-Code', render: renderer.diagnose},
         {name: 'Diagnosetext', render: renderer.diagnosetext},
-        {name: 'Zshg', render: renderer.zshg},
+        {name: 'Zusammenhang', render: renderer.zshg},
         {name: 'Arzt', render: renderer.arzt},
         {name: 'AU begr\u00fcndend', render: renderer.founding},
         {name: '', render: renderer.trash},

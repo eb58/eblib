@@ -96,15 +96,15 @@
           }, '');
         }
       };
-      _.extend($.fn.ebtable.lang, {
+      $.extend($.fn.ebtable.lang, {
         'mdk': {
           'Anpassen': 'Spalten verwalten'
         }
       });
 
-      var opts = {
+      var gridopts = {
         sortmaster: [{col: idx.gid}, {col: idx.gtyp}], //[{col:1,sortorder:'asc',sortformat:'date-de'},{col:2,sortorder:'desc'}]
-        sortcolname: 'Tierart',
+        sortcolname: 'Datum',
         columns: [
           {name: "Grouping", invisible: true, technical: true, sortorder: 'asc-fix'},
           {name: "GroupCnt", invisible: true, technical: true},
@@ -132,19 +132,21 @@
         },
         groupdefs: {grouplabel: 0, groupcnt: 1, groupid: 2, groupsortstring: 3, groupname: 4, grouphead: 'GA', groupelem: 'GB'},
         reloadData: function () {
-          grid = $('#grid').ebtable(opts, basketTestdata);
+          var ss = $.fn.ebtable.loadSessionState();
+          gridopts = $.extend(true, {}, gridopts, ss.myopts);
+          grid = $('#grid').ebtable(gridopts, basketTestdata);
         },
         lang: 'en',
       };
       var grid;
       $().ready(function () {
-        grid = $('#grid').ebtable(opts, basketTestdata);
+        grid = $('#grid').ebtable(gridopts, basketTestdata);
         $('#saveGridStatus').on('click', grid.saveSessionState)
         $('#loadGridStatus').on('click', function () {
-          var mixopts = _.extend({}, opts, $.fn.ebtable.loadSessionState());
-          grid = $('#grid').ebtable(mixopts, basketTestdata).setFilterValues(mixopts.filters);
+          var ss = $.extend($.fn.ebtable.loadSessionState());
+          gridopts = $.extend(true, {}, gridopts, ss ? ss.myopts : {});
+          grid = $('#grid').ebtable(gridopts, basketTestdata).setFilterValues(ss.filters);
         })
-
       });
     </script>
   </head>

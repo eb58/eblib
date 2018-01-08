@@ -17,13 +17,16 @@
 
       $(document).ready(function () {
         $('#test1').button().click(function () {
-          ebviewer.view('/docs/test.pdf', 'pdf', {});
+          ebviewer.view('/docs/test.pdf', 'test.pdf', 'pdf', {});
         });
         $('#test2').button().click(function () {
-          ebviewer.view('/docs/test.jpg', 'jpg', {});
+          ebviewer.view('/docs/test.jpg', 'test.jpg','jpg', {});
         });
         $('#test3').button().click(function () {
-          console.log($.confirm('Frage', 'ja?'));
+          ebviewer.view('/docs/test.xml', 'test.xml', 'xml', {});
+        });
+        $('#test4').button().click(function () {
+          ebviewer.view('/docs/test.txt', 'test.txt', 'txt', {});
         });
 
         $("#myDialog").dialog({
@@ -58,7 +61,8 @@
   <body>
     <button id='test1'>TESTPDF</button>
     <button id='test2'>TESTIMG</button>
-    <button id='test3'>xxx</button>
+    <button id='test3'>TESTXML</button>
+    <button id='test4'>TESTTXT</button>
 
     <div id="myDialog">
       <img src="/docs/test.jpg" style='width:95%' alt="Bild!"/>  

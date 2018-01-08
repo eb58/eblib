@@ -20,7 +20,7 @@ var ebviewer = (function () {
     opts = opts || {};
     var defopts = {
       width: 800,
-      height: 900,
+      height: 1000,
       resizable: true,
       dependent: true, /* does the document window depend on its opener? */
       name: opts.crypteddocid ? "doc_" + opts.crypteddocid : docurl, /* internal document window name */
@@ -28,7 +28,8 @@ var ebviewer = (function () {
       y: -1, /* fixed window position (-1 = not fixed) */
       fixPosition: true /* true = fixed position is retrieved from user preferences */
     };
-    var myopts = $.extend({}, defopts, opts, myopts.fixPosition && getPositionFromUserPrefs ? getPositionFromUserPrefs() : {x: -1, y: -1});
+    var myopts = $.extend({}, defopts, opts );
+    var myopts = $.extend({}, myopts, myopts.fixPosition && getPositionFromUserPrefs ? getPositionFromUserPrefs() : {x: -1, y: -1});
     var params = _.template(
       "width=<%=w%>px,\n\
       height=<%=h%>px,\n\

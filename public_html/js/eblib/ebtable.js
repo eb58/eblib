@@ -101,12 +101,10 @@
 
     var sessionStateUtil = (function () {// saving/loading state
       var saveSessionState = function () {
-        var sortcolidx = util.colIdxFromName(myopts.sortcolname);
         sessionStorage[sessionStorageKey] = JSON.stringify({
           pageCur: self.getPageCur(),
-          sortcolname: myopts.sortcolname,
-          sortdirection: myopts.columns[sortcolidx].sortorder,
           filters: filteringFcts.getFilterValues(),
+          myopts: myopts,
           openGroups: getOpenGroups()
         });
       };
@@ -338,10 +336,10 @@
             coldefs.push({col: colidx, sortformat: coldef.sortformat, sortorder: coldef.sortorder});
           }
           coldefs.forEach(function (o) {
-            o.sortorder = myopts.columns[o.col].sortorder || 'desc';
+            o.sortorder = myopts.columns[o.col].sortorder || myopts.sortdirection || 'desc';
           });
           tblData = tblData.sort(tblData.rowCmpCols(coldefs, origData.groupsdata));
-          util.log('sorting', myopts.sortcolname);
+          util.log('sorting',  myopts.sortcolname, JSON.stringify(coldefs));
         }
       }
     };
@@ -531,7 +529,7 @@
           var thwidth = coldef.width ? 'width:' + coldef.width + ';' : '';
           var thstyle = coldef.css || coldef.width ? ' style="' + thwidth + ' ' + (coldef.css ? coldef.css : '') + '"' : '';
           var hdrTemplate = '\
-            <th id="<%=colid%>"<%=thstyle%> >\n\
+            <th id="<%=colid%>"<%=thstyle%> title="<%=tooltip%>" >\n\
               <div style="display:inline-flex">\n\
                 <span style="float:left" class="ui-icon ui-icon-blank"></span>\n\
                 <%=colname%>\n\

@@ -13,17 +13,17 @@
   <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
   <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
   <script src="/vendor/vue-1.0.26/vue.js"></script>
-  <script src="/vendor/vue-1.0.26/vue-eb.js"></script>
+  <script src="/js/vue-eb.js"></script>
   <script src="/js/eblib/ebdropdown.js"></script>  
   <script src="/js/eblib/ebselect.js"></script>  
   <script src="/tests/vueTests/dlgVueTest.js"></script>
   <script>var debug = true;</script>
-  <script src="/data/tableData.js"></script>
+  <script src="/data/mimadata.js"></script>
   <script>
     $(document).ready(function () {
       $('#btnTest').click(function () {
         dlgVueTest({
-          keywords: ['Schlagwort 1', 'Schlagwort 2', 'Schlagwort 3', 'Schlagwort 4', 'Schlagwort 5', 'Schlagwort 6'],
+          keywords: keywords,
           doctabs: doctabs,
           doctypes: doctypes
         });

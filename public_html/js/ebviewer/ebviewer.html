@@ -3,12 +3,12 @@
   <head>
     <title>Viewer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="vendor/jQueryUI-1.12.0/jquery-ui.min.css">
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.min.css">
     <style type="text/css">
       html, body, iframe, div { margin: 0; padding: 0; outline: 0; }
       html, body { height: 100%; width: 100%; cursor: default; }
       #container { z-index: 2; min-height: 100%; height: 100%; min-width: 600px; width: 100%; position: absolute; overflow: hidden; text-align: center; background: #dfdfdf; }     
-      #document { z-index: 3; position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; overflow: hidden; background:url(images/loading.gif) no-repeat center center; background-color: #fff; }
+      #div-document { z-index: 3; position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; overflow: hidden; background:url(images/loading.gif) no-repeat center center; background-color: #fff; }
       #footer { z-index: 80;min-width: 600px; position: absolute; left: 0px; right: 0px; bottom: 0px; height: 50px; background: #aaa; }
       #btns { padding: 5px 10px 5px 10px; float: right; }
     </style>
@@ -20,6 +20,8 @@
       function getEmbedString(docurl, ext) {
         if ($.inArray(ext, ['jpg', 'jepg', 'png', 'gif', 'tiff', 'tif', 'bmp']) >= 0) {
           return "<img id='docframeImg' src='" + docurl + "' style='width:100%'>";
+        } else if ($.inArray(ext, ['xml', 'txt']) >= 0) {
+          return "<embed id='docframePdf' src='" + docurl + ">";
         } else {
           return "<iframe id='docframePdf' src='" + docurl + "' style='width:100%; height:100%'>";
         }
@@ -51,7 +53,7 @@
         });
       }
       $(document).ready(function () {
-        $("#document").css("background", "transparent");
+        $("#div-document").css("background", "transparent");
         var params = window.location.search.replace('?', '').split('|');
         console.log(params);
         var docurl = params[0];
@@ -59,7 +61,7 @@
         var ext = params[2];
         var info = params[3];
         $('title').text('Viewer - ' + name + '.' + ext + ' (' + info + ')');
-        $('#document').html(getEmbedString(docurl, ext));
+        $('#div-document').html(getEmbedString(docurl, ext));
 
         if (ext === 'pdf')
           $('#btnPrintLocal').hide();
@@ -81,7 +83,7 @@
   </head>
   <body>
     <div id='container'>
-      <div style="height:95%" id="document"></div>
+      <div style="height:95%" id="div-document"></div>
     </div>
     <div  id="footer">
       <div style="height:5%" id="btns">

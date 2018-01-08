@@ -1,7 +1,7 @@
 /* global _ ,jQuery*/
 (function ($) {
   "use strict";
-  $.fn.ebbind = function (data, key, onChange ) {
+  $.fn.ebbind = function (data, key, onChange) {
     var id = this[0].id;
     var type = this[0].type;
     var self = this;
@@ -11,14 +11,14 @@
       this.val(data[key]).off().on('change', function () {
         data[key] = self.val();
         onChange && onChange(self);
-        if( $(this).prop('class').contains('hasDatepicker') && data[key].trim()==='' ) {
+        if ($(this).prop('class').contains('hasDatepicker') && data[key].trim() === '') {
           data[key] = null;
         }
         console.log('text changed ' + id, data[key]);
       }).on('keyup', function () {
         data[key] = self.val();
         onChange && onChange(self);
-        if( $(this).prop('class').contains('hasDatepicker') && data[key].trim()==='' ) {
+        if ($(this).prop('class').contains('hasDatepicker') && data[key].trim() === '') {
           data[key] = null;
         }
         console.log('text keyup ' + id, data[key]);
@@ -27,7 +27,7 @@
       this.prop('checked', data[key]).off().on('click', function () {
         data[key] = self.prop('checked');
         onChange && onChange(self);
-        console.log('checkbox changed ' + id, data[key] );
+        console.log('checkbox changed ' + id, data[key]);
       });
     } else if ($('select', this).length) {
       this.setSelectedValue(data[key]).off().on("selectmenuchange", function () {
@@ -53,7 +53,11 @@
       this.val(data[key]).on('keyup', function () {
         data[key] = $ta.val().trim();
         onChange && onChange(self);
-        console.log('textarea changed --- id:' + id);
+        console.log('textarea keyup --- id:' + id);
+      }).on('paste', function () {
+        data[key] = $ta.val().trim();
+        onChange && onChange(self);
+        console.log('textarea paste --- id:' + id);
       });
       this.setTextAreaCounter();
     } else if ($('.ebselect', this).length) {

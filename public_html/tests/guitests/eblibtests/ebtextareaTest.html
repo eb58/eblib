@@ -8,10 +8,7 @@
     <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.min.css"/>
     <link rel="stylesheet" href="/vendor/jQuery-contextmenu/jquery.contextMenu.css">
     <style>
-      * {
-        font-family: roboto, arial;
-        font-size: 12px;
-      }
+      * { font-family: roboto, arial; font-size: 12px; }
     </style>
     <script src="/vendor/underscore-1.8.3/underscore.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
@@ -24,25 +21,16 @@
     <script>
 
       var data = {
-        test1Textarea: 'Testfeld11111',
+        test1Textarea: 'Mario Fehrenbach, 27.11.2017, 10:07 Uhr:\r\näööäöäö\r\nWF-Engine: \"14.02.-16:01 Autodisposition (KH) konnte nicht durchgeführt werden: keine Weiterleitungsregel gefunden\"\r\nAMS023: In der Tabelle ismed_dev.product_reason_relation ist keine Beziehung zwischen Frage d. AG=1000 und Produkt=67 definiert.;Korrekturauftrag',
         test2Textarea: 'Textfeld2\nTextfeld2\nTextfeld2\nTextfeld2\nTextfeld2\nTextfeld2\n',
         test3Textarea: '1\n2\n3\n4\n5\n6\n7\n8\n9\n10',
       };
-
       $(document).ready(function () {
         var opts1 = {
           title: {fontSize: '14px', pos: 'top', text: 'Text1', },
           counter: {fontSize: '8px', pos: 'top'},
           maxByte: 550,
           maxNrOfVisibleRows: 10,
-          boilerplates: {
-            'font-size': '12px',
-            pos: 'top',
-            items: {
-              1: { name: 'Testbaustein1', text: 'Damit Ihr indess erkennt, woher dieser ganze Irrthum gekommen ist, und weshalb man die Lust anklagt und den Schmerz lobet, so will ich Euch Alles eröffnen und auseinander setzen, was jener Begründer der Wahrheit und gleichsam Baumeister des glücklichen Lebens selbst darüber gesagt hat. Niemand, sagt er, verschmähe, oder hasse, oder fliehe die Lust als solche, sondern weil grosse Schmerzen ihr folgen, wenn man nicht mit Vernunft ihr nachzugehen verstehe. Ebenso werde der Schmerz als solcher von Niemand geliebt, gesucht und verlangt, sondern weil mitunter solche Zeiten eintreten, dass man mittelst Arbeiten und Schmerzen eine grosse Lust sich zu verschaften suchen müsse. Um hier gleich bei dem Einfachsten stehen zu bleiben, so würde Niemand von uns anstrengende körperliche Uebungen vornehmen, wenn er nicht einen Vortheil davon erwartete. Wer dürfte aber wohl Den tadeln, der nach einer Lust verlangt, welcher keine Unannehmlichkeit folgt, oder der einem Schmerze ausweicht, aus dem keine Lust hervorgeht?'},
-              2: { name: 'Testbaustein2', text: 'Dagegen tadelt und hasst man mit Recht Den, welcher sich durch die Lockungen einer gegenwärtigen Lust erweichen und verführen lässt, ohne in seiner blinden Begierde zu sehen, welche Schmerzen und Unannehmlichkeiten seiner deshalb warten. Gleiche Schuld treffe Die, welche aus geistiger Schwäche, d.h. um der Arbeit und dem Schmerze zu entgehen, ihre Pflichten verabsäumen. Man kann hier leicht und schnell den richtigen Unterschied treffen; zu einer ruhigen Zeit, wo die Wahl der Entscheidung völlig frei ist und nichts hindert, das zu thun, was den Meisten gefällt, hat man jede Lust zu erfassen und jeden Schmerz abzuhalten; aber zu Zeiten trifft es sich in Folge von schuldigen Pflichten oder von sachlicher Noth, dass man die Lust zurückweisen und Beschwerden nicht von sich weisen darf. Deshalb trifft der Weise dann eine Auswahl, damit er durch Zurückweisung einer Lust dafür eine grössere erlange oder durch Uebernahme gewisser Schmerzen sich grössere erspare.'},
-            },
-          }
         };
         var opts2 = {
           title: {fontSize: '14px', pos: 'top', text: 'Text2', },
@@ -54,25 +42,24 @@
           width: '50%',
           maxByte: 30000,
           maxNrOfVisibleRows: 20,
-          boilerplates: {
+          textmodules: {
             'font-size': '12px',
             pos: 'bottom',
-            items: {
-              1: { name: 'Testbaustein1', text: 'Damit Ihr indess erkennt, woher dieser ganze Irrthum gekommen ist, und weshalb man die Lust anklagt und den Schmerz lobet, so will ich Euch Alles eröffnen und auseinander setzen, was jener Begründer der Wahrheit und gleichsam Baumeister des glücklichen Lebens selbst darüber gesagt hat. Niemand, sagt er, verschmähe, oder hasse, oder fliehe die Lust als solche, sondern weil grosse Schmerzen ihr folgen, wenn man nicht mit Vernunft ihr nachzugehen verstehe. Ebenso werde der Schmerz als solcher von Niemand geliebt, gesucht und verlangt, sondern weil mitunter solche Zeiten eintreten, dass man mittelst Arbeiten und Schmerzen eine grosse Lust sich zu verschaften suchen müsse. Um hier gleich bei dem Einfachsten stehen zu bleiben, so würde Niemand von uns anstrengende körperliche Uebungen vornehmen, wenn er nicht einen Vortheil davon erwartete. Wer dürfte aber wohl Den tadeln, der nach einer Lust verlangt, welcher keine Unannehmlichkeit folgt, oder der einem Schmerze ausweicht, aus dem keine Lust hervorgeht?'},
-              2: { name: 'Testbaustein2', text: 'Dagegen tadelt und hasst man mit Recht Den, welcher sich durch die Lockungen einer gegenwärtigen Lust erweichen und verführen lässt, ohne in seiner blinden Begierde zu sehen, welche Schmerzen und Unannehmlichkeiten seiner deshalb warten. Gleiche Schuld treffe Die, welche aus geistiger Schwäche, d.h. um der Arbeit und dem Schmerze zu entgehen, ihre Pflichten verabsäumen. Man kann hier leicht und schnell den richtigen Unterschied treffen; zu einer ruhigen Zeit, wo die Wahl der Entscheidung völlig frei ist und nichts hindert, das zu thun, was den Meisten gefällt, hat man jede Lust zu erfassen und jeden Schmerz abzuhalten; aber zu Zeiten trifft es sich in Folge von schuldigen Pflichten oder von sachlicher Noth, dass man die Lust zurückweisen und Beschwerden nicht von sich weisen darf. Deshalb trifft der Weise dann eine Auswahl, damit er durch Zurückweisung einer Lust dafür eine grössere erlange oder durch Uebernahme gewisser Schmerzen sich grössere erspare.'},
-            },
-          }
-          //disabled:true
+            textmoduleNames: [
+              {id: 3, name: "Textbaustein1"},
+              {id: 4, name: "Textbaustein2"},
+            ],
+            textmoduleContents: '/data/json/textmoduleContents.json',
+          },
         };
-        
-        $('#test1Textarea').ebtextarea(opts1).ebbind(data);
-        $('#test2Textarea').ebtextarea(opts2).ebbind(data);
-        var ta3 = $('#test3Textarea').ebtextarea(opts3).ebbind(data);
-
+        var ta1 = $('#test1Textarea').ebtextarea(opts1).ebbind(data);
+        var ta2 = $('#test2Textarea').ebtextarea(opts2).ebbind(data);
+        var ta3 = $('#test3Textarea').ebtextarea(opts3).ebbind(data,'test3Textarea');
         $('#btnDisableTextareaField').on('click', function (evt) {
           ta3.disable($(evt.target).prop('checked'));
         });
-      });
+      }
+      );
 
     </script>
   </head>

@@ -7,13 +7,11 @@
     var defopts = {
       title: {text: '', fontSize: '12px', pos: 'top'},
       counter: {fontSize: '8px', pos: 'bottom'},
-      nrRows: 5, // # of lines in textarea
-      nrCols: 30, // # of cols in textarea
       maxByte: 1000000,
       width: '100%',
-      height: '',
+      height: 100,
+      maxheight: 100,
       disabled: false,
-      maxNrOfVisibleRows: 10,
       margin: '8px 0px 0px 0px',
       charsNotAllowed: /[^\S\n\r\t\x20-\xFF]+/,
       textmodules: null, //{
@@ -34,11 +32,10 @@
 
     var utils = {
       adjustVisibleHeight: function adjustVisibleHeight() {
-        var $ta = $('#' + id + ' textarea');
-        var cntNL = $ta.val().split('\n').length;
-        if (cntNL >= $ta.prop('rows') || cntNL <= myopts.maxNrOfVisibleRows) {
-          $('#' + id + ' textarea').prop('rows', Math.max(myopts.nrRows, Math.min(cntNL, myopts.maxNrOfVisibleRows)));
-        }
+        var ta = $('#' + id + ' textarea');
+        ta.css({'overflow-y': ta[0].scrollHeight > myopts.maxheight ? 'scroll' : 'hidden'})
+          .height(Math.max(myopts.height,Math.min(myopts.maxheight, ta[0].scrollHeight))-4);
+        
       },
       handleChanges: function () {
         var ta = $('#' + id + ' textarea');
@@ -100,33 +97,28 @@
     };
 
     var top =
-      (myopts.title && myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
-      (tm && tm.pos === 'top' ? '&nbsp;<i class="ebtextareatextmodules fa fa-bars" title="Textbausteine einf&uuml;gen" style="font-size: ' + (tm['font-size'] || '8px') + ';"></i>&nbsp;' : '') +
-      (myopts.counter && myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"></span>' : '');
+            (myopts.title && myopts.title.pos === 'top' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
+            (tm && tm.pos === 'top' ? '&nbsp;<i class="ebtextareatextmodules fa fa-bars" title="Textbausteine einf&uuml;gen" style="font-size: ' + (tm['font-size'] || '8px') + ';"></i>&nbsp;' : '') +
+            (myopts.counter && myopts.counter.pos === 'top' ? '<span class="ebtextareacnt"></span>' : '');
     var bottom =
-      (myopts.title && myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
-      (tm && tm.pos === 'bottom' ? '&nbsp;<i class="ebtextareatextmodules fa fa-bars" title="Textbausteine einf&uuml;gen" style="font-size: ' + (tm['font-size'] || '8px') + ';"></i>&nbsp;' : '') +
-      (myopts.counter && myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '');
+            (myopts.title && myopts.title.pos === 'bottom' ? '<span class="ebtextareatitle">' + myopts.title.text + '&nbsp;</span>' : '') +
+            (tm && tm.pos === 'bottom' ? '&nbsp;<i class="ebtextareatextmodules fa fa-bars" title="Textbausteine einf&uuml;gen" style="font-size: ' + (tm['font-size'] || '8px') + ';"></i>&nbsp;' : '') +
+            (myopts.counter && myopts.counter.pos === 'bottom' ? '<span class="ebtextareacnt"></span>' : '');
     var s = _.template('\
       <div class="ebtextarea">\n\
         <div><%=top%></div>\n\
-        <textarea rows="<%=rows%>" cols="<%=cols%>" style="<%=width%><%=height%>"></textarea>\n\
+        <textarea style="<%=width%><%=height%> overflow-x:hidden"></textarea>\n\
         <div><%=bottom%></div>\n\
       </div>\n')({
-      rows: myopts.nrRows,
-      cols: myopts.nrCols,
       top: myopts.disabled ? '' : top,
       bottom: myopts.disabled ? '' : bottom,
       width: (myopts.width ? 'width:' + myopts.width + ';' : ''),
-      height: (myopts.height ? 'height:' + myopts.height + ';' : '')
+      height: (myopts.height ? 'height:' + myopts.height + 'px;' : '')
     });
     if (!$('#' + id + ' textarea').length) {
       $(this).html(s);
       $('#' + id + ' textarea').prop('disabled', myopts.disabled);
-      $('#' + id + ' textarea')
-        .off()
-        .on('keyup', utils.handleChanges)
-        .on('paste', utils.handleChanges);
+      $('#' + id + ' textarea').off().on('input', utils.handleChanges);
 
       tm && tm.textmoduleNames && tm.textmoduleNames.length && $.contextMenu({
         selector: '#' + id + ' .ebtextareatextmodules',
@@ -139,8 +131,7 @@
           } else if (_.isArray(tm.textmoduleContents)) {
             $('#' + id + ' textarea').val(_.find(tm.textmoduleContents, {id: Number(key)}).content);
           }
-          $('#' + id + ' textarea').trigger("keyup");
-          utils.handleChanges();
+          $('#' + id + ' textarea').trigger("input");
         },
         items: tm.textmoduleNames.reduce(function (acc, item) {
           acc[item.id] = {name: item.name};

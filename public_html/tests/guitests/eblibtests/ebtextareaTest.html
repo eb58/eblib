@@ -19,7 +19,8 @@
     <script src="/js/eblib/ebutils.js"></script>
     <script src="/js/eblib/ebtextarea.js"></script>
     <script>
-
+      var ta1, ta2, ta3;
+      
       var data = {
         test1Textarea: 'Mario Fehrenbach, 27.11.2017, 10:07 Uhr:\r\näööäöäö\r\nWF-Engine: \"14.02.-16:01 Autodisposition (KH) konnte nicht durchgeführt werden: keine Weiterleitungsregel gefunden\"\r\nAMS023: In der Tabelle ismed_dev.product_reason_relation ist keine Beziehung zwischen Frage d. AG=1000 und Produkt=67 definiert.;Korrekturauftrag',
         test2Textarea: 'Textfeld2\nTextfeld2\nTextfeld2\nTextfeld2\nTextfeld2\nTextfeld2\n',
@@ -29,8 +30,8 @@
         var opts1 = {
           title: {fontSize: '14px', pos: 'top', text: 'Text1', },
           counter: {fontSize: '8px', pos: 'top'},
-          maxByte: 550,
-          maxNrOfVisibleRows: 10,
+          maxheight: 200,
+          maxByte: 1550,
         };
         var opts2 = {
           title: {fontSize: '14px', pos: 'top', text: 'Text2', },
@@ -40,8 +41,8 @@
         var opts3 = {
           title: {fontSize: '8px', pos: 'bottom', text: 'Noch ein Test'},
           width: '50%',
+          maxheight: 100,
           maxByte: 30000,
-          maxNrOfVisibleRows: 20,
           textmodules: {
             'font-size': '12px',
             pos: 'bottom',
@@ -52,14 +53,13 @@
             textmoduleContents: '/data/json/textmoduleContents.json',
           },
         };
-        var ta1 = $('#test1Textarea').ebtextarea(opts1).ebbind(data);
-        var ta2 = $('#test2Textarea').ebtextarea(opts2).ebbind(data);
-        var ta3 = $('#test3Textarea').ebtextarea(opts3).ebbind(data,'test3Textarea');
+        ta1 = $('#test1Textarea').ebtextarea(opts1).ebbind(data);
+        ta2 = $('#test2Textarea').ebtextarea(opts2).ebbind(data);
+        ta3 = $('#test3Textarea').ebtextarea(opts3).ebbind(data, 'test3Textarea');
         $('#btnDisableTextareaField').on('click', function (evt) {
           ta3.disable($(evt.target).prop('checked'));
         });
-      }
-      );
+      });
 
     </script>
   </head>

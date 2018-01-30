@@ -1,14 +1,14 @@
 /* global _ ,jQuery, eblogger*/
 (function ($) {
   "use strict";
-  $.fn.ebbind = function (data, key, onChange) {
+  $.fn.ebbind = function (data, key, onChange, opts ) {
     var id = this[0].id;
     var type = this[0].type;
     var self = this;
 
     var utils = {
       changeInputField: function () {
-        data[key] = self.val();
+        data[key] = opts.marshalling ?  opts.marshalling.fromInputField(self.val()) : self.val();
         onChange && onChange(self);
         if ($(this).hasClass('hasDatepicker') && data[key].trim() === '') {
           data[key] = null;
@@ -19,10 +19,9 @@
 
     key = key || id;
     if (type === 'text' || type === 'password') {
-      this.val(data[key])
-        .off()
-        .on('input', utils.changeInputField)
-        .on('change', utils.changeInputField);
+      var val = opts.marshalling ?  opts.marshalling.toInputField(data[key]) : data[key];
+      this.val(val).off().on('input', utils.changeInputField);
+      //console.log('input changed id:' + id + ' data:' + data[key] + ' transformed data:' +  val );
     } else if (type === 'checkbox') {
       this.prop('checked', data[key]).off().on('click', function () {
         data[key] = self.prop('checked');

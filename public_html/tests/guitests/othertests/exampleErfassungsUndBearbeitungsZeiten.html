@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>TODO supply a title</title>
+      <meta charset='UTF-8'>
+      <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+      <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'>
+      <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.css'>
+      <link rel='stylesheet' href='/vendor/ebtable/ebtable.css'/>
+      <style>
+         * {font-family:Arial;color: black;font-size: 12px;      }
+         body { background:#FAFAF0; margin: 10px 10px 10px 10px; }
+      </style>
+
+      <script src='/vendor/underscore-1.8.3/underscore.js'></script>
+      <script src='/vendor/jQuery-1.11.3/jquery.js'></script>
+      <script src='/vendor/jQueryUI-1.12.0/jquery-ui.js'></script>
+      <script src='/vendor/moment.min.js'></script>
+      <script src='/vendor/ebtable/mx.js'></script>
+      <script src='/vendor/ebtable/ebtable.js'></script>  
+
+      <script src='/js/polyfill.js'></script>
+
+      <script src='/js/eblib/ebutils.js'></script>
+      <script src='/js/eblib/ebbind.js'></script>
+      <script src='/js/eblib/ebdropdown.js'></script>  
+
+      <script src='/js/components/componentBearbeitungszeiten.js'></script>  
+
+      <script src='/js/dlgs/dlgSelectExperts.js'></script>  
+      <script src='/js/dlgs/dlgErfassungsUndBearbeitungsZeiten.js'></script>  
+
+      <script>
+         var readonly = false;
+
+         var bereicheList = [
+            {v: null, txt: '<keine Auswahl>'},
+            {v: 1, txt: 'Bereich1'},
+            {v: 2, txt: 'Bereich2'},
+            {v: 3, txt: 'Bereich3'}
+         ];
+
+         var zeitdata = {
+            'sichtungszeit': {mitarbeiter: {id: 0, name: 'tester'}, bereichId: 1, erledigungszeit: 130},
+            'fehlbesuchszeit': {mitarbeiter: {id: 0, name: 'tester'}, bereichId: 2, erledigungszeit: 130},
+            'kodierfachkraft': [
+               {mitarbeiter: {id: 0, name: 'gutachter1'}, bereichId: 2, erledigungszeit: 130, ruestzeit: 150},
+               {mitarbeiter: {id: 0, name: 'Fehrenbach, Mario'}, bereichId: 2, erledigungszeit: 130, ruestzeit: 150}
+            ],
+            'beteiligter-gutachter': [
+               {mitarbeiter: {id: 0, name: 'gutachter2'}, bereichId: 2, erledigungszeit: 130, ruestzeit: 150}
+            ],
+            'verantwortlicher-gutachter': [
+               {mitarbeiter: {id: 0, name: 'gutachter3'}, bereichId: 3, erledigungszeit: 133, ruestzeit: 150}
+            ]
+         };
+         
+         dlgOpts = {
+            readonly: readonly,
+            zeitdata: zeitdata,
+            bereicheList: bereicheList,
+            callback: function (data) {
+               console.log('callback called!!!', data);
+            }
+         };
+
+         $(document).ready(function () {
+            dlgErfassungsUndBearbeitungsZeiten(dlgOpts);
+            $('#btnTest').on('click', function () {
+               dlgErfassungsUndBearbeitungsZeiten(dlgOpts);
+            })
+         });
+      </script>
+   </head>
+   <body>
+      <button id='btnTest'>TEST</button>
+   </body>
+</html>

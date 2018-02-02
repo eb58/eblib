@@ -19,7 +19,7 @@
 
     key = key || id;
     if (type === 'text' || type === 'password') {
-      var val = opts.marshalling ?  opts.marshalling.toInputField(data[key]) : data[key];
+      var val = opts && opts.marshalling ?  opts.marshalling.toInputField(data[key]) : data[key];
       this.val(val).off().on('input', utils.changeInputField);
       //console.log('input changed id:' + id + ' data:' + data[key] + ' transformed data:' +  val );
     } else if (type === 'checkbox') {

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TODO supply a title</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'>
+    <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.css'>
+    <link rel='stylesheet' href='/vendor/ebtable/ebtable.css'/>
+    <style>
+      * {font-family:Arial;color: black;font-size: 12px;      }
+      body { background:#FAFAF0; margin: 10px 10px 10px 10px; }
+    </style>
+
+    <script src='/vendor/underscore-1.8.3/underscore.js'></script>
+    <script src='/vendor/jQuery-1.11.3/jquery.js'></script>
+    <script src='/vendor/jQueryUI-1.12.0/jquery-ui.js'></script>
+    <script src='/vendor/moment.min.js'></script>
+    <script src='/vendor/ebtable/mx.js'></script>
+    <script src='/vendor/ebtable/ebtable.js'></script>  
+
+    <script src='/js/polyfill.js'></script>
+
+    <script src='/js/eblib/ebutils.js'></script>
+    <script src='/js/eblib/ebbind.js'></script>
+    <script src='/js/eblib/ebdropdown.js'></script>  
+
+    <script src='/js/components/componentBearbeitungszeiten.js'></script>  
+
+    <script src='/js/dlgs/dlgSelectExperts.js'></script>  
+    <script src='/js/dlgs/dlgBearbeitungsZeiten.js'></script>  
+
+    <script>
+      var readonly = false;
+
+      var bereicheList = [
+        {v: null, txt: '- keine Auswahl -'},
+        {v: 1, txt: 'Bereich1'},
+        {v: 2, txt: 'Bereich2'},
+        {v: 3, txt: 'Bereich3'}
+      ];
+
+      var zeitdata = {
+        sichtung: [{user: {userid: 50000000000010, firstname: 'test', lastname: 'test'}, sectorid: 1, 'working-time': 130}],
+        fehlbesuchszeit: [{user: {userid: 50000000000010, firstname: 'test', lastname: 'test'}, sectorid: 2, 'working-time': 130}],
+        kfk: [
+          {user: {userid: 50000000000010, firstname: 'Paul', lastname: 'Gutachter'}, sectorid: 2, 'working-time': 130, 'setup-time': 150},
+          {user: {userid: 50000000000010, firstname: 'Mario', lastname: 'Fehrenbach'}, sectorid: 2, 'working-time': 130, 'setup-time': 150}
+        ],
+        bga: [
+          {user: {userid: 50000000000010, firstname: 'Paul', lastname: 'Gutachter'}, sectorid: 2, 'working-time': 130, 'setup-time': 150}
+        ],
+        vga: [
+          {user: {userid: 50000000000010, firstname: 'Paul', lastname: 'Gutachter'}, sectorid: 3, 'working-time': 133, 'setup-time': 150}
+        ]
+      };
+
+      dlgOpts = {
+        readonly: readonly,
+        zeitdata: zeitdata,
+        bereicheList: bereicheList,
+        callback: function (data) {
+          console.log('callback called!!!', data);
+        }
+      };
+
+      $(document).ready(function () {
+        dlgBearbeitungsZeiten(dlgOpts);
+        $('#btnTest').on('click', function () {
+          dlgBearbeitungsZeiten(dlgOpts);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <button id='btnTest'>TEST</button>
+  </body>
+</html>

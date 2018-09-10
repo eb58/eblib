@@ -19,10 +19,11 @@
     <script src="/data/himilists.js"></script>  
     <script src="/data/orderinfoData.js"></script>  
 
-    <script src="/js/polyfill.js"></script>
     <script src="/vendor/ebtable/mx.js"></script>
-    <script src="/js/eblib/ebutils.js"></script>
     <script src="/vendor/ebtable/ebtable.js"></script>
+
+    <script src="/js/polyfill.js"></script>
+    <script src="/js/eblib/ebutils.js"></script>
     <script src="/js/eblib/ebselect.js"></script>
     <script src="/js/eblib/ebtextarea.js"></script>
     <script src="/js/dlgs/dlgIcdcode.js"></script>  
@@ -52,7 +53,7 @@
           dlgTestEbselect();
         })
         $('#testIcd').on('click', function () {
-          dlgIcd(icddata, takeover, {icdCode: 'A'});
+          dlgIcd(gIcddata, takeover, {icdCode: 'A'});
         })
         $('#testOrderInfo').on('click', function () {
           dlgOrderInfo({name: 'Rita Rotkohl', wid: '50000008536'}, orderinfoData);

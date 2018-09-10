@@ -20,6 +20,7 @@ var dlgIcd = function (icddata, onTakeOverCallback, opts) {
       {name: "Code", match: matcher.contains}
     ],
     selectionCol: { singleSelection: true, selectOnRowClick: true },
+    rowsPerPage:15,
     colorder: [0, 2, 1],
     afterRedraw: style
   };

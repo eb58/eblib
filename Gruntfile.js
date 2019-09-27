@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         }
       },
       dist: {
-        src: ['public_html/js/eblib/*.js'],
+        src: ['public_html/javascripteblib/*.js'],
         dest: 'public_html/dist/<%= pkg.name %>.js'
       },
       css: {
@@ -53,7 +53,7 @@ module.exports = function (grunt) {
       }
     },
     jshint: {
-      files: ['public_html/js/**/*.js'],
+      files: ['public_html/javascript**/*.js'],
       options: {
 //        curly: false,
 //        eqeqeq: true,

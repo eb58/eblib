@@ -1,7 +1,7 @@
 /* global _, jQuery, datepickerOptions, icdUtils */ /* jshint multistr: true *//* jshint expr: true */
-(function ($) {
+(function ($){
   "use strict";
-  $.fn.icdlist = function (icds, opts) {
+  $.fn.icdlist = function (icds, opts){
     var id = this[0].id;
 
 //	- effective = false -> Vorangegangene Diagnosen
@@ -34,10 +34,10 @@
 
     var tbldata;
 
-    function initTable(icds) {
+    function initTable(icds){
 
       if (myopts.type === 'ZO') {
-        var validIcds4ZO = icds.filter(function (icd) {
+        var validIcds4ZO = icds.filter(function (icd){
           return icd.effective && icd.icdForAssoc;
         });
         if (myopts.isDta) {
@@ -56,7 +56,7 @@
         $('#' + id + ' .fa-plus-circle').hide();
       }
 
-      tbldata = icds.map(function (icd, idx) {
+      tbldata = icds.map(function (icd, idx){
         return [
           idx,
           icd,
@@ -76,7 +76,7 @@
 
       $('#icd' + id + 'grid').ebtable(tblopts, tbldata);
 
-      $('#' + id + ' .fa-plus-circle').off().on('click', function () {
+      $('#' + id + ' .fa-plus-circle').off().on('click', function (){
         var icdForAssoc = myopts.type === 'ZO';
         var effective = myopts.type !== 'ZU';
         var newicd = {
@@ -97,9 +97,9 @@
       });
     }
 
-    var afterRedraw = function () {
-      $('#' + id + ' .datum').datepicker(datepickerOptions).each(function (idx, elem) {
-        $(elem).off().on('change', function (evt) {
+    var afterRedraw = function (){
+      $('#' + id + ' .datum').datepicker(datepickerOptions).each(function (idx, elem){
+        $(elem).off().on('change', function (evt){
           var arr = evt.target.id.split('-');
           var type = arr[0].contains('audatefrom') ? 'begin' : 'end';
           var rownr = Number(arr[1]);
@@ -108,40 +108,40 @@
           tbldata[rownr] = $(elem).val();
         });
       });
-      $('#' + id + ' .diagnosecode').each(function (idx, elem) {
-        $(elem).off().on('blur', function (evt) {
-          var icdCodeNumber = evt.target.value.trim().toUpperCase();
+      $('#' + id + ' .diagnosecode').each(function (idx, elem){
+        $(elem).off().on('blur', function (evt){
+          var icdCode = evt.target.value.trim().toUpperCase();
           var n = Number(evt.target.id.replace(/.*-/, ''));
-          var icdCode = icdUtils.getIcdCodeFromNumber(icdCodeNumber);
-          icdCode = icdCode || icdUtils.getIcdCodeFromNumber(icdCodeNumber+'-');
-          icdCode = icdCode || icdUtils.getIcdCodeFromNumber(icdCodeNumber+'.-');
-          if (icdCode) {
+          var icdCodeObject = icdUtils.getIcdCodeObjectByCode(icdCode);
+          icdCodeObject = icdCodeObject || icdUtils.getIcdCodeObjectByCode(icdCode + '-');
+          icdCodeObject = icdCodeObject || icdUtils.getIcdCodeObjectByCode(icdCode + '.-');
+          if (icdCodeObject) {
             icds[n] = icds[n] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
-            icds[n]['icd-code-id'] = icdCode.id;
-            icds[n]['icd-code-number'] = icdCode.code;
-            icds[n]['text'] = icdCodeNumber === '---.-' ? ('#' + id + 'icdtext-' + n).val() : icdCode.text;
-            $('#' + id + 'icdcode-' + n).val(icdCode.code);
-            $('#' + id + 'icdtext-' + n).val(icdCode.text);
-            $('#' + id + 'founding-' + n ).prop('disabled', false );
-          } else{
+            icds[n]['icd-code-id'] = icdCodeObject.id;
+            icds[n]['icd-code-number'] = icdCodeObject.code;
+            icds[n]['text'] = icdCode === '---.-' ? ('#' + id + 'icdtext-' + n).val() : icdCodeObject.text;
+            $('#' + id + 'icdcode-' + n).val(icdCodeObject.code);
+            $('#' + id + 'icdtext-' + n).val(icdCodeObject.text);
+            $('#' + id + 'founding-' + n).prop('disabled', false);
+          } else {
             icds[n]['icd-code-id'] = null;
-            icds[n]['icd-code-number'] = icdCodeNumber;
+            icds[n]['icd-code-number'] = icdCode;
             icds[n]['text'] = '';
-            $('#' + id + 'founding-' + n ).prop('disabled', true ).prop('checked', false );
+            $('#' + id + 'founding-' + n).prop('disabled', true).prop('checked', false);
           }
         });
       });
-      $('#' + id + ' i.fa-search').each(function (idx, elem) {
-        $(elem).off().on('click', function (evt) {
+      $('#' + id + ' i.fa-search').each(function (idx, elem){
+        $(elem).off().on('click', function (evt){
           var n = Number(evt.target.id.replace(/.*-/, ''));
-          dlgIcd( icdUtils.getIcdData(), function (code, text, icdid) {
+          dlgIcd(icdUtils.getIcdData(), function (code, text, icdid){
             icds[n] = icds[n] || {'icd-code-id': null, 'icd-code-number': null, digital: false};
             icds[n]['icd-code-id'] = icdid;
             icds[n]['icd-code-number'] = code;
             icds[n]['text'] = code === '---.-' ? $('#icdtext' + n).val() : text;
             $('#' + id + 'icdcode-' + n).val(icds[n]['icd-code-number']);
             $('#' + id + 'icdtext-' + n).val(icds[n]['text']);
-            $('#' + id + 'founding-' + n ).prop('disabled', false );
+            $('#' + id + 'founding-' + n).prop('disabled', false);
             return true;
           }, {
             icdCode: $('#' + id + 'icdcode-' + n).val(),
@@ -150,32 +150,32 @@
           );
         });
       });
-      $('#' + id + ' .diagnosetext').each(function (idx, elem) {
-        $(elem).off().on('change', function (evt) {
+      $('#' + id + ' .diagnosetext').each(function (idx, elem){
+        $(elem).off().on('change', function (evt){
           var n = Number(evt.target.id.replace(/.*-/, ''));
           icds[n]['text'] = $(elem).val();
         });
       });
-      $('#' + id + ' .arzt').each(function (idx, elem) {
-        $(elem).off().on('change', function (evt) {
+      $('#' + id + ' .arzt').each(function (idx, elem){
+        $(elem).off().on('change', function (evt){
           var n = Number(evt.target.id.replace(/.*-/, ''));
           icds[n]['servicerenderer-fullname'] = $(elem).val();
         });
       });
-      $('#' + id + ' .zshg').each(function (idx, elem) {
-        $(elem).off().on('click', function (evt) {
-          var n = Number(evt.target.id.replace(/.*-/,''));
+      $('#' + id + ' .zshg').each(function (idx, elem){
+        $(elem).off().on('click', function (evt){
+          var n = Number(evt.target.id.replace(/.*-/, ''));
           icds[n]['associated'] = $(elem).prop('checked');
         });
       });
-      $('#' + id + ' .founding').each(function (idx, elem) {
-        $(elem).off().on('click', function (evt) {
-          var n = Number(evt.target.id.replace(/.*-/,''));
+      $('#' + id + ' .founding').each(function (idx, elem){
+        $(elem).off().on('click', function (evt){
+          var n = Number(evt.target.id.replace(/.*-/, ''));
           icds[n]['founding'] = $(elem).prop('checked');
         });
       });
-      $('#' + id + ' i.fa-trash-o').each(function (idx, elem) {
-        $(elem).off().on('click', function (evt) {
+      $('#' + id + ' i.fa-trash-o').each(function (idx, elem){
+        $(elem).off().on('click', function (evt){
           var n = Number(evt.target.id.replace(/.*-/, ''));
           icds.splice(n, 1);
           initTable(icds);
@@ -197,7 +197,7 @@
       $('#icd' + id + 'grid .ebtable .ctrl').hide();
 
       var invisCols = invisibleColumns[myopts.type];
-      invisCols.forEach(function (col) {
+      invisCols.forEach(function (col){
         $('#icd' + id + 'grid .ebtable th:nth-child(' + col + ')').css('display', 'none');
         $('#icd' + id + 'grid .ebtable td:nth-child(' + col + ')').css('display', 'none');
       });
@@ -214,34 +214,34 @@
     };
 
     var renderer = {
-      audatefrom: function (data, row) {
+      audatefrom: function (data, row){
         return '<input class="datum" type="text" id="' + id + 'audatefrom-' + row[0] + '" value="' + data + '">';
       },
-      audateuntil: function (data, row) {
+      audateuntil: function (data, row){
         return '<input class="datum" type="text" id="' + id + 'audateuntil-' + row[0] + '" value="' + data + '">';
       },
-      diagnose: function (data, row) {
+      diagnose: function (data, row){
         var disabled = myopts.disable || row[1].digital;
-        return '<input class="diagnosecode" type="text" id="' + id + 'icdcode-' + row[0] + '" value="' + data + '" ' +  (disabled?'disabled':'') + '>' 
+        return '<input class="diagnosecode" type="text" id="' + id + 'icdcode-' + row[0] + '" value="' + data + '" ' + (disabled ? 'disabled' : '') + '>'
                 + (disabled ? '' : '&nbsp;<i id="icdsearch-' + row[0] + '" class="fa fa-search fa-lg"></i>');
       },
-      diagnosetext: function (data, row) {
+      diagnosetext: function (data, row){
         return '<input class="diagnosetext" type="text" id="' + id + 'icdtext-' + row[0] + '" value="' + data + '">';
       },
-      zshg: function (data, row) {
-        return '<input class="zshg" type="checkbox" id="' + id + 'zshg-' + row[0] + '" ' +  (data ?' checked="true"':'') + '>';
+      zshg: function (data, row){
+        return '<input class="zshg" type="checkbox" id="' + id + 'zshg-' + row[0] + '" ' + (data ? ' checked="true"' : '') + '>';
       },
-      founding: function (data, row) {
-        return '<input class="founding" type="checkbox" id="' 
-                + id + 'founding-' + row[0] + '" ' 
-                + (data ?' checked="true"':'') 
-                + (row[1]['icd-code-id'] ? '' :  ' disabled=true' ) 
+      founding: function (data, row){
+        return '<input class="founding" type="checkbox" id="'
+                + id + 'founding-' + row[0] + '" '
+                + (data ? ' checked="true"' : '')
+                + (row[1]['icd-code-id'] ? '' : ' disabled=true')
                 + '>';
       },
-      arzt: function (data, row) {
+      arzt: function (data, row){
         return '<input class="arzt" type="text" id="' + id + 'arzt-' + row[0] + '" value="' + data + '">';
       },
-      trash: function (data, row) {
+      trash: function (data, row){
         var isZusAU = myopts.type === 'AU' && row[1].effective && row[1].icdForAssoc;
         return row[1].digital || myopts.disable || isZusAU ? '<span>&nbsp;</span>' : '&nbsp;<i id="' + id + 'icdtrash-' + row[0] + '" class="fa fa-trash-o fa-lg"></i>';
       },
@@ -269,7 +269,7 @@
     };
 
     this.id = id;
-    (function (a) {
+    (function (a){
       var addBtn = myopts.disable || (myopts.type !== 'AU' && myopts.isDta) ? '' : '<i class="fa fa-plus-circle fa-lg"></i>';
       var s = _.template('\
         <div>\n\

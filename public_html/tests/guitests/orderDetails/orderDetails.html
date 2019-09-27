@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<!-- orderDetails (<%=org.slf4j.MDC.get('Request')%>) -->
+<html xmlns='http://www.w3.org/1999/xhtml' lang='de'>
+   <head>
+      <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+      <meta http-equiv='Content-Style-Type' content='text/css'/>
+
+      <title>Auftrag</title>
+
+      <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
+      <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+      <link rel='stylesheet' href='/vendor/ebtable/ebtable.css'/>
+      <link rel='stylesheet' href='/css/eblib.css'/>
+      <link rel='stylesheet' href='/css/ebselect.css'/>
+
+      <style>
+         input.red { color: red; width:40px}
+         input.black { color: black; width:40px}
+         .ui-datepicker-trigger { border:none; background:none; }
+         ul.ui-menu { max-height: 300px }
+      </style>
+
+      <script src='/data/icddata.js'></script>    
+      <script src='/data/order/auftrag.js'></script>
+      <script src='/data/order/valuelists.js'></script>
+
+      <script src='/vendor/Underscore-1.8.3/underscore.min.js'></script>
+      <script src='/vendor/jQuery-1.11.3/jquery.min.js'></script>
+      <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
+      <script src='/vendor/jQuery-contextmenu/jquery.contextMenu.min.js'></script>
+      <script src='/vendor/moment.min.js'></script>
+      <script src='/vendor/ebtable/mx.js'></script>
+      <script src='/vendor/ebtable/ebtable.js'></script>
+      <script src='/vendor/vue-1.0.26/vue.js'></script>
+
+      <script src='/javascript/polyfill.js'></script>
+      <script src='/javascript/jquery-ui-datepicker-de.js'></script>
+      <script src='/javascript/vue-eb.js'></script>
+      <!--<script src='/javascript/jquery-ismed.js'></script>-->
+      <!--<script src='/javascript/workspace.js'></script>-->
+
+      <script src='/javascript/eblib/ebutils.js'></script>
+      <script src='/javascript/eblib/ebviewer.js'></script>
+      <script src='/javascript/eblib/ebbind.js'></script>
+      <script src='/javascript/eblib/ebdropdown.js'></script>
+      <script src='/javascript/eblib/ebselect.js'></script>
+      <script src='/javascript/eblib/ebtextarea.js'></script>
+      <script src='/javascript/icdUtils.js'></script>
+
+      <script src='/javascript/components/componentBearbeitungszeiten.js'></script>
+      <script src='/javascript/dialogs/dlgIcdcode.js'></script>
+      <script src='/javascript/dialogs/dlgSelectExpert.js'></script>
+      <script src='/javascript/dialogs/dlgInsurantInfo.js'></script>
+      <script src='/javascript/dialogs/dlgBearbeitungsZeiten.js'></script>
+
+      <script type='text/javascript'>
+
+         const listUtils = {
+           getListObjectById: function getListObjectById(list, id){
+             return _.find(list, function (o){
+               return o.value === Number(id);
+             });
+           },
+           getListObjectByCode: function getListObjectByCode(list, code){
+             return _.find(list, function (o){
+               return Number(o.code) === Number(code);
+             });
+           },
+           mapper: function (list, idString){
+             const ret = {
+               get: function (){
+                 const id = Number(this.auftrag[idString]);
+                 const x = listUtils.getListObjectById(list, id);
+                 return x ? x.code : '';
+               },
+               set: function (newValue){
+                 const x = listUtils.getListObjectByCode(list,newValue);
+                 this.auftrag[idString] = x ? x.value : -1;
+               }
+             };
+             return ret;
+           }
+         };
+
+         function getFrist(date){
+           const today = moment();
+           const diff = moment(date, 'DD.MM.YYYY').diff(today);
+           return Math.floor(moment.duration(diff).asDays());
+         }
+
+         $(document).ready(function (){
+
+           $('#cbReadonly').on('change', function (){
+             const readonly = $('#cbReadonly').prop('checked');
+             $('input').prop('disabled', readonly);
+             $('.sel').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+             $('.readonly').prop('disabled', true);
+             $('#cbReadonly').prop('disabled', false);
+           })
+
+           const vue = new Vue({
+             el: '#app',
+             data: {
+               readonly: false,
+               auftrag: auftrag,
+               orgaOptions: orgas,
+               fags: fags,
+               fagsPrecision: fagsPrecision,
+               products: products,
+               gutachtenarten: gutachtenarten,
+               gutachtenartenPrecision: gutachtenartenPrecision
+             },
+             computed: {
+               ansprechpartner: function (){
+                 const x = auftrag['applicant-contact']
+                 return  x.firstname + ' ' + x.name;
+               },
+               sfbStandort: function (){
+                 const name = auftrag['sfb-location-name'];
+                 const strasse = auftrag['sfb-location-street'];
+                 const plz = auftrag['sfb-location-zipcode'];
+                 const ort = auftrag['sfb-location-city'];
+                 return name + ' ' + plz + ' ' + ort + ' ' + strasse;
+               },
+               aktuellerBearbeiter: function (){
+                 return auftrag.performer.firstname + ' ' + auftrag.performer.lastname;
+               },
+               fristInDays: function (){
+                 return getFrist(auftrag['deadline-date']);
+               },
+               fristAblaufBeiKasseInDays: function (){
+                 return getFrist(auftrag['deadline-at-agency-date']);
+               },
+               fag: listUtils.mapper(fags, 'reason-id'),
+               fagText: function (){
+                 const icdCodeId = Number(this.auftrag["reason-id"]);
+                 const x = icdUtils.getIcdCodeObjectById(icdCodeId);
+                 return x ? x.text : '';
+               },
+               icd: {
+                 get: function (){
+                   const icdCodeId = Number(this.auftrag["icd-code-id"]);
+                   const x = icdUtils.getIcdCodeObjectById(icdCodeId);
+                   return x ? x.code : '';
+                 },
+                 set: function (newValue){
+                   const x = icdUtils.getIcdCodeObjectByCode(newValue);
+                   this.auftrag['icd-code-id'] = x ? x.id : '';
+                 }
+               },
+               icdText: function (){
+                 const icdCodeId = Number(this.auftrag["icd-code-id"]);
+                 const x = icdUtils.getIcdCodeObjectById(icdCodeId);
+                 return x ? x.text : '';
+               },
+             },
+             methods: {
+               showAnsprechpartner: function (){
+                 alert('Ansprechpartner ' + JSON.stringify(auftrag['applicant-contact']));
+               },
+               openDlgIcd: function (){
+                 dlgIcd(gIcddata, function (code, text, id){
+                   auftrag['icd-code-id'] = id;
+                   return true;
+                 }, {icdCode: $('#icdCode').val()});
+               }
+             }
+           });
+         });
+
+      </script>
+   </head>
+   <body>
+      <div id='app'>
+         <div>
+            Readonly<input type='checkbox' v-model='readonly' id='cbReadonly'/>
+         </div>
+         <hr/>
+
+         <div>
+            <h2>Eigenschaften</h2> 
+            <span>
+               <label for='isEilauftrag'>Eilauftrag</label>
+               <input type='checkbox' v-model='auftrag["is-priority"]'/>
+            </span>
+            <span>
+               <label for='isPRGKZ'>PRGRZ</label>
+               <input type='checkbox' v-model='auftrag["is-prg"]'/>
+            </span>
+            <span>
+               <label for='isBTHG'>BTHG</label>
+               <input type='checkbox' v-model='auftrag["is-bthg"]' @click='auftrag["is-bthg-plus"]=false'/>
+            </span>
+            <span v-if='auftrag["is-bthg"]'>
+               <label for='isBTHGPlus'>BTHG+</label>
+               <input type='checkbox' v-model='auftrag["is-bthg-plus"]'/>
+            </span>
+            <span>
+               <label for='isSpezialfall'>Spezialfall</label>
+               <input type='checkbox' v-model='auftrag["is-special-case"]'/>
+            </span>
+         </div>
+
+         <br/>
+
+         <div>
+            <h2>Fristen</h2> 
+            <table>
+               <tr>
+                  <td>Frist</td>
+                  <td>
+                     <input type='text' v-model='fristInDays' disabled v-bind:class='fristInDays<=0?"red":"black"' />
+                     <input type='text' v-if='!readonly' v-datepicker='auftrag["deadline-date"]' disabled hidden />
+                  </td>
+               </tr>
+               <tr>
+                  <td>Fristablauf bei Kasse</td>
+                  <td>
+                     <input type='text' v-model='fristAblaufBeiKasseInDays' disabled v-bind:class='fristAblaufBeiKasseInDays<=0?"red":"black"'/>
+                     <input type='text' v-if='!readonly' v-datepicker='auftrag["deadline-at-agency-date"]' disabled hidden />
+                  </td>
+               </tr>
+            </table>
+         </div>
+
+         <br/>
+
+         <div>
+
+            <div>
+               <h2>Versicherter                
+                  <span class='ui-icon ui-icon-info' title='Versicherten anzeigen'></span>
+               </h2> 
+               <span>Name                <input type='text' v-model='auftrag.insuredperson.lastname'    disabled class="readonly"/></span>
+               <span>Vorname             <input type='text' v-model='auftrag.insuredperson.firstname'   disabled class="readonly"/></span>
+               <span>Geburtsdatum        <input type='text' v-model='auftrag.insuredperson.dateofbirth' disabled class="readonly"/></span>
+               <span>Versicherungsnummer <input type='text' v-model='auftrag.insuredperson.insuranceno' disabled class="readonly"/></span>
+            </div>
+
+            <div>
+               <h2>Auftraggeber                
+                  <span class='ui-icon ui-icon-info'   title='Auftraggeber anzeigen'></span>
+                  <span class='ui-icon ui-icon-search' title='Auftraggeber auswählen' v-if='!readonly'></span>
+                  <span class='ui-icon ui-icon-trash'  title='Auftraggeber entfernen' v-if='!readonly'></span>
+               </h2> 
+               <span>Aktenzeichen         
+                  <input type='text' v-model='auftrag["workorder-no"]'/>
+               </span>
+               <span>Auftrag vom          
+                  <input type='text' v-if='readonly' v-model='auftrag["date-incoming"]' disabled/>
+                  <input type='text' v-if='!readonly' v-datepicker='auftrag["date-incoming"]'/>
+               </span>
+               <span>Name                 
+                  <input type='text' v-model='auftrag.applicant.name' disabled class="readonly"/>
+               </span>
+               <span>Aktueller Bearbeiter 
+                  <input type='text' v-model='aktuellerBearbeiter' disabled class="readonly"/>
+               </span>
+               <span>Ansprechpartner 
+                  <input type='text' v-model='ansprechpartner' disabled class="readonly"/>
+                  <span @click='showAnsprechpartner' class='ui-icon ui-icon-info' title='Ansprechpartner anzeigen'></span>
+               </span>
+               <span v-if='sfbStandort'>
+                  <p/>
+                  SFB-Standort 
+                  <input type='text' style='width:300px' v-model='sfbStandort' disabled class="readonly"/>
+               </span>
+
+            </div>
+
+            <div>
+               <h2>Auftragsdaten</h2> 
+               <table>
+                  <tr>
+                     <td>Frage des AG</td>
+                     <td><input type='text' style='width:40px' v-model='fag'/></td>
+                     <td>
+                        <select v-selectmenu='auftrag["reason-id"]' style='width:500px' class='sel'>
+                           <option v-for='opt in fags' v-bind:value='opt.value'>{{ opt.text }}</option>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Präz. Frage des AG</td>
+                     <td><input type='text' style='width:40px' v-model='auftrag["reason-spec-id"]'/></td>
+                     <td>
+                        <select v-selectmenu='auftrag["reason-spec-id"]' style='width:500px' class='sel'>
+                           <option v-for='opt in fagsPrecision' v-bind:value='opt.value'>{{ opt.text }}</option>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Produkt</td>
+                     <td></td>
+                     <td>
+                        <select v-selectmenu='auftrag["product-id"]' style='width:500px' class='sel'>
+                           <option v-for='opt in products' v-bind:value='opt.value'>{{ opt.text }}</option>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Gutachtenart</td>
+                     <td>
+                        <input type='text' style='width:40px' v-model='auftrag["expertise-type-id"]'/>
+                     </td>
+                     <td>
+                        <select v-selectmenu='auftrag["expertise-type-id"]' style='width:500px' class='sel'>
+                           <option v-for='opt in gutachtenarten' v-bind:value='opt.value'>{{ opt.text }}</option>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Präz. Gutachtenart</td>
+                     <td><input type='text' style='width:40px' v-model='auftrag["expertise-type-spec-id"]'/></td>
+                     <td>
+                        <select v-selectmenu='auftrag["expertise-type-spec-id"]' style='width:500px' class='sel'>
+                           <option v-for='opt in gutachtenartenPrecision' v-bind:value='opt.value'>{{ opt.text }}</option>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Erläuterung Anlass</td>
+                     <td></td>
+                     <td><input type='text' v-model='auftrag["reason-hint"]' style='width:500px'/></td>
+                  </tr>
+                  <tr>
+                     <td>Diagnose</td>
+                     <td>
+                        <input type='text' style='width:40px' v-model="icd" id="icdCode" />
+                     </td>
+                     <td>
+                        <input type='text' style='width:500px' v-model="icdText" class="readonly" disabled />
+                        <span class='ui-icon ui-icon-search' @click="openDlgIcd"  v-if='!readonly'></span>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Eingangsdatum</td>
+                     <td></td>
+                     <td>
+                        <input type='text' v-if='readonly'  v-model='auftrag["registration-date"]' disabled/>
+                        <input type='text' v-if='!readonly' v-datepicker='auftrag["registration-date"]'/>
+                     </td>
+                  </tr>
+
+                  "registration-date"
+               </table>
+            </div>
+
+         </div>
+
+
+         <hr/>
+         <pre>data: {{ $data.auftrag | json 3}}</pre>
+      </div>
+
+   </body>
+</html>

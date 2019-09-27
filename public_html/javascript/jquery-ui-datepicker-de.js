@@ -31,4 +31,55 @@ jQuery(function ($) {
   $.datepicker.setDefaults($.datepicker.regional['de']);
 });
 
-var datepickerOptions = {changeMonth: true, changeYear: true, showOn: "button", buttonText: "<i class='fa fa-calendar fa-lg'></i>"};
+var datepickerOptions = {
+  changeMonth: true,
+  changeYear: true,
+  buttonText: "<i class='fa fa-calendar'></i>",
+};
+
+
+var datepickerUtils = (function () {
+  "use strict";
+  var holidays = null;
+  var retry = 0;
+
+  function refreshHolidays() {
+    if (retry < 3) {
+      $.ajax({
+        url: "ajaxContext.do?action=get-public-holidays&ajax=1",
+        async: false,
+        success: function (result) {
+          if (!result['message-type'] || result['message-type'] === 'message')
+            holidays = result.holidays;
+          else
+            retry++;
+        }
+      });
+    }
+  }
+
+  function workingDaysOnly(date) {
+    var day = date.getDay();
+    if (day == 0 || day == 6)
+      return [ false, '' ];
+
+    if (holidays == null)
+      refreshHolidays();
+
+    if (holidays) {
+      var key = (date.getYear() - 110) * 512 + date.getMonth() * 32 + date.getDate();
+      var holiday = holidays[key.toString(16)];
+
+      if (holiday != null)
+        return [ false, 'ui-datepicker-holiday', holiday ];
+    }
+
+    return [ true, '' ];
+  }
+
+  // API
+  return {
+    workingDaysOnly: workingDaysOnly
+  };
+})();
+

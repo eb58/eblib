@@ -24,18 +24,24 @@ var icdUtils = (function () {
     return icddata;
   }
 
-  function getIcdCodeFromNumber(code) {
-    var x = _.find(icdUtils.getIcdData(), function (o) { return o[2] === code; });
+  function getIcdCodeObjectById(id) {
+    var x = _.find(icdUtils.getIcdData(), function (o) { return o[0] === id; });
+    return x ? {id: x[0], text: x[1], code: x[2]} : null;
+  }
+  
+  function getIcdCodeObjectByCode(icdCode) {
+    var x = _.find(icdUtils.getIcdData(), function (o) { return o[2] === icdCode; });
     return x ? {id: x[0], text: x[1], code: x[2]} : null;
   }
 
-  function checkIcdCodeNumber(codenumber) {
-    return !!_.find(icdUtils.getIcdData(), function (o) { return o[2] === codenumber; });
+  function checkIcdCode(icdCode) {
+    return !!_.find(icdUtils.getIcdData(), function (o) { return o[2] === icdCode; });
   }
   // api
   return {
     getIcdData: getIcdData,
-    getIcdCodeFromNumber: getIcdCodeFromNumber,
-    checkIcdCodeNumber: checkIcdCodeNumber,
+    getIcdCodeObjectById: getIcdCodeObjectById,
+    getIcdCodeObjectByCode: getIcdCodeObjectByCode,
+    checkIcdCode: checkIcdCode,
   };
 })();

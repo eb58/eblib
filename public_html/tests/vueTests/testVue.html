@@ -1,93 +1,121 @@
 <!DOCTYPE html>
 <head>
-  <meta charset="utf-8">
-  <title>Vue Test</title>
-  <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0//jquery-ui.css">
-  <style>
-    * {font-family:Arial;color: black;font-size: 12px;}
-    #app { width: 800px; background-color: #f3f3f0; margin:5px; padding: 10px}
-  </style>
-  <script src="/vendor/moment.min.js"></script>
-  <script src="/vendor/underscore-1.8.3/underscore.js"></script>
-  <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
-  <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
-  <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
-  <script src="/vendor/vue-1.0.26/vue.js"></script>
-  <script src="/js/vue-eb.js"></script>
-  <script>
-    var vue;
+   <meta charset="utf-8">
+   <title>Vue Test</title>
+   <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
+   <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+   <link rel='stylesheet' href='/vendor/ebtable/ebtable.css'/>
 
-    $(document).ready(function () {
-      vue = new Vue({
-        el: '#app',
-        data: {
-          message: 'Hello Vue.js!',
-          b: true,
-          picked: 'one',
-          selected: 'two',
-          dt: '',
-          dtx: '',
-          ddval1: 1,
-          ddval2: 1,
-          options1: [
-            {text: 'AAA', value: 1},
-            {text: 'BBB', value: 2},
-            {text: 'CCC', value: 4}
-          ],
-          options2: ['AAA', 'BBB', 'CCC'],
-          o: {
-            a: 'aa'
-          }
+   <style>
+      * {font-family:Arial;color: black;font-size: 12px;}
+      #app { width: 800px; background-color: #f3f3f0; margin:5px; padding: 10px}
+      .ui-datepicker-trigger { border:none; background:none; }
+   </style>
+
+   <script src="/vendor/moment.min.js"></script>
+   <script src="/vendor/underscore-1.8.3/underscore.js"></script>
+   <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
+   <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+   <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+   <script src="/vendor/vue-1.0.26/vue.js"></script>
+   <script src="/javascript/vue-eb.js"></script>
+   <script>
+      const data = {
+        readonly: false,
+        message: 'Hello Vue.js!',
+        b: true,
+        picked: 'one',
+        selected: 'two',
+        date: '',
+        dtx: '',
+        ddval1: 1,
+        ddval2: 1,
+        options1: [
+          {text: 'AAA', value: 1},
+          {text: 'BBB', value: 2},
+          {text: 'CCC', value: 4}
+        ],
+        options2: ['AAA', 'BBB', 'CCC'],
+        o: {
+          a: 'aa'
         },
-        computed: {
-          rev_message: function () {
-            return this.message.split('').reverse().join('');
-          },
-          xxx: function () {
-            console.log('xxx');
-            if (this.message.length > 20) {
-              this.picked = 'one';
+        name:'12345',
+      };
+      var vue;
+
+      $(document).ready(function (){
+
+        $('#cbReadonly').on('change', function (){
+          const readonly = $('#cbReadonly').prop('checked');
+          $('input').prop('disabled', readonly);
+          $(".sel").selectmenu().selectmenu(readonly ? 'disable' : 'enable');
+          // $('select').selectmenu(readonly ? 'disable' : 'enable');
+          $('#cbReadonly').prop('disabled', false);
+        })
+
+        vue = new Vue({
+          el: '#app',
+          data: data,
+          computed: {
+            rev_message: function (){
+              return this.message.split('').reverse().join('');
+            },
+            xxx: function (){
+              console.log('xxx');
+              if (this.message.length > 20) {
+                this.picked = 'one';
+              }
+              return this.message.length > 20;
+            },
+            fullName: {
+              get: function (){
+                return this.name.split('').reverse().join('')
+              },
+              set: function (newValue){
+                this.name = newValue.split('').reverse().join('')
+              }
             }
-            return this.message.length > 20;
+          },
+          methods: {
+            CheckDate: function (){
+              console.log(this.dt);
+            }
           }
-        },
-        methods: {
-          CheckDate: function () {
-            console.log(this.dt);
-          }
-        }
+        });
       });
-    });
-  </script>
+   </script>
 </head>
 
 <body>
 
-  <div id="app">
-    <input v-model="message">
-    <p>{{ message }}</p>
-    <p>{{ rev_message }}</p>
-    <p><input type="checkbox" v-model="b">{{b ? "yes" : "no"}}</p>  
-    <p>
-      <label>One<input type="radio" name="picked"     id='one' value="one" v-radio="picked"></label>
-      <label>Two<input type="radio" name="picked"     id='two' value="two" v-radio="picked"></label>
-      <label>Three<input type="radio" name="picked" id='three' value="three" v-radio="picked" ></label>
-      Ausgewählt ist: {{picked}}
-    </p>
-    <!--<input type="text" v-datepicker-processdate="dtx" />-->
-    <input type="text" v-datepicker="dt" />
+   <div id="app">
+      <input type='text' v-model='fullName'/>
+      Readonly<input type='checkbox' v-model='readonly' id='cbReadonly'/>
+      <br/>
+      <input v-model="message">
+      <p>{{ message }}</p>
+      <p>{{ rev_message }}</p>
+      <p><input type="checkbox" v-model="b">{{b ? "yes" : "no"}}</p>  
+      <p>
+         <label>One  <input type="radio" name="picked" id='one'   value="one"   v-radio="picked"/></label>
+         <label>Two  <input type="radio" name="picked" id='two'   value="two"   v-radio="picked"/></label>
+         <label>Three<input type="radio" name="picked" id='three' value="three" v-radio="picked"/></label>
+         Ausgewählt ist: {{picked}}
+      </p>
+      <!--<input type="text" v-datepicker-processdate="dtx" />-->
+      <input type="text" v-datepicker="date" />
 
-    <br/>
-    <select v-selectmenu='ddval1'>
-      <option v-for="option in options1" v-bind:value="option.value">{{ option.text }}</option>
-    </select>
+      <br/>
+      <select v-selectmenu='ddval1' style='width:200px' class='sel'>
+         <option v-for="option in options1" v-bind:value="option.value">{{ option.text }}</option>
+      </select>
 
-    <select v-selectmenu='ddval2'>
-      <option v-for="option in options2" >{{ option }}</option>
-    </select>
+      <select v-selectmenu='ddval2' style='width:200px' class='sel'>
+         <option v-for="option in options2" >{{ option }}</option>
+      </select>
 
-    <pre>data: {{$data | json 3}}</pre>
-  </div>
+      <pre>data: {{$data | json 3}}</pre>
+   </div>
 
 </body>
 </html>

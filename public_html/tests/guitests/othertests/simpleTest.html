@@ -5,12 +5,8 @@
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
-      <link rel="stylesheet" href="/css/ebselect.css">
-      <link rel="stylesheet" href="/css/eblist.css">
-      <link rel="stylesheet" href="/vendor/ebtable/ebtable.css">
-      <link rel="stylesheet" href="/vendor/jQuery-toggles/css/toggles-full.css">
       <style>
-         * {font-family:Arial;color: black;font-size: 10px;      }
+         * {font-family:Arial; color: black;  }
          body { max-width: 800px; }
          select:disabled { color: #ccc}
       </style>
@@ -18,37 +14,15 @@
       <script src="/vendor/underscore-1.8.3/underscore.js"></script>
       <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
       <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
-      <script src="/vendor/jQuery-toggles/toggles.js"></script>
-      <script src="/vendor/notify.min.js"></script>
-      <script src="/vendor/jquery.noty.packaged.min.js"></script>
-      <script src="/vendor/ebtable/mx.js"></script>
-      <script src="/vendor/ebtable/ebtable.js"></script>
-      <script src="/js/eblib/eblogger.js"></script>
+      <script src="/javascripteblib/ebpager.js"></script>
       <script>
 
-         var logOpts = {
-            //onlog: (l) => l, 
-            level: eblogger.LEVEL.TRACE,
-         };
-
-         var logger = eblogger(logOpts)
-
-         console.assert( logger.fatal('TEST1').substring(0,7) === '[FATAL]') ;
-         console.assert( logger.error('TEST2').substring(0,7) === '[ERROR]') ;
-         logger.error('ERROR');
-         logger.warn('WARN');
-         logger.info('INFO');
-         logger.debug('DEBUG');
-         logger.trace('TRACE');
-         
          $(document).ready(function () {
-            $('#btnTest').on('click', function () {
-               noty({type: "success", text: "Die Fensterposition wurde erfolgreich gespeichert", timeout: 5000});
-            })
+            $('#pager').pager({});
          });
       </script>
    </head>
    <body>
-      <button id='btnTest'>TEST</button>
+      <div id="pager"></div>
    </body>
 </html>

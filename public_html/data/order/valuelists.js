@@ -1,5 +1,5 @@
 const fags = [
-  {value: -1, code:'', text: ""},
+  {value: -1, code: '', text: ""},
   {value: 1, code: 210, text: "Notwendigkeit und Dauer der stationären Krankenhausbehandlung (§112 Abs.2 Nr.2 SGB V)"},
   {value: 2, code: 230, text: "DRG ordnungsgemäße Abrechnung"},
   {value: 3, code: 231, text: "DRG ordnungsgemäße Abrechnung und Dauer und Notwendigkeit von Krankenhausbehandlung"},
@@ -25,16 +25,6 @@ const products = [
   {value: 6, code: 71, text: "Produkt 5"}
 ];
 
-const orgas = [
-  {value: -1, code: "", text: ""},
-  {value: 1, code: 1000, text: "AB13HG0"},
-  {value: 2, code: 1001, text: "AB13HG1"},
-  {value: 3, code: 1002, text: "AB14HG6"},
-  {value: 4, code: 1003, text: "AB31HG0"},
-  {value: 5, code: 1004, text: "AB34HG0"},
-  {value: 6, code: 1005, text: "AB36HG0"},
-];
-
 const gutachtenarten = [
   {value: -1, code: "", text: ""},
   {value: 1, code: 66, text: "Gutachtenart 0"},
@@ -53,3 +43,27 @@ const gutachtenartenPrecision = [
   {value: 6, code: 72, text: "Gutachtenartpräzisierung 6"},
   {value: 6, code: 73, text: "Gutachtenartpräzisierung 7"},
 ];
+
+const beratungsstellen = [
+  {value: 1, text: "AnzeigeNameBZ1"},
+  {value: 2, text: "Beratungsstelle1"},
+  {value: 3, text: "Beratungsstelle2"},
+  {value: 4, text: "Beratungsstelle3"},
+]
+
+const ordercodes = [
+  {value: -1, code: "", text: ""},
+  {value: 5, code: 'KON-GA', text: "KON-GA Konsiliargutachten"},
+  {value: 2, code: 'KU-ORG', text: "KU-ORG Körperliche Untersuchung organisieren"},
+  {value: 2, code: 'UN-ANF', text: "UN-ANF Unterlagen anfordern 2"},
+]
+
+const valuelists = {
+  fags: fags,
+  fagsPrecision: fagsPrecision,
+  products:products,
+  gutachtenarten:gutachtenarten,
+  gutachtenartenPrecision:gutachtenartenPrecision,
+  beratungsstellen:beratungsstellen,
+  ordercodes: ordercodes,
+}

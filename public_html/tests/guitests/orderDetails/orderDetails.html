@@ -16,8 +16,10 @@
       <style>
          input.red { color: red; width:40px}
          input.black { color: black; width:40px}
-         .ui-datepicker-trigger { border:none; background:none; }
          ul.ui-menu { max-height: 300px }
+         .ui-datepicker-trigger { border:none; background:none; }
+         .date { width: 65px; }
+         .date-time { width: 100px; }
       </style>
 
       <script src='/data/icddata.js'></script>    
@@ -63,7 +65,7 @@
            },
            getListObjectByCode: function getListObjectByCode(list, code){
              return _.find(list, function (o){
-               return Number(o.code) === Number(code);
+               return '' + o.code === '' + code;
              });
            },
            mapper: function (list, idString){
@@ -74,7 +76,7 @@
                  return x ? x.code : '';
                },
                set: function (newValue){
-                 const x = listUtils.getListObjectByCode(list,newValue);
+                 const x = listUtils.getListObjectByCode(list, newValue);
                  this.auftrag[idString] = x ? x.value : -1;
                }
              };
@@ -103,12 +105,7 @@
              data: {
                readonly: false,
                auftrag: auftrag,
-               orgaOptions: orgas,
-               fags: fags,
-               fagsPrecision: fagsPrecision,
-               products: products,
-               gutachtenarten: gutachtenarten,
-               gutachtenartenPrecision: gutachtenartenPrecision
+               valuelists: valuelists,
              },
              computed: {
                ansprechpartner: function (){
@@ -131,12 +128,11 @@
                fristAblaufBeiKasseInDays: function (){
                  return getFrist(auftrag['deadline-at-agency-date']);
                },
-               fag: listUtils.mapper(fags, 'reason-id'),
-               fagText: function (){
-                 const icdCodeId = Number(this.auftrag["reason-id"]);
-                 const x = icdUtils.getIcdCodeObjectById(icdCodeId);
-                 return x ? x.text : '';
-               },
+               fag: listUtils.mapper(valuelists.fags, 'reason-id'),
+               fagPrec: listUtils.mapper(valuelists.fagsPrecision, 'reason-spec-id'),
+               gutachtenart: listUtils.mapper(valuelists.gutachtenarten, 'expertise-type-id'),
+               gutachtenartPrec: listUtils.mapper(valuelists.gutachtenartenPrec, 'expertise-type-spec-id'),
+               ordercode: listUtils.mapper(valuelists.ordercodes, 'ordercode-id'),
                icd: {
                  get: function (){
                    const icdCodeId = Number(this.auftrag["icd-code-id"]);
@@ -204,6 +200,17 @@
          <br/>
 
          <div>
+            <h2>Kürzel</h2> 
+               <input type='text' style='width:40px' v-model='ordercode'/>
+                        <select v-selectmenu='auftrag["ordercode-id"]' style='width:500px' class='sel'>
+                           <option v-for='opt in valuelists.ordercodes' v-bind:value='opt.value'>{{ opt.text }}</option>
+                        </select>
+
+         </div>
+
+         <br/>
+
+         <div>
             <h2>Fristen</h2> 
             <table>
                <tr>
@@ -226,6 +233,12 @@
          <br/>
 
          <div>
+            <h2>Referenzierte Aufträge</h2> 
+         </div>
+
+         <br/>
+
+         <div>
 
             <div>
                <h2>Versicherter                
@@ -233,7 +246,7 @@
                </h2> 
                <span>Name                <input type='text' v-model='auftrag.insuredperson.lastname'    disabled class="readonly"/></span>
                <span>Vorname             <input type='text' v-model='auftrag.insuredperson.firstname'   disabled class="readonly"/></span>
-               <span>Geburtsdatum        <input type='text' v-model='auftrag.insuredperson.dateofbirth' disabled class="readonly"/></span>
+               <span>Geburtsdatum        <input type='text' v-model='auftrag.insuredperson.dateofbirth' disabled class="readonly date"/></span>
                <span>Versicherungsnummer <input type='text' v-model='auftrag.insuredperson.insuranceno' disabled class="readonly"/></span>
             </div>
 
@@ -247,8 +260,8 @@
                   <input type='text' v-model='auftrag["workorder-no"]'/>
                </span>
                <span>Auftrag vom          
-                  <input type='text' v-if='readonly' v-model='auftrag["date-incoming"]' disabled/>
-                  <input type='text' v-if='!readonly' v-datepicker='auftrag["date-incoming"]'/>
+                  <input type='text' v-if='readonly' v-model='auftrag["date-incoming"]' class="date" disabled/>
+                  <input type='text' v-if='!readonly' v-datepicker='auftrag["date-incoming"]' class="date"/>
                </span>
                <span>Name                 
                   <input type='text' v-model='auftrag.applicant.name' disabled class="readonly"/>
@@ -276,16 +289,16 @@
                      <td><input type='text' style='width:40px' v-model='fag'/></td>
                      <td>
                         <select v-selectmenu='auftrag["reason-id"]' style='width:500px' class='sel'>
-                           <option v-for='opt in fags' v-bind:value='opt.value'>{{ opt.text }}</option>
+                           <option v-for='opt in valuelists.fags' v-bind:value='opt.value'>{{ opt.text }}</option>
                         </select>
                      </td>
                   </tr>
                   <tr>
                      <td>Präz. Frage des AG</td>
-                     <td><input type='text' style='width:40px' v-model='auftrag["reason-spec-id"]'/></td>
+                     <td><input type='text' style='width:40px' v-model='fagPrec'/></td>
                      <td>
                         <select v-selectmenu='auftrag["reason-spec-id"]' style='width:500px' class='sel'>
-                           <option v-for='opt in fagsPrecision' v-bind:value='opt.value'>{{ opt.text }}</option>
+                           <option v-for='opt in valuelists.fagsPrecision' v-bind:value='opt.value'>{{ opt.text }}</option>
                         </select>
                      </td>
                   </tr>
@@ -294,27 +307,27 @@
                      <td></td>
                      <td>
                         <select v-selectmenu='auftrag["product-id"]' style='width:500px' class='sel'>
-                           <option v-for='opt in products' v-bind:value='opt.value'>{{ opt.text }}</option>
+                           <option v-for='opt in valuelists.products' v-bind:value='opt.value'>{{ opt.text }}</option>
                         </select>
                      </td>
                   </tr>
                   <tr>
                      <td>Gutachtenart</td>
                      <td>
-                        <input type='text' style='width:40px' v-model='auftrag["expertise-type-id"]'/>
+                        <input type='text' style='width:40px' v-model='gutachtenart'/>
                      </td>
                      <td>
                         <select v-selectmenu='auftrag["expertise-type-id"]' style='width:500px' class='sel'>
-                           <option v-for='opt in gutachtenarten' v-bind:value='opt.value'>{{ opt.text }}</option>
+                           <option v-for='opt in valuelists.gutachtenarten' v-bind:value='opt.value'>{{ opt.text }}</option>
                         </select>
                      </td>
                   </tr>
                   <tr>
                      <td>Präz. Gutachtenart</td>
-                     <td><input type='text' style='width:40px' v-model='auftrag["expertise-type-spec-id"]'/></td>
+                     <td><input type='text' style='width:40px' v-model='gutachtenartPrec'/></td>
                      <td>
                         <select v-selectmenu='auftrag["expertise-type-spec-id"]' style='width:500px' class='sel'>
-                           <option v-for='opt in gutachtenartenPrecision' v-bind:value='opt.value'>{{ opt.text }}</option>
+                           <option v-for='opt in valuelists.gutachtenartenPrecision' v-bind:value='opt.value'>{{ opt.text }}</option>
                         </select>
                      </td>
                   </tr>
@@ -337,13 +350,34 @@
                      <td>Eingangsdatum</td>
                      <td></td>
                      <td>
-                        <input type='text' v-if='readonly'  v-model='auftrag["registration-date"]' disabled/>
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["registration-date"]'/>
+                        <input type='text' v-if='readonly'  v-model='auftrag["registration-date"]' disabled class="date"/>
+                        <input type='text' v-if='!readonly' v-datepicker='auftrag["registration-date"]' class="date"/>
                      </td>
                   </tr>
-
-                  "registration-date"
+                  <tr>
+                     <td>Letzte Änderung</td>
+                     <td></td>
+                     <td><input type='text' v-model='auftrag["last-modification-date"]' disabled class="date-time"/></td>
+                  </tr>
+                  <tr>
+                     <td>Beratungsstelle</td>
+                     <td></td>
+                     <td>
+                        <select v-selectmenu='auftrag["competent-helpdesk-id"]' style='width:500px' class='sel'>
+                           <option v-for='opt in valuelists.beratungsstellen' v-bind:value='opt.value'>{{ opt.text }}</option>
+                        </select>
+                     </td>
+                  </tr>
                </table>
+            </div>
+
+            <div>
+               <h2>Beteilgte Mitarbeiter</h2> 
+               Erfasser
+               Verantwortlicher Gutachter
+               Beteiligte Gutachter
+               Vorgesehener Gutachter
+               Auftragsbesogene Gruppe
             </div>
 
          </div>

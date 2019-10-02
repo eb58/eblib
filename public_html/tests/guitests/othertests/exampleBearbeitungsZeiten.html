@@ -19,16 +19,16 @@
     <script src='/vendor/ebtable/mx.js'></script>
     <script src='/vendor/ebtable/ebtable.js'></script>  
 
-    <script src='/javascriptpolyfill.js'></script>
+    <script src='/javascript/polyfill.js'></script>
 
-    <script src='/javascripteblib/ebutils.js'></script>
-    <script src='/javascripteblib/ebbind.js'></script>
-    <script src='/javascripteblib/ebdropdown.js'></script>  
+    <script src='/javascript/eblib/ebutils.js'></script>
+    <script src='/javascript/eblib/ebbind.js'></script>
+    <script src='/javascript/eblib/ebdropdown.js'></script>  
 
-    <script src='/javascriptcomponents/componentBearbeitungszeiten.js'></script>  
+    <script src='/javascript/components/componentBearbeitungszeiten.js'></script>  
 
-    <script src='/javascriptdlgs/dlgSelectExperts.js'></script>  
-    <script src='/javascriptdlgs/dlgBearbeitungsZeiten.js'></script>  
+    <script src='/javascript/dialogs/dlgSelectExperts.js'></script>  
+    <script src='/javascript/dialogs/dlgBearbeitungsZeiten.js'></script>  
 
     <script>
       var readonly = false;
@@ -41,6 +41,7 @@
       ];
 
       var zeitdata = {
+        migrated: [],
         sichtung: [{user: {userid: 50000000000010, firstname: 'test', lastname: 'test'}, sectorid: 1, 'working-time': 130}],
         fehlbesuchszeit: [{user: {userid: 50000000000010, firstname: 'test', lastname: 'test'}, sectorid: 2, 'working-time': 130}],
         kfk: [

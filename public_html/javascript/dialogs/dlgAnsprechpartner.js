@@ -16,7 +16,7 @@ var dlgAnsprechpartner = function (opts, ansprechpartner){
           <tr><td>Telefon   <td><td><input type="text" v-model="branchofficeno"/><td></tr>\n\
           <tr><td>Fax       <td><td><input type="text" v-model="fax"/><td></tr>\n\
           <tr><td>Email     <td><td><input type="text" v-model="email"/><td></tr>\n\
-          <tr><td>Bemerkung <td><td><textarea cols=42  v-model="additionalinformation"></textarea/><td></tr>\n\
+          <tr><td>Bemerkung <td><td><textarea  v-model="additionalinformation"></textarea/><td></tr>\n\
         </table>\n\
       </div>');
 
@@ -54,7 +54,7 @@ var dlgAnsprechpartner = function (opts, ansprechpartner){
       });
     },
     title: 'Ansprechpartner',
-    height: 300, width: 400,
+    height: 300, width: 420,
     closeText: 'Schlie\u00dfen',
     modal: true,
     buttons: opts.readonly ? buttonsReadonlyModus : buttonsEditModus
@@ -71,5 +71,5 @@ var dlgAnsprechpartner = function (opts, ansprechpartner){
   $('#dlgAnsprechpartner').css('background-color', '#eeeee0');
   $('#dlgAnsprechpartner').parent().find('*').css('font-size', '12px');
   $("#dlgAnsprechpartner input").width('300px').prop('disabled',opts.readonly);
-  $("#dlgAnsprechpartner textarea").prop('disabled',opts.readonly)
-};
+  $("#dlgAnsprechpartner textarea").prop('disabled',opts.readonly).width('300px');
+  };

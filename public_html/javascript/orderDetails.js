@@ -1,5 +1,5 @@
 /* global moment, auftrag, valuelists, icdUtils, gIcddata, _, servicerenderers */
-
+let readonly = false;
 const listUtils = {
   getListObjectById: function getListObjectById(list, id){
     return _.find(list, function (o){
@@ -71,6 +71,42 @@ $(document).ready(function (){
     $('#cbReadonly').prop('disabled', false);
   });
 
+
+
+  $('#btnBearbeitungszeiten').on('click', function (){
+    const  bereicheList = [
+      {v: null, txt: '- keine Auswahl -'},
+      {v: 1, txt: 'Bereich1'},
+      {v: 2, txt: 'Bereich2'},
+      {v: 3, txt: 'Bereich3'}
+    ];
+    const  zeitdata = {
+      migrated: [],
+      sichtung: [{user: {userid: 50000000000010, firstname: 'test', lastname: 'test'}, sectorid: 1, 'working-time': 130}],
+      fehlbesuchszeit: [{user: {userid: 50000000000010, firstname: 'test', lastname: 'test'}, sectorid: 2, 'working-time': 130}],
+      kfk: [
+        {user: {userid: 50000000000010, firstname: 'Paul', lastname: 'Gutachter'}, sectorid: 2, 'working-time': 130, 'setup-time': 150},
+        {user: {userid: 50000000000010, firstname: 'Mario', lastname: 'Fehrenbach'}, sectorid: 2, 'working-time': 130, 'setup-time': 150}
+      ],
+      bga: [
+        {user: {userid: 50000000000010, firstname: 'Paul', lastname: 'Gutachter'}, sectorid: 2, 'working-time': 130, 'setup-time': 150}
+      ],
+      vga: [
+        {user: {userid: 50000000000010, firstname: 'Paul', lastname: 'Gutachter'}, sectorid: 3, 'working-time': 133, 'setup-time': 150}
+      ]
+    };
+
+    dlgOpts = {
+      readonly: readonly,
+      zeitdata: zeitdata,
+      bereicheList: bereicheList,
+      callback: function (data){
+        console.log('callback called!!!', data);
+      }
+    };
+    dlgBearbeitungsZeiten(dlgOpts);
+  });
+
   const selectedServicerendererId = servicerenderers.find(function (o){
     return o.selected
   }).servicerendererid;
@@ -82,7 +118,7 @@ $(document).ready(function (){
   const vue = new Vue({
     el: '#app',
     data: {
-      readonly: false,
+      readonly: readonly,
       auftrag: auftrag,
       valuelists: valuelists,
       servicerenderers: servicerenderers,
@@ -179,7 +215,7 @@ $(document).ready(function (){
         dlgAnsprechpartner({readonly: true}, ansprechpartner)
       },
       editDlgAnsprechpartner: function (ansprechpartner){
-        const takeOver = function (ansprechpartner){ 
+        const takeOver = function (ansprechpartner){
           auftrag["applicant-contact"] = ansprechpartner;
           return true;
         };

@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         }
       },
       dist: {
-        src: ['public_html/javascripteblib/*.js'],
+        src: ['public_html/javascript/eblib/*.js'],
         dest: 'public_html/dist/<%= pkg.name %>.js'
       },
       css: {

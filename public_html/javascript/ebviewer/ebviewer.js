@@ -52,7 +52,7 @@ var ebviewer = (function () {
       l: myopts.x,
       t: myopts.y
     });
-    return window.open("/javascriptebviewer/ebviewer.html?" + docurl + '|' + name + '|' +  ext + '|' + info +'|'  , '', params);
+    return window.open("/javascript/ebviewer/ebviewer.html?" + docurl + '|' + name + '|' +  ext + '|' + info +'|'  , '', params);
   }
 
   return {

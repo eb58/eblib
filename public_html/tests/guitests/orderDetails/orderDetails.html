@@ -144,7 +144,7 @@
                </h2> 
                <table>
                   <tr><td>Name                </td><td><input type='text' v-model='auftrag.insuredperson.lastname'    disabled class="readonly"/></td></tr>
-                  <tr><td>Vorname             </td><td><input type='text' v-model='auftrag.insuredperson.firstame'    disabled class="readonly"/></td></tr>
+                  <tr><td>Vorname             </td><td><input type='text' v-model='auftrag.insuredperson.firstname'   disabled class="readonly"/></td></tr>
                   <tr><td>Geburtsdatum        </td><td><input type='text' v-model='auftrag.insuredperson.dateofbirth' disabled class="readonly"/></td></tr>
                   <tr><td>Versicherungsnummer </td><td><input type='text' v-model='auftrag.insuredperson.insuranceno' disabled class="readonly"/></td></tr>
                </table>
@@ -153,8 +153,8 @@
             <div>
                <h2>Auftraggeber                
                   <i class="fa fa-info-circle" title='Auftraggeber anzeigen'></i> 
-                  <i class="fa fa-search" title='Auftraggeber auswählen' v-if='!readonly'></i> 
-                  <i class="fa fa-trash" title='Auftraggeber entfernen'  v-if='!readonly'></i> 
+                  <i class="fa fa-search"      title='Auftraggeber auswählen' v-if='!readonly'></i> 
+                  <i class="fa fa-trash"       title='Auftraggeber entfernen' v-if='!readonly'></i> 
                </h2> 
                <table>
                   <tr>
@@ -164,7 +164,7 @@
                   <tr>
                      <td>Auftrag vom</td>
                      <td>
-                        <input type='text' v-if='readonly' v-model='auftrag["date-incoming"]' class="date" disabled/>
+                        <input type='text' v-if='readonly'  v-model     ='auftrag["date-incoming"]' class="date" disabled/>
                         <input type='text' v-if='!readonly' v-datepicker='auftrag["date-incoming"]' class="date"/>
                      </td>
                   </tr>
@@ -330,6 +330,14 @@
                         <select v-selectmenu='auftrag["result-id"]' style='width:500px' class='sel'>
                            <option v-for='opt in valuelists.results' v-bind:value='opt.value'>{{ opt.text }}</option>
                         </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td>Bearbeitungszeiten</td>
+                     <td>
+                     </td>
+                     <td>
+                        <button id='btnBearbeitungszeiten'>Bearbeitungszeiten eingeben</button>
                      </td>
                   </tr>
                   <tr>

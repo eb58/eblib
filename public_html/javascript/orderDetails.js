@@ -65,6 +65,7 @@ $(document).ready(function (){
     const readonly = $('#cbReadonly').prop('checked');
     $('input').prop('disabled', readonly);
     $('textarea').prop('disabled', readonly);
+    $('.ui-datepicker-trigger').prop('disabled', readonly);
     $('.sel').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
     $('.readonly').prop('disabled', true);
     $('#cbReadonly').prop('disabled', false);

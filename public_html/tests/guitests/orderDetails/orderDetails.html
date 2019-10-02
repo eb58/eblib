@@ -335,7 +335,8 @@
                      <td>
                      </td>
                      <td>
-                        <input type='text' v-datepicker='auftrag["result-date"]' class="date" />
+                        <input type='text' v-if='readonly' v-model='auftrag["result-date"]' class="date" disabled/>
+                        <input type='text' v-if='!readonly' v-datepicker='auftrag["result-date"]' class="date"/>
                      </td>
                   </tr>
                   <tr v-if='auftrag["dms-upload-date"]'>
@@ -343,7 +344,7 @@
                      <td>
                      </td>
                      <td>
-                        <input type='text' v-model='auftrag["dms-upload-date"]' class="date readonly" disabled/>
+                        <input type='text' v-model='auftrag["dms-upload-date"]' class="date" disabled/>
                      </td>
                   </tr>
                   <tr>
@@ -351,7 +352,8 @@
                      <td>
                      </td>
                      <td>
-                        <input type='text' v-datepicker='auftrag["target-date"]' class="date" />
+                        <input type='text' v-if='readonly'  v-model='auftrag["target-date"]' class="date" disabled/>
+                        <input type='text' v-if='!readonly' v-datepicker='auftrag["target-date"]' class="date"/>
                      </td>
                   </tr>
                   <tr>
@@ -359,7 +361,8 @@
                      <td>
                      </td>
                      <td>
-                        <input type='text' v-datepicker='auftrag["order-request-date"]' class="date" />
+                        <input type='text' v-if='readonly'  v-model='auftrag["order-request-date"]' class="date" disabled/>
+                        <input type='text' v-if='!readonly' v-datepicker='auftrag["order-request-date"]' class="date"/>
                      </td>
                   </tr>
                </table>

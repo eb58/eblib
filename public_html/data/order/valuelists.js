@@ -58,12 +58,57 @@ const ordercodes = [
   {value: 2, code: 'UN-ANF', text: "UN-ANF Unterlagen anfordern 2"},
 ]
 
+const erledigungsarten = [
+  {value: -1, code: "", text: ""},
+  {value: 4, code: '10', text: "10 Aktenlage"},
+  {value: 14, code: '11', text: "11 SFB mündlich/schriftlich"},
+  {value: 5, code: '20', text: "20 Sozialmedizinische Begutachtung mit körperlicher Untersuchung"},
+  {value: 10, code: '21', text: "21 Begutachtung mit symptombezogener persönlicher Befunderhebung"},
+]
+
+const erledigungsorte = [
+  {value: -1, code: "", text: ""},
+  {value: 11, code: '03', text: "03 im Krankenhaus oder anderer Einrichtung"},
+  {value: 4, code: '10', text: "10 Beratungsstelle / BBZ"},
+  {value: 5, code: '20', text: "20 An anderer Stelle"},
+  {value: 6, code: '30', text: "30 in häuslicher Umgebung"},
+  {value: 10, code: '40', text: "40 Im häuslichen Umfeld"},
+  {value: 12, code: '62', text: "62 in vollstationärer Pflegeeinrichtung"},
+]
+
+const results = [
+  {value: -1, code: "", text: ""},
+  {value: 22, code: '50', text: "50 Medizinische Voraussetzungen für die Leistung erfüllt"},
+  {value: 21, code: '60', text: "60 Medizinische Voraussetzungen für die Leistung nicht erfüllt"},
+  {value: 16, code: '90', text: "90 Andere Antwort"},
+]
+
+const reasonsOfPrgDelay = [
+  {value: -1, code: "", text: ""},
+  {value: 1, text: "Keine Verzögerung"},
+  {value: 2, text: "Der Versicherte steht für notwendige Befunderhebung / Hausbesuch nicht zur Verfügung"},
+  {value: 3, text: "Unverzichtbare angeforderte Auskünfte / Unterlagen gingen nicht fristgerecht ein"},
+]
+
+const servicerendererTypes = [
+  {value:'Leistungserbringer', text: 'Leistungserbringer'},
+  {value:'Krankenhaus',text: 'Krankenhaus'},
+  {value:'Sanitätshaus',text: 'Sanitätshaus'},
+  {value:'Pflegeeinrichtung',text: 'Pflegeeinrichtung'},
+]
+
+
 const valuelists = {
   fags: fags,
   fagsPrecision: fagsPrecision,
-  products:products,
-  gutachtenarten:gutachtenarten,
-  gutachtenartenPrecision:gutachtenartenPrecision,
-  beratungsstellen:beratungsstellen,
+  products: products,
+  gutachtenarten: gutachtenarten,
+  gutachtenartenPrecision: gutachtenartenPrecision,
+  beratungsstellen: beratungsstellen,
   ordercodes: ordercodes,
+  erledigungsarten: erledigungsarten,
+  erledigungsorte: erledigungsorte,
+  results: results,
+  reasonsOfPrgDelay: reasonsOfPrgDelay,
+  servicerendererTypes:servicerendererTypes
 }

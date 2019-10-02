@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html xmlns='http://www.w3.org/1999/xhtml' lang='de'>
+   <head>
+      <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+      <meta http-equiv='Content-Style-Type' content='text/css'/>
+
+      <title>Auftrag</title>
+
+      <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
+      <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+      <link rel='stylesheet' href='/vendor/ebtable/ebtable.css'/>
+      <link rel='stylesheet' href='/css/eblib.css'/>
+      <link rel='stylesheet' href='/css/ebselect.css'/>
+
+      <style>
+         * { font-family:Arial; color: black; font-size: 14px;  }
+         input.red { color: red; width:40px}
+         input.black { color: black; width:40px}
+         ul.ui-menu { max-height: 300px }
+         .ui-datepicker-trigger { border:none; background:none; }
+         .date { width: 65px; }
+         .date-time { width: 100px; }
+      </style>
+
+      <script src='/data/icddata.js'></script>    
+      <script src='/data/order/auftrag2.js'></script>
+      <script src='/data/order/valuelists.js'></script>
+
+      <script src='/vendor/Underscore-1.8.3/underscore.min.js'></script>
+      <script src='/vendor/jQuery-1.11.3/jquery.min.js'></script>
+      <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
+      <script src='/vendor/jQuery-contextmenu/jquery.contextMenu.min.js'></script>
+      <script src='/vendor/moment.min.js'></script>
+      <script src='/vendor/ebtable/mx.js'></script>
+      <script src='/vendor/ebtable/ebtable.js'></script>
+      <script src='/vendor/vue-1.0.26/vue.js'></script>
+
+      <script src='/javascript/polyfill.js'></script>
+      <script src='/javascript/jquery-ui-datepicker-de.js'></script>
+      <script src='/javascript/vue-eb.js'></script>
+      <!--<script src='/javascript/jquery-ismed.js'></script>-->
+      <!--<script src='/javascript/workspace.js'></script>-->
+
+      <script src='/javascript/eblib/ebutils.js'></script>
+      <script src='/javascript/eblib/ebviewer.js'></script>
+      <script src='/javascript/eblib/ebbind.js'></script>
+      <script src='/javascript/eblib/ebdropdown.js'></script>
+      <script src='/javascript/eblib/ebselect.js'></script>
+      <script src='/javascript/eblib/ebtextarea.js'></script>
+      <script src='/javascript/icdUtils.js'></script>
+
+      <script src='/javascript/components/componentBearbeitungszeiten.js'></script>
+      <script src='/javascript/dialogs/dlgIcdcode.js'></script>
+      <script src='/javascript/dialogs/dlgSelectExpert.js'></script>
+      <script src='/javascript/dialogs/dlgInsurantInfo.js'></script>
+      <script src='/javascript/dialogs/dlgBearbeitungsZeiten.js'></script>
+      <script src='/javascript/orderDetails.js'></script>
+
+      <script type='text/javascript'>
+         const servicerenderers = {
+           "987654": {
+             "servicerendererid": 987654,
+             "name": "Kreiskankenhaus Aschaffenburg",
+             "servicerenderertype": "Krankenhaus",
+             "shortname": "KKH A'burg",
+             "delivery-config-id": 14,
+             "valid": true,
+             "selected": true,
+             "duplicate": "NoDuplicate"
+           },
+           "987652": {
+             "servicerendererid": 987652,
+             "name": "Sanitätshaus Schulze",
+             "servicerenderertype": "Sanitätshaus",
+             "shortname": "SR2 short",
+             "delivery-config-id": 13,
+             "valid": true,
+             "selected": true,
+             "duplicate": "ResolvedDuplicate"
+           },
+           "987655": {
+             "servicerendererid": 987655,
+             "name": "Dr. Schule",
+             "servicerenderertype": "Leistungserbringer",
+             "shortname": "SR1 short",
+             "delivery-config-id": 14,
+             "valid": true,
+             "selected": true,
+             "duplicate": "ResolvedDuplicate"
+           },
+         };
+
+         $(document).ready(function (){
+
+         })
+      </script>
+   </head>
+   <body>
+      <div>TODO write content</div>
+   </body>
+</html>

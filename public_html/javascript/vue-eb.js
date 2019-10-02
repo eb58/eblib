@@ -94,8 +94,4 @@ Vue.directive('ebselect', {
   }
 });
 
-Vue.directive('button', {
-  bind: function (){
-    $(this.el).button();
-  }
-});
+

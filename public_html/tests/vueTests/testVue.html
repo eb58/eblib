@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <head>
-   <meta charset="utf-8">
+   <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
    <title>Vue Test</title>
    <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
    <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <link rel='stylesheet' href='https://unpkg.com/select2@4.0.3/dist/css/select2.min.css'/>
    <link rel='stylesheet' href='/vendor/ebtable/ebtable.css'/>
 
    <style>
-      * {font-family:Arial;color: black;font-size: 12px;}
+      * {font-family: Arial; color: black;font-size: 12px;}
       #app { width: 800px; background-color: #f3f3f0; margin:5px; padding: 10px}
       .ui-datepicker-trigger { border:none; background:none; }
    </style>
@@ -15,11 +19,16 @@
    <script src="/vendor/moment.min.js"></script>
    <script src="/vendor/underscore-1.8.3/underscore.js"></script>
    <script src="/vendor/jQuery-1.11.3/jquery.js"></script>
-   <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
    <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
-   <script src="/vendor/vue-1.0.26/vue.js"></script>
-   <script src="/javascript/vue-eb.js"></script>
+   <script src="https://unpkg.com/select2@4.0.3/dist/js/select2.js"></script>
+   <script src="/vendor/vue-2.6.0/vue.js"></script>
+
+   <script src="/javascript/vue-eb-components.js"></script>
+
    <script>
+
       const data = {
         readonly: false,
         message: 'Hello Vue.js!',
@@ -29,7 +38,7 @@
         date: '',
         dtx: '',
         ddval1: 1,
-        ddval2: 1,
+        ddval2: 2,
         options1: [
           {text: 'AAA', value: 1},
           {text: 'BBB', value: 2},
@@ -39,11 +48,20 @@
         o: {
           a: 'aa'
         },
-        name:'12345',
+        name: '12345',
+        options: [
+          {id: 1, text: 'Hello'},
+          {id: 2, text: 'World'}
+        ],
+        checkbox1: true,
+        checkbox2: true,
       };
       var vue;
-
       $(document).ready(function (){
+
+        $("input:checkbox").checkboxradio({
+          icon: true
+        });
 
         $('#cbReadonly').on('change', function (){
           const readonly = $('#cbReadonly').prop('checked');
@@ -56,16 +74,10 @@
         vue = new Vue({
           el: '#app',
           data: data,
+          // vuetify: new Vuetify(),
           computed: {
             rev_message: function (){
               return this.message.split('').reverse().join('');
-            },
-            xxx: function (){
-              console.log('xxx');
-              if (this.message.length > 20) {
-                this.picked = 'one';
-              }
-              return this.message.length > 20;
             },
             fullName: {
               get: function (){
@@ -89,33 +101,53 @@
 <body>
 
    <div id="app">
+      <label for="cbReadonly">Readonly</label>
+      <input type='checkbox' v-model='readonly' id='cbReadonly'/>
+
+      <div>
+         <p>Selected: {{ selected }}</p>
+         <select2 :options="options" v-model="selected"></select2>
+      </div>
+
+      <eb-vue-date-picker v-model='date'></eb-vue-date-picker>
+      <eb-vue-date-picker v-model='date'></eb-vue-date-picker>
+
       <input type='text' v-model='fullName'/>
-      Readonly<input type='checkbox' v-model='readonly' id='cbReadonly'/>
       <br/>
       <input v-model="message">
       <p>{{ message }}</p>
       <p>{{ rev_message }}</p>
-      <p><input type="checkbox" v-model="b">{{b ? "yes" : "no"}}</p>  
+      <!--<p><input type="checkbox" v-model="b">{{b ? "yes" : "no"}}</p>-->  
       <p>
-         <label>One  <input type="radio" name="picked" id='one'   value="one"   v-radio="picked"/></label>
-         <label>Two  <input type="radio" name="picked" id='two'   value="two"   v-radio="picked"/></label>
-         <label>Three<input type="radio" name="picked" id='three' value="three" v-radio="picked"/></label>
-         Ausgewählt ist: {{picked}}
-      </p>
-      <!--<input type="text" v-datepicker-processdate="dtx" />-->
-      <input type="text" v-datepicker="date" />
+      <fieldset>
+         <label>One  <eb-radio name="picked"  v-model='picked'/></label>
+         <label>Two  <eb-radio name="picked"  v-model='picked' /></label>
+         <label>Three<eb-radio name="picked"  v-model='picked' /></label>
+      </fieldset>
+      Ausgewählt ist: {{picked}}
+   </p>
 
-      <br/>
-      <select v-selectmenu='ddval1' style='width:200px' class='sel'>
-         <option v-for="option in options1" v-bind:value="option.value">{{ option.text }}</option>
-      </select>
 
-      <select v-selectmenu='ddval2' style='width:200px' class='sel'>
-         <option v-for="option in options2" >{{ option }}</option>
-      </select>
+   <br/>
+   <select2 v-model='ddval1' style='width:200px' class='sel'>
+      <option v-for="option in options1" v-bind:value="option.value">{{ option.text }}</option>
+   </select2>
 
-      <pre>data: {{$data | json 3}}</pre>
-   </div>
+   <eb-vue-dropdown v-model='ddval2' style='width:200px' class='sel'>
+      <option v-for="option in options2" >{{ option }}</option>
+   </eb-vue-dropdown>
+
+   <h2>Checkbox</h2>
+   <label for="checkbox-1">2 Star</label>
+   <input type="checkbox" name="checkbox-1" id="checkbox-1">
+   
+   <label for="checkbox-nested-1">2 Double
+      <input type="checkbox" name="checkbox-nested-1" id="checkbox-nested-1">
+    </label>
+   <pre>data: {{$data | json 3}}</pre>
+
+
+</div>
 
 </body>
 </html>

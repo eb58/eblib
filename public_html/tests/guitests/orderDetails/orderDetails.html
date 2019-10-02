@@ -50,6 +50,7 @@
 
       <script src='/javascript/components/componentBearbeitungszeiten.js'></script>
       <script src='/javascript/dialogs/dlgIcdcode.js'></script>
+      <script src='/javascript/dialogs/dlgAnsprechpartner.js'></script>
       <script src='/javascript/dialogs/dlgSelectExpert.js'></script>
       <script src='/javascript/dialogs/dlgInsurantInfo.js'></script>
       <script src='/javascript/dialogs/dlgBearbeitungsZeiten.js'></script>
@@ -183,7 +184,8 @@
                      <td>Ansprechpartner</td>
                      <td>
                         <input type='text' v-model='ansprechpartner' disabled class="readonly"/>
-                        <i class="fa fa-info-circle" title='Ansprechpartner anzeigen' @click='showAnsprechpartner(auftrag["applicant-contact"])'></i> 
+                        <i class="fa fa-info-circle" title='Ansprechpartner anzeigen' @click='showDlgAnsprechpartner(auftrag["applicant-contact"])'></i> 
+                        <i v-if="!readonly" class="fa fa-edit" title='Ansprechpartner bearbeiten' @click='editDlgAnsprechpartner(auftrag["applicant-contact"])'></i> 
                      </td>
                   </tr>
                   <tr>
@@ -449,8 +451,7 @@
             </div>
 
          </div>
-         <!--<hr/>-->
-         <pre>data: {{ $data.servicerenderers | json 3}}</pre>
+         <!--<pre>data: {{ $data.servicerenderers | json 3}}</pre>-->
       </div>
 
    </body>

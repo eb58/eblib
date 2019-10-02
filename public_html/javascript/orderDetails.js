@@ -169,14 +169,21 @@ $(document).ready(function (){
       },
     },
     methods: {
-      showAnsprechpartner: function (ansprechpartner){
-        alert('Ansprechpartner ' + JSON.stringify(ansprechpartner));
-      },
       openDlgIcd: function (){
         dlgIcd(gIcddata, function (code, text, id){
           auftrag['icd-code-id'] = id;
           return true;
         }, {icdCode: $('#icdCode').val()});
+      },
+      showDlgAnsprechpartner: function (ansprechpartner){
+        dlgAnsprechpartner({readonly: true}, ansprechpartner)
+      },
+      editDlgAnsprechpartner: function (ansprechpartner){
+        const takeOver = function (ansprechpartner){ 
+          auftrag["applicant-contact"] = ansprechpartner;
+          return true;
+        };
+        dlgAnsprechpartner({onTakeOverCallback: takeOver}, ansprechpartner)
       },
       showServiceRenderer: function (servicerenderer){
         alert('ServiceRenderer' + JSON.stringify(servicerenderer));
@@ -190,7 +197,7 @@ $(document).ready(function (){
       },
       addServicerenderer: function (){
         console.log(this.selectedServicerendererType)
-        const name = this.selectedServicerendererType + '-' + i++ 
+        const name = this.selectedServicerendererType + '-' + i++
         this.servicerenderers.push({
           name: name,
           shortname: name,
@@ -202,16 +209,16 @@ $(document).ready(function (){
       },
       deleteServicerenderer: function (servicerenderer){
         console.log(servicerenderer)
-        this.servicerenderers = this.servicerenderers.filter(function(o){
+        this.servicerenderers = this.servicerenderers.filter(function (o){
           return o.name !== servicerenderer.name
         });
         const servicerenderersCounter = countServiceRenderers(this.servicerenderers)
         this.servicerendererTypes = computeAvailableServicerendererTypes(this.allServicerendererTypes, servicerenderersCounter);
         // hack for refreshing List of types!!
         this.selectedServicerendererType = undefined;
-        setTimeout(()=> {
+        setTimeout(() => {
           this.selectedServicerendererType = this.servicerendererTypes.length > 0 ? this.servicerendererTypes[0].value : undefined;
-        },0)
+        }, 0)
       },
     },
   })

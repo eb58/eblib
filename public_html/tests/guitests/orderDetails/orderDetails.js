@@ -73,7 +73,7 @@ $(document).ready(function (){
 
 
 
-  $('#btnBearbeitungszeiten').on('click', function (){
+  $('#btnBearbeitungszeiten').button().on('click', function (){
     const  bereicheList = [
       {v: null, txt: '- keine Auswahl -'},
       {v: 1, txt: 'Bereich1'},

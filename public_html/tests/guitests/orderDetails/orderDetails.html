@@ -279,7 +279,7 @@
                         <input type='text' style='width:40px' v-model="icd" id="icdCode" />
                      </td>
                      <td>
-                        <input type='text' style='width:500px' v-model="icdText" class="readonly" disabled />
+                        <input type='text' style='width:500px' v-model="icdText" :class="readonly?'readonly':''" />
                         <i class="fa fa-search" title='Icdcodeauswählen' @click="openDlgIcd"  v-if='!readonly'></i> 
                      </td>
                   </tr>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Vue Test</title>
+
+        <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
+        <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+        <link rel='stylesheet' href='https://unpkg.com/select2@4.0.3/dist/css/select2.min.css'/>
+        <link rel='stylesheet' href='/vendor/ebtable/ebtable.css'/>
+
+        <style>
+            * {font-family: Arial; color: black;font-size: 12px;}
+            #app { width: 800px; background-color: #f3f3f0; margin:5px; padding: 10px}
+            .ui-datepicker-trigger { border:none; background:none; }
+            .sel {
+                min-width: 300px;
+            }
+        </style>
+        <script src="/vendor/moment.min.js"></script>
+
+        <script src="/vendor/underscore-1.8.3/underscore.js"></script>
+        <script src='/vendor/jQuery-1.11.3/jquery.min.js'></script>
+        <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
+        <script src="/vendor/jQueryUI-1.12.0/jquery-ui-datepicker-de.js"></script>
+        <script src="https://unpkg.com/select2@4.0.3/dist/js/select2.js"></script>
+        <script src="/vendor/vue-2.6.0/vue.js"></script>
+
+        <script src="/javascript/vue2-eb-components.js"></script>
+        <script>
+            $(document).ready(() => {
+                var vm = new Vue({
+                    el: '#el',
+                    data: {
+                        date: '01.03.1958',
+                        selected1: null,
+                        selected2: null,
+                        options1: [
+                            {id: null, text: ''},
+                            {id: 1, text: 'Variante1'},
+                            {id: 2, text: 'Variante2'}
+                        ],
+                        opts1: [{id: null, text: ''}, {id: 1, text: 'AAAA'}, {id: 2, text: 'BBBB'}, ],
+                        opts2: [{id: null, text: ''}, {id: 1, text: 'XXXX'}, {id: 2, text: 'YYYY'}, ],
+                    },
+                    computed: {
+                        options2: function () {
+                            if (!this.selected1)
+                                return [];
+                            return this.selected1 === '' + 1 ? this.opts1 : this.opts2;
+                        }
+                    }
+                })
+            })
+        </script>
+
+    </head>
+    <body>
+        <div id="el">
+            <eb-vue-dropdown :options="options1" v-model="selected1" class='sel'></eb-vue-dropdown>
+            <eb-vue-dropdown :options="options2" v-model="selected2" class='sel'></eb-vue-dropdown>
+            <p>Selected1: {{ selected1 }}</p>
+            <p>Selected2: {{ selected2 }}</p>
+            <eb-vue-date-picker v-model="date"></eb-vue-date-picker>
+            <p>date: {{ date }}</p>
+        </div>
+
+
+        <script type="text/x-template" id="select2-template">
+            <select>
+            <slot></slot>
+            </select>
+        </script>
+    </body>
+</html>

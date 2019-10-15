@@ -32,11 +32,12 @@ jQuery(function ($) {
 });
 
 var datepickerOptions = {
-  changeMonth: true,
-  changeYear: true,
-  buttonText: "<i class='fa fa-calendar'></i>",
+    changeMonth: true,
+    changeYear: true,
+    showOn: "both",
+    disabled: false,
+    buttonText: "<i class='fa fa-calendar fa-lg'></i>"
 };
-
 
 var datepickerUtils = (function () {
   "use strict";

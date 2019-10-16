@@ -19,8 +19,7 @@ var dlgIcd = function (icddata, onTakeOverCallback, opts) {
       {name: "Text", match: matcher.contains},
       {name: "Code", match: matcher.contains}
     ],
-    selectionCol: { singleSelection: true, selectOnRowClick: true },
-    rowsPerPage:15,
+    selectionCol: { singleSelection: true, selectOnRowClick: true},
     colorder: [0, 2, 1],
     afterRedraw: style
   };
@@ -69,7 +68,7 @@ var dlgIcd = function (icddata, onTakeOverCallback, opts) {
     $('#dlgIcd').css('background-color', '#eeeee0');
     $('#dlgIcd th, #dlgIcd td').css('border-color', '#fff').css('border-style', 'solid').css('border-width', '1px');
     $('#dlgIcd th:nth-child(1)').css('width', '20px');
-    $('#dlgIcd th:nth-child(2)').css('width', '60px');
+    $('#dlgIcd th:nth-child(2)').css('width', '50px');
     $('#dlgIcd input#Code').css('width', '80%');
     $('#dlgIcd input#Text').css('width', '97%');
     $('#dlgIcd .ctrl:has(#ctrlLength)').remove();

@@ -4,17 +4,25 @@
 */
 
 * { font-family:Arial; color: black; font-size: 12px; }
+a:hover {color: #AA0000; cursor: pointer;}
 body { background:#F9F9F9; margin: 10px 10px 10px 10px;}
 h1 {font-size: 16px;}
+.fa:hover { color: red; cursor: pointer;}
 
 textarea[readonly]{ background-color: #e3e0e0; }
 
 #dlgAlert   ul { margin:1px; padding:0px 10px 0px 10px; }
 #dlgConfirm ul { margin:1px; padding:0px 10px 0px 10px; }
 
+table .heading { font-size: 16px; font-weight: bold; text-align: left; vertical-align: top; text-indent: 0; border-color: #d6d6d6; height:30px}
 table .subheading { font-size: 100%; font-weight: bold; text-align: left; text-indent: 0; background: linear-gradient(#e8e8d4,#d6d6d6); border-color: #d6d6d6; }
 
 /* jquery-ui overrides */
 .ui-icon { transform: scale(1.2); margin: 1px; padding: 1px;}
 .ui-button { color: black; text-decoration: none; border-color: #aaa; }
 .ui-selectmenu-button { height: 14px;}
+.ui-dialog ul.ui-menu { max-height: 500px;}
+
+.ql-container { background-color: #ffffff; }
+.ql-container.ql-disabled { background-color: #efefe0; }
+

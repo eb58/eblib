@@ -54,6 +54,7 @@
     <script src='/javascript/eblib/ebtextarea.js'></script>
     <script src='/javascript/eblib/mx.js'></script>
     <script src='/javascript/eblib/ebtable.js'></script>
+    <script src='/javascript/eblib/ebcombined.js'></script>
     <script src='/javascript/icdUtils.js'></script>
 
     <script src='/javascript/components/componentBearbeitungszeiten.js'></script>
@@ -116,10 +117,11 @@
           </td>
           <td>Kürzel</td>
           <td>
-            <input type='text' style='width:50px' v-model='ordercode'/>
+              <div id='kuerzel'></div>
+<!--            <input type='text' style='width:50px' v-model='ordercode'/>
             <select v-selectmenu='auftrag["ordercode-id"]' style='width:300px' class='sel'>
               <option v-for='opt in valuelists.ordercodes' v-bind:value='opt.value'>{{ opt.text }}</option>
-            </select>
+            </select>-->
           </td>
         </tr>
         <tr>
@@ -214,17 +216,18 @@
         <!-- ##########################################################################-->
         <tr>
           <td>Status</td>
-          <td><input type='text' v-model='auftrag["process-status"]' disabled class="readonly"/></td>
+          <td><div>{{auftrag["process-status"]}}</div></td>
           <td></td>
           <td></td>
         </tr>
         <tr>
           <td>Frage des AG</td>
           <td>
-            <input type='text' style='width:50px' v-model='fag'/>
-            <select v-selectmenu='auftrag["reason-id"]' style='width:300px' class='sel'>
-              <option v-for='opt in valuelists.fags' v-bind:value='opt.value'>{{ opt.text }}</option>
-            </select>
+             <div id='fag'></div>
+            <!--<input type='text' style='width:50px' v-model='fag'/>-->
+            <!--<select v-selectmenu='auftrag["reason-id"]' style='width:300px' class='sel'>-->
+              <!--<option v-for='opt in valuelists.fags' v-bind:value='opt.value'>{{ opt.text }}</option>-->
+            <!--</select>-->
           </td>
           <td>Präz. Frage des AG</td>
           <td>

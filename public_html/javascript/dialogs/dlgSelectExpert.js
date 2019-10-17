@@ -1,24 +1,54 @@
 /* global _, ebutils */
-var dlgSelectExperts = function (onTakeOverCallback, opts) {
+const dlgSelectExperts = function (onTakeOverCallback, opts) {
 
-  opts.usertypeName = opts.usertypeName || 'Vorgangsbearbeiter';
+  const defopts = {
+    open: dlgOpen,
+    close: function () {
+      $(this).dialog('destroy');
+    },
+    title: opts.usertypeNames.join(', ') + ' ausw\u00e4hlen',
+    heading: 'Bitte w\u00e4hlen Sie einen Bearbeiter',
+    singleSelection: true,
+    width: 1000,
+    onlyThoseInOrgunitSpecialcase: false,
+    position: {my: "left top", at: "left+30 top+40", of: window},
+    closeText: 'Schlie\u00dfen',
+    show: {effect: "blind", duration: 200},
+    hide: {effect: "blind", duration: 200},
+    modal: true,
+    usertypeNames: ['Vorgangsbearbeiter'],
+    buttons: {
+      '\u00dcbernehmen': function () {
+        utils.overtake() && $(this).dialog("destroy");
+      },
+      'Abbrechen': function () {
+        $(this).dialog("destroy");
+      }
+    },
+  };
 
-  var utils = {
+  const myopts = $.extend({}, defopts, opts);
+
+  const utils = {
     concat: function () {
       return _.compact([].slice.call(arguments)).join(', ');
     },
     formatName: function (o) {
       return utils.concat(o.lastname, o.firstname);
     },
+    formatVornameNachname: function (o) {
+      return ([o.firstname, o.lastname]).join(' ');
+    },
     getExperts: function () {
       var ret = [];
       $.ajax({
-        url: 'mima.do?action=get-experts&ajax=1' + (opts.usertypeName === 'Gutachter' ? '' : '&all=true'),
+        url: '/ISmed/ajax/workspace.do?action=get-experts&ajax=1&destRoles=' + myopts.usertypeNames
+                + '&dlgContext=' + myopts.dlgContext + '&check4SpecialCase=' + myopts.onlyThoseInOrgunitSpecialcase,
         async: false,
         success: function (res) {
           handleAjaxResult(res, function (res) {
             ret = res.experts.filter(function (expert) {
-              return opts.onlyThoseInOrgunitSpecialcase ? expert.inOrgunitSpecialcase : true;
+              return myopts.onlyThoseInOrgunitSpecialcase ? expert.inOrgunitSpecialcase : true;
             });
           });
         },
@@ -41,28 +71,57 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
       var selRows = grid.getSelectedRows();
       return selRows.length === 0 ? 0 : selRows[0][0];
     },
+    getSelectedExpertIds: function (grid) {
+      var selRows = grid.getSelectedRows();
+      return selRows.map(function (row) {
+        return row[0]
+      });
+    },
+    getSelectedExpertsNames: function (grid) {
+      var selRows = grid.getSelectedRows();
+      return selRows.map(function (row) {
+        return row[5]
+      }).reduce(function (acc, o) {
+        return acc + (acc ? ', ' : '') + o
+      }, '');
+    },
     getSelectedExpertName: function (grid) {
       var selRows = grid.getSelectedRows();
       return selRows.length === 0 ? '' : selRows[0][1];
     },
+    getSelectedExpertVornameNachname: function (grid) {
+      var selRows = grid.getSelectedRows();
+      return selRows.length === 0 ? '' : selRows[0][5];
+    },
     getExpertsForGrid: function (data) {
       return data.map(function (o) {
-        return [o.userid, utils.formatName(o), (o.fakultaete || []).join(', '), (o.zusatzbezeichnung || []).join(', '), o.email];
+        return [o.userid, utils.formatName(o), (o.fakultaete || []).join(', '), (o.zusatzbezeichnung || []).join(', '), o.email, utils.formatVornameNachname(o)];
       });
     },
     overtake: function () {
-      var v = {
-        userid: utils.getSelectedExpertId(grid),
-        name: utils.getSelectedExpertName(grid)
-      };
-      if (!v.userid) {
-        $.alert('Hinweis', 'Bitte einen Eintrag ausw\u00e4hlen');
-        return false;
-      } else {
+      if (myopts.singleSelection) {
+        var v = {
+          userid: utils.getSelectedExpertId(grid),
+          name: utils.getSelectedExpertName(grid),
+          vornamenachname: utils.getSelectedExpertVornameNachname(grid)
+        };
+        if (!v.userid) {
+          $.alert('Hinweis', 'Bitte einen Eintrag ausw\u00e4hlen');
+          return false;
+        }
         return onTakeOverCallback(v);
+      } else {
+        var ids = utils.getSelectedExpertIds(grid);
+        const selectedExperts = experts.filter(function (expert) {
+          return ids.includes(expert.userid)
+        })
+        return onTakeOverCallback(selectedExperts);
       }
+
     },
   };
+
+  const experts = utils.getExperts()
 
   function dlgOpen( ) {
     var optsExpertsGrid = {
@@ -71,60 +130,63 @@ var dlgSelectExperts = function (onTakeOverCallback, opts) {
         {name: "Name"},
         {name: "Fachgebiet"},
         {name: "Zusatzbezeichnung"},
-        {name: "E-Mail"}
+        {name: "E-Mail"},
+        {name: "VornameNachname", technical: true, invisible: true}
       ],
       flags: {
         arrangeColumnsButton: false,
         colsResizable: false,
-        config:false,
+        config: false
       },
       sortcolname: 'Name',
-      selectionCol: {singleSelection: true, selectOnRowClick: true},
-      afterRedraw: styling
+      selectionCol: {
+        singleSelection: myopts.singleSelection,
+        selectOnRowClick: true,
+        onSelection: myopts.singleSelection ? undefined : function () {
+          const countSelected = utils.getSelectedExpertIds(grid).length;
+          if (!myopts.singleSelection) {
+            const s = 'Ausgew\u00e4hlt ' + (countSelected === 1 ? 'ist' : 'sind') + ':' + utils.getSelectedExpertsNames(grid);
+            $('#expertsselected').text(countSelected > 0 ? s : '')
+          }
+        }
+      },
+      afterRedraw: styling,
 
     };
-    grid = $('#dlgSelectExperts #expertsgrid').ebtable(optsExpertsGrid, utils.getExpertsForGrid(utils.getExperts()));
+    const expertsForGridData = utils.getExpertsForGrid(experts);
+    grid = $('#dlgSelectExperts #expertsgrid').ebtable(optsExpertsGrid, expertsForGridData);
+
+    const selectedExpertsIds = myopts.selectedExperts.map(function (expert) {
+      return expert.participant.userid;
+    })
+
+    grid.setSelectedRows(function (r) {
+      return selectedExpertsIds.includes(r[0]); // r[0] => userid
+    });
+
+    $('#expertsselected').text(utils.getSelectedExpertsNames(grid))
   }
 
   var grid;
-  var defopts = {
-    open: dlgOpen,
-    close: function () {
-      $(this).dialog('destroy');
-    },
-    title: opts.usertypeName + ' ausw\u00e4hlen',
-    width: 1000,
-    closeText: 'Schlie\u00dfen',
-    show: {effect: "blind", duration: 200},
-    hide: {effect: "blind", duration: 200},
-    modal: true,
-    buttons: {
-      '\u00dcbernehmen': function () {
-        utils.overtake() && $(this).dialog("close");
-      },
-      'Abbrechen': function () {
-        $(this).dialog("close");
-      }
-    },
-    onlyThoseInOrgunitSpecialcase: false
-  };
 
-  var dlg = $("\
+  const template = _.template("\
     <div id='dlgSelectExperts'>\n\
-      <span style='float:right'><a href=javascript:call_help('mimaDlgDispose');><i class='fa fa-question-circle-o fa-lg'></i> Hilfe</a></span>\n\
-      <h2>Bitte w\u00e4hlen Sie einen " + opts.usertypeName + "</h2>\n\
-        <div id='expertsgrid'></div>\n\
-    </div>");
+      <span style='float:right'><a href=javascript:call_help('<%=context%>');><i class='fa fa-question-circle-o fa-lg'></i> Hilfe</a></span>\n\
+      <h2><%=heading%></h2>\n\
+      <div id='expertsselected'></div>\n\
+      <div id='expertsgrid'></div>\n\
+    </div>")({
+    context: myopts.dlgContext,
+    heading: myopts.heading,
+  })
 
-  var myopts = $.extend({}, defopts, opts);
-
+  var dlg = $(template);
   dlg.dialog(myopts);
 //  .keyup(function (e){ e.keyCode === 13 && utils.overtake(); });
-//  Styling
   function styling() {
     $('#dlgSelectExperts').css('background-color', '#eeeee0');
     $('#expertsgrid  th, #expertsgrid td').css('border-color', '#fff').css('border-style', 'solid').css('border-width', '1px');
     $('#expertsgrid #data table td').css('padding', '3px 4px 3px 4px');
+    $('#dlgSelectExperts').parent().find('*').css('font-size', '12px');
   }
-
 };

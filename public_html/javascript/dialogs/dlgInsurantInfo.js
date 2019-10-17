@@ -1,4 +1,4 @@
-/* global _ */
+/* global _, mx */
 var dlgInsurantInfo = function (opts, data) {
   $('#dlgInsurantInfo').remove();
   var dlg = $('\
@@ -20,7 +20,7 @@ var dlgInsurantInfo = function (opts, data) {
         rowsPerPage: 1000,
         flags: {filter: false, config: false}
       };
-      var tblData = mx(_.map(data.insurantComments, function (o) {
+      var tblData = mx(data.insurantComments.map(function (o) {
         return _.values(o);
       })).cols([1, 2, 3]);
       $('#hintList').ebtable(commentopts, tblData);

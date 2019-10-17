@@ -35,7 +35,6 @@ var datepickerOptions = {
     changeMonth: true,
     changeYear: true,
     showOn: "both",
-    disabled: false,
     buttonText: "<i class='fa fa-calendar fa-lg'></i>"
 };
 

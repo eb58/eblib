@@ -34,16 +34,18 @@ Vue.directive.util = {
         });
         $(this.el).datepicker(opts);
         $(this.el)
-                .on('keyup', function (evt){
-                  evt.keyCode === 13 && opts.onClose(evt.target.value);
-                })
-                .on('blur', function (evt){
-                  opts.onClose(evt.target.value);
-                })
-                .on('focus', function (evt){
-                  $(evt.target).select();
-                });
-      },
+            .on('keyup', function (evt){
+              evt.keyCode === 13 && opts.onClose(evt.target.value);
+            })
+            .on('blur', function (evt){
+              opts.onClose(evt.target.value);
+            })
+            .on('focus', function (evt){
+              $(evt.target).select();
+            });
+
+      }
+      ,
       update: function (val){
         $(this.el).datepicker('setDate', val);
       }
@@ -74,9 +76,7 @@ Vue.directive('radio', {
   bind: function (){
     var vm = this.vm;
     var key = this.expression;
-    $(this.el).checkboxradio().on('change', function (evt, ui){
-      vm.$set(key, evt.target.id);
-    });
+    $(this.el).checkboxradio().on('change', function (evt, ui){vm.$set(key, evt.target.id);});
   },
   update: function (val){
     $(this.el).prop("checked", $(this.el).val() === val).checkboxradio().checkboxradio("refresh");
@@ -94,4 +94,8 @@ Vue.directive('ebselect', {
   }
 });
 
-
+Vue.directive('button', {
+  bind: function () {
+    $(this.el).button();
+  }
+});

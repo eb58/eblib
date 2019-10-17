@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CombinedField Tester</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
+
+        <style>
+            * {font-family:Arial; color: black;  }
+            body { max-width: 800px; }
+            select:disabled { color: #ccc}
+        </style>
+
+        <script src="/vendor/underscore-1.8.3/underscore-1.8.3.js"></script>
+        <script src="/vendor/jQuery-1.11.3/jquery-1.11.3.min.js"></script>
+        <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+        <script src='/javascript/polyfill.js'></script>
+        <script src='/javascript/eblib/ebdropdown.js'></script>
+        <script src="/javascript/eblib/ebcombined.js"></script>
+        <script>
+
+            const model = {
+                selection1: null,
+                selection2: null,
+            }
+
+            const valuLists = {
+                ddData1: [
+                    {v: null, txt: '', code: ''},
+                    {v: 1, txt: '10 AAA', code: '10'},
+                    {v: 2, txt: '20 BBB', code: '20'},
+                    {v: 3, txt: '30 CCC', code: '30'},
+                    {v: 4, txt: '40 DDD', code: '40'},
+                ],
+                ddData2: [
+                    {v: null, txt: '', code: ''},
+                    {v: 1, txt: '10 GESTERN', code: '10'},
+                    {v: 2, txt: '20 HEUTE', code: '20'},
+                    {v: 3, txt: '30 MORGERN', code: '30'},
+                ],
+                ddData3: [
+                    {v: null, txt: '', code: ''},
+                    {v: 4, txt: '10 VOR EINER STUNDE', code: '10'},
+                    {v: 5, txt: '20 JETZT', code: '20'},
+                    {v: 6, txt: '30 IN EINER STUNDE', code: '30'},
+                ],
+                ddEmpty: [{v: null, txt: '', code: ''}, ],
+            }
+
+            const initCombinedField2 = function (ddData) {
+                $('#combined2').ebCombined({
+                    ddData: ddData,
+                    onChange: function (v) {
+                        console.log('combined2 Wert wurde geändert auf', v);
+                        model.selection2 = v.v
+                        console.log(model);
+                    }
+                });
+            }
+
+            $(document).ready(function () {
+                $('#combined1').ebCombined({
+                    ddData: valuLists.ddData1,
+                    onChange: function (v) {
+                        console.log('combined1 Wert wurde geändert auf', v);
+                        initCombinedField2(v.v === null ? valuLists.ddEmpty : v.v === 1 ? valuLists.ddData2 : valuLists.ddData3);
+                        model.selection1 = v.v;
+                        model.selection2 = null;
+                        console.log(model);
+                    },
+                });
+                initCombinedField2(valuLists.ddEmpty)
+            });
+        </script>
+    </head>
+    <body>
+        <div id="combined1"></div>
+        <div id="combined2"></div>
+    </body>
+</html>

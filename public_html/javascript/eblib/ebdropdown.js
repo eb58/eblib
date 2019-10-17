@@ -19,17 +19,19 @@
 
         var api = {
             setSelectedValue: function setSelectedValue(v) {
-                const $elems = $(idX + ' option').filter(function (i, o) {
-                    if (v && v.txt) {
+        if (v !== undefined && v !== null) {
+          var cmp = '' + (v.txt || v.v || v);
+          $(idX + ' option').filter(function (i, o) {
+            if (v.txt) {
                         return $(o).text() === v.txt;
-                    } if (v && v.v) {
+            } else if (v.v) {
                         return $(o).val() === v.v;
                     } else {
-                        return $(o).text() === 'null' || $(o).val() === 'null';
+              return $(o).text() === cmp || $(o).val() === cmp;
                     }
-                })
-                $elems.prop("selected", "selected");
+          }).prop("selected", "selected");
                 myopts.jqueryui && $(idX).selectmenu().selectmenu('refresh');
+        }
                 return this;
             },
             getSelectedValue: function getSelectedValue() {

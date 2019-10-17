@@ -58,7 +58,7 @@ const auftrag = {
     "inOrgunitSpecialcase": false
   },
   "process-status-id": 256,
-  "process-status": 'In Arbeit',
+  "process-status": 'In Bearbeitung',
   "cause-for-return": null,
   "reason-id": 126,
   "reason-spec-id": null,

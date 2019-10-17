@@ -25,7 +25,7 @@
                 selection2: null,
             }
 
-            const valuLists = {
+            const valueLists = {
                 ddData1: [
                     {v: null, txt: '', code: ''},
                     {v: 1, txt: '10 AAA', code: '10'},
@@ -51,6 +51,7 @@
             const initCombinedField2 = function (ddData) {
                 $('#combined2').ebCombined({
                     ddData: ddData,
+                    selected: 1,
                     onChange: function (v) {
                         console.log('combined2 Wert wurde geändert auf', v);
                         model.selection2 = v.v
@@ -60,21 +61,29 @@
             }
 
             $(document).ready(function () {
+                
+                $('#combined0').ebCombined({
+                    ddData: valueLists.ddData1,
+                    selected: 1,
+                })
+                
                 $('#combined1').ebCombined({
-                    ddData: valuLists.ddData1,
+                    ddData: valueLists.ddData1,
+                    selected: 10,
                     onChange: function (v) {
                         console.log('combined1 Wert wurde geändert auf', v);
-                        initCombinedField2(v.v === null ? valuLists.ddEmpty : v.v === 1 ? valuLists.ddData2 : valuLists.ddData3);
+                        initCombinedField2(v.v === null ? valueLists.ddEmpty : v.v === 1 ? valueLists.ddData2 : valueLists.ddData3);
                         model.selection1 = v.v;
                         model.selection2 = null;
                         console.log(model);
                     },
                 });
-                initCombinedField2(valuLists.ddEmpty)
+                initCombinedField2(valueLists.ddEmpty)
             });
         </script>
     </head>
     <body>
+        <div id="combined0"></div>
         <div id="combined1"></div>
         <div id="combined2"></div>
     </body>

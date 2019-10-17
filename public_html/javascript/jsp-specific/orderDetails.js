@@ -1,5 +1,4 @@
-/* global moment, auftrag, valuelists, icdUtils, gIcddata, _, servicerenderers, ajaxFunctions, top, valueLists, dlgMode */
-
+/* global moment, auftrag, valuelists, icdUtils, gIcddata, _, servicerenderers, ajaxFunctions, top, valueLists, dlgMode, valueListsParent */
 const listUtils = {
     getListObjectById: function getListObjectById(list, id) {
         return _.find(list, function (o) {
@@ -102,30 +101,33 @@ function convertParticipantsToShortString(participants) {
 }
 
 const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
-
     computeReasons: function (auftrag, reasonList, ordertype_reason_relList) {
         const isDta = auftrag['is-dta'];
         const orderType = auftrag['order-type'];
         const orderTypeId = auftrag['order-type-id'];
         const isOrderTypeWb = orderType === 'wb';
         const filterDate = moment(auftrag['date-incoming'], 'DD.MM.YYYY').format('YYYY-MM-DD')
-        let reasons;
-        reasons = reasonList.filter(function (o) {
+
+        let reasons = reasonList.filter(function (o) {
             return o.validfrom <= filterDate && filterDate <= o.validto
         });
-        reasons = (isDta && !isOrderTypeWb) ? reasons.filter(function (o) {
-            return o.ordertypeid === orderTypeId
-        }) : reasons;
 
-        if (isDta && isOrderTypeWb) {
-            const relation = ordertype_reason_relList.find(function (o) {
-                return o.srcId === '' + orderTypeId
-            });
-            const reasonIds = relation ? relation.destList : [];
-            reasons = reasonList.filter(function (o) {
-                return reasonIds.includes('' + o.id);
-            });
+        if (isDta) {
+            if (isOrderTypeWb) {
+                const relation = ordertype_reason_relList.find(function (o) {
+                    return o.srcId === '' + orderTypeId
+                });
+                const reasonIds = relation ? relation.destList : [];
+                reasons = reasonList.filter(function (o) {
+                    return reasonIds.includes('' + o.id);
+                });
+            } else {
+                reasons = !isOrderTypeWb ? reasons.filter(function (o) {
+                    return o.ordertypeid === orderTypeId
+                }) : reasons;
+            }
         }
+
         reasons = reasons.map(function (o) {
             return {
                 v: o.id,
@@ -135,8 +137,8 @@ const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
         })
         return [{v: null, txt: ''}].concat(reasons);
     },
-    computeReasonPrecs: function (auftrag, reasonprecList, reason2reasonspecRelationList) {
-        const relation = reason2reasonspecRelationList.find(function (x) {
+    computeReasonPrecs: function (auftrag, reasonprecList, reason_reasonspec_relList) {
+        const relation = reason_reasonspec_relList.find(function (x) {
             return x.srcId === '' + auftrag['reason-id']
         });
         const ret = !relation ? [] : reasonprecList.filter(function (o) {
@@ -150,57 +152,176 @@ const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
         });
         return [{v: null, txt: ''}].concat(ret);
     },
-    computeProducts: function (auftrag, productList) {
-        const products = productList
-                .filter(function (p) {
-                    return p.ordertype === auftrag['order-type'];
+    computeProducts: function (auftrag, productList, productReasonList) {
+        const reason = valueLists.reasonList.find(o => '' + o.id === '' + auftrag['reason-id'])
+        if (!reason)
+            return [{v: null, txt: '', code: ''}];
+
+
+        const relation = productReasonList.find(function (x) {
+            return x.srcId === '' + reason.number
+        });
+
+        const products = !relation ? [] : productList
+                .filter(function (o) {
+                    return relation.destList.includes(o.id)
                 })
-                .map(function (p) {
+                .map(function (o) {
                     return {
-                        v: p.id,
-                        txt: p.name,
-                        code: p.number
+                        v: o.id,
+                        txt: o.name,
+                        code: o.number
                     };
                 });
         return [{v: null, txt: '', code: ''}].concat(products);
     },
-    computeExpertisetypes: function (auftrag, expertiseTypes) {
+    computeExpertisetypes: function (auftrag, expertiseTypes, product_expertisetype_relList) {
         return expertiseTypes;
     },
-    computeExpertisetypesSpec: function (auftrag, expertisetypesspecList, expertisetype2expertisetypespeRelationlist) {
-        const expertisetype = expertisetype2expertisetypespeRelationlist.find(function (x) {
+    computeExpertisetypesSpec: function (auftrag, expertisetypes, expertisetype_spec_relList) {
+        const expertisetype = expertisetype_spec_relList.find(function (x) {
             return x.srcId === '' + auftrag['expertise-type-id']
         });
-        const ret = !expertisetype ? [] : expertisetypesspecList.filter(function (o) {
+        const ret = !expertisetype ? [] : expertisetypes.filter(function (o) {
             return expertisetype.destList.includes('' + o.v)
         })
         return [{v: null, txt: '', code: ''}].concat(ret)
     },
-    computeResults: function (auftrag, results) {
+    computeResults: function (auftrag, results, product_result_relList) {
         return results;
-    }
+    },
+    computeResultcategories: function (auftrag, resultcategory, product_resultcategory_relList) {
+        return resultcategory.map(function (o) {
+            return {
+                v: o.id,
+                txt: (o.number + ' ' + o.display),
+                code: o.number
+            };
+        });
+    },
+    computeLocations: function (auftrag, location, product_location_relList) {
+        return location.map(function (o) {
+            return {
+                v: o.id,
+                txt: (o.number + ' ' + o.display),
+                code: o.number
+            };
+        });
+    },
 }
 
 function initAuftrag(auftrag, readonly) {
-    $('#kuerzel').ebCombined({
-        ddData: valuelists.ordercodes,
-        onChange: function (selection) {
-            auftrag['ordercode-id'] = selection.v;
-        },
-    });
-    $('#fag').ebCombined({
-        ddData: valuelists.fags,
-        onChange: function (selection) {
-            auftrag['reason-id'] = selection.v;
-        },
-    });
 
-    valuelists.fags = listTransformers.computeReasons(auftrag, valueLists.reasonList, valueLists.ordertype_reason_relList);
-    valuelists.fagsPrecision = listTransformers.computeReasonPrecs(auftrag, valueLists.reasonspecList, valueLists.reason_reasonspec_relList);
-    valuelists.products = listTransformers.computeProducts(auftrag, valueLists.productList);
-    valuelists.expertisetypes = listTransformers.computeExpertisetypes(auftrag, valueLists.expertisetypes);
-    valuelists.expertisetypesspec = listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList);
-    valuelists.results = listTransformers.computeResults(auftrag, valueLists.results)
+    /*
+     *                                FAG (reason)     -  FAG Prec ( reason_spec )
+     *                                  |
+     *                               Product 
+     *                                  |
+     * Erledigungsart Erledigungsort Gutachtenart    Ergebnis
+     *                                  |
+     *                             GutachtenartPrec
+     *  
+     */
+
+    const initOrdercodes = function () { // Kuerzel
+        $('#kuerzel').ebCombined({
+            ddData: valueLists.ordercode,
+            onChange: function (selection) {
+                auftrag['ordercode-id'] = selection.v;
+            },
+        });
+    }
+
+    const initReasons = function () { // FAG
+        $('#fag').ebCombined({
+            ddData: listTransformers.computeReasons(auftrag, valueLists.reasonList, valueLists.ordertype_reason_relList),
+            onChange: function (selection) {
+                auftrag['reason-id'] = selection.v;
+                initReasonsPrec()
+                initProducts()
+            },
+            selected: auftrag['reason-id'],
+        });
+    }
+
+    const initReasonsPrec = function () {
+        $('#fagPrec').ebCombined({
+            ddData: listTransformers.computeReasonPrecs(auftrag, valueLists.reasonspecList, valueLists.reason_reasonspec_relList),
+            onChange: function (selection) {
+                auftrag['reason-spec-id'] = selection.v;
+            },
+            selected: auftrag['reason-spec-id'],
+        });
+    }
+
+    const initExpertisetypePrec = function () {
+        $('#gutachtenartPrec').ebCombined({
+            ddData: listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList),
+            onChange: function (selection) {
+                auftrag['reason-spec-id'] = selection.v;
+            },
+        });
+    }
+
+    const initProducts = function () {
+        const x = listTransformers.computeProducts(auftrag, valueLists.productList, valueListsParent.ProductReasonList)
+        $('#product-list').ebdropdown({width: '300px', }, x);
+    }
+
+    const initExpertisetype = function () { // Gutachtenart
+        $('#gutachtenart').ebCombined({
+            ddData: listTransformers.computeExpertisetypes(auftrag, valueLists.expertisetypes),
+            onChange: function (selection) {
+                auftrag['expertise-type-id'] = selection.v;
+                initGutachtenartPrec()
+            },
+        });
+    }
+
+    const initResultcategories = function () { // Erledigungsart
+        const data = listTransformers.computeResultcategories(auftrag, valueListsParent.resultcategory, valueLists.product_resultcategory_relList)
+        $('#erledigungsart').ebCombined({
+            ddData: data,
+            onChange: function (selection) {
+                auftrag['result-category-id'] = selection.v;
+            },
+        });
+    }
+
+    const initLocations = function () { // Erledigungsort
+        const data = listTransformers.computeLocations(auftrag, valueLists.resultlocation, valueLists.product_location_relList)
+        $('#erledigungsort').ebCombined({
+            ddData: data,
+            onChange: function (selection) {
+                auftrag['location-id'] = selection.v;
+            },
+        });
+    }
+
+    const initResults = function () { // Ergebnis
+        $('#ergebnis').ebCombined({
+            ddData: listTransformers.computeResults(auftrag, valueLists.results, valueLists.product_resultRelList),
+            onChange: function (selection) {
+                auftrag['result-id'] = selection.v;
+            },
+        });
+    }
+
+    initOrdercodes()
+    initReasons()
+    initReasonsPrec()
+    initExpertisetype()
+    initExpertisetypePrec()
+    initProducts()
+    initResults()
+    initResultcategories()
+    initLocations()
+    initExpertisetype()
+
+
+//    valuelists.expertisetypes = listTransformers.computeExpertisetypes(auftrag, valueLists.expertisetypes);
+//    valuelists.expertisetypesspec = listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList);
+//    valuelists.results = listTransformers.computeResults(auftrag, valueLists.results)
 
     const servicerenderers = loadServicerenderers();
     const selectedServicerenderer = servicerenderers.find(function (o) {
@@ -268,14 +389,6 @@ function initAuftrag(auftrag, readonly) {
             fristAblaufBeiKasseInDays: function () {
                 return getFrist(auftrag['deadline-at-agency-date']);
             },
-            fag: listUtils.mapper(valuelists.fags, 'reason-id', function () {
-                valuelists.fagsPrecision = listTransformers.computeReasonPrecs(auftrag, valueLists.reasonspecList, valueLists.reason_reasonspec_relList);
-                auftrag['reason-spec-id'] = null;
-                setTimeout(function () {
-                    $('#reasonSpec').selectmenu('refresh');
-                }, 1);
-            }),
-            fagPrec: listUtils.mapper(valuelists.fagsPrecision, 'reason-spec-id'),
             gutachtenart: listUtils.mapper(valuelists.expertisetypes, 'expertise-type-id', function () {
                 auftrag['expertise-type-spec-id'] = null;
                 valuelists.expertisetypesspec = listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList);
@@ -334,13 +447,6 @@ function initAuftrag(auftrag, readonly) {
             registrationUsername: function () {
                 return auftrag['registration-user-name'].firstname + ' ' + auftrag['registration-user-name'].lastname;
             },
-            computedFags: function () {
-                return listTransformers.computeReasons(auftrag, valueLists.reasonList, valueLists.ordertype_reason_relList);
-            },
-            computedFagsPrec: function () {
-                return listTransformers.computeReasonPrecs(auftrag, valueLists.reasonspecList, valueLists.reason_reasonspec_relList);
-            },
-
         },
         methods: {
             doBearbeitungszeiten: function (readonly) {
@@ -491,5 +597,4 @@ $(document).ready(function () {
         setReadonly($('#cbReadonly').prop('checked'))
     });
     $('button').button();
-
 })

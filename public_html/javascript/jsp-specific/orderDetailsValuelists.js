@@ -100,13 +100,13 @@ const servicerendererTypes = [
 
 
 const valuelists = {
-  fags: fags,
-  fagsPrecision: fagsPrecision,
-  products: products,
-  gutachtenarten: gutachtenarten,
-  gutachtenartenPrecision: gutachtenartenPrecision,
+//  fags: fags,
+//  fagsPrecision: fagsPrecision,
+//  products: products,
+//  gutachtenarten: gutachtenarten,
+//  gutachtenartenPrecision: gutachtenartenPrecision,
   beratungsstellen: beratungsstellen,
-  ordercodes: ordercodes,
+//  ordercodes: ordercodes,
   erledigungsarten: erledigungsarten,
   erledigungsorte: erledigungsorte,
   results: results,

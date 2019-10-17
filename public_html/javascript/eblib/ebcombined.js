@@ -47,14 +47,19 @@
         const myopts = $.extend({}, defopts, opts);
 
         function init() {
+            const selected = opts.ddData.find(function (o) {
+                return o.v === myopts.selected
+            })
+
             ddField = $('#dd-' + id).ebdropdown({
                 change: handlers.onChange,
                 width: myopts.ddWidth,
-            }, opts.ddData)
+            }, opts.ddData, myopts.selected)
             $('#in-' + id)
                     .width(myopts.inputWidth)
                     .on('input', handlers.onChange)
                     .on('blur', handlers.onBlur)
+                    .val(selected ? selected.code : ' ')
         }
 
         (function (a) {

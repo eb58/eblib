@@ -1,96 +1,10 @@
 /* global moment, auftrag, valuelists, icdUtils, gIcddata, _, servicerenderers, ajaxFunctions, top, valueLists, dlgMode, valueListsParent */
-const listUtils = {
-    getListObjectById: function getListObjectById(list, id) {
-        return _.find(list, function (o) {
-            return o.value === Number(id);
-        });
-    },
-    getListObjectByCode: function getListObjectByCode(list, code) {
-        return _.find(list, function (o) {
-            return '' + o.code === '' + code;
-        });
-    },
-    mapper: function (list, idString, callback) {
-        const ret = {
-            get: function () {
-                callback && callback('get');
-                const id = Number(this.auftrag[idString]);
-                const x = listUtils.getListObjectById(list, id);
-                return x ? x.code : '';
-            },
-            set: function (newValue) {
-                callback && callback('set');
-                const x = listUtils.getListObjectByCode(list, newValue);
-                this.auftrag[idString] = x ? x.value : null;
-            }
-        };
-        return ret;
-    }
-};
+valueLists = valueLists || Object.assign( {ProductReasonList:parent.ProductReasonList}, top.valueLists, parent.valueLists );
 
-function getFrist(date) {
+function getFristAsDays(date) {
     const today = moment();
     const diff = moment(date, 'DD.MM.YYYY').diff(today);
-    return Math.floor(moment.duration(diff).asDays());
-}
-
-function countServiceRenderers(x) {
-    return x.reduce(function (acc, o) {
-        return (acc[o.servicerenderertype.toLowerCase()]++, acc)
-    }, {
-        leistungserbringer: 0,
-        krankenhaus: 0,
-        'sanit\u00e4tshaus': 0,
-        pflegeeinrichtung: 0
-    })
-}
-
-function computeAvailableServicerendererTypes(servicerendererTypes, servicerenderersCounter) {
-    const maxServiceRenderersForType = Object.freeze({
-        leistungserbringer: 6,
-        krankenhaus: 1,
-        'sanit\u00e4tshaus': 1,
-        pflegeeinrichtung: 1
-    })
-    return servicerendererTypes.filter(function (o) {
-        const v = o.v.toLowerCase()
-        return servicerenderersCounter[v] < maxServiceRenderersForType[v];
-    });
-}
-
-function showRefOrder(mode, workorderid) {
-    const sAction = _.template('showRefOrder.do?workorderid=<%=workorderid%>&mode=<%=mode%>&workspace=<%=mode%>')({
-        workorderid: workorderid,
-        mode: mode,
-    });
-    if (top.secWnd && !top.secWnd.closed) {
-        top.secWnd.close();
-    }
-    top.secWnd = window.open(sAction, 'show_referenced_order', 'width=850,height=700,left=10,top=10,location=no,menubar=no,toolbar=no,dependent=yes,resizeable=no,scrollbars=no,status=no');
-    if (top.secWnd)
-        top.secWnd.focus();
-}
-
-function searchWorkorder() {
-    $.alert('Info', 'Hier kommt die Suche hin')
-}
-
-function loadServicerenderers() {
-    let servicerenderers = [];
-    false && $.ajax({
-        url: '/ISmed/ajax/workspace.do?action=load-servicerenderers&ajax=1',
-        async: false,
-        success: function (result) {
-            handleAjaxResult(result, function () {
-                console.log('load-servicerenderers', result.data)
-                servicerenderers = result.data;
-            });
-        },
-        error: function (a, b, c) {
-            console.log('Fehler beim Laden der LEs', a, b, c);
-        }
-    })
-    return servicerenderers;
+    return Math.ceil(moment.duration(diff).asDays());
 }
 
 function convertParticipantsToShortString(participants) {
@@ -98,6 +12,90 @@ function convertParticipantsToShortString(participants) {
         return '';
     const p = participants[0].participant;
     return p.firstname + ' ' + p.lastname + (participants.length > 1 ? ' u.a.' : '')
+}
+
+const serviceRendererUtils = {
+    servicerendererTypes: [
+        {v: 'Leistungserbringer', txt: 'Leistungserbringer'},
+        {v: 'Krankenhaus', txt: 'Krankenhaus'},
+        {v: 'Sanit\u00e4tshaus', txt: 'Sanit\u00e4tshaus'},
+        {v: 'Pflegeeinrichtung', txt: 'Pflegeeinrichtung'},
+    ],
+    loadServicerenderers: function () {
+        let servicerenderers = [];
+        false && $.ajax({
+            url: '/ISmed/ajax/workspace.do?action=load-servicerenderers&ajax=1',
+            async: false,
+            success: function (result) {
+                handleAjaxResult(result, function () {
+                    console.log('load-servicerenderers', result.data)
+                    servicerenderers = result.data;
+                });
+            },
+            error: function (a, b, c) {
+                console.log('Fehler beim Laden der LEs', a, b, c);
+            }
+        })
+        return servicerenderers;
+    },
+    findSelectedServiceRenderer: function (servicerenderers) {
+        return servicerenderers.find(function (o) {
+            return o.selected
+        });
+    },
+    getSelectedServicerendererId: function () {
+        const selectedServicerenderer = serviceRendererUtils.findSelectedServiceRenderer(servicerenderers)
+        return selectedServicerenderer ? selectedServicerenderer.servicerendererid : undefined;
+    },
+    countServiceRenderers: function (x) {
+        return x.reduce(function (acc, o) {
+            return (acc[o.servicerenderertype.toLowerCase()]++, acc)
+        }, {
+            leistungserbringer: 0,
+            krankenhaus: 0,
+            'sanit\u00e4tshaus': 0,
+            pflegeeinrichtung: 0
+        })
+    }
+    ,
+    computeAvailableServicerendererTypes: function (servicerenderer) {
+        const maxServiceRenderersForType = Object.freeze({
+            leistungserbringer: 6,
+            krankenhaus: 1,
+            'sanit\u00e4tshaus': 1,
+            pflegeeinrichtung: 1
+        })
+
+        const servicerenderersCounter = serviceRendererUtils.countServiceRenderers(servicerenderer)
+
+        return serviceRendererUtils.servicerendererTypes.filter(function (o) {
+            const v = o.v.toLowerCase()
+            return servicerenderersCounter[v] < maxServiceRenderersForType[v];
+        });
+    }
+}
+
+const servicerenderers = serviceRendererUtils.loadServicerenderers()
+const selectedServicerendererId = serviceRendererUtils.getSelectedServicerendererId(servicerenderers);
+const availableServicerendererTypes = serviceRendererUtils.computeAvailableServicerendererTypes(servicerenderers);
+const selectedServicerendererType = availableServicerendererTypes.length > 0 ? availableServicerendererTypes[0].value : undefined;
+
+const dlgs = {
+    showRefOrder: function (mode, workorderid) {
+        const sAction = _.template('showRefOrder.do?workorderid=<%=workorderid%>&mode=<%=mode%>&workspace=<%=mode%>')({
+            workorderid: workorderid,
+            mode: mode,
+        });
+        if (top.secWnd && !top.secWnd.closed) {
+            top.secWnd.close();
+        }
+        top.secWnd = window.open(sAction, 'show_referenced_order', 'width=850,height=700,left=10,top=10,location=no,menubar=no,toolbar=no,dependent=yes,resizeable=no,scrollbars=no,status=no');
+        if (top.secWnd)
+            top.secWnd.focus();
+    },
+    searchWorkorder: function () {
+        $.alert('Info', 'Hier kommt die Suche hin')
+    },
 }
 
 const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
@@ -111,7 +109,6 @@ const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
         let reasons = reasonList.filter(function (o) {
             return o.validfrom <= filterDate && filterDate <= o.validto
         });
-
         if (isDta) {
             if (isOrderTypeWb) {
                 const relation = ordertype_reason_relList.find(function (o) {
@@ -127,7 +124,6 @@ const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
                 }) : reasons;
             }
         }
-
         reasons = reasons.map(function (o) {
             return {
                 v: o.id,
@@ -141,7 +137,7 @@ const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
         const relation = reason_reasonspec_relList.find(function (x) {
             return x.srcId === '' + auftrag['reason-id']
         });
-        const ret = !relation ? [] : reasonprecList.filter(function (o) {
+        const values = !relation ? [] : reasonprecList.filter(function (o) {
             return relation.destList.includes('' + o.v)
         }).map(function (o) {
             return {
@@ -150,19 +146,18 @@ const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
                 code: o.number
             };
         });
-        return [{v: null, txt: ''}].concat(ret);
+        return [{v: null, txt: ''}].concat(values);
     },
     computeProducts: function (auftrag, productList, productReasonList) {
-        const reason = valueLists.reasonList.find(o => '' + o.id === '' + auftrag['reason-id'])
+        const reason = valueLists.reasonList.find(function (o) {
+            return '' + o.id === '' + auftrag['reason-id']
+        })
         if (!reason)
             return [{v: null, txt: '', code: ''}];
-
-
         const relation = productReasonList.find(function (x) {
             return x.srcId === '' + reason.number
         });
-
-        const products = !relation ? [] : productList
+        const values = !relation ? [] : productList
                 .filter(function (o) {
                     return relation.destList.includes(o.id)
                 })
@@ -173,44 +168,92 @@ const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
                         code: o.number
                     };
                 });
-        return [{v: null, txt: '', code: ''}].concat(products);
+        return [{v: null, txt: '', code: ''}].concat(values);
     },
-    computeExpertisetypes: function (auftrag, expertiseTypes, product_expertisetype_relList) {
-        return expertiseTypes;
+    computeExpertisetypes: function (auftrag, expertisetypes, product_expertisetype_relList) {
+        const relation = product_expertisetype_relList.find(function (x) {
+            return x.srcId === '' + auftrag['product-id']
+        });
+        const values = !relation ? [] : expertisetypes.filter(function (o) {
+            return relation.destList.includes('' + o.v)
+        }).map(function (o) {
+            return {
+                v: o.v,
+                txt: (o.code + ' ' + o.txt),
+                code: o.code
+            };
+        });
+        return [{v: null, txt: ''}].concat(values);
+
+        return [{v: null, txt: '', code: ''}].concat(expertisetypes);
     },
     computeExpertisetypesSpec: function (auftrag, expertisetypes, expertisetype_spec_relList) {
-        const expertisetype = expertisetype_spec_relList.find(function (x) {
+        const relation = expertisetype_spec_relList.find(function (x) {
             return x.srcId === '' + auftrag['expertise-type-id']
         });
-        const ret = !expertisetype ? [] : expertisetypes.filter(function (o) {
-            return expertisetype.destList.includes('' + o.v)
+        const values = !relation ? [] : expertisetypes.filter(function (o) {
+            return relation.destList.includes('' + o.v)
+        }).map(function (o) {
+            return {
+                v: o.v,
+                txt: (o.code + ' ' + o.txt),
+                code: o.code
+            }
         })
-        return [{v: null, txt: '', code: ''}].concat(ret)
+
+        return [{v: null, txt: '', code: ''}].concat(values)
     },
     computeResults: function (auftrag, results, product_result_relList) {
-        return results;
+        const relation = product_result_relList.find(function (x) {
+            return x.srcId === '' + auftrag['product-id']
+        });
+        const values = !relation ? [] : results.filter(function (o) {
+            return relation.destList.includes('' + o.v)
+        }).map(function (o) {
+            return {
+                v: o.v,
+                txt: (o.code + ' ' + o.txt),
+                code: o.code
+            }
+        })
+
+        return  [{v: null, txt: '', code: ''}].concat(results);
+        ;
     },
     computeResultcategories: function (auftrag, resultcategory, product_resultcategory_relList) {
-        return resultcategory.map(function (o) {
-            return {
-                v: o.id,
-                txt: (o.number + ' ' + o.display),
-                code: o.number
-            };
+        const relation = product_resultcategory_relList.find(function (x) {
+            return x.srcId === '' + auftrag['product-id']
         });
+        const values = !relation ? [] : resultcategory.filter(function (o) {
+            return relation.destList.includes('' + o.v)
+        }).map(function (o) {
+            return {
+                v: o.v,
+                txt: o.display,
+                code: o.code
+            }
+        })
+        return [{v: null, txt: '', code: ''}].concat(values);
     },
     computeLocations: function (auftrag, location, product_location_relList) {
-        return location.map(function (o) {
-            return {
-                v: o.id,
-                txt: (o.number + ' ' + o.display),
-                code: o.number
-            };
+        const relation = product_location_relList.find(function (x) {
+            return x.srcId === '' + auftrag['product-id']
         });
+        const values = !relation ? [] : location.filter(function (o) {
+            return relation.destList.includes('' + o.v)
+        }).map(function (o) {
+            return {
+                v: o.v,
+                txt: (o.number + ' ' + o.text),
+                code: o.code
+            }
+        })
+        return [{v: null, txt: '', code: ''}].concat(values);
     },
 }
 
 function initAuftrag(auftrag, readonly) {
+
 
     /*
      *                                FAG (reason)     -  FAG Prec ( reason_spec )
@@ -223,127 +266,164 @@ function initAuftrag(auftrag, readonly) {
      *  
      */
 
-    const initOrdercodes = function () { // Kuerzel
+    const getSelectionValue = function (auftrag, listData, valueName) {
+        return _.pluck(listData, 'v').includes(auftrag[valueName]) ? auftrag[valueName] : null;
+    }
+
+    const initOrdercodes = function (auftrag) { // Kuerzel
         $('#kuerzel').ebCombined({
             ddData: valueLists.ordercode,
+            selected: auftrag['ordercode-id'],
             onChange: function (selection) {
                 auftrag['ordercode-id'] = selection.v;
             },
         });
     }
 
-    const initReasons = function () { // FAG
+    const initReasons = function (auftrag) { // FAG
+        const data = listTransformers.computeReasons(auftrag, valueLists.reasonList, valueLists.ordertype_reason_relList)
+        const selected = getSelectionValue(auftrag, data, 'reason-id')
         $('#fag').ebCombined({
-            ddData: listTransformers.computeReasons(auftrag, valueLists.reasonList, valueLists.ordertype_reason_relList),
+            ddData: data,
+            selected: selected,
             onChange: function (selection) {
                 auftrag['reason-id'] = selection.v;
-                initReasonsPrec()
-                initProducts()
+
+                initReasonsPrec(auftrag)
+                initProducts(auftrag)
+
+                initResults(auftrag)
+                initResultcategories(auftrag)
+                initLocations(auftrag)
+                initExpertisetypes(auftrag)
+                initExpertisetypesPrec(auftrag)
             },
-            selected: auftrag['reason-id'],
         });
     }
 
-    const initReasonsPrec = function () {
+    const initReasonsPrec = function (auftrag) { // FAG Präzisierung
+        const data = listTransformers.computeReasonPrecs(auftrag, valueLists.reasonspecList, valueLists.reason_reasonspec_relList)
+        const selected = getSelectionValue(auftrag, data, 'reason-spec-id')
         $('#fagPrec').ebCombined({
-            ddData: listTransformers.computeReasonPrecs(auftrag, valueLists.reasonspecList, valueLists.reason_reasonspec_relList),
-            onChange: function (selection) {
-                auftrag['reason-spec-id'] = selection.v;
-            },
-            selected: auftrag['reason-spec-id'],
-        });
-    }
-
-    const initExpertisetypePrec = function () {
-        $('#gutachtenartPrec').ebCombined({
-            ddData: listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList),
+            ddData: data,
+            selected: selected,
             onChange: function (selection) {
                 auftrag['reason-spec-id'] = selection.v;
             },
         });
     }
 
-    const initProducts = function () {
-        const x = listTransformers.computeProducts(auftrag, valueLists.productList, valueListsParent.ProductReasonList)
-        $('#product-list').ebdropdown({width: '300px', }, x);
+    const initProducts = function (auftrag) { // Produkt
+        const data = listTransformers.computeProducts(auftrag, valueLists.productList, valueLists.ProductReasonList)
+        const selected = getSelectionValue(auftrag, data, 'product-id')
+        const onChange = function (evt) {
+            const v = evt.target.value;
+            auftrag['product-id'] = _.isNumber(v) ? Number(v) : null;
+
+            initResults(auftrag)
+            initResultcategories(auftrag)
+            initLocations(auftrag)
+            initExpertisetypes(auftrag)
+            initExpertisetypesPrec(auftrag)
+        };
+        const opts = {width: '300px', change: onChange}
+        $('#product-list').ebdropdown(opts, data, selected);
     }
 
-    const initExpertisetype = function () { // Gutachtenart
+    const initExpertisetypes = function (auftrag) { // Gutachtenart
+        const data = listTransformers.computeExpertisetypes(auftrag, valueLists.expertisetypes, valueLists.product_expertisetype_relList)
+        const selected = getSelectionValue(auftrag, data, 'expertise-type-id')
         $('#gutachtenart').ebCombined({
-            ddData: listTransformers.computeExpertisetypes(auftrag, valueLists.expertisetypes),
+            ddData: data,
+            selected: selected,
             onChange: function (selection) {
                 auftrag['expertise-type-id'] = selection.v;
-                initGutachtenartPrec()
+                auftrag['expertise-type-spec-id'] = null;
+                initExpertisetypesPrec(auftrag)
             },
         });
     }
 
-    const initResultcategories = function () { // Erledigungsart
-        const data = listTransformers.computeResultcategories(auftrag, valueListsParent.resultcategory, valueLists.product_resultcategory_relList)
+    const initExpertisetypesPrec = function (auftrag) { // Gutachtenart Präzizierung
+        const data = listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList)
+        const selected = getSelectionValue(auftrag, data, 'expertise-type-spec-id')
+        $('#gutachtenartPrec').ebCombined({
+            ddData: data,
+            selected: selected,
+            onChange: function (selection) {
+                auftrag['expertise-type-spec-id'] = selection.v;
+            },
+        });
+    }
+
+    const initResultcategories = function (auftrag) { // Erledigungsart
+        const data = listTransformers.computeResultcategories(auftrag, valueLists.resultcategories, valueLists.product_resultcategory_relList)
+        const selected = getSelectionValue(auftrag, data, 'result-category-id')
         $('#erledigungsart').ebCombined({
             ddData: data,
+            selected: selected,
             onChange: function (selection) {
                 auftrag['result-category-id'] = selection.v;
             },
         });
     }
 
-    const initLocations = function () { // Erledigungsort
-        const data = listTransformers.computeLocations(auftrag, valueLists.resultlocation, valueLists.product_location_relList)
+    const initLocations = function (auftrag) { // Erledigungsort
+        const data = listTransformers.computeLocations(auftrag, valueLists.resultlocations, valueLists.product_location_relList)
+        const selected = getSelectionValue(auftrag, data, 'location-id')
         $('#erledigungsort').ebCombined({
             ddData: data,
+            selected: selected,
             onChange: function (selection) {
                 auftrag['location-id'] = selection.v;
             },
         });
     }
 
-    const initResults = function () { // Ergebnis
+    const initResults = function (auftrag) { // Ergebnis
+        const data = listTransformers.computeResults(auftrag, valueLists.results, valueLists.product_result_relList)
+        const selected = getSelectionValue(auftrag, data, 'result-id')
         $('#ergebnis').ebCombined({
-            ddData: listTransformers.computeResults(auftrag, valueLists.results, valueLists.product_resultRelList),
+            ddData: data,
+            selected: selected,
             onChange: function (selection) {
                 auftrag['result-id'] = selection.v;
             },
         });
     }
 
-    initOrdercodes()
-    initReasons()
-    initReasonsPrec()
-    initExpertisetype()
-    initExpertisetypePrec()
-    initProducts()
-    initResults()
-    initResultcategories()
-    initLocations()
-    initExpertisetype()
+    const initCompetencecenters = function (auftrag) { // Beratungsstellen
+        const data = valueLists.competencecenterList
+        const selected = getSelectionValue(auftrag, data, 'competent-helpdesk-id')
+        const onChange = function (evt) {
+            const v = evt.target.value;
+            auftrag['competent-helpdesk-id'] = _.isNumber(v) ? Number(v) : null;
+        };
+        $('#beratungsstellen').ebdropdown({width: '300px', change: onChange}, data, selected);
+    }
 
-
-//    valuelists.expertisetypes = listTransformers.computeExpertisetypes(auftrag, valueLists.expertisetypes);
-//    valuelists.expertisetypesspec = listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList);
-//    valuelists.results = listTransformers.computeResults(auftrag, valueLists.results)
-
-    const servicerenderers = loadServicerenderers();
-    const selectedServicerenderer = servicerenderers.find(function (o) {
-        return o.selected
-    });
-    const selectedServicerendererId = selectedServicerenderer ? selectedServicerenderer.servicerendererid : undefined;
-    const servicerenderersCounter = countServiceRenderers(servicerenderers)
-    const servicerendererTypes = computeAvailableServicerendererTypes(valuelists.servicerendererTypes, servicerenderersCounter);
-    const selectedServicerendererType = servicerendererTypes.length > 0 ? servicerendererTypes[0].value : undefined;
+    initOrdercodes(auftrag)
+    initReasons(auftrag)
+    initReasonsPrec(auftrag)
+    initExpertisetypes(auftrag)
+    initExpertisetypesPrec(auftrag)
+    initProducts(auftrag)
+    initResults(auftrag)
+    initResultcategories(auftrag)
+    initLocations(auftrag)
+    initExpertisetypes(auftrag)
+    initCompetencecenters(auftrag)
 
     new Vue({
         el: '#app',
         data: {
             readonly: readonly,
             auftrag: auftrag,
-            valuelists: valuelists,
             servicerenderers: servicerenderers,
             selectedServicerendererId: selectedServicerendererId,
-            allServicerendererTypes: valuelists.servicerendererTypes,
-            servicerendererTypes: servicerendererTypes,
+            allServicerendererTypes: serviceRendererUtils.servicerendererTypes,
+            servicerendererTypes: availableServicerendererTypes,
             selectedServicerendererType: selectedServicerendererType,
-            servicerenderersCounter: servicerenderersCounter,
         },
         computed: {
             participantVGA: function () { // VGA = Verantwortlicher Gutachter
@@ -384,23 +464,11 @@ function initAuftrag(auftrag, readonly) {
                 return auftrag.performer.firstname + ' ' + auftrag.performer.lastname;
             },
             fristInDays: function () {
-                return getFrist(auftrag['deadline-date']);
+                return getFristAsDays(auftrag['deadline-date']);
             },
             fristAblaufBeiKasseInDays: function () {
-                return getFrist(auftrag['deadline-at-agency-date']);
+                return getFristAsDays(auftrag['deadline-at-agency-date']);
             },
-            gutachtenart: listUtils.mapper(valuelists.expertisetypes, 'expertise-type-id', function () {
-                auftrag['expertise-type-spec-id'] = null;
-                valuelists.expertisetypesspec = listTransformers.computeExpertisetypesSpec(auftrag, valueLists.expertisetypesspec, valueLists.expertisetype_spec_relList);
-                setTimeout(function () {
-                    $('#expertiseSpec').selectmenu('refresh');
-                }, 1);
-            }),
-            gutachtenartPrec: listUtils.mapper(valuelists.expertisetypesspec, 'expertise-type-spec-id'),
-            ordercode: listUtils.mapper(valuelists.ordercodes, 'ordercode-id'),
-            erledigungsart: listUtils.mapper(valuelists.erledigungsarten, 'result-category-id'),
-            erledigungsort: listUtils.mapper(valuelists.erledigungsorte, 'location-id'),
-            ergebnisse: listUtils.mapper(valuelists.results, 'result-id'),
             icd: {
                 get: function () {
                     const icdCodes = auftrag['icd-codes'];
@@ -441,7 +509,6 @@ function initAuftrag(auftrag, readonly) {
                     } else {
                         icdCodes[0].text = text;
                     }
-
                 }
             },
             registrationUsername: function () {
@@ -484,7 +551,6 @@ function initAuftrag(auftrag, readonly) {
                 const bgas = auftrag['participants'].filter(function (participant) {
                     return participant['participant-type'] === 'BGA' // nur die BGAs
                 });
-
                 var callback = function (selectedBGA) {
                     const newSelectedBGAs = selectedBGA.map(function (expert) {
                         return {
@@ -542,7 +608,7 @@ function initAuftrag(auftrag, readonly) {
                 this.servicerendererTypes = computeAvailableServicerendererTypes(this.allServicerendererTypes, servicerenderersCounter);
                 // hack for refreshing List of types!!
                 this.selectedServicerendererType = undefined;
-                setTimeout(() => {
+                setTimeout(function () {
                     this.selectedServicerendererType = this.servicerendererTypes.length > 0 ? this.servicerendererTypes[0].value : undefined;
                 }, 0)
             },
@@ -566,7 +632,6 @@ function initAuftrag(auftrag, readonly) {
 }
 
 let readonly = false;
-
 const setReadonly = function (readonly) {
     $('input').prop('disabled', readonly);
     $('textarea').prop('disabled', readonly);
@@ -592,7 +657,6 @@ $(document).ready(function () {
             console.log('Fehler bei load-workorder-data', a, b, c);
         }
     });
-
     $('#cbReadonly').on('change', function () {
         setReadonly($('#cbReadonly').prop('checked'))
     });

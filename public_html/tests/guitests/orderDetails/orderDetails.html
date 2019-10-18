@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!-- orderDetails (<%=org.slf4j.MDC.get("Request")%>) -->
-<html xmlns='http://www.w3.org/1999/xhtml' lang='de'>
+ 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de">
     <head>
         <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
         <meta http-equiv='Content-Style-Type' content='text/css'/>
@@ -30,7 +31,6 @@
             .date-time { width: 100px; }
         </style>
 
-
         <script src='/vendor/Underscore-1.8.3/underscore-1.8.3.min.js'></script>
         <script src='/vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
         <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
@@ -40,12 +40,12 @@
         <script src='/vendor/vue-1.0.26/vue.js'></script>
         <script src='/vendor/vue-1.0.26/vue-eb.js'></script>
 
-        <script src="/javascript/polyfill.js"></script>
+        <script src='/javascript/polyfill.js'></script>
         <script src='/javascript/jquery-ui-datepicker-de.js'></script>
-        <!--<script src='/javascript/jquery-ismed.js'></script>-->
-        <!--<script src='/javascript/help_caller.js'></script>-->
-        <!--<script src='/javascript/workspace.js'></script>-->
-        <script src='/data/icddata_1.js'></script>
+        <script src='/javascript/jquery-ismed.js'></script>
+        <!--<script src='javascript/help_caller.js'></script>-->
+        <!--<script src='javascript/workspace.js'></script>-->
+        <!--<script src='data/icddata_1.js'></script>-->
 
         <script src='/javascript/eblib/ebutils.js'></script>
         <script src='/javascript/eblib/ebviewer.js'></script>
@@ -72,7 +72,6 @@
 
         <script src='/data/order/auftrag3.js'></script>
         <script src='/data/order/valuelists.js'></script>
-        <script src='/javascript/jsp-specific/orderDetailsValuelists.js'></script>
         <script src='/javascript/jsp-specific/orderDetails.js'></script>
 
 
@@ -114,13 +113,7 @@
                         </span>
                     </td>
                     <td>Kürzel</td>
-                    <td>
-                        <div id='kuerzel'></div>
-                        <!--            <input type='text' style='width:50px' v-model='ordercode'/>
-                                    <select v-selectmenu='auftrag["ordercode-id"]' style='width:300px' class='sel'>
-                                      <option v-for='opt in valuelists.ordercodes' v-bind:value='opt.value'>{{ opt.text }}</option>
-                                    </select>-->
-                    </td>
+                    <td><div id='kuerzel'></div></td>
                 </tr>
                 <tr>
                     <td>Frist</td>
@@ -139,8 +132,8 @@
                     <td><input type='text' v-model='auftrag["last-modification-date"]' disabled class="date-time readonly"/></td>
                     <td>Referenzierte Aufträge</td>
                     <td>
-                        <a href="#" onclick="showRefOrder('showReference',{{auftrag['reference-id']}})">{{ auftrag['reference-id'] }}</a>
-                        <i v-if='!readonly' onclick="searchWorkorder()" class="fa fa-search fa-2x" title='Ehemaligen Auftrag suchen'></i>
+                        <a href="#" onclick="dlgs.showRefOrder('showReference',{{auftrag['reference-id']}})">{{ auftrag['reference-id'] }}</a>
+                        <i v-if='!readonly' onclick="dlg.searchWorkorder()" class="fa fa-search fa-2x" title='Ehemaligen Auftrag suchen'></i>
                     </td>
                 </tr>
 
@@ -214,7 +207,7 @@
                 <!-- ##########################################################################-->
                 <tr>
                     <td>Status</td>
-                    <td><div>{{auftrag["process-status"]}}</div></td>
+                    <td><div>{{auftrag["process-status-text"]}}</div></td>
                     <td></td>
                     <td></td>
                 </tr>
@@ -281,10 +274,8 @@
                     </td>
                     <td>Beratungsstelle</td>
                     <td>
-                        <span style="display:inline-block; width:60px;"></span>
-                        <select v-selectmenu='auftrag["competent-helpdesk-id"]' style='width:300px' class='sel'>
-                            <option v-for='opt in valuelists.beratungsstellen' v-bind:value='opt.value'>{{ opt.text }}</option>
-                        </select>
+                        <span style="display:inline-block; width: 60px;"></span>
+                        <div id="beratungsstellen" style="display:inline-block"></div>
                     </td>
                 </tr>
                 <tr>
@@ -363,7 +354,6 @@
                     </td>
                 </tr>
             </table>
-            <!--<pre>data: {{ $data.servicerenderers | json 3}}</pre>-->
         </div>
 
     </body>

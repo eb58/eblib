@@ -11641,7 +11641,7 @@ const valueLists2 = {
 }
 
 const valueListsParent = {
-    resultcategory: [
+    resultcategories: [
         {
             "id": "58",
             "number": "01",
@@ -12870,4 +12870,4 @@ const valueListsParent = {
     ]
 }
 
-const valueLists = {...valueLists1, ...valueLists2}
+    valueLists = {...valueLists1, ...valueLists2, ...valueListsParent}

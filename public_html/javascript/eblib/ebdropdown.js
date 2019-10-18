@@ -12,7 +12,7 @@
             width: '100%',
             disabled: false,
             jqueryui: true,
-            change: function (evt, ui) {}
+            change: function (evt, ui) {},
         };
         var myopts = $.extend({}, defopts, opts);
         var idX = '#' + myopts.id;

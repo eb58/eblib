@@ -99,6 +99,9 @@ const dlgs = {
 }
 
 const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
+    computeOrdercodes(auftrag, ordercodes ){
+       return [{v: null, txt: ''}].concat(ordercodes) 
+    },
     computeReasons: function (auftrag, reasonList, ordertype_reason_relList) {
         const isDta = auftrag['is-dta'];
         const orderType = auftrag['order-type'];
@@ -271,8 +274,9 @@ function initAuftrag(auftrag, readonly) {
     }
 
     const initOrdercodes = function (auftrag) { // Kuerzel
+        const data = listTransformers.computeOrdercodes(auftrag, valueLists.ordercode )
         $('#kuerzel').ebCombined({
-            ddData: valueLists.ordercode,
+            ddData: data,
             selected: auftrag['ordercode-id'],
             onChange: function (selection) {
                 auftrag['ordercode-id'] = selection.v;

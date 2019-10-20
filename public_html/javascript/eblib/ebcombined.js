@@ -46,7 +46,7 @@
         }
         const myopts = $.extend({}, defopts, opts);
 
-        function init() {
+       const init = function () {
             const selected = opts.ddData.find(function (o) {
                 return o.v === myopts.selected
             })

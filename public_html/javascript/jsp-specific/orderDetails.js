@@ -14,72 +14,6 @@ function convertParticipantsToShortString(participants) {
     return p.firstname + ' ' + p.lastname + (participants.length > 1 ? ' u.a.' : '')
 }
 
-const serviceRendererUtils = {
-    servicerendererTypes: [
-        {v: 'Leistungserbringer', txt: 'Leistungserbringer'},
-        {v: 'Krankenhaus', txt: 'Krankenhaus'},
-        {v: 'Sanit\u00e4tshaus', txt: 'Sanit\u00e4tshaus'},
-        {v: 'Pflegeeinrichtung', txt: 'Pflegeeinrichtung'},
-    ],
-    loadServicerenderers: function () {
-        let servicerenderers = [];
-        false && $.ajax({
-            url: '/ISmed/ajax/workspace.do?action=load-servicerenderers&ajax=1',
-            async: false,
-            success: function (result) {
-                handleAjaxResult(result, function () {
-                    console.log('load-servicerenderers', result.data)
-                    servicerenderers = result.data;
-                });
-            },
-            error: function (a, b, c) {
-                console.log('Fehler beim Laden der LEs', a, b, c);
-            }
-        })
-        return servicerenderers;
-    },
-    findSelectedServiceRenderer: function (servicerenderers) {
-        return servicerenderers.find(function (o) {
-            return o.selected
-        });
-    },
-    getSelectedServicerendererId: function () {
-        const selectedServicerenderer = serviceRendererUtils.findSelectedServiceRenderer(servicerenderers)
-        return selectedServicerenderer ? selectedServicerenderer.servicerendererid : undefined;
-    },
-    countServiceRenderers: function (x) {
-        return x.reduce(function (acc, o) {
-            return (acc[o.servicerenderertype.toLowerCase()]++, acc)
-        }, {
-            leistungserbringer: 0,
-            krankenhaus: 0,
-            'sanit\u00e4tshaus': 0,
-            pflegeeinrichtung: 0
-        })
-    }
-    ,
-    computeAvailableServicerendererTypes: function (servicerenderer) {
-        const maxServiceRenderersForType = Object.freeze({
-            leistungserbringer: 6,
-            krankenhaus: 1,
-            'sanit\u00e4tshaus': 1,
-            pflegeeinrichtung: 1
-        })
-
-        const servicerenderersCounter = serviceRendererUtils.countServiceRenderers(servicerenderer)
-
-        return serviceRendererUtils.servicerendererTypes.filter(function (o) {
-            const v = o.v.toLowerCase()
-            return servicerenderersCounter[v] < maxServiceRenderersForType[v];
-        });
-    }
-}
-
-const servicerenderers = serviceRendererUtils.loadServicerenderers()
-const selectedServicerendererId = serviceRendererUtils.getSelectedServicerendererId(servicerenderers);
-const availableServicerendererTypes = serviceRendererUtils.computeAvailableServicerendererTypes(servicerenderers);
-const selectedServicerendererType = availableServicerendererTypes.length > 0 ? availableServicerendererTypes[0].value : undefined;
-
 const dlgs = {
     showRefOrder: function (mode, workorderid) {
         const sAction = _.template('showRefOrder.do?workorderid=<%=workorderid%>&mode=<%=mode%>&workspace=<%=mode%>')({
@@ -577,44 +511,6 @@ function initAuftrag(auftrag, readonly) {
                 auftrag['participants'] = auftrag['participants'].filter(function (participant) {
                     return participant['participant-type'] !== 'BGA'
                 })
-            },
-            showServiceRenderer: function (servicerenderer) {
-                alert('ServiceRenderer' + JSON.stringify(servicerenderer));
-            },
-            selectServicerendererAsPreferred: function (event) {
-                console.log(event.target.value);
-                const selectedServicerendererId = Number(event.target.value);
-                this.servicerenderers.forEach(function (servicerenderer) {
-                    servicerenderer.selected = servicerenderer.servicerendererid === selectedServicerendererId
-                })
-            },
-            addServicerenderer: (function () {
-                let i = 0;
-                return function () {
-                    console.log(this.selectedServicerendererType)
-                    const name = this.selectedServicerendererType + '-' + i++
-                    this.servicerenderers.push({
-                        name: name,
-                        shortname: name,
-                        servicerenderertype: this.selectedServicerendererType,
-                    })
-                    const servicerenderersCounter = countServiceRenderers(this.servicerenderers)
-                    this.servicerendererTypes = computeAvailableServicerendererTypes(this.allServicerendererTypes, servicerenderersCounter);
-                    this.selectedServicerendererType = this.servicerendererTypes.length > 0 ? this.servicerendererTypes[0].value : undefined;
-                }
-            })(),
-            deleteServicerenderer: function (servicerenderer) {
-                console.log(servicerenderer)
-                this.servicerenderers = this.servicerenderers.filter(function (o) {
-                    return o.name !== servicerenderer.name
-                });
-                const servicerenderersCounter = countServiceRenderers(this.servicerenderers)
-                this.servicerendererTypes = computeAvailableServicerendererTypes(this.allServicerendererTypes, servicerenderersCounter);
-                // hack for refreshing List of types!!
-                this.selectedServicerendererType = undefined;
-                setTimeout(function () {
-                    this.selectedServicerendererType = this.servicerendererTypes.length > 0 ? this.servicerendererTypes[0].value : undefined;
-                }, 0)
             },
             saveWorkorder: function () {
                 $.ajax({

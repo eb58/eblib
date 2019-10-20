@@ -328,29 +328,7 @@
                 <!-- ##########################################################################-->
                 <tr>
                     <td colspan='4'>
-                        <div>
-                            <div v-if='servicerendererTypes.length && !readonly'>
-                                <select v-selectmenu='selectedServicerendererType' style="width:200px" class='sel'>
-                                    <option v-for='opt in servicerendererTypes' v-bind:value='opt.value'>{{ opt.text }}</option>
-                                </select>
-                                <i class="fa fa-plus fa-2x" @click='addServicerenderer' title='Leistungserbringer hinzufügen'></i>
-                            </div>
-                            <table>
-                                <tr v-for='servicerenderer in servicerenderers'>
-                                    <td> {{ servicerenderer.servicerenderertype }} </td>
-                                    <td>  <input
-                                            type="radio"
-                                            name="selectedServicerenderer"
-                                            :value="servicerenderer.servicerendererid"
-                                            v-model="selectedServicerendererId" @click="selectServicerendererAsPreferred"
-                                            title='Bevorzugter Leistungserbringer'>
-                                    </td>
-                                    <td> <a href="#" @click='showServiceRenderer(servicerenderer)'>{{ servicerenderer.shortname }}</a></td>
-                                    <td> <i class="fa fa-search fa-2x" title='Leistungserbringer suchen'  v-if='!readonly' @click='searchServicerenderer(servicerenderer)'></i> </td>
-                                    <td> <i class="fa fa-trash fa-2x"  title='Leistungserbringer löschen' v-if='!readonly' @click='deleteServicerenderer(servicerenderer)'></i> </td>
-                                </tr>
-                            </table>
-                        </div>
+                        <div id="servicerenderer"></div>
                     </td>
                 </tr>
             </table>

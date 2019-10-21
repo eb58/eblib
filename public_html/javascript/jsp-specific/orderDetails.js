@@ -1,5 +1,5 @@
 /* global moment, auftrag, valuelists, icdUtils, gIcddata, _, servicerenderers, ajaxFunctions, top, valueLists, dlgMode, valueListsParent */
-valueLists = valueLists || Object.assign( {ProductReasonList:parent.ProductReasonList}, top.valueLists, parent.valueLists );
+valueLists = valueLists || Object.assign({ProductReasonList: parent.ProductReasonList}, top.valueLists, parent.valueLists);
 
 function getFristAsDays(date) {
     const today = moment();
@@ -33,8 +33,8 @@ const dlgs = {
 }
 
 const listTransformers = {// Berechne Wertelisten abhängig von Auftrag
-    computeOrdercodes(auftrag, ordercodes ){
-       return [{v: null, txt: ''}].concat(ordercodes) 
+    computeOrdercodes(auftrag, ordercodes) {
+        return [{v: null, txt: ''}].concat(ordercodes)
     },
     computeReasons: function (auftrag, reasonList, ordertype_reason_relList) {
         const isDta = auftrag['is-dta'];
@@ -208,9 +208,10 @@ function initAuftrag(auftrag, readonly) {
     }
 
     const initOrdercodes = function (auftrag) { // Kuerzel
-        const data = listTransformers.computeOrdercodes(auftrag, valueLists.ordercode )
+        const data = listTransformers.computeOrdercodes(auftrag, valueLists.ordercode)
         $('#kuerzel').ebCombined({
             ddData: data,
+            disabled: readonly,
             selected: auftrag['ordercode-id'],
             onChange: function (selection) {
                 auftrag['ordercode-id'] = selection.v;
@@ -223,6 +224,7 @@ function initAuftrag(auftrag, readonly) {
         const selected = getSelectionValue(auftrag, data, 'reason-id')
         $('#fag').ebCombined({
             ddData: data,
+            disabled: readonly,
             selected: selected,
             onChange: function (selection) {
                 auftrag['reason-id'] = selection.v;
@@ -244,6 +246,7 @@ function initAuftrag(auftrag, readonly) {
         const selected = getSelectionValue(auftrag, data, 'reason-spec-id')
         $('#fagPrec').ebCombined({
             ddData: data,
+            disabled: readonly,
             selected: selected,
             onChange: function (selection) {
                 auftrag['reason-spec-id'] = selection.v;
@@ -264,7 +267,11 @@ function initAuftrag(auftrag, readonly) {
             initExpertisetypes(auftrag)
             initExpertisetypesPrec(auftrag)
         };
-        const opts = {width: '300px', change: onChange}
+        const opts = {
+            width: '300px',
+            disabled: readonly,
+            change: onChange,
+        }
         $('#product-list').ebdropdown(opts, data, selected);
     }
 
@@ -274,6 +281,7 @@ function initAuftrag(auftrag, readonly) {
         $('#gutachtenart').ebCombined({
             ddData: data,
             selected: selected,
+            disabled: readonly,
             onChange: function (selection) {
                 auftrag['expertise-type-id'] = selection.v;
                 auftrag['expertise-type-spec-id'] = null;
@@ -287,7 +295,7 @@ function initAuftrag(auftrag, readonly) {
         const selected = getSelectionValue(auftrag, data, 'expertise-type-spec-id')
         $('#gutachtenartPrec').ebCombined({
             ddData: data,
-            selected: selected,
+            disabled: readonly,
             onChange: function (selection) {
                 auftrag['expertise-type-spec-id'] = selection.v;
             },
@@ -299,6 +307,7 @@ function initAuftrag(auftrag, readonly) {
         const selected = getSelectionValue(auftrag, data, 'result-category-id')
         $('#erledigungsart').ebCombined({
             ddData: data,
+            disabled: readonly,
             selected: selected,
             onChange: function (selection) {
                 auftrag['result-category-id'] = selection.v;
@@ -311,6 +320,7 @@ function initAuftrag(auftrag, readonly) {
         const selected = getSelectionValue(auftrag, data, 'location-id')
         $('#erledigungsort').ebCombined({
             ddData: data,
+            disabled: readonly,
             selected: selected,
             onChange: function (selection) {
                 auftrag['location-id'] = selection.v;
@@ -323,6 +333,7 @@ function initAuftrag(auftrag, readonly) {
         const selected = getSelectionValue(auftrag, data, 'result-id')
         $('#ergebnis').ebCombined({
             ddData: data,
+            disabled: readonly,
             selected: selected,
             onChange: function (selection) {
                 auftrag['result-id'] = selection.v;
@@ -337,7 +348,11 @@ function initAuftrag(auftrag, readonly) {
             const v = evt.target.value;
             auftrag['competent-helpdesk-id'] = _.isNumber(v) ? Number(v) : null;
         };
-        $('#beratungsstellen').ebdropdown({width: '300px', change: onChange}, data, selected);
+        $('#beratungsstellen').ebdropdown({
+            width: '300px',
+            disabled: readonly,
+            change: onChange
+        }, data, selected);
     }
 
     initOrdercodes(auftrag)
@@ -357,11 +372,7 @@ function initAuftrag(auftrag, readonly) {
         data: {
             readonly: readonly,
             auftrag: auftrag,
-            servicerenderers: servicerenderers,
-            selectedServicerendererId: selectedServicerendererId,
-            allServicerendererTypes: serviceRendererUtils.servicerendererTypes,
-            servicerendererTypes: availableServicerendererTypes,
-            selectedServicerendererType: selectedServicerendererType,
+            servicerenderers: servicerendererData,
         },
         computed: {
             participantVGA: function () { // VGA = Verantwortlicher Gutachter
@@ -533,11 +544,7 @@ function initAuftrag(auftrag, readonly) {
 
 let readonly = false;
 const setReadonly = function (readonly) {
-    $('input').prop('disabled', readonly);
-    $('textarea').prop('disabled', readonly);
-    $('.sel').selectmenu().selectmenu(readonly ? 'disable' : 'enable');
-    $('.readonly').prop('disabled', true);
-    $('#cbReadonly').prop('disabled', false);
+    initAuftrag(auftrag, readonly)
 }
 
 $(document).ready(function () {

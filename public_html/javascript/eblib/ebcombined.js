@@ -46,7 +46,7 @@
         }
         const myopts = $.extend({}, defopts, opts);
 
-       const init = function () {
+        const init = function () {
             const selected = opts.ddData.find(function (o) {
                 return o.v === myopts.selected
             })
@@ -54,24 +54,24 @@
             ddField = $('#dd-' + id).ebdropdown({
                 change: handlers.onChange,
                 width: myopts.ddWidth,
+                disabled: myopts.disabled,
             }, opts.ddData, myopts.selected)
             $('#in-' + id)
+                    .prop('disabled', myopts.disabled)
                     .width(myopts.inputWidth)
                     .on('input', handlers.onChange)
                     .on('blur', handlers.onBlur)
                     .val(selected ? selected.code : ' ')
         }
 
-        (function (a) {
-            const template = _.template(
-                    '<div class="ebcombined">\n\
+        const template = _.template(
+                '<div class="ebcombined">\n\
                         <input id="in-<%=id%>" type="text"/>\n\
                         <div   id="dd-<%=id%>" style="display:inline"> </div>\n\
                     </div>\n');
-            const s = template({id: id, options: myopts, width: myopts.width, height: myopts.height});
-            a.html(s);
-            init();
-        })(this);
+        const s = template({id: id, options: myopts, width: myopts.width, height: myopts.height});
+        this.html(s);
+        init();
     }
 }
 )(jQuery);

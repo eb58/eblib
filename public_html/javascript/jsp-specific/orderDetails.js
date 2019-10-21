@@ -366,6 +366,8 @@ function initAuftrag(auftrag, readonly) {
     initLocations(auftrag)
     initExpertisetypes(auftrag)
     initCompetencecenters(auftrag)
+    
+    $('#servicerenderers').servicerenderers(servicerendererData, {readonly:readonly});
 
     new Vue({
         el: '#app',

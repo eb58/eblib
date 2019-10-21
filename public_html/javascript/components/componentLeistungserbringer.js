@@ -5,12 +5,10 @@
         const id = this[0].id;
         const self = this;
         this.id = id;
-        var ddServicerendererType;
         const defopts = {
-
+            readonly: false,
         };
         const  myopts = $.extend({}, defopts, opts);
-
         const servicerendererTypes = ['Arzt/Sonstige', 'Krankenhaus', 'Sanit\u00e4tshaus', 'Pflegeeinrichtung']
 
         const servicerendererUtils = {
@@ -114,10 +112,13 @@
                 servicerenderertype: function (data) {
                     return data === 'Arzt' || data === 'Sonstige' ? 'Arzt/Sonstige' : data;
                 },
+                showIfSelected: function(data,row,r){
+                  return data ? '&nbsp;&nbsp;<i class="fa fa-thumbs-up fa-2x" title="Bevorzugter Leistungserbringer"></i>': '';  
+                },
                 actions: function (data, row, r) {
                     const template = _.template(
-                            '&nbsp;<i id="info-<%=id%>-<%=r%>"   class="fa fa-info  fa-2x" title="Leistungserbringer anzeigen"></i>\n\
-                             &nbsp;<i id="remove-<%=id%>-<%=r%>" class="fa fa-trash fa-2x" title="Leistungserbringer entfernen"></i>');
+                            '&nbsp;<i id="info-<%=id%>-<%=r%>"   class="fa fa-info  fa-2x" title="Leistungserbringer anzeigen"></i>' +
+                            (myopts.readonly ? '' : '&nbsp;<i id="remove-<%=id%>-<%=r%>" class="fa fa-trash fa-2x" title="Leistungserbringer entfernen"></i>'));
                     return template({r: r, id: id})
                 }
             };
@@ -132,7 +133,7 @@
                         return sortOrder[a.servicerenderertype] - sortOrder[b.servicerenderertype]
                     })
                     .map(function (o) {
-                        const x = [o.servicerendererid, o.servicerenderertype, o.shortname, ''];
+                        const x = [o.servicerendererid, o.selected, o.servicerenderertype, o.shortname, ''];
                         x.selected = o.selected;
                         return x;
                     })
@@ -141,11 +142,12 @@
                 flags: {filter: false, pagelenctrl: false, config: false, withsorting: false, clearFilterButton: false, colsResizable: false, jqueryuiTooltips: false, ctrls: false},
                 columns: [
                     {name: "id", invisible: true},
+                    {name: "  ", invisible: !myopts.readonly, render: renderer.showIfSelected},
                     {name: "Art", render: renderer.servicerenderertype},
                     {name: "Name"},
-                    {name: "", invisible: myopts.readonly, render: myopts.readonly ? null : renderer.actions}
+                    {name: "",  render: renderer.actions}
                 ],
-                selectionCol: {
+                selectionCol: myopts.readonly ? null : {
                     singleSelection: true,
                     selectOnRowClick: true,
                     onSelection: function (rowNr, row, origData, b) {
@@ -165,7 +167,7 @@
             $('#select-' + id).toggle(visible)
             $('#' + id + ' .fa-plus-circle').toggle(visible)
             if (visible) {
-                ddServicerendererType = $('#select-' + id).ebdropdown({disabled: myopts.readonly, width: 300}, availableServicerendererTypes)
+                $('#select-' + id).ebdropdown({disabled: myopts.readonly, width: 300}, availableServicerendererTypes)
                 $('#' + id + ' .fa-plus-circle')
                         .off()
                         .on('click', function () {
@@ -176,17 +178,19 @@
             initTable();
         }
 
-        const template = _.template('\
-                <div class="serviverenderers">\n\
-                    <div>\n\
+        const ctrlTemplate = _.template('                    \n\
+                    <div id="ctrl">\n\
                         <div id="select-<%=id%>" style="display:inline"></div>\n\
                         <div style="display:inline; vertical-align:middle" >\n\
                             <i class="fa fa-plus-circle fa-2x"  title="Leistungserbringer hinzufügen"></i>\n\
                         </div>\n\
-                    <div>\n\
+                    <div>')({id: id});
+        const template = _.template('\
+                <div class="serviverenderers">\n\
+                    <%=ctrl%>\n\
                     <div id="table-<%=id%>"> </div>\n\
                 </div>\n');
-        const s = template({id: id, options: myopts, width: myopts.width, height: myopts.height});
+        const s = template({id: id, ctrl: myopts.readonly ? '' : ctrlTemplate});
         this.html(s);
         init();
     }

@@ -26,14 +26,23 @@
         <script src="/javascript/dialogs/dlgServicerendererInfo.js"></script>
         <script>
 
+            const init = function (readonly) {
+                $('#servicerenderers').servicerenderers(servicerendererData, {readonly: readonly});
+            }
 
             $(document).ready(function () {
-                const opts = {};
-                $('#servicerenderers').servicerenderers(servicerendererData, opts);
+                init(false);
+                $('#cbReadonly').on('click', function (evt) {
+                    console.log(evt.target.checked);
+                    init(evt.target.checked)
+                })
             });
         </script>
     </head>
     <body>
+        <div>
+            Readonly<input type='checkbox' id='cbReadonly'/>
+        </div>
         <div id="servicerenderers"></div>
     </body>
 </html>

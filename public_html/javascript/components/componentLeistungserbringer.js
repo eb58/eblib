@@ -53,18 +53,18 @@
             },
             computeAvailableServicerendererTypes: function (servicerenderers) {
                 const maxServiceRenderersForType = Object.freeze({
-                    'arzt/sonstige': 6,
+                    'arzt/sonstige': 2,
                     krankenhaus: 1,
                     'sanit\u00e4tshaus': 1,
                     pflegeeinrichtung: 1
                 })
 
-                const servicerenderersCounter = servicerendererUtils.countServiceRenderers(servicerenderers)
+                const cnt = servicerendererUtils.countServiceRenderers(servicerenderers)
                 const counter = {
-                    'arzt/sonstige': servicerenderersCounter.arzt + servicerenderersCounter.sonstige,
-                    krankenhaus: 0,
-                    'sanit\u00e4tshaus': 0,
-                    pflegeeinrichtung: 0
+                    'arzt/sonstige': cnt.arzt + cnt.sonstige,
+                    krankenhaus: cnt.krankenhaus,
+                    'sanit\u00e4tshaus': cnt['sanit\u00e4tshaus'],
+                    pflegeeinrichtung: cnt.pflegeeinrichtung
                 }
 
                 return servicerendererTypes.filter(function (o) {
@@ -97,7 +97,7 @@
                 $(elem).off().on('click', function (evt) {
                     var n = Number(evt.target.id.replace(/.*-/, ''));
                     dataServicerenderers.splice(n, 1);
-                    initTable();
+                    init();
                 });
             });
             $('#' + id + ' i.fa-info').each(function (idx, elem) {
@@ -159,16 +159,20 @@
             $('#table-' + id).ebtable(tblOpts, tblData);
         }
         const init = function () {
-            const visible = servicerendererUtils.computeAvailableServicerendererTypes(servicerenderers).length > 0;
             const availableServicerendererTypes = servicerendererUtils.computeAvailableServicerendererTypes(servicerenderers)
-            ddServicerendererType = $('#select-' + id).ebdropdown({disabled: myopts.readonly}, availableServicerendererTypes)
-            $('#add-' + id)
-                    .toggle(visible)
-                    .off()
-                    .on('click', function () {
-                        servicerendererUtils.addServicerenderer()
-                        init()
-                    })
+            const visible = availableServicerendererTypes.length > 0
+
+            $('#select-' + id).toggle(visible)
+            $('#' + id + ' .fa-plus-circle').toggle(visible)
+            if (visible) {
+                ddServicerendererType = $('#select-' + id).ebdropdown({disabled: myopts.readonly, width: 300}, availableServicerendererTypes)
+                $('#' + id + ' .fa-plus-circle')
+                        .off()
+                        .on('click', function () {
+                            servicerendererUtils.addServicerenderer()
+                            init()
+                        })
+            }
             initTable();
         }
 
@@ -177,12 +181,10 @@
                     <div>\n\
                         <div id="select-<%=id%>" style="display:inline"></div>\n\
                         <div style="display:inline; vertical-align:middle" >\n\
-                            <i id="add-<%=id%>" class="fa fa-plus-circle fa-2x"  title="Leistungserbringer hinzufügen"></i>\n\
+                            <i class="fa fa-plus-circle fa-2x"  title="Leistungserbringer hinzufügen"></i>\n\
                         </div>\n\
                     <div>\n\
-                    <div style="display:inline-block;">\n\
-                        <div id="table-<%=id%>" style="display:inline-block; min-width:1000px"></div>\n\
-                    <div>\n\
+                    <div id="table-<%=id%>"> </div>\n\
                 </div>\n');
         const s = template({id: id, options: myopts, width: myopts.width, height: myopts.height});
         this.html(s);

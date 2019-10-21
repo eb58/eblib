@@ -16,6 +16,7 @@ const dlgServicerendererSearch = function (opts, onTakeOverCallback) {
         hide: {effect: "blind", duration: 200},
         modal: true,
         servicerendererTypes: ['Leistungserbringer', 'Krankenhaus', 'Sanit\u00e4tshaus', 'Pflegeeinrichtung'],
+        dlgContext: 'dlgServicerendererSearch',
         buttons: {
             '\u00dcbernehmen': function () {
                 utils.overtake() && $(this).dialog("destroy")
@@ -34,7 +35,7 @@ const dlgServicerendererSearch = function (opts, onTakeOverCallback) {
                     .filter(function (o) {
                         if (!searchCriteria.servicerenderertype)
                             return true
-                        if (searchCriteria.servicerenderertype === 'Leistungserbringer')
+                        if (searchCriteria.servicerenderertype === 'Arzt/Sonstige')
                             return o.servicerenderertype === 'Arzt' || o.servicerenderertype === 'Sonstige'
                         return  o.servicerenderertype === searchCriteria.servicerenderertype
                     })
@@ -79,7 +80,7 @@ const dlgServicerendererSearch = function (opts, onTakeOverCallback) {
             columns: [
                 {name: "data", technical: true, invisible: true},
                 {name: "Name"},
-                {name: "Type", valuelist: [''].concat(myopts.servicerendererTypes)},
+                {name: "Art", valuelist: [''].concat(myopts.servicerendererTypes)},
             ],
             flags: {
                 arrangeColumnsButton: false,
@@ -131,7 +132,7 @@ const dlgServicerendererSearch = function (opts, onTakeOverCallback) {
 
     const template = _.template("\
         <div id='dlgServicerendererSearch'>\n\
-          <span style='float:right'><a href=javascript:call_help('<%=context%>')><i class='fa fa-question-circle-o fa-lg'></i> Hilfe</a></span>\n\
+          <span style='float:right'><a href=javascript:call_help('<%=dlgContext%>')><i class='fa fa-question-circle-o fa-lg'></i> Hilfe</a></span>\n\
           <div id='searchcriteria'>\n\
             <label style='display:inline'>Art </label>\n\
             <div id='search-srr-ddtype' style='display:inline'></div>\n\
@@ -141,9 +142,8 @@ const dlgServicerendererSearch = function (opts, onTakeOverCallback) {
           <button id='search-srr-btn'>Suchen</button>\n\
           <div id='xxxgrid'></div>\n\
         </div>")({
-        context: myopts.dlgContext,
-    }
-    )
+        dlgContext: myopts.dlgContext,
+    })
 
     var dlg = $(template)
     dlg.dialog(myopts)
@@ -155,6 +155,6 @@ const dlgServicerendererSearch = function (opts, onTakeOverCallback) {
         $('#dlgServicerendererSearch').css('background-color', '#eeeee0');
         $('#xxxgrid th, xxxgrid td').css('border-color', '#fff').css('border-style', 'solid').css('border-width', '1px')
         $('#xxxgrid #data table td').css('padding', '3px 4px 3px 4px')
-        $('#dlgSearchServicerenderer').parent().find('*').css('font-size', '12px')
-    dlgServicerendererSearch
+        $('#dlgServicerendererSearch').parent().find('*').css('font-size', '12px')
+    }
 }

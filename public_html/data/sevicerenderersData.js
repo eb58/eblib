@@ -1,24 +1,34 @@
 const servicerendererData = [
     {
-        "servicerendererid": 71922,
-        "name": "Schmidt",
+        "servicerendererid": 1,
+        "name": "Dr. Eric Schmidt",
         "servicerenderertype": "Arzt",
-        "shortname": "Schmidt",
+        "shortname": "Dr. Eric Schmidt",
         "delivery-config-id": null,
         "valid": true,
         "selected": true,
         "duplicate": "NoDuplicate"
     },
     {
-        "servicerendererid": 71923,
-        "name": "Eckie von Hirschhausen",
-        "servicerenderertype": "Pflegeeinrichtung",
-        "shortname": "Eckie von Hirschhausen",
+        "servicerendererid": 2,
+        "name": "DRK Berlin",
+        "servicerenderertype": "Sonstige",
+        "shortname": "DRK Berlin",
         "delivery-config-id": null,
         "valid": true,
         "selected": false,
         "duplicate": "NoDuplicate"
-    }
+    },
+    {
+        "servicerendererid": 8,
+        "name": "Dr. Eckie von Hirschhausen",
+        "servicerenderertype": "Pflegeeinrichtung",
+        "shortname": "Dr. Eckie von Hirschhausen",
+        "delivery-config-id": null,
+        "valid": true,
+        "selected": false,
+        "duplicate": "NoDuplicate"
+    },
 ]
 
 const serviceRenderersFromSearch = [
@@ -28,4 +38,6 @@ const serviceRenderersFromSearch = [
     {servicerendererid: 4, shortname: 'Kreiskrankenhaus Alzenau', servicerenderertype: 'Krankenhaus'},
     {servicerendererid: 5, shortname: 'Sanit\u00e4tshaus Riedl', servicerenderertype: 'Sanit\u00e4tshaus'},
     {servicerendererid: 6, shortname: 'Dr. Ernst Maier', servicerenderertype: 'Arzt'},
+    {servicerendererid: 7, shortname: 'Dr. Horst Schulze', servicerenderertype: 'Arzt'},
+    {servicerendererid: 8, shortname: 'Dr Eckie von Hirschhausen', servicerenderertype: 'Pflegeeinrichtung'},
 ]

@@ -1,4 +1,4 @@
-[
+const akte = [
   {
     "workorder-id": 50000005143,
     "crypted-doc-id": "2338DC79923731E7",

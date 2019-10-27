@@ -1,55 +1,108 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            body { background:#FAFAF0; margin: 5px 5px 5px 5px; }
-            * {font-family: roboto; color: black; font-size: 12px; }
-        </style>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed" >    
-        <link rel="stylesheet" href="/vendor/font-awesome-4.7.0/css/font-awesome.min.css">
-        <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.min.css">
-        <link rel="stylesheet" href="/css/ebtree.css">
+  <head>
+    <title>TODO supply a title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body { background:#FAFAF0; margin: 5px 5px 5px 5px; }
+      * {font-family: roboto; color: black; font-size: 12px; }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed" >    
+    <link rel="stylesheet" href="/vendor/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.min.css">
+    <link rel="stylesheet" href="/css/ebtree.css">
 
-        <script src="/vendor/underscore-1.8.3/underscore-1.8.3.min.js"></script>
-        <script src="/vendor/jQuery-1.11.3/jquery-1.11.3.min.js"></script>
-        <script src="/vendor/jQueryUI-1.12.0/jquery-ui.min.js"></script>
-        <script src="/javascript/eblib/ebbind.js"></script>
-        <script src="/javascript/eblib/ebtree.js"></script>
-        <!--<script src="/js/utils/utils.js"></script>-->
+    <script src="/vendor/underscore-1.8.3/underscore-1.8.3.min.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery-1.11.3.min.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.min.js"></script>
+    <script src="/javascript/eblib/ebbind.js"></script>
+    <script src="/javascript/eblib/ebtree.js"></script>
+    <!--<script src="/js/utils/utils.js"></script>-->
+    <script src="/data/akte.js"></script>
 
-        <script>
-            var treeData = [
-                {
-                    label: 'Allgemeine Parameter',
-                    subitems: [
-                        {label: 'Weitere BV'},
-                    ],
-                },
-                {
-                    label: 'Spezielle Parameter',
-                    subitems: [
-                        {label: 'Subitem1'},
-                        {label: 'Subitem3'},
-                        {label: 'Subitem3'},
-                    ],
-                },
-            ];
-            var tree;
-            $().ready(function () {
-                var treeOpts = {
-                };
-                tree = $('#tree1').ebtree(treeOpts, treeData);
+    <script>
+      Array.prototype.groupBy = function (pred) {
+        return _.groupBy(this, pred);
+      };
+      Object.prototype.mapObject = function (iteratee) {
+        return _.mapObject(this, iteratee);
+      };
+      Object.prototype.mapObjectToArray = function (f) {
+        return Object.keys(this).map(key => f ? f(key, this[key]) : this[key]);
+      };
 
 
-            });
-        </script>
-    </head>
-    <body>
-        <div id="mainWork">
-            <div id='tree1'    style="overflow: auto; float:left; border:1px solid black; padding: 1px"></div>
-        </div>
-    </body>
+      const renderDocument = doc => doc.docType.doctypetext + ' - ' + doc.docdate + ' - ' + (doc.author || '') + ' - ' + doc.name
+
+      const subtree1 = akte
+              .filter(o => o['source-workorder-id'] === 0)
+              .groupBy(e => e.document.tab.name)
+              .mapObjectToArray((key, o) => ({label: key, subitems: o.map(e => ({label: renderDocument(e.document), subitems: []}))}))
+
+      const subtree2 = akte
+              .filter(o => o['source-workorder-id'] !== 0)
+              .groupBy(o => o['source-workorder-id'])
+              .mapObject(o => o.groupBy(e => e.document.tab.name))
+              .mapObjectToArray((key, o) =>
+                ({label: key, subitems: o.mapObjectToArray((key, o) => ({label: key, subitems: o.map(e => ({label: renderDocument(e.document), subitems: []}))}))}))
+
+      console.log(subtree1);
+
+      const docs = [
+        {label: 'Dokumente zum Auftrag', subitems: subtree1},
+        {label: 'Dokumente aus früheren Aufträgen', subitems: subtree2},
+      ];
+
+      console.log(docs);
+
+      var treeData = [
+        {
+          label: 'Allgemeine Parameter',
+          subitems: [
+            {label: 'Weitere BV'},
+          ],
+        },
+        {
+          label: 'Spezielle Parameter',
+          subitems: [
+            {label: 'Subitem1'},
+            {label: 'Subitem3'},
+            {label: 'Subitem3'},
+          ],
+        },
+      ];
+
+      var treeData = [
+        {
+          label: 'Allgemeine Parameter',
+          subitems: [
+            {label: 'Weitere BV'},
+          ],
+        },
+        {
+          label: 'Spezielle Parameter',
+          subitems: [
+            {label: 'Subitem1'},
+            {label: 'Subitem3'},
+            {label: 'Subitem3'},
+          ],
+        },
+      ];
+
+      var tree;
+      $().ready(function () {
+        var treeOpts = {
+        };
+        tree = $('#tree1').ebtree(treeOpts, docs);
+
+
+      });
+    </script>
+  </head>
+  <body>
+    <div id="mainWork">
+      <div id='tree1'    style="overflow: auto; float:left; border:1px solid black; padding: 1px"></div>
+    </div>
+  </body>
 </html>

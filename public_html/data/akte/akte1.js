@@ -1,4 +1,4 @@
-const akte = [
+const akte1 = [
   {
     "workorder-id": 50000005143,
     "crypted-doc-id": "2338DC79923731E7",
@@ -19,12 +19,13 @@ const akte = [
       "archivingdate": null,
       "author": null,
       "note": null,
+      "serverdruck": true,
       "tab": {
         "tabid": 3,
         "name": "weitere Dokumente zum Auftrag",
         "systemtab": false
       },
-      "removable": true,
+      "removable": false,
       "invisible": false,
       "registrationuser": null,
       "externalid": null,

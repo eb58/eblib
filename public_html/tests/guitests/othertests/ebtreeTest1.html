@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
       body { background:#FAFAF0; margin: 5px 5px 5px 5px; }
-      * {font-family: roboto; color: black; font-size: 12px; }
+      * {font-family: arial; color: black; font-size: 12px; }
     </style>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed" >    
     <link rel="stylesheet" href="/vendor/font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.min.css">
     <link rel="stylesheet" href="/css/ebtree.css">
@@ -16,176 +15,133 @@
     <script src="/vendor/underscore-1.8.3/underscore-1.8.3.min.js"></script>
     <script src="/vendor/jQuery-1.11.3/jquery-1.11.3.min.js"></script>
     <script src="/vendor/jQueryUI-1.12.0/jquery-ui.min.js"></script>
+    <script src="/javascript/polyfill.js"></script>
     <script src="/javascript/eblib/ebbind.js"></script>
     <script src="/javascript/eblib/ebtree.js"></script>
-    <!--<script src="/js/utils/utils.js"></script>-->
-    <script src="/data/akte/akte1.js"></script>
-    <script src="/data/akte/akte2.js"></script>
-    <script src="/data/akte/akte3.js"></script>
 
     <script>
-      akte = akte2;
-
-
-      Array.prototype.groupBy = function (pred) {
-        return _.groupBy(this, pred);
-      };
-      Object.prototype.mapObject = function (iteratee) {
-        return _.mapObject(this, iteratee);
-      };
-      Object.prototype.mapObjectToArray = function (f) {
-        return Object.keys(this).map(key => f ? f(key, this[key]) : this[key]);
-      };
-
       const availableActions = {
         'checkbox': {
           prefix: 'checkbox',
-          renderer: function (id) {
+          renderer: function (item) {
             return  _.template('<input type="checkbox" id="<%=id%>"></i>')({
-              id: 'checkbox-' + id,
+              id: 'checkbox-' + item.id,
             })
           },
           action: function (item) {
-            console.log('INFO!', item)
+            console.log('CHECKBOX checked:', item)
+          }
+        },
+        'document-link': {
+          prefix: 'document-link',
+          renderer: function (item) {
+            const documentLabel = function (doc) {
+              return _.template('<%=doctype%> - <%= docdate%> - <%= author%> - <%= docname%>')({
+                doctype: doc.docType.doctypetext,
+                docdate: doc.docdate,
+                author: doc.author || '',
+                docname: doc.name,
+              })
+            }
+            return  _.template('<a id="<%=id%>"><%=name%></a>')({
+              id: 'document-link-' + item.id,
+              name: item.data ? documentLabel(item.data) : '',
+            })
+          },
+          action: function (item) {
+            console.log('LINK clicked!', item)
           }
         },
         'show-info': {
           prefix: 'show-info',
-          renderer: function (id) {
-            return  _.template('<i class="fa fa-info fa-lg" id="<%=id%>"></i>')({
-              id: 'show-info-' + id,
+          renderer: function (item) {
+            return  _.template('<i class="fa fa-info fa-2x" id="<%=id%>" title="Informationen zu Dokument"></i>')({
+              id: 'show-info-' + item.id,
             })
           },
           action: function (item) {
             console.log('INFO!', item)
           }
         },
-        'standart-schreiben': {
-          prefix: 'standart-schreiben',
-          renderer: function (id) {
-            return  _.template('<i class="fa fa-edit fa-lg" id="<%=id%>"></i>')({
-              id: 'standart-schreiben-' + id,
+        'standard-schreiben': {
+          prefix: 'standard-schreiben',
+          renderer: function (item) {
+            return  _.template('<i class="fa fa-book fa-2x" id="<%=id%>"  title="Standardschreiben erstellen"></i>')({
+              id: 'standard-schreiben-' + item.id,
             })
           },
           action: function (item) {
-            console.log('INFO!', item)
+            console.log('Standardschreiben', item)
           }
         },
         'serverdruck-info': {
           prefix: 'serverdruck-info',
-          renderer: function (id) {
-            return  _.template('<i class="fa fa-print fa-lg" id="<%=id%>"></i>')({
-              id: 'serverdruck-info-' + id,
+          renderer: function (item) {
+            const map = {1: 'angestoßen', 2: 'angefordert'}
+            return  _.template('<i class="fa fa-print fa-2x" id="<%=id%>" title="<%=title%>" style="background-color:<%=backgroundColor%>"></i>')({
+              id: 'serverdruck-info-' + item.id,
+              title: 'Serverdruck ' + (item.data['delivery-status'] ? map[item.data['delivery-status']] : '????'), // TODO
+              backgroundColor: item.data['delivery-status'] === 1 ? 'yellow' : 'lightgreen',
             })
           },
-          function(item) {
-            console.log('serverdruck-info!', item)
-          }, // just indicator, no action
         },
       };
 
-      const documentLabel = doc => _.template('<%=doctype%> - <%= docdate%> - <%= author%> - <%= docname%>')({
-          doctype: doc.docType.doctypetext,
-          docdate: doc.docdate,
-          author: doc.author || '',
-          docname: doc.name,
-        })
-
-      const computeActionsForDocument = function (document) {
-        const res = [];
-
-        if (document.removable)
-          res.push(availableActions['checkbox'])
-
-        res.push(availableActions['show-info'])
-        
-        if (document.serverdruck)
-          res.push(availableActions['serverdruck-info'])
-        
-        return res;
-      }
-
-      const subtree1 = akte
-              .filter(o => o['source-workorder-id'] === 0)
-              .groupBy(e => e.document.tab.name)
-              .mapObjectToArray((key, o) => ({
-                  label: key,
-                  actions: [availableActions['checkbox']],
-                  subitems: o.map(e => ({
-                      label: documentLabel(e.document),
-                      actions: computeActionsForDocument(e.document),
-                      data: e.document
-                    }))
-                }))
-
-      const subtree2 = akte
-              .filter(o => o['source-workorder-id'] !== 0)
-              .groupBy(o => o['source-workorder-id'])
-              .mapObject(o => o.groupBy(e => e.document.tab.name))
-              .mapObjectToArray((key, o) => ({
-                  label: key,
-                  actions: [availableActions['checkbox']],
-                  subitems: o.mapObjectToArray((key, o) => ({
-                      label: key,
-                      actions: [availableActions['checkbox']],
-                      subitems: o.map(e => ({
-                          label: documentLabel(e.document),
-                          actions: computeActionsForDocument(e.document),
-                          data: e.document,
-                        }))
-                    }))
-                }))
-
-      console.log(subtree1);
-      console.log(subtree2);
-
-      const docs = [
-        {label: 'Dokumente zum Auftrag', isopen: true, actions: [availableActions['checkbox']], subitems: subtree1},
-      ];
-      if (subtree2.length) {
-        docs.push({label: 'Dokumente aus früheren Aufträgen', actions: [availableActions['checkbox']], subitems: subtree2})
-      }
-
-      console.log(docs);
-
-      var treeData = [
-        {
+      const treeData = [{
           label: 'Allgemeine Parameter',
           selected: true,
+          isCollapsed: true,
           actions: [availableActions['checkbox']],
           subitems: [{
               label: 'Weitere BV',
+              isCollapsed: true,
               actions: [availableActions['checkbox'], availableActions['show-info']],
               data: {
                 name: 'TEST1'
-              }
+              },
+              subitems: [
+                {label: 'Subitem1', actions: [availableActions['show-info']]},
+                {label: 'Subitem2', actions: [availableActions['checkbox'], availableActions['show-info']]},
+                {label: 'Subitem3', actions: [availableActions['checkbox'], availableActions['show-info']]},
+              ],
             },
           ],
         },
         {
           label: 'Spezielle Parameter',
+          isCollapsed: true,
           actions: [availableActions['checkbox']],
           subitems: [
             {label: 'Subitem1', actions: [availableActions['show-info']]},
-            {label: 'Subitem3', actions: [availableActions['checkbox'], availableActions['show-info']]},
+            {label: 'Subitem2', actions: [availableActions['checkbox'], availableActions['show-info']]},
             {label: 'Subitem3', actions: [availableActions['checkbox'], availableActions['show-info']]},
           ],
         },
       ];
 
       $().ready(function () {
-        var treeOpts = {
-          withSelection: true,
-        };
-        const tree1 = $('#tree1').ebtree(treeData, treeOpts);
-        const tree2 = $('#tree2').ebtree(docs, treeOpts);
+
+        const tree1 = $('#tree1').ebtree(treeData);
+        $('#btnOpenAll').on('click', function () {
+          tree1.collapseAll(false)
+        });
+        $('#btnCloseAll').on('click', function () {
+          tree1.collapseAll(true)
+        });
+        $('#btnGetSelection').on('click', function () {
+          const res = tree1.getSelectedItems();
+          console.log(res);
+        });
+
       });
     </script>
   </head>
   <body>
     <div id="mainWork">
-      <div id='tree1'  style="border:1px solid black; padding: 1px"></div>
-      <div id='tree2'  style="border:1px solid black; padding: 1px"></div>
+      <button id='btnOpenAll'>Alle Ordner öffnen</button>
+      <button id='btnCloseAll'>Alle Ordner schließen</button>
+      <button id='btnGetSelection'>Alle Selektierten Items ermitteln</button>
+      <div id='tree1' style="border:1px solid black; padding: 1px"></div>
     </div>
   </body>
 </html>

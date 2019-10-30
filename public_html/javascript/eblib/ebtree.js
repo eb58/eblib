@@ -7,7 +7,9 @@
 
     var defopts = {
       onClickItem: function (evt) {
-        console.log('onClickItem', evt.target.id, evt);
+        const item = utilsTree.itemById(evt.target.id);
+        console.log('onClickItem', item);
+
       },
       onCheckItem: function (evt) {
         const item = utilsTree.itemById(evt.target.id)
@@ -21,29 +23,6 @@
     };
 
     var myopts = _.extend({}, defopts, opts || {});
-
-    var utils = {
-      gencount: 0,
-      generateId: function () {
-        return 'itemid-' + Math.floor(Math.random() * 10000) + '-' + new Date().getTime() + '-' + this.gencount++;
-      },
-      initItem: function (item) {
-        item.subitems = item.subitems || [];
-        return item;
-      },
-      createSubitem: function (item) {
-        item.subitems = item.subitems || [];
-        var newItem = {};
-        newItem.parent = item;
-        return utils.initItem(newItem);
-      },
-      selectSubitems: function (item, isChecked) {
-        internals.traverse(item.subitems, function (subitem) {
-          console.log('selectSubitems subitem', isChecked, subitem)
-          $('#checkbox-' + subitem.id).prop('checked', isChecked)
-        })
-      },
-    };
 
     const internals = {
       delItem: function (treeItems, itemId) {
@@ -88,6 +67,29 @@
       },
     }
 
+    var utils = {
+      gencount: 0,
+      generateId: function () {
+        return 'itemid-' + Math.floor(Math.random() * 10000) + '-' + new Date().getTime() + '-' + this.gencount++;
+      },
+      initItem: function (item) {
+        item.subitems = item.subitems || [];
+        return item;
+      },
+      createSubitem: function (item) {
+        item.subitems = item.subitems || [];
+        var newItem = {};
+        newItem.parent = item;
+        return utils.initItem(newItem);
+      },
+      selectSubitems: function (item, isChecked) {
+        internals.traverse(item.subitems, function (subitem) {
+          console.log('selectSubitems subitem', isChecked, subitem)
+          $('#checkbox-' + subitem.id).prop('checked', isChecked)
+        })
+      },
+    };
+
     var utilsTree = {
       itemById: function (id) {
         return internals.itemById(treeItems, id);
@@ -108,6 +110,25 @@
           }
         })
       },
+      collapseAll: function (b) {
+        utilsTree.traverse(function (item) {
+          item.isCollapsed = b;
+        })
+        init()
+      },
+      getSelectedItems: function () {
+        const selected = [];
+        $('#' + treeid + ' input[type=checkbox]:checked').each(function (idx, elem) {
+          selected.push(elem)
+        })
+        return selected.map(function (elem) {
+          return utilsTree.itemById(elem.id.replace('checkbox-', ''));
+        }).filter(function (item) {
+          return item.data;
+        }).map(function (item) {
+          return item.data;
+        })
+      }
     };
 
     var renderTree = {
@@ -115,11 +136,14 @@
         item.subitems.forEach(function (subitem) {
           subitem.parent = item;
         })
-        var rsubitems = renderTree.renderItems(item.subitems, item.isCollapsed);
         item.id = item.id || utils.generateId()
         const actions = item.actions ? item.actions.reduce(function (acc, action) {
-          return acc += action.renderer(item.id)
+          return acc += action.renderer(item)
         }, '') : '';
+        const arrow = item.subitems && item.subitems.length ?
+                '<i class="fa fa-caret-' + (item.isCollapsed ? 'right' : 'down') + ' fa-1x" id="caret-' + item.id + '"/>' :
+                '<span>&nbsp;</span>';
+        var rsubitems = renderTree.renderItems(item.subitems, item.isCollapsed);
         return _.template('\
               <li id=<%=id%> >\n\
                   <%=arrow%>\n\
@@ -129,8 +153,7 @@
               </li>\n\
             ')({
           id: item.id,
-          arrow: item.subitems && item.subitems.length ? '<i class="fa fa-caret-' + (item.isCollapsed ? 'right' : 'down') + ' fa-lg"/>' : '<span>&nbsp;</span>',
-          //eckbox: myopts.withSelection ? '<input type="checkbox" id="cb_' + item.id + '"/>' : '',
+          arrow: arrow,
           actions: actions,
           label: (item.label || item.id) + '',
           subitems: rsubitems
@@ -147,6 +170,7 @@
     }
 
     var redraw = function () {
+      $('#' + treeid + ' .ebtree').detach();
       const x = '\
               <div class="ebtree">' +
               renderTree.renderItems(treeItems, false) +
@@ -157,9 +181,9 @@
     var init = function () {
       redraw();
       // init actions
-      $('#' + treeid).off().on('click', myopts.onClickItem)
+      // $('#' + treeid).off().on('click', myopts.onClickItem)
       $('#' + treeid + ' input[type=checkbox]').each(function (idx, elem) {
-        $(elem).off().on('click', function (evt) {
+        $(elem).on('click', function (evt) {
           evt.stopPropagation();
           const checked = evt.target.checked;
           const id = evt.target.id.replace('checkbox-', '');
@@ -171,11 +195,11 @@
         var item = utilsTree.itemById(evt.target.parentElement.id);
         item.isCollapsed = !item.isCollapsed;
         if (item.isCollapsed) {
-          $('#' + evt.target.parentElement.id + ' ul').hide()
-          $('#' + evt.target.parentElement.id + '>i').removeClass('fa-caret-down').addClass('fa-caret-right');
+          $('#' + item.id + '>ul').hide()
+          $('#caret-' + item.id).first().removeClass('fa-caret-down').addClass('fa-caret-right');
         } else {
-          $('#' + evt.target.parentElement.id + ' ul').show()
-          $('#' + evt.target.parentElement.id + '>i').removeClass('fa-caret-right').addClass('fa-caret-down');
+          $('#' + item.id + '>ul').show()
+          $('#caret-' + item.id).removeClass('fa-caret-right').addClass('fa-caret-down');
         }
         evt.stopPropagation();
       })
@@ -183,25 +207,31 @@
       utilsTree.traverse(function (item) {
         item.actions && item.actions.forEach(function (action) {
           console.log('Action handler registration', item, action);
-          0 && $('#' + action.prefix + '-' + item.id).off().on('click', function (evt) {
+          $('#' + action.prefix + '-' + item.id).on('click', function (evt) {
+            action.action && action.action(item)
             evt.stopPropagation();
-            action.action(item)
           })
         })
       })
       return self;
     }
 
-    init();
+    init(false);
 
     this.id = treeid;
+
+
     var api = {
+      getSelectedItems: utilsTree.getSelectedItems,
+      collapseAll: utilsTree.collapseAll,
       traverse: utilsTree.traverse,
       itemById: utilsTree.itemById,
       setFocus: utilsTree.setFocus,
       createSubitem: utils.createSubitem,
       init: init,
+      availableActions: availableActions,
     };
     return _.extend(this, api);
   };
+
 })(jQuery);

@@ -1,6 +1,10 @@
-.ebtree ul{ list-style-type: none; padding: 3px 5px 3px 5px; margin:1px 0px 1px 0px; }
-.ebtree li{ list-style-type: none; padding: 1px 5px 1px 5px;  }
-.ebtree a { color: blue;}
-.ebtree i { padding: 3px 3px 3px 3px;  }
-.ebtree li.focus>a{background-color: #cce;}
+.ebtree ul{ list-style-type: none; padding: 1px 5px 1px 5px; margin:1px 0px 1px 0px; }
 .ebtree ul li span { float: left;	width: 16.5px;}
+.ebtree li{ list-style-type: none; padding: 1px 5px 1px 5px; margin-left: 15px }
+.ebtree li.focus>a{ background-color: #cce;}
+.ebtree i { padding: 1px 4px 1px 4px;  }
+.ebtree i.fa-caret-down, i.fa-caret-right { width:8px;  padding: 1px 1px 1px 1px; }
+.ebtree a { color: blue;}
+.ebtree input[type=checkbox] { margin: 1px 1px 1px 1px;}
+.ebtree {background: #e8e8d4;}
+

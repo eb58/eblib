@@ -19,7 +19,7 @@ const akte1 = [
       "archivingdate": null,
       "author": null,
       "note": null,
-      "serverdruck": true,
+      "delivery-status": 1,
       "tab": {
         "tabid": 3,
         "name": "weitere Dokumente zum Auftrag",
@@ -29,7 +29,7 @@ const akte1 = [
       "invisible": false,
       "registrationuser": null,
       "externalid": null,
-      "doclink": false
+      "doclink": true
     },
     "source-workorder-id": 0,
     "crypted-suid": "2338DC79923731E7"
@@ -63,6 +63,7 @@ const akte1 = [
       "invisible": false,
       "registrationuser": null,
       "externalid": null,
+      "delivery-status": 2,
       "doclink": false
     },
     "source-workorder-id": 0,
@@ -97,7 +98,8 @@ const akte1 = [
       "invisible": false,
       "registrationuser": null,
       "externalid": null,
-      "doclink": false
+      "delivery-status": 2,
+      "doclink": true
     },
     "source-workorder-id": 50000004864,
     "crypted-suid": "AF0467199E3151B9"

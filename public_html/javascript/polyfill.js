@@ -28,7 +28,13 @@ if (!String.prototype.endsWith) {
   };
 }
 
-if (typeof $ !== 'undefined')
+if (!Array.prototype.groupBy) {
+  Array.prototype.groupBy = function (pred) {
+    return _.groupBy(this, pred);
+  };
+}
+
+if (typeof $ !== 'undefined') {
   $.extend({
     alert: function (title, message) {
       message = message || '';
@@ -49,8 +55,9 @@ if (typeof $ !== 'undefined')
       }).html('<br>' + message.replace(/\n/g, '<br>'));
     }
   });
+}
 
-if (typeof $ !== 'undefined')
+if (typeof $ !== 'undefined') {
   $.extend({
     confirm: function (title, question, callbackYes, callbackNo) {
       question = question || '';
@@ -78,6 +85,4 @@ if (typeof $ !== 'undefined')
       }).html('<br>' + question.replace(/\n/g, '<br>'));
     }
   });
-
-
-
+}

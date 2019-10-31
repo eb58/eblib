@@ -67,12 +67,12 @@
         },
         'show-info': {
           renderer: function (item) {
-            return  _.template('<i class="fa fa-info-circle fa-1x" id="<%=id%>" title="Informationen zu Dokument" onclick="actions.dlgShowDocumentInfo(\'<%=id%>\')"></i>')({id: item.id})
+            return  _.template('<i class="fa fa-info-circle fa-1x" id="<%=id%>" title="Informationen zu Dokument"></i>')({id: item.id})
           }
         },
         'standard-schreiben': {
           renderer: function (item) {
-            return  _.template('<i class="fa fa-book fa-1x" id="<%=id%>" title="Standardschreiben erstellen" onclick="actions.dlgShowDocumentInfo(\'<%=id%>\')"></i>')({id: item.id})
+            return  _.template('<i class="fa fa-book fa-1x" id="<%=id%>" title="Standardschreiben erstellen"></i>')({id: item.id})
           }
         },
         'serverdruck-info': {
@@ -84,7 +84,7 @@
 
       const computeActionsForDocument = function (doc) {
         const res = [];
-        
+
         if (doc.removable)
           res.push(availableActions['checkbox'])
 
@@ -145,7 +145,7 @@
           })
         }
       });
-      
+
       const tree = [];
       if (subtree1.length) {
         tree.push({
@@ -164,15 +164,17 @@
       }
       return tree;
     }
-    
+
     const initTree = function (akte) {
       const tree = $('#tree').ebtree(prepareAkteForTree(akte));
-      $('#btnOpenAll').button().on('click', function () {
-        tree.collapseAll(false)
-      });
-      $('#btnCloseAll').button().on('click', function () {
-        tree.collapseAll(true)
-      });
+      $('#tree .fa-info-circle').on('click', function (evt) {
+        const item = tree.itemById(evt.target.id);
+        actions.dlgShowDocumentInfo(item.data.crypteddocid);
+      })
+      $('#tree .fa-book').on('click', function (evt) {
+        const item = tree.itemById(evt.target.id);
+        actions.dlgCreateStandardschreiben(item.data.crypteddocid);
+      })
       return tree;
     }
 
@@ -189,8 +191,8 @@
             name: doc.name
           })
 
-          const a = _.template('<i class="fa fa-info-circle fa-1x" title="Informationen zu Dokument" onclick=actions.dlgShowDocumentInfo(\'<%=id%>\')></i>')({id: doc.crypteddocid});
-          const b = !doc['doclink'] ? '' : _.template('<i class="fa fa-book fa-1x" title="Standardschreiben erstellen" onclick=actions.dlgCreateStandardschreiben(\'<%=id%>\')></i>')({id: doc.crypteddocid});
+          const a = _.template('<i class="fa fa-info-circle fa-1x" id="<%=id%>" title="Informationen zu Dokument" ></i>')({id: doc.crypteddocid});
+          const b = !doc['doclink'] ? '' : _.template('<i class="fa fa-book fa-1x" id="<%=id%>" title="Standardschreiben erstellen"></i>')({id: doc.crypteddocid});
           const c = renderDeliveryStatus(doc['delivery-status']);
           return link + a + b + c;
         }
@@ -216,7 +218,15 @@
         rowData.disabled = !d.removable;
         return rowData
       });
-      return $('#grid').ebtable(opts, data)
+      const grid = $('#grid').ebtable(opts, data)
+      $('#grid .fa-info-circle').on('click', function (evt) {
+        actions.dlgShowDocumentInfo(evt.target.id);
+      })
+      $('#grid .fa-book').on('click', function (evt) {
+        actions.dlgCreateStandardschreiben(evt.target.id);
+      })
+      return grid;
+
     }
 
     const init = function () {
@@ -233,7 +243,7 @@
       $("#tabs").tabs({
         beforeActivate: function (evt, ui) {
           const selection = getSelectedDocuments($(ui.oldPanel).prop('id') === 'tab-grid' ? 'grid' : 'tree');
-          return !selection.length || $.confirm('Warnung', 'Sie haben Dokumente selektiert. Wirklich Ansicht wechseln?');
+          return !selection.length || confirm('Warnung. Sie haben Dokumente selektiert. Wirklich Ansicht wechseln?');
         },
         activate: function (evt, ui) {
           activePanel = $(ui.newPanel).prop('id') === 'tab-grid' ? 'grid' : 'tree'

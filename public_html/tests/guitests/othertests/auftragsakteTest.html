@@ -8,6 +8,7 @@
       body { background:#FAFAF0; margin: 5px 5px 5px 5px; }
       * {font-family: arial; color: black; font-size: 12px; }
       .ebtable i { padding: 1px 4px 1px 4px;  }
+      #tab-tree, #tab-grid { padding: 4px 4px 4px 4px;  }
 
     </style>
     <link rel="stylesheet" href="/vendor/font-awesome-4.7.0/css/font-awesome.min.css">
@@ -43,9 +44,11 @@
 
     <script>
 
-    $(document).ready(function () {
-      $('#akte').auftragsakte(akte1)
-    });
+      const akte = akte1;
+     
+      $(document).ready(function () {
+        $('#akte').auftragsakte(akte1)
+      });
     </script>
   </head>
   <body>

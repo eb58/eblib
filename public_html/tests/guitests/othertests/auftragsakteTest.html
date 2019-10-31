@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test2 for ebtree </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body { background:#FAFAF0; margin: 5px 5px 5px 5px; }
+      * {font-family: arial; color: black; font-size: 12px; }
+      .ebtable i { padding: 1px 4px 1px 4px;  }
+
+    </style>
+    <link rel="stylesheet" href="/vendor/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.min.css">
+    <link rel="stylesheet" href="/css/ebtree.css">
+    <link rel="stylesheet" href="/css/ebtable.css">
+
+    <script src="/data/akte/akte1.js"></script>
+    <script src="/data/akte/akte2.js"></script>
+    <script src="/data/akte/akte3.js"></script>
+    <script src="/data/ddlistValues.js"></script>
+
+    <script src="/vendor/underscore-1.8.3/underscore-1.8.3.min.js"></script>
+    <script src="/vendor/jQuery-1.11.3/jquery-1.11.3.min.js"></script>
+    <script src="/vendor/jQueryUI-1.12.0/jquery-ui.min.js"></script>
+    <script src='/vendor/moment.min.js'></script>
+
+    <script src="/javascript/polyfill.js"></script>
+    <script src='/javascript/jquery-ui-datepicker-de.js'></script>
+    <script src='/javascript/jquery-ismed.js'></script>
+
+    <script src='/javascript/eblib/ebutils.js'></script>
+    <script src='/javascript/eblib/ebbind.js'></script>
+    <script src='/javascript/eblib/ebdropdown.js'></script>  
+    <script src='/javascript/eblib/ebselect.js'></script>  
+    <script src='/javascript/eblib/ebtextarea.js'></script>  
+    <script src="/javascript/eblib/ebtree.js"></script>
+    <script src="/javascript/eblib/mx.js"></script>
+    <script src="/javascript/eblib/ebtable.js"></script>
+
+    <script src="/javascript/dialogs/dlgDocAttrInfoEdit.js"></script>
+    <script src="/javascript/components/auftragsakte.js"></script>
+
+    <script>
+
+    $(document).ready(function () {
+      $('#akte').auftragsakte(akte1)
+    });
+    </script>
+  </head>
+  <body>
+    <div id="akte">
+  </body>
+</html>

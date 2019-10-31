@@ -3,13 +3,12 @@
   "use strict";
   $.fn.ebtree = function (treeItems, opts) {
     const treeid = this[0].id;
-    var self = this;
+    const self = this;
 
-    var defopts = {
+    const defopts = {
       onClickItem: function (evt) {
         const item = utilsTree.itemById(evt.target.id);
         console.log('onClickItem', item);
-
       },
       onCheckItem: function (evt) {
         const item = utilsTree.itemById(evt.target.id)
@@ -22,12 +21,12 @@
       },
     };
 
-    var myopts = _.extend({}, defopts, opts || {});
+    const myopts = _.extend({}, defopts, opts || {});
 
     const internals = {
       delItem: function (treeItems, itemId) {
         if (treeItems) {
-          var idx = _.findIndex(treeItems, function (o) {
+          const idx = _.findIndex(treeItems, function (o) {
             return o.id === itemId;
           });
           if (idx >= 0) {
@@ -43,11 +42,11 @@
       itemById: function (treeItems, id) {
         if (!treeItems)
           return null;
-        for (var i = 0, len = treeItems.length; i < len; i++) {
+        for (let i = 0, len = treeItems.length; i < len; i++) {
           if (treeItems[i]) {
             if (treeItems[i].id === id)
               return treeItems[i];
-            var x = internals.itemById(treeItems[i].subitems, id);
+            const x = internals.itemById(treeItems[i].subitems, id);
             if (x)
               return x;
           }
@@ -57,7 +56,7 @@
       traverse: function (treeItems, f, g) {
         if (!treeItems)
           return;
-        for (var i = 0, len = treeItems.length; i < len; i++) {
+        for (let i = 0, len = treeItems.length; i < len; i++) {
           if (treeItems[i]) {
             f && f(treeItems[i])
             internals.traverse(treeItems[i].subitems, f, g);
@@ -67,7 +66,7 @@
       },
     }
 
-    var utils = {
+    const utils = {
       gencount: 0,
       generateId: function () {
         return 'itemid-' + Math.floor(Math.random() * 10000) + '-' + new Date().getTime() + '-' + this.gencount++;
@@ -78,7 +77,7 @@
       },
       createSubitem: function (item) {
         item.subitems = item.subitems || [];
-        var newItem = {};
+        const newItem = {};
         newItem.parent = item;
         return utils.initItem(newItem);
       },
@@ -90,7 +89,7 @@
       },
     };
 
-    var utilsTree = {
+    const utilsTree = {
       itemById: function (id) {
         return internals.itemById(treeItems, id);
       },
@@ -131,7 +130,7 @@
       }
     };
 
-    var renderTree = {
+    const renderTree = {
       renderListItem: function (item) {
         item.subitems.forEach(function (subitem) {
           subitem.parent = item;
@@ -141,16 +140,16 @@
           return acc += action.renderer(item)
         }, '') : '';
         const arrow = item.subitems && item.subitems.length ?
-                '<i class="fa fa-caret-' + (item.isCollapsed ? 'right' : 'down') + ' fa-1x" id="caret-' + item.id + '"/>' :
-                '<span>&nbsp;</span>';
-        var rsubitems = renderTree.renderItems(item.subitems, item.isCollapsed);
+                '<i style="vertical-align:top" class="fa fa-caret-' + (item.isCollapsed ? 'right' : 'down') + ' fa-1x" id="caret-' + item.id + '"/>' :
+                '<span></span>';
+        const rsubitems = renderTree.renderItems(item.subitems, item.isCollapsed);
         return _.template('\
-              <li id=<%=id%> >\n\
-                  <%=arrow%>\n\
-                  <%=actions%>\n\
-                  <%=label%>\n\
-                  <%=subitems%>\n\
-              </li>\n\
+              <li id=<%=id%> >\
+                  <%=arrow%>\
+                  <%=actions%>\
+                  <%=label%>\
+                  <%=subitems%>\
+              </li>\
             ')({
           id: item.id,
           arrow: arrow,
@@ -163,25 +162,30 @@
         return items && items.length ? '<ul style="display:' + (bCollapsed ? 'none' : 'block') + '">\n' + items.reduce(function (acc, item) {
           utils.initItem(item);
           item.init && item.init();
-          var ritem = renderTree.renderListItem(item);
+          const ritem = renderTree.renderListItem(item);
           return acc + ritem;
         }, '') + '\n</ul>' : '';
       }
     }
 
-    var redraw = function () {
+    const redraw = function () {
       $('#' + treeid + ' .ebtree').detach();
       const x = '\
-              <div class="ebtree">' +
+              <div class="ebtree">\
+                 <span style="float:right">\n\
+                      <i class="fa fa-plus-circle fa-2x" title="Alle Ordner öffnen"></i>\n\
+                      <i class="fa fa-minus-circle fa-2x" title="Alle Ordner schließen"></i>\n\
+                </span>\n\
+                 <div>' +
               renderTree.renderItems(treeItems, false) +
-              '</div>'
+              '</div>\n\
+              </div>'
       $('#' + treeid).html(x);
     };
 
-    var init = function () {
+    const init = function () {
       redraw();
       // init actions
-      // $('#' + treeid).off().on('click', myopts.onClickItem)
       $('#' + treeid + ' input[type=checkbox]').each(function (idx, elem) {
         $(elem).on('click', function (evt) {
           evt.stopPropagation();
@@ -192,7 +196,8 @@
         })
       })
       $('#' + treeid + ' .fa-caret-down, #' + treeid + ' .fa-caret-right').off().on('click', function (evt) {
-        var item = utilsTree.itemById(evt.target.parentElement.id);
+        evt.stopPropagation();
+        const item = utilsTree.itemById(evt.target.parentElement.id);
         item.isCollapsed = !item.isCollapsed;
         if (item.isCollapsed) {
           $('#' + item.id + '>ul').hide()
@@ -201,18 +206,14 @@
           $('#' + item.id + '>ul').show()
           $('#caret-' + item.id).removeClass('fa-caret-right').addClass('fa-caret-down');
         }
-        evt.stopPropagation();
       })
-      // init actions for 
-      utilsTree.traverse(function (item) {
-        item.actions && item.actions.forEach(function (action) {
-          console.log('Action handler registration', item, action);
-          $('#' + action.prefix + '-' + item.id).on('click', function (evt) {
-            action.action && action.action(item)
-            evt.stopPropagation();
-          })
-        })
-      })
+      $('#' + treeid + ' .fa-plus-circle').on('click', function () {
+        utilsTree.collapseAll(false)
+      });
+      $('#' + treeid + ' .fa-minus-circle').on('click', function () {
+        utilsTree.collapseAll(true)
+      });
+
       return self;
     }
 
@@ -220,8 +221,7 @@
 
     this.id = treeid;
 
-
-    var api = {
+    const api = {
       getSelectedItems: utilsTree.getSelectedItems,
       collapseAll: utilsTree.collapseAll,
       traverse: utilsTree.traverse,
@@ -229,7 +229,6 @@
       setFocus: utilsTree.setFocus,
       createSubitem: utils.createSubitem,
       init: init,
-      availableActions: availableActions,
     };
     return _.extend(this, api);
   };

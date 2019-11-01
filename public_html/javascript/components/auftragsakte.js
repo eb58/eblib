@@ -247,12 +247,17 @@
         });
       }
       const setSelectedDocuments = function (panel, selection) {
+        const checkedCrypteddocids = _.pluck(selection, 'crypteddocid')
         if (panel === 'tab-tree') {
-
+          tree.traverse(function (item) {
+            if (item.data) {
+              const checked = checkedCrypteddocids.includes(item.data.crypteddocid)
+              $('#' + item.id + ' input[type=checkbox]').prop('checked', checked)
+            }
+          })
         } else {
           grid.setSelectedRows(function (r) {
-            const crypteddocids = _.pluck(selection, 'crypteddocid')
-            return crypteddocids.includes(r[0]['crypted-doc-id']);
+            return checkedCrypteddocids.includes(r[0]['crypted-doc-id']);
           });
         }
       }

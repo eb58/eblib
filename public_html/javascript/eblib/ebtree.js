@@ -127,6 +127,11 @@
         }).map(function (item) {
           return item.data;
         })
+      },
+      setSelectedItems: function (selection) {
+        $('#' + treeid + ' input[type=checkbox]').each(function (idx, elem) {
+          console.log(elem)
+        })
       }
     };
 
@@ -185,7 +190,9 @@
 
     const init = function () {
       redraw();
+
       // init actions
+      myopts.initActions()
       $('#' + treeid + ' input[type=checkbox]').each(function (idx, elem) {
         $(elem).on('click', function (evt) {
           evt.stopPropagation();
@@ -195,6 +202,7 @@
           utils.selectSubitems(clickedItem, checked)
         })
       })
+      
       $('#' + treeid + ' .fa-caret-down, #' + treeid + ' .fa-caret-right').off().on('click', function (evt) {
         evt.stopPropagation();
         const item = utilsTree.itemById(evt.target.parentElement.id);
@@ -207,6 +215,7 @@
           $('#caret-' + item.id).removeClass('fa-caret-right').addClass('fa-caret-down');
         }
       })
+      
       $('#' + treeid + ' .fa-folder-open').on('click', function () {
         utilsTree.collapseAll(false)
       });
@@ -214,6 +223,10 @@
         utilsTree.collapseAll(true)
       });
 
+      // styling
+      $('.fa-folder-open, .fa-folder', self).css({
+        color: 'blue'
+      })
       return self;
     }
 
@@ -223,6 +236,7 @@
 
     const api = {
       getSelectedItems: utilsTree.getSelectedItems,
+      setSelectedItems: utilsTree.setSelectedItems,
       collapseAll: utilsTree.collapseAll,
       traverse: utilsTree.traverse,
       itemById: utilsTree.itemById,

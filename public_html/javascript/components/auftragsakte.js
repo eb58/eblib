@@ -6,7 +6,6 @@
     const self = this;
     const defopts = {};
     const myopts = $.extend({}, defopts, opts);
-
     const actions = {
       dlgShowDocumentInfo: function (doc) {
         doc = _.isObject(doc) ? doc : akte.find(o => o['crypted-doc-id'] === doc).document
@@ -23,7 +22,6 @@
         console.log('dlgCreateStandardschreiben', doc)
       },
     };
-
     const renderDeliveryStatus = function (deliveryStatus) {
       if (deliveryStatus === 1 || deliveryStatus === 2) {
         const map1 = {1: 'angefordert', 2: 'angesto\u00dfen'};
@@ -41,7 +39,6 @@
       const mapObjectToArray = function (obj, f) {
         return Object.keys(obj).map(key => f ? f(key, obj[key]) : obj[key]);
       };
-
       const availableActions = {
         'checkbox': {
           renderer: function (item) {
@@ -81,10 +78,8 @@
           },
         },
       };
-
       const computeActionsForDocument = function (doc) {
         const res = [];
-
         if (doc.removable)
           res.push(availableActions['checkbox'])
 
@@ -145,7 +140,6 @@
           })
         }
       });
-
       const tree = [];
       if (subtree1.length) {
         tree.push({
@@ -166,19 +160,36 @@
     }
 
     const initTree = function (akte) {
-      const tree = $('#tree').ebtree(prepareAkteForTree(akte));
-      $('#tree .fa-info-circle').on('click', function (evt) {
-        const item = tree.itemById(evt.target.id);
-        actions.dlgShowDocumentInfo(item.data.crypteddocid);
-      })
-      $('#tree .fa-book').on('click', function (evt) {
-        const item = tree.itemById(evt.target.id);
-        actions.dlgCreateStandardschreiben(item.data.crypteddocid);
-      })
+
+      const initActions = function () {
+        $('#tree .fa-info-circle').on('click', function (evt) {
+          const item = tree.itemById(evt.target.id);
+          actions.dlgShowDocumentInfo(item.data.crypteddocid);
+        })
+        $('#tree .fa-book').on('click', function (evt) {
+          const item = tree.itemById(evt.target.id);
+          actions.dlgCreateStandardschreiben(item.data.crypteddocid);
+        })
+      }
+      const treeopts = {
+        initActions: initActions
+
+      };
+      const tree = $('#tree').ebtree(prepareAkteForTree(akte), treeopts)
+
       return tree;
     }
 
     const initGrid = function (akte) {
+
+      const  afterRedraw = function () {
+        $('#grid .fa-info-circle').on('click', function (evt) {
+          actions.dlgShowDocumentInfo(evt.target.id);
+        })
+        $('#grid .fa-book').on('click', function (evt) {
+          actions.dlgCreateStandardschreiben(evt.target.id);
+        })
+      }
 
       const renderer = {
         quelle: function (data) {
@@ -209,8 +220,11 @@
           {name: "Lasche"},
           {name: "Quelle", render: renderer.quelle},
         ],
+        rowsPerPageSelectValues: [10, 15, 25, 50],
+        rowsPerPage: 10,
         selectionCol: true,
         flags: {colsResizable: true},
+        afterRedraw: afterRedraw,
       };
       const data = akte.map(function (o) {
         const d = o.document;
@@ -219,37 +233,40 @@
         return rowData
       });
       const grid = $('#grid').ebtable(opts, data)
-      $('#grid .fa-info-circle').on('click', function (evt) {
-        actions.dlgShowDocumentInfo(evt.target.id);
-      })
-      $('#grid .fa-book').on('click', function (evt) {
-        actions.dlgCreateStandardschreiben(evt.target.id);
-      })
-      return grid;
 
+      return grid;
     }
 
     const init = function () {
       const grid = initGrid(akte);
       const tree = initTree(akte);
       let activePanel = 'grid';
-
       const getSelectedDocuments = function (panel) {
-        return panel === 'tree' ? tree.getSelectedItems() : grid.getSelectedRows().map(function (sel) {
+        return panel === 'tab-tree' ? tree.getSelectedItems() : grid.getSelectedRows().map(function (sel) {
           return sel[0].document
         });
+      }
+      const setSelectedDocuments = function (panel, selection) {
+        if (panel === 'tab-tree') {
+
+        } else {
+          grid.setSelectedRows(function (r) {
+            const crypteddocids = _.pluck(selection, 'crypteddocid')
+            return crypteddocids.includes(r[0]['crypted-doc-id']);
+          });
+        }
       }
 
       $("#tabs").tabs({
         beforeActivate: function (evt, ui) {
-          const selection = getSelectedDocuments($(ui.oldPanel).prop('id') === 'tab-grid' ? 'grid' : 'tree');
-          return !selection.length || confirm('Warnung. Sie haben Dokumente selektiert. Wirklich Ansicht wechseln?');
+          const oldPanel = $(ui.oldPanel).prop('id');
+          const newPanel = $(ui.newPanel).prop('id');
+          const selection = getSelectedDocuments(oldPanel);
+          // selection.length || confirm('Warnung. Sie haben Dokumente selektiert. Wirklich Ansicht wechseln?');
+          setSelectedDocuments(newPanel, selection);
+          return true
         },
-        activate: function (evt, ui) {
-          activePanel = $(ui.newPanel).prop('id') === 'tab-grid' ? 'grid' : 'tree'
-        }
       });
-
       $('#btnDelete').button().on('click', function () {
         const selection = getSelectedDocuments(activePanel)
         console.log('Delete', selection);
@@ -258,7 +275,6 @@
         const selection = getSelectedDocuments(activePanel)
         console.log(selection);
       });
-
     }
 
     this.id = id;

@@ -173,8 +173,8 @@
       const x = '\
               <div class="ebtree">\
                  <span style="float:right">\n\
-                      <i class="fa fa-plus-circle fa-2x" title="Alle Ordner öffnen"></i>\n\
-                      <i class="fa fa-minus-circle fa-2x" title="Alle Ordner schließen"></i>\n\
+                      <i class="fa fa-folder-open fa-2x" title="Alle Ordner öffnen"></i>\n\
+                      <i class="fa fa-folder fa-2x" title="Alle Ordner schließen"></i>\n\
                 </span>\n\
                  <div>' +
               renderTree.renderItems(treeItems, false) +
@@ -207,10 +207,10 @@
           $('#caret-' + item.id).removeClass('fa-caret-right').addClass('fa-caret-down');
         }
       })
-      $('#' + treeid + ' .fa-plus-circle').on('click', function () {
+      $('#' + treeid + ' .fa-folder-open').on('click', function () {
         utilsTree.collapseAll(false)
       });
-      $('#' + treeid + ' .fa-minus-circle').on('click', function () {
+      $('#' + treeid + ' .fa-folder').on('click', function () {
         utilsTree.collapseAll(true)
       });
 

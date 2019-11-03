@@ -241,11 +241,13 @@
       const grid = initGrid(akte);
       const tree = initTree(akte);
       let activePanel = 'grid';
+
       const getSelectedDocuments = function (panel) {
         return panel === 'tab-tree' ? tree.getSelectedItems() : grid.getSelectedRows().map(function (sel) {
           return sel[0].document
         });
       }
+
       const setSelectedDocuments = function (panel, selection) {
         const checkedCrypteddocids = _.pluck(selection, 'crypteddocid')
         if (panel === 'tab-tree') {
@@ -280,6 +282,10 @@
         const selection = getSelectedDocuments(activePanel)
         console.log(selection);
       });
+      // styling
+      $('#tab-tree, #tab-grid', self).css({
+        padding: '3px'
+      })
     }
 
     this.id = id;

@@ -4,7 +4,12 @@
   $.fn.auftragsakte = function (akte, opts) {
     const id = this[0].id;
     const self = this;
-    const defopts = {};
+    const valueLists = opener ? opener.top.valueLists: {};
+
+    const defopts = {
+      doctypes: valueLists.doctypes || [],
+      doctabs:  valueLists.doctabs || [],
+    };
     const myopts = $.extend({}, defopts, opts);
     const actions = {
       dlgShowDocumentInfo: function (doc) {
@@ -12,10 +17,10 @@
         const  docInfoOpts = {
           readonly: false,
           keywords: doc.keywords || [],
-          doctypes: doctypes,
-          doctabs: doctabs
+          doctypes: myopts.doctypes,
+          doctabs: myopts.doctabs
         };
-        dlgDocAttrInfoEdit(doc, docInfoOpts);
+        dlgDocAttrInfoEdit(doc, docInfoOpts, ajaxFunctions.saveDocumentAttributes);
       },
       dlgCreateStandardschreiben: function (doc) {
         doc = _.isObject(doc) ? doc : akte.find(o => o['crypted-doc-id'] === doc).document
@@ -151,7 +156,7 @@
       }
       if (subtree2.length) {
         tree.push({
-          label: 'Dokumente aus früheren Aufträgen',
+          label: 'Dokumente aus fr\u00fcheren Auftr\u00e4gen',
           actions: [availableActions['checkbox']],
           subitems: subtree2
         })
@@ -202,8 +207,11 @@
             name: doc.name
           })
 
+          // aus altem Code:  	<c:when test="${Row['RepId'] > '0' && deliveryStatus != '0' && deliveryStatus != '1'}">  TODO!!!! wofür steht RepId
+          const renderStandardschreibenErstellen = doc['delivery-status-id'] !== 0 &&  doc['delivery-status-id'] !== 1
+
           const a = _.template('<i class="fa fa-info-circle fa-1x" id="<%=id%>" title="Informationen zu Dokument" ></i>')({id: doc.crypteddocid});
-          const b = !doc['doclink'] ? '' : _.template('<i class="fa fa-book fa-1x" id="<%=id%>" title="Standardschreiben erstellen"></i>')({id: doc.crypteddocid});
+          const b = !renderStandardschreibenErstellen ? '' : _.template('<i class="fa fa-book fa-1x" id="<%=id%>" title="Standardschreiben erstellen"></i>')({id: doc.crypteddocid});
           const c = renderDeliveryStatus(doc['delivery-status']);
           return link + a + b + c;
         }
@@ -222,7 +230,7 @@
         ],
         rowsPerPageSelectValues: [10, 15, 25, 50],
         rowsPerPage: 10,
-        selectionCol: true,
+        selectionCol: true,          
         flags: {colsResizable: true},
         afterRedraw: afterRedraw,
       };

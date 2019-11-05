@@ -1,4 +1,4 @@
-/* global _,jQuery,mx *//* jshint multistr: true */ /* jshint expr: true */
+/* destId, global _,jQuery,mx *//* jshint multistr: true */ /* jshint expr: true */
 (function ($) {
   "use strict";
   var doctitle = $(document).prop('title').replace(/ /g, '');
@@ -45,7 +45,7 @@
         var stateGeneral = {
           rowsPerPage: myopts.rowsPerPage,
           colorderByName: myopts.colorder.map(function (idx) {
-            return myopts.columns[idx].name;
+            return myopts.columns[idx] ? myopts.columns[idx].name : null;
           }),
           invisibleColnames: myopts.columns.reduce(function (acc, o) {
             if (o.invisible && !o.technical)
@@ -70,7 +70,7 @@
           util.setDefaultWidthForColumns();
           return;
         }
-        myopts.rowsPerPage = state.rowsPerPage;
+        myopts.rowsPerPage = typeof opts.rowsPerPage == 'undefined' ? state.rowsPerPage : myopts.rowsPerPage;
         myopts.colorder = [];
         state.colorderByName.forEach(function (colname) {
           var n = util.colIdxFromName(colname);
@@ -236,6 +236,11 @@
           util.log('Row ' + (b ? 'selected!' : 'unselected!'), rowNr);
           $(selgridid + '#check' + rowNr).prop('checked', b);
         }
+        if (b && myopts.selectionCol && myopts.selectionCol.destCol 
+          && $(selgridid + '#destRow'+rowNr).prop('checked') && typeof(destId) != 'undefined') {
+          $(selgridid + '#destRow'+rowNr).prop('checked', false);
+          destId = null;
+        }
         myopts.selectionCol && myopts.selectionCol.onSelection && myopts.selectionCol.onSelection(rowNr, row, origData, b);
         $(selgridid + ' #ctrlInfo').html(ctrlInfo());
       },
@@ -251,6 +256,8 @@
             tblData.forEach(function (row, rowNr) {
               selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
             });
+            if (typeof(destId) != 'undefined') 
+              destId = null;
           } else {
             selectionFcts.deselectAllRows();
           }
@@ -265,6 +272,15 @@
           selectionFcts.selectRow(rowNr, tblData[rowNr], checked);
           $(selgridid + '#checkAll').prop('checked', false);
         }
+      },
+      selectDestRow: function selectDestRow(event) { // select row
+        if (!myopts.selectionCol || !myopts.selectionCol.destCol)
+          return;
+        var rowNr = event.target.id.replace('destRow', '');
+        var checked = $(event.target).prop('checked');
+        myopts.selectionCol.destCol(rowNr, tblData[rowNr], checked);
+        selectionFcts.selectRow(rowNr, tblData[rowNr], false);
+        $(selgridid + '#checkAll').prop('checked', false);
       },
       deselectAllRows: function deselectAllRows() {
         if (!myopts.selectionCol)
@@ -355,6 +371,14 @@
           if (_(_(coldef.sortmaster).pluck('col')).indexOf(colidx) < 0) {
             coldefs.push({col: colidx, sortformat: coldef.sortformat, sortorder: coldef.sortorder});
           }
+          if (myopts.sortcolname != 'Name/Auftrag') {
+            var nameidx = util.colIdxFromName('Name/Auftrag');
+            if (nameidx > -1)
+              coldefs.push({col: nameidx});
+          }
+          var wididx = util.colIdxFromName('WorkorderId');
+          if (wididx > -1)
+            coldefs.push({col: wididx});
           coldefs.forEach(function (o) {
             o.sortorder = myopts.columns[o.col].sortorder || myopts.sortdirection || 'desc';
           });
@@ -429,20 +453,22 @@
         ctrls: true,
       },
       bodyHeight: Math.max(200, $(window).height() - 180),
-      bodyWidth: '', //Math.max(700, $(window).width() - 40),
-      rowsPerPageSelectValues: [10, 25, 50, 100],
-      rowsPerPage: 10,
+      bodyWidth: '', // Math.max(700, $(window).width() - 40),
+      rowsPerPageSelectValues: [15, 25, 50, 100],
+      rowsPerPage: 15,
       pageCur: 0,
       colorder: _.range(opts.columns.length), // [0,1,2,... ]
       selectionCol: false, // or true or  
       // { 
       //   singleSelection: true,                                 // default: false
+      //   selectAll: false,                                      // default: true
+      //   destCol: true (call selectDestRow()),                  // default: false - keine Zielspalte bei Admin Stammdaten-Dlgs
       //   selectOnRowClick: true,                                // default: false
       //   render : function(origData, row, checked){},           // default: null
       //   onStartSelection: function(rowNr, row, origData, b){}, // default: null
       //   onSelection: function(rowNr, row, origData, b){},      // default: null
       //   onSelectAll: function(){}                              // default: null
-      //   onSelectAll: function(){}                              // default: null
+      //   onUnSelectAll: function(){}                            // default: null
       // }
       
       saveState: stateUtil.saveState,
@@ -462,6 +488,13 @@
       opts.flags = _.extend(defopts.flags, opts.flags);
       if (opts.flags.colsResizable)
         opts.saveState = defopts.saveState;
+
+      if (opts.selectionCol === true ){
+        opts.selectionCol = { selectAll: true }
+      }
+      if (opts.selectionCol && opts.selectionCol.selectAll === undefined){
+        opts.selectionCol.selectAll = true;
+      }
       opts.saveState = typeof opts.saveState === 'boolean' ? stateUtil.saveState : opts.saveState;
     }
 
@@ -553,14 +586,24 @@
     }
     
     function arrangeColumnsButton() {
-      return myopts.flags.arrangeColumnsButton ? '<button id="arrangeColumnsButton"><span class="ui-icon ui-icon-arrow-2-e-w" title="' + util.translate('Spaltenbreite automatisch abpassen') + '"></button>' : '';
+      return myopts.flags.arrangeColumnsButton ? '<button id="arrangeColumnsButton"><span class="ui-icon ui-icon-arrow-2-e-w" title="' + util.translate('Spaltenbreite automatisch anpassen') + '"></button>' : '';
     }
     
     function tableHead() {
-      var res = myopts.selectionCol ? '<th class="selectCol"><input id="checkAll" type="checkbox"></th>' : '';
+      let res = '';
+      if (myopts.selectionCol) {
+        res += '<th class="selectCol">';
+        res += (myopts.selectionCol.selectAll ? '<input id="checkAll" type="checkbox">' : '') + '</th>'; 
+      }
+      res += myopts.selectionCol && myopts.selectionCol.destCol ? '<th class="selectCol"></th>' : '';
       for (var c = 0; c < myopts.columns.length; c++) {
         var coldef = myopts.columns[myopts.colorder[c]];
-        if (!coldef.invisible) {
+        if (!coldef) {
+          console.log('no coldef found: colorder idx=' + c + '; columns idx=' + myopts.colorder[c]);
+          continue;
+        }
+
+        if (!coldef.invisible ) {
           var t_inputfld = '<input type="text" id="<%=colid%>" value="<%=filter%> "title="<%=tooltip%>"/>';
           var t_selectfld = '<select id="<%=colid%>" value="<%=filter%>"><%=opts%></select>';
           var opts = (coldef.valuelist || []).reduce(function (acc, o) {
@@ -586,7 +629,7 @@
             fld: fld,
             thstyle: thstyle,
             tooltip: coldef.tooltip,
-            filtersvisible: (myopts.flags.filter ? '' : ' style="display:none"'),
+            filtersvisible: (myopts.flags.filter && !coldef.noFilter ) ? '' : ' style="display:none"',
           });
         }
       }
@@ -608,11 +651,13 @@
         if (gc && row.isGroupElement && !origData.groupsdata[tblData[r][gc.groupid]].isOpen)
           continue;
 
-        var cls = row.isGroupElement ? ' class="group"' : '';
-        cls = row.isGroupHeader ? ' class="groupheader"' : cls;
-        res += '<tr>';
         var checked = !!tblData[r].selected ? ' checked="checked" ' : '';
         var disabled = !!tblData[r].disabled ? ' disabled="disabled" ' : '';
+
+        var cls = row.isGroupElement ? ' class="group"' : '';
+        cls = row.isGroupHeader ? ' class="groupheader"' : cls;
+        cls = disabled ? ' class="disabled"' : cls;
+        res += '<tr>';
 
         if (myopts.selectionCol) {
           if (myopts.selectionCol.render) {
@@ -623,12 +668,16 @@
           } else if (!myopts.selectionCol.singleSelection) {
             res += '<td' + cls + '><input id="check' + r + '" type="checkbox"' + checked + disabled + '/></td>';
           }
+          if (myopts.selectionCol.destCol) {
+            checked = tblData[r][0] == destId ? ' checked="checked"' : ''
+            res += '<td' + cls + '><input name="destRow" id="destRow' + r + '" type="radio" class="destCol"' + checked + '/></td>';
+          }
         }
 
         var colorder = myopts.colorder;
         for (var c = 0; c < myopts.columns.length; c++) {
           var coldef = myopts.columns[colorder[c]];
-          if (!coldef.invisible) {
+          if (coldef && !coldef.invisible) {
             var xx = tblData[r][colorder[c]];
             var v = _.isNumber(xx) ? xx : (xx || '');
             var val = coldef.render ? coldef.render(v, row, r, origData) : v;
@@ -706,6 +755,7 @@
       myopts.selectionCol && myopts.selectionCol.selectOnRowClick && $(selgridid + '#data tr td:not(:first-child)').off().on('click', function (evt) {
         $(event.target).parent().find('input').trigger('click');
       });
+      myopts.selectionCol && myopts.selectionCol.destCol && $(selgridid + '#data .destCol').off().on('change', selectionFcts.selectDestRow);
       myopts.selectionCol && myopts.selectionCol.singleSelection && $(selgridid + '#checkAll').hide();
       myopts.afterRedraw && myopts.afterRedraw($(gridid));
     }
@@ -717,7 +767,7 @@
 
     function initHeaderActions() {
       $(selgridid + 'thead th').off().on('click', sortingFcts.sorting);
-      $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filteringFcts.filtering).on('click', ignoreSorting);
+      $(selgridid + 'thead input[type=text]').off().on('keypress', reloading).on('keyup', filteringFcts.filtering).on('input', filteringFcts.filtering).on('click', ignoreSorting);
       $(selgridid + 'thead select').off().on('change', filteringFcts.filtering).on('click', ignoreSorting);
       if (myopts.flags.colsResizable) {
         $(selgridid + '.ebtable').resizable({
@@ -777,10 +827,21 @@
               return col.technical || col.mandatory ? idx : util.colIdxFromName(colnames.shift());
             });
             myopts.saveState && myopts.saveState();
-            myopts.bodyWidth = Math.min(myopts.bodyWidth || $(window).width() - 20, $(window).width() - 20);
-            //var filters = self.getFilterValues();
+            if (myopts.onSaveColConfig) {
+              var visibleCols = [];
+              myopts.columns.map(function(o) {if (!o.mandatory && !o.invisible) visibleCols.push(o.dbcol);});
+              var config = {};
+              config['visibleCols'] = visibleCols;
+              config['colorder'] = myopts.colorder.join(); 
+              myopts.onSaveColConfig(JSON.stringify(config));
+            }
+            if (myopts.bodyWidth == undefined || myopts.bodyWidth =='')
+              myopts.bodyWidth = $(window).width() - 20;
+            else
+              myopts.bodyWidth = Math.min(myopts.bodyWidth, $(window).width() - 20);
+            
             redraw(pageCur, true);
-            //self.setFilterValues(filters);
+            util.setDefaultWidthForColumns();
           }
         };
         dlgConfig(dlgopts);
@@ -811,7 +872,6 @@
         myopts.clickOnRowHandler && myopts.clickOnRowHandler(rowData, $(this));
       });
       $(selgridid + '#data input[type=checkbox]', selgridid + '#data input[type=radio]').off().on('change', selectionFcts.selectRows);
-      //$(selgridid + '.ctrl').off().on('dblclick', util.setDefaultWidthForColumns);
       $(selgridid + '#arrangeColumnsButton').button().off().on('click',util.setDefaultWidthForColumns) ;
 
       initHeaderActions();

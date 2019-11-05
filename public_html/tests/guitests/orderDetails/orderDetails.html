@@ -1,342 +1,342 @@
 <!DOCTYPE html>
 <!-- orderDetails (<%=org.slf4j.MDC.get("Request")%>) -->
- 
+
 <html xmlns="http://www.w3.org/1999/xhtml" lang="de">
-    <head>
-        <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
-        <meta http-equiv='Content-Style-Type' content='text/css'/>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <meta http-equiv='Content-Style-Type' content='text/css'/>
 
-        <title>Auftrag</title>
+    <title>Auftrag</title>
 
-        <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
-        <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
-        <link rel='stylesheet' href='/css/ebselect.css'/>
-        <link rel='stylesheet' href='/css/ebtable.css'/>
-        <link rel='stylesheet' href='/css/eblib.css'/>
+    <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
+    <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+    <link rel='stylesheet' href='/css/ebselect.css'/>
+    <link rel='stylesheet' href='/css/ebtable.css'/>
+    <link rel='stylesheet' href='/css/eblib.css'/>
 
-        <style>
-            * { font-family:Arial; color: black; font-size: 12px;  }
-            input.red { color: red; width:50px;}
-            input.black { color: black; width:50px; }
-            ul.ui-menu { max-height: 300px; }
-            .ui-datepicker-trigger { border:none; background:none; }
-            #layout { width:100%; border-collapse: collapse; margin:5px 0px 5px 0px; background-color: #FEFEF9 }
-            #layout>tbody>tr>td{ border: 1px solid lightgrey; padding: 2px 2px; }
-            #layout>tbody>tr>td:nth-child(odd ) { width:15%; border-width: 1px 0px 1px 1px; }
-            #layout>tbody>tr>td:nth-child(even) { width:35%; border-width: 1px 1px 1px 0px; }
-            #layout>tbody>tr>td input{ padding:1px 3px 1px 3px; margin: 1px 1px 1px 1px; border-width: 1px; border-color:#cccccc }
-            #layout img.ui-datepicker-trigger{ margin: 1px 0px 0px 2px; vertical-align:middle; }
-            #layout input[type='checkbox']{ width:16px; margin:0px 15px 0px 0px; }
-            .date { width: 65px; }
-            .date-time { width: 100px; }
-        </style>
+    <style>
+      * { font-family:Arial; color: black; font-size: 12px;  }
+      input.red { color: red; width:50px;}
+      input.black { color: black; width:50px; }
+      ul.ui-menu { max-height: 300px; }
+      .ui-datepicker-trigger { border:none; background:none; }
+      #layout { width:100%; border-collapse: collapse; margin:5px 0px 5px 0px; background-color: #FEFEF9 }
+      #layout>tbody>tr>td{ border: 1px solid lightgrey; padding: 2px 2px; }
+      #layout>tbody>tr>td:nth-child(odd ) { width:15%; border-width: 1px 0px 1px 1px; }
+      #layout>tbody>tr>td:nth-child(even) { width:35%; border-width: 1px 1px 1px 0px; }
+      #layout>tbody>tr>td input{ padding:1px 3px 1px 3px; margin: 1px 1px 1px 1px; border-width: 1px; border-color:#cccccc }
+      #layout img.ui-datepicker-trigger{ margin: 1px 0px 0px 2px; vertical-align:middle; }
+      #layout input[type='checkbox']{ width:16px; margin:0px 15px 0px 0px; }
+      .date { width: 65px; }
+      .date-time { width: 100px; }
+    </style>
 
-        <script src='/vendor/Underscore-1.8.3/underscore-1.8.3.min.js'></script>
-        <script src='/vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
-        <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
-        <script src='/vendor/jQuery-contextmenu/jquery.contextMenu.min.js'></script>
-        <script src='/vendor/jquery.numeric.min.js'></script>
-        <script src='/vendor/moment.min.js'></script>
-        <script src='/vendor/vue-1.0.26/vue.js'></script>
-        <script src='/vendor/vue-1.0.26/vue-eb.js'></script>
+    <script src='/vendor/Underscore-1.8.3/underscore-1.8.3.min.js'></script>
+    <script src='/vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
+    <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
+    <script src='/vendor/jQuery-contextmenu/jquery.contextMenu.min.js'></script>
+    <script src='/vendor/jquery.numeric.min.js'></script>
+    <script src='/vendor/moment.min.js'></script>
+    <script src='/vendor/vue-1.0.26/vue.js'></script>
+    <script src='/vendor/vue-1.0.26/vue-eb.js'></script>
 
-        <script src='/javascript/polyfill.js'></script>
-        <script src='/javascript/jquery-ui-datepicker-de.js'></script>
-        <!--<script src='/javascript/jquery-ismed.js'></script>-->
-        <!--<script src='javascript/help_caller.js'></script>-->
-        <!--<script src='javascript/workspace.js'></script>-->
-        <!--<script src='data/icddata_1.js'></script>-->
+    <script src='/javascript/polyfill.js'></script>
+    <script src='/javascript/jquery-ui-datepicker-de.js'></script>
+    <!--<script src='/javascript/jquery-ismed.js'></script>-->
+    <!--<script src='javascript/help_caller.js'></script>-->
+    <!--<script src='javascript/workspace.js'></script>-->
+    <!--<script src='data/icddata_1.js'></script>-->
 
-        <script src='/javascript/eblib/ebutils.js'></script>
-        <script src='/javascript/eblib/ebviewer.js'></script>
-        <script src='/javascript/eblib/ebbind.js'></script>
-        <script src='/javascript/eblib/ebdropdown.js'></script>
-        <script src='/javascript/eblib/ebselect.js'></script>
-        <script src='/javascript/eblib/ebtextarea.js'></script>
-        <script src='/javascript/eblib/mx.js'></script>
-        <script src='/javascript/eblib/ebtable.js'></script>
-        <script src='/javascript/eblib/ebcombined.js'></script>
-        <script src='/javascript/icdUtils.js'></script>
+    <script src='/javascript/eblib/ebutils.js'></script>
+    <script src='/javascript/eblib/ebviewer.js'></script>
+    <script src='/javascript/eblib/ebbind.js'></script>
+    <script src='/javascript/eblib/ebdropdown.js'></script>
+    <script src='/javascript/eblib/ebselect.js'></script>
+    <script src='/javascript/eblib/ebtextarea.js'></script>
+    <script src='/javascript/eblib/mx.js'></script>
+    <script src='/javascript/eblib/ebtable.js'></script>
+    <script src='/javascript/eblib/ebcombined.js'></script>
+    <script src='/javascript/icdUtils.js'></script>
 
-        <script src='/javascript/components/componentBearbeitungszeiten.js'></script>
-        <script src='/javascript/components/componentLeistungserbringer.js'></script>
-        <script src="/javascript/dialogs/dlgServicerendererSearch.js"></script>
-        <script src="/javascript/dialogs/dlgServicerendererInfo.js"></script>
-        <script src='/javascript/dialogs/dlgIcdcode.js'></script>
-        <script src='/javascript/dialogs/dlgSelectExpert.js'></script>
-        <script src='/javascript/dialogs/dlgInsurantInfo.js'></script>
-        <script src='/javascript/dialogs/dlgBearbeitungsZeiten.js'></script>
-        <script src='/javascript/dialogs/dlgAnsprechpartner.js'></script>
-        <script src='/javascript/dialogs/dlgApplicant.js'></script>
-        <!--<script src='/javascript/ismed_script.js'></script>-->
-        <!--<script src='/javascript/prepareOrder.js'></script>-->
-        <!--<script src='/javascript/order_script.js'></script>-->
-        <!--<script src='/javascript/order_details.js'></script>-->
+    <script src='/javascript/components/componentBearbeitungszeiten.js'></script>
+    <script src='/javascript/components/componentLeistungserbringer.js'></script>
+    <script src="/javascript/dialogs/dlgServicerendererSearch.js"></script>
+    <script src="/javascript/dialogs/dlgServicerendererInfo.js"></script>
+    <script src='/javascript/dialogs/dlgIcdcode.js'></script>
+    <script src='/javascript/dialogs/dlgSelectExpert.js'></script>
+    <script src='/javascript/dialogs/dlgInsurantInfo.js'></script>
+    <script src='/javascript/dialogs/dlgBearbeitungsZeiten.js'></script>
+    <script src='/javascript/dialogs/dlgAnsprechpartner.js'></script>
+    <script src='/javascript/dialogs/dlgApplicant.js'></script>
+    <!--<script src='/javascript/ismed_script.js'></script>-->
+    <!--<script src='/javascript/prepareOrder.js'></script>-->
+    <!--<script src='/javascript/order_script.js'></script>-->
+    <!--<script src='/javascript/order_details.js'></script>-->
 
-        <script src='/data/order/auftrag3.js'></script>
-        <script src='/data/order/valuelists.js'></script>
-        <script src='/data/sevicerenderersData.js'></script>
-        <script src='/javascript/jsp-specific/orderDetails.js'></script>
+    <script src='/data/order/auftrag3.js'></script>
+    <script src='/data/order/valuelists.js'></script>
+    <script src='/data/sevicerenderersData.js'></script>
+    <script src='/javascript/jsp-specific/orderDetails.js'></script>
 
 
-    </head>
-    <body>
-        <div id='app'>
-            <div>
-                Readonly<input type='checkbox' v-model='readonly' id='cbReadonly'/>
-                <button @click='saveWorkorder'>Test Speichern</button>
-            </div>
-            <hr/>
+  </head>
+  <body>
+    <div id='app'>
+      <div>
+        Readonly<input type='checkbox' v-model='readonly' id='cbReadonly'/>
+        <button @click='saveWorkorder'>Test Speichern</button>
+      </div>
+      <hr/>
 
-            <table id='layout'>
-                <!-- ##########################################################################-->
-                <tr><td class='subheading' colspan='4'>Eigenschaften</td></tr>
-                <!-- ##########################################################################-->
-                <tr>
-                    <td>Kennzeichen</td>
-                    <td>
-                        <span>
-                            <label for='isEilauftrag'>Eilauftrag</label>
-                            <input type='checkbox' id='isEilauftrag' v-model='auftrag["is-priority"]'/>
-                        </span>
-                        <span>
-                            <label for='isPRGKZ'>PRGRZ</label>
-                            <input type='checkbox' id='isPRGKZ' v-model='auftrag["is-prg"]'/>
-                        </span>
-                        <span>
-                            <label for='isBTHG'>BTHG</label>
-                            <input type='checkbox' id='isBTHG' v-model='auftrag["is-bthg"]' @click='auftrag["is-bthg-plus"]=false'/>
-                        </span>
-                        <span v-if='auftrag["is-bthg"]'>
-                            <label for='isBTHGPlus'>BTHG+</label>
-                            <input type='checkbox' id='isBTHGPlus' v-model='auftrag["is-bthg-plus"]'/>
-                        </span>
-                        <span>
-                            <label for='isSpezialfall'>Spezialfall</label>
-                            <input type='checkbox' id='isSpezialfall' v-model='auftrag["is-special-case"]'/>
-                        </span>
-                    </td>
-                    <td>Kürzel</td>
-                    <td><div id='kuerzel'></div></td>
-                </tr>
-                <tr>
-                    <td>Frist</td>
-                    <td>
-                        <input type='text' v-model='fristInDays' disabled v-bind:class='fristInDays<=0?"red":"black"' class='readonly' />
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["deadline-date"]' disabled hidden />
-                    </td>
-                    <td v-if='!readonly ||auftrag["deadline-at-agency-date"]'>Fristablauf bei Kasse</td>
-                    <td v-if='!readonly || auftrag["deadline-at-agency-date"] !== null'>
-                        <input type='text' v-model='fristAblaufBeiKasseInDays' disabled v-bind:class='fristAblaufBeiKasseInDays<=0?"red":"black"'  class='readonly' />
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["deadline-at-agency-date"]' disabled hidden />
-                    </td>
-                </tr>
-                <tr v-if="auftrag['reference-id']>0 || !readonly">
-                    <td>Letzte Änderung</td>
-                    <td><input type='text' v-model='auftrag["last-modification-date"]' disabled class="date-time readonly"/></td>
-                    <td>Referenzierte Aufträge</td>
-                    <td>
-                        <a href="#" onclick="dlgs.showRefOrder('showReference',{{auftrag['reference-id']}})">{{ auftrag['reference-id'] }}</a>
-                        <i v-if='!readonly' onclick="dlg.searchWorkorder()" class="fa fa-search fa-2x" title='Ehemaligen Auftrag suchen'></i>
-                    </td>
-                </tr>
+      <table id='layout'>
+        <!-- ##########################################################################-->
+        <tr><td class='subheading' colspan='4'>Eigenschaften</td></tr>
+        <!-- ##########################################################################-->
+        <tr>
+          <td>Kennzeichen</td>
+          <td>
+            <span>
+              <label for='isEilauftrag'>Eilauftrag</label>
+              <input type='checkbox' id='isEilauftrag' v-model='auftrag["is-priority"]'/>
+            </span>
+            <span>
+              <label for='isPRGKZ'>PRGRZ</label>
+              <input type='checkbox' id='isPRGKZ' v-model='auftrag["is-prg"]'/>
+            </span>
+            <span>
+              <label for='isBTHG'>BTHG</label>
+              <input type='checkbox' id='isBTHG' v-model='auftrag["is-bthg"]' @click='auftrag["is-bthg-plus"]=false'/>
+            </span>
+            <span v-if='auftrag["is-bthg"]'>
+              <label for='isBTHGPlus'>BTHG+</label>
+              <input type='checkbox' id='isBTHGPlus' v-model='auftrag["is-bthg-plus"]'/>
+            </span>
+            <span>
+              <label for='isSpezialfall'>Spezialfall</label>
+              <input type='checkbox' id='isSpezialfall' v-model='auftrag["is-special-case"]'/>
+            </span>
+          </td>
+          <td>Kürzel</td>
+          <td><div id='kuerzel'></div></td>
+        </tr>
+        <tr>
+          <td>Frist</td>
+          <td>
+            <input type='text' v-model='fristInDays' disabled v-bind:class='fristInDays<=0?"red":"black"' class='readonly' />
+            <input type='text' v-if='!readonly' v-datepicker='auftrag["deadline-date"]' disabled hidden />
+          </td>
+          <td v-if='!readonly ||auftrag["deadline-at-agency-date"]'>Fristablauf bei Kasse</td>
+          <td v-if='!readonly || auftrag["deadline-at-agency-date"] !== null'>
+            <input type='text' v-model='fristAblaufBeiKasseInDays' disabled v-bind:class='fristAblaufBeiKasseInDays<=0?"red":"black"'  class='readonly' />
+            <input type='text' v-if='!readonly' v-datepicker='auftrag["deadline-at-agency-date"]' disabled hidden />
+          </td>
+        </tr>
+        <tr v-if="auftrag['reference-id']>0 || !readonly">
+          <td>Letzte Änderung</td>
+          <td><input type='text' v-model='auftrag["last-modification-date"]' disabled class="date-time readonly"/></td>
+          <td>Referenzierte Aufträge</td>
+          <td>
+            <a href="#" onclick="dlgs.showRefOrder('showReference',{{auftrag['reference-id']}})">{{ auftrag['reference-id'] }}</a>
+            <i v-if='!readonly' onclick="dlg.searchWorkorder()" class="fa fa-search fa-2x" title='Ehemaligen Auftrag suchen'></i>
+          </td>
+        </tr>
 
-                <!-- ##########################################################################-->
-                <tr><td class='subheading' colspan='4'>
-                        Versicherter
-                        <i class="fa fa-info-circle fa-2x" title='Versicherten anzeigen'></i>
-                    </td>
-                </tr>
-                <!-- ##########################################################################-->
-                <tr>
-                    <td>Name                </td><td><input type='text' v-model='auftrag.insuredperson.lastname'    disabled class="readonly"/></td>
-                    <td>Vorname             </td><td><input type='text' v-model='auftrag.insuredperson.firstname'   disabled class="readonly"/></td>
-                </tr>          
-                <tr>
-                    <td>Geburtsdatum        </td><td><input type='text' v-model='auftrag.insuredperson["date-of-birth"]' disabled class="readonly"/></td>
-                    <td>Versicherungsnummer </td><td><input type='text' v-model='auftrag.insuredperson["insurance-no"]'  disabled class="readonly"/></td>
-                </tr>
-                <!-- ##########################################################################-->
-                <tr>
-                    <td class='subheading' colspan='4'>
-                        Auftraggeber
-                        <i class="fa fa-info-circle fa-2x" title='Auftraggeber anzeigen'></i>
-                        <i class="fa fa-search fa-2x"      title='Auftraggeber auswählen' v-if='!readonly'></i>
-                        <i class="fa fa-trash fa-2x"       title='Auftraggeber entfernen' v-if='!readonly'></i>
-                    </td>
-                </tr>
-                <!-- ##########################################################################-->
-                <tr>
-                    <td>Aktenzeichen</td>
-                    <td><input type='text' v-model='auftrag["workorder-no"]'/></td>
-                    <td>Auftrag vom</td>
-                    <td>
-                        <input type='text' v-if='readonly'  v-model     ='auftrag["date-incoming"]' class="date" disabled/>
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["date-incoming"]' class="date"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Name</td>
-                    <td><input type='text' v-model='auftrag.applicant.name' disabled class="readonly"/></td>
-                    <td>Aktueller Bearbeiter</td>
-                    <td> <input type='text' v-model='aktuellerBearbeiter' disabled class="readonly"/></td>
-                </tr>
-                <tr>
-                    <td>Ansprechpartner</td>
-                    <td>
-                        <input type='text' v-model='ansprechpartner' disabled class="readonly"/>
-                        <i class="fa fa-edit fa-2x" title='Ansprechpartner bearbeiten' @click='editDlgAnsprechpartner(auftrag["applicant-contact"])'></i>
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr v-if='readonly && sfbStandort.trim().length > 0'>
-                    <td>SFB-Standort</td>
-                    <td><input type='text' v-model='sfbStandort' disabled class="readonly"/></td>
-                </tr>
-                <tr v-if='!readonly'>
-                    <td>SFB Name</td>
-                    <td><input type='text' v-model='auftrag["sfb-location-name"]'/></td>
-                    <td>SFB Straße</td>
-                    <td><input type='text' v-model='auftrag["sfb-location-street"]'/></td>
-                </tr>
-                <tr v-if='!readonly'>
-                    <td>SFB Postleitzahl</td>
-                    <td><input type='text' v-model='auftrag["sfb-location-zipcode"]'/></td>
-                    <td>SFB Ort</td>
-                    <td><input type='text' v-model='auftrag["sfb-location-city"]'/></td>
-                </tr>
-                <!-- ##########################################################################-->
-                <tr><td class='subheading' colspan='4'>Auftragsdaten</td></tr>
-                <!-- ##########################################################################-->
-                <tr>
-                    <td>Status</td>
-                    <td><div>{{auftrag["process-status-text"]}}</div></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Frage des AG</td>
-                    <td><div id='fag'></div></td>
-                    <td>Präz. Frage des AG</td>
-                    <td><div id='fagPrec'></div></td>
-                </tr>
-                <tr>
-                    <td>Produkt</td>
-                    <td>
-                        <span style="display:inline-block; width: 60px;"></span>
-                        <div id="product-list" style="display:inline-block"></div>
-                    </td>
-                    <td>Erläuterung Anlass</td>
-                    <td><input type='text' v-model='auftrag["reason-hint"]' style='width:350px'/></td>
-                </tr>
-                <tr>
-                    <td>Gutachtenart</td>
-                    <td><div id="gutachtenart"></div></td>
-                    <td>Präz. Gutachtenart</td>
-                    <td><div id="gutachtenartPrec"></div></td>
-                </tr>
-                <tr>
-                    <td>Diagnose</td>
-                    <td>
-                        <span style="display:inline-block">
-                            <input type='text' style='width:50px' v-model="icd" id="icdCode" />
-                            <input type='text' style='width:300px' v-model="icdText" />
-                            <i class="fa fa-search fa-2x" title='Icdcode auswählen' @click="openDlgIcd"  v-if='!readonly'></i>
-                            <i class="fa fa-trash fa-2x" title='Icdcode entfernen' @click="icd=null"  v-if='!readonly'></i>
-                        </span>
-                    </td>
-                    <td>Eingangsdatum</td>
-                    <td>
-                        <input type='text' v-if='readonly'  v-model='auftrag["registration-date"]' disabled class="date"/>
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["registration-date"]' class="date"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Erledigungsart</td>
-                    <td><div id="erledigungsart"> </div></td>
-                    <td>Erledigungsort</td>
-                    <td><div id="erledigungsort"> </div></td>
-                </tr>
-                <tr>
-                    <td>Ergebnis</td>
-                    <td><div id="ergebnis"></div>
-                    </td>
-                    <td>Bearbeitungszeiten</td>
-                    <td>
-                        <span style="display:inline-block; width:60px;"></span>
-                        <button @click='doBearbeitungszeiten(readonly)'>Bearbeitungszeiten
-                            <i class="fa fa-clock-o fa-lg" title='Bearbeitungszeiten' ></i>
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Begutachtungsdatum</td>
-                    <td>
-                        <input type='text' v-if='readonly' v-model='auftrag["result-date"]' class="date" disabled/>
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["result-date"]' class="date"/>
-                    </td>
-                    <td>Beratungsstelle</td>
-                    <td>
-                        <span style="display:inline-block; width: 60px;"></span>
-                        <div id="beratungsstellen" style="display:inline-block"></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td><span v-if='auftrag["dms-upload-date"]'>DMS-Upload am</span></td>
-                    <td>
-                        <input v-if='auftrag["dms-upload-date"]' type='text' v-model='auftrag["dms-upload-date"]' class="date" disabled/>
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Ursprünglicher Termin</td>
-                    <td>
-                        <input type='text' v-if='readonly'  v-model='auftrag["target-date"]' class="date" disabled/>
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["target-date"]' class="date"/>
-                    </td>
-                    <td>Antragsdatum des Versicherten</td>
-                    <td>
-                        <input type='text' v-if='readonly'  v-model='auftrag["order-request-date"]' class="date" disabled/>
-                        <input type='text' v-if='!readonly' v-datepicker='auftrag["order-request-date"]' class="date"/>
-                    </td>
-                </tr>
-                <!-- ##########################################################################-->
-                <tr><td class='subheading' colspan='4'>Beteilgte Mitarbeiter</td></tr>
-                <!-- ##########################################################################-->
-                <tr>
-                    <td>Erfasser</td>
-                    <td><input type="text" v-model='registrationUsername' disabled class='readonly'></td>
-                    <td>Verantwortlicher Gutachter</td>
-                    <td> <input type="text" v-model='participantVGA' disabled class='readonly'></td>
-                </tr>
-                <tr>
-                    <td>Vorgesehener Gutachter</td>
-                    <td> <input type="text" v-model='participantWGA' disabled class='readonly'></td>
-                    <td>Beteiligte Gutachter </td>
-                    <td>
-                        <input type="text" v-model='participantsBGA' disabled class='readonly'>
-                            <i v-if='!readonly' class="fa fa-search fa-2x" @click='selectBeteiligteGutachter' title='Beteiligte Gutachter auswählen' ></i>
-                            <i v-if='!readonly' class="fa fa-trash  fa-2x" @click='deleteBeteiligteGutachter' title='Beteiligte Gutachter löschen'></i>
-                    </td>
-                </tr>
-                <tr>
-                    <td v-if='auftragsbezogeneGruppe'>Auftragsbezogene Gruppe </td>
-                    <td v-if='auftragsbezogeneGruppe'>  <input type="text" v-model='auftragsbezogeneGruppe' disabled class='readonly'></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <!-- ##########################################################################-->
-                <tr><td class='subheading' colspan='4'>Leistungserbringer</td></tr>
-                <!-- ##########################################################################-->
-                <tr>
-                    <td colspan='4'>
-                        <div id="servicerenderers"></div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <!-- ##########################################################################-->
+        <tr><td class='subheading' colspan='4'>
+            Versicherter
+            <i class="fa fa-info-circle fa-2x" title='Versicherten anzeigen'></i>
+          </td>
+        </tr>
+        <!-- ##########################################################################-->
+        <tr>
+          <td>Name                </td><td><input type='text' v-model='auftrag.insuredperson.lastname'    disabled class="readonly"/></td>
+          <td>Vorname             </td><td><input type='text' v-model='auftrag.insuredperson.firstname'   disabled class="readonly"/></td>
+        </tr>          
+        <tr>
+          <td>Geburtsdatum        </td><td><input type='text' v-model='auftrag.insuredperson["date-of-birth"]' disabled class="readonly"/></td>
+          <td>Versicherungsnummer </td><td><input type='text' v-model='auftrag.insuredperson["insurance-no"]'  disabled class="readonly"/></td>
+        </tr>
+        <!-- ##########################################################################-->
+        <tr>
+          <td class='subheading' colspan='4'>
+            Auftraggeber
+            <i class="fa fa-info-circle fa-2x" title='Auftraggeber anzeigen'></i>
+            <i class="fa fa-search fa-2x"      title='Auftraggeber auswählen' v-if='!readonly'></i>
+            <i class="fa fa-trash fa-2x"       title='Auftraggeber entfernen' v-if='!readonly'></i>
+          </td>
+        </tr>
+        <!-- ##########################################################################-->
+        <tr>
+          <td>Aktenzeichen</td>
+          <td><input type='text' v-model='auftrag["workorder-no"]'/></td>
+          <td>Auftrag vom</td>
+          <td>
+            <input type='text' v-if='readonly'  v-model     ='auftrag["date-incoming"]' class="date" disabled/>
+            <input type='text' v-if='!readonly' v-datepicker='auftrag["date-incoming"]' class="date"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Name</td>
+          <td><input type='text' v-model='auftrag.applicant.name' disabled class="readonly"/></td>
+          <td>Aktueller Bearbeiter</td>
+          <td> <input type='text' v-model='aktuellerBearbeiter' disabled class="readonly"/></td>
+        </tr>
+        <tr>
+          <td>Ansprechpartner</td>
+          <td>
+            <input type='text' v-model='ansprechpartner' disabled class="readonly"/>
+            <i class="fa fa-edit fa-2x" title='Ansprechpartner bearbeiten' @click='editDlgAnsprechpartner(auftrag["applicant-contact"])'></i>
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr v-if='readonly && sfbStandort.trim().length > 0'>
+          <td>SFB-Standort</td>
+          <td><input type='text' v-model='sfbStandort' disabled class="readonly"/></td>
+        </tr>
+        <tr v-if='!readonly'>
+          <td>SFB Name</td>
+          <td><input type='text' v-model='auftrag["sfb-location-name"]'/></td>
+          <td>SFB Straße</td>
+          <td><input type='text' v-model='auftrag["sfb-location-street"]'/></td>
+        </tr>
+        <tr v-if='!readonly'>
+          <td>SFB Postleitzahl</td>
+          <td><input type='text' v-model='auftrag["sfb-location-zipcode"]'/></td>
+          <td>SFB Ort</td>
+          <td><input type='text' v-model='auftrag["sfb-location-city"]'/></td>
+        </tr>
+        <!-- ##########################################################################-->
+        <tr><td class='subheading' colspan='4'>Auftragsdaten</td></tr>
+        <!-- ##########################################################################-->
+        <tr>
+          <td>Status</td>
+          <td><div>{{auftrag["process-status-text"]}}</div></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Frage des AG</td>
+          <td><div id='fag'></div></td>
+          <td>Präz. Frage des AG</td>
+          <td><div id='fagPrec'></div></td>
+        </tr>
+        <tr>
+          <td>Produkt</td>
+          <td>
+            <span style="display:inline-block; width: 60px;"></span>
+            <div id="product-list" style="display:inline-block"></div>
+          </td>
+          <td>Erläuterung Anlass</td>
+          <td><input type='text' v-model='auftrag["reason-hint"]' style='width:350px'/></td>
+        </tr>
+        <tr>
+          <td>Gutachtenart</td>
+          <td><div id="gutachtenart"></div></td>
+          <td>Präz. Gutachtenart</td>
+          <td><div id="gutachtenartPrec"></div></td>
+        </tr>
+        <tr>
+          <td>Diagnose</td>
+          <td>
+            <span style="display:inline-block">
+              <input type='text' style='width:50px' v-model="icd" id="icdCode" />
+              <input type='text' style='width:300px' v-model="icdText" />
+              <i class="fa fa-search fa-2x" title='Icdcode auswählen' @click="openDlgIcd"  v-if='!readonly'></i>
+              <i class="fa fa-trash fa-2x" title='Icdcode entfernen' @click="icd=null"  v-if='!readonly'></i>
+            </span>
+          </td>
+          <td>Eingangsdatum</td>
+          <td>
+            <input type='text' v-if='readonly'  v-model='auftrag["registration-date"]' disabled class="date"/>
+            <input type='text' v-if='!readonly' v-datepicker='auftrag["registration-date"]' class="date"/>
+          </td>
+        </tr>
+        <tr>
+          <td>Erledigungsart</td>
+          <td><div id="erledigungsart"> </div></td>
+          <td>Erledigungsort</td>
+          <td><div id="erledigungsort"> </div></td>
+        </tr>
+        <tr>
+          <td>Ergebnis</td>
+          <td><div id="ergebnis"></div>
+          </td>
+          <td>Bearbeitungszeiten</td>
+          <td>
+            <span style="display:inline-block; width:60px;"></span>
+            <button @click='doBearbeitungszeiten(readonly)'>Bearbeitungszeiten
+              <i class="fa fa-clock-o fa-lg" title='Bearbeitungszeiten' ></i>
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td>Begutachtungsdatum</td>
+          <td>
+            <input type='text' v-if='readonly' v-model='auftrag["result-date"]' class="date" disabled/>
+            <input type='text' v-if='!readonly' v-datepicker='auftrag["result-date"]' class="date"/>
+          </td>
+          <td>Beratungsstelle</td>
+          <td>
+            <span style="display:inline-block; width: 60px;"></span>
+            <div id="beratungsstellen" style="display:inline-block"></div>
+          </td>
+        </tr>
+        <tr>
+          <td><span v-if='auftrag["dms-upload-date"]'>DMS-Upload am</span></td>
+          <td>
+            <input v-if='auftrag["dms-upload-date"]' type='text' v-model='auftrag["dms-upload-date"]' class="date" disabled/>
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Ursprünglicher Termin</td>
+          <td>
+            <input type='text' v-if='readonly'  v-model='auftrag["target-date"]' class="date" disabled/>
+            <input type='text' v-if='!readonly' v-datepicker='auftrag["target-date"]' class="date"/>
+          </td>
+          <td>Antragsdatum des Versicherten</td>
+          <td>
+            <input type='text' v-if='readonly'  v-model='auftrag["order-request-date"]' class="date" disabled/>
+            <input type='text' v-if='!readonly' v-datepicker='auftrag["order-request-date"]' class="date"/>
+          </td>
+        </tr>
+        <!-- ##########################################################################-->
+        <tr><td class='subheading' colspan='4'>Beteilgte Mitarbeiter</td></tr>
+        <!-- ##########################################################################-->
+        <tr>
+          <td>Erfasser</td>
+          <td><input type="text" v-model='registrationUsername' disabled class='readonly'></td>
+          <td>Verantwortlicher Gutachter</td>
+          <td> <input type="text" v-model='participantVGA' disabled class='readonly'></td>
+        </tr>
+        <tr>
+          <td>Vorgesehener Gutachter</td>
+          <td> <input type="text" v-model='participantWGA' disabled class='readonly'></td>
+          <td>Beteiligte Gutachter </td>
+          <td>
+            <input type="text" v-model='participantsBGA' disabled class='readonly'>
+              <i v-if='!readonly' class="fa fa-search fa-2x" @click='selectBeteiligteGutachter' title='Beteiligte Gutachter auswählen' ></i>
+              <i v-if='!readonly' class="fa fa-trash  fa-2x" @click='deleteBeteiligteGutachter' title='Beteiligte Gutachter löschen'></i>
+          </td>
+        </tr>
+        <tr>
+          <td v-if='auftragsbezogeneGruppe'>Auftragsbezogene Gruppe </td>
+          <td v-if='auftragsbezogeneGruppe'>  <input type="text" v-model='auftragsbezogeneGruppe' disabled class='readonly'></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <!-- ##########################################################################-->
+        <tr><td class='subheading' colspan='4'>Leistungserbringer</td></tr>
+        <!-- ##########################################################################-->
+        <tr>
+          <td colspan='4'>
+            <div id="servicerenderers"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
 
-    </body>
+  </body>
 </html>

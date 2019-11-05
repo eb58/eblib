@@ -177,13 +177,13 @@
       $('#' + treeid + ' .ebtree').detach();
       const x = '\
               <div class="ebtree">\
-                 <span style="float:right">\n\
-                      <i class="fa fa-folder-open fa-2x" title="Alle Ordner öffnen"></i>\n\
-                      <i class="fa fa-folder fa-2x" title="Alle Ordner schließen"></i>\n\
-                </span>\n\
-                 <div>' +
-              renderTree.renderItems(treeItems, false) +
-              '</div>\n\
+                 <span style="float:right">\
+                      <i class="fa fa-folder-open fa-2x" title="Alle Ordner öffnen"></i>\
+                      <i class="fa fa-folder fa-2x" title="Alle Ordner schließen"></i>\
+                 </span>\
+                <div>' +
+                renderTree.renderItems(treeItems, false) +
+                '</div>\n\
               </div>'
       $('#' + treeid).html(x);
     };

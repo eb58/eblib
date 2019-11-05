@@ -42,7 +42,7 @@ const auftrag = {
   "performer": {// aktueller Bearbeiter
     "userid": "50000000000015",
     "firstname": "Mario",
-    "lastname": "Fehrenbach",
+    "lastname": "Mustermann",
     "email": "performer@email.address",
     "fakultaete": null,
     "zusatzbezeichnung": null,
@@ -61,8 +61,8 @@ const auftrag = {
   "registration-user-name": {
     "userid": "50000000000016",
     "firstname": "Ursula",
-    "lastname": "Fehrenbach",
-    "email": "ursula.fehrenbach@email.address",
+    "lastname": "Mustermann",
+    "email": "ursula.Mustermann@email.address",
     "fakultaete": null,
     "zusatzbezeichnung": null,
     "inOrgunitSpecialcase": false
@@ -70,8 +70,8 @@ const auftrag = {
   "responsible-expert": {
     "userid": "50000000000015",
     "firstname": "Mario",
-    "lastname": "Fehrenbach",
-    "email": "fehrenbach@email.address",
+    "lastname": "Mustermann",
+    "email": "Mustermann@email.address",
     "fakultaete": null,
     "zusatzbezeichnung": null,
     "inOrgunitSpecialcase": false
@@ -105,8 +105,8 @@ const auftrag = {
       "participant": {
         "userid": "40000000000008",
         "firstname": "Annika",
-        "lastname": "Burket",
-        "email": "annika.burket@workorder.de",
+        "lastname": "Borgmann",
+        "email": "annika.Borgmann@workorder.de",
         "fakultaete": null,
         "zusatzbezeichnung": null,
         "inOrgunitSpecialcase": false

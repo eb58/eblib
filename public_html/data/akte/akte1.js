@@ -496,7 +496,7 @@ const akte1 = [
       "keywords": null,
       "receptiondate": "03.06.2015 12:01",
       "archivingdate": "09.11.2018 11:48",
-      "author": "Mario Fehrenbach",
+      "author": "Mario Mustermann",
       "note": null,
       "tab": {
         "tabid": 3,
@@ -530,7 +530,7 @@ const akte1 = [
       "keywords": null,
       "receptiondate": "03.06.2015 13:33",
       "archivingdate": "09.11.2018 11:48",
-      "author": "Mario Fehrenbach",
+      "author": "Mario Mustermann",
       "note": null,
       "tab": {
         "tabid": 3,
@@ -564,7 +564,7 @@ const akte1 = [
       "keywords": null,
       "receptiondate": "11.06.2015 20:30",
       "archivingdate": "09.11.2018 11:48",
-      "author": "Mario Fehrenbach",
+      "author": "Mario Mustermann",
       "note": null,
       "tab": {
         "tabid": 2,

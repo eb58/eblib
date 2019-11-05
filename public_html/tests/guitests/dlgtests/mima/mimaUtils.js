@@ -59,7 +59,7 @@ var mimaUtils = {
       $('.servicerenderer').prop('disabled', mimaData.servicerenderer.servicerendererid !== 0);
     }
   },
-  takeExpertsData: function takeExpertsData(expertsid, expertListAsShortString) { // [3454], 'Fehrenbach, Mario'
+  takeExpertsData: function takeExpertsData(expertsid, expertListAsShortString) { // [3454], 'Mustermann, Mario'
     mimaData.performer = {userid: parseInt(expertsid[0])} || null;
     mimaData.performer.firstname = expertListAsShortString.split(',')[1];
     mimaData.performer.lastname = expertListAsShortString.split(',')[0];

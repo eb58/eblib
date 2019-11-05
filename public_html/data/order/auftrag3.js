@@ -42,7 +42,7 @@ const auftrag = {
   "performer": {
     "userid": "50000000000015",
     "firstname": "Mario",
-    "lastname": "Fehrenbach",
+    "lastname": "Mustermann",
     "email": "matthias.mayer@atos.net",
     "fakultaete": [
       "fakultät",
@@ -85,7 +85,7 @@ const auftrag = {
   "registration-user-name": {
     "userid": "50000000000015",
     "firstname": "Mario",
-    "lastname": "Fehrenbach",
+    "lastname": "Mustermann",
     "email": "matthias.mayer@atos.net",
     "fakultaete": [
       "fakultät",
@@ -105,7 +105,7 @@ const auftrag = {
       "participant": {
         "userid": "50000000000015",
         "firstname": "Mario",
-        "lastname": "Fehrenbach",
+        "lastname": "Mustermann",
         "email": "matthias.mayer@atos.net",
         "fakultaete": [
           "fakultät",

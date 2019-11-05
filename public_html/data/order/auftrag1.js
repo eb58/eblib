@@ -84,8 +84,8 @@ const auftrag = {
   "performer": {
     "userid": "50000000000015",
     "firstname": "Mario",
-    "lastname": "Fehrenbach",
-    "email": "fehrenbach@email.address",
+    "lastname": "Mustermann",
+    "email": "Mustermann@email.address",
     "fakultaete": null,
     "zusatzbezeichnung": null,
     "inOrgunitSpecialcase": false
@@ -102,8 +102,8 @@ const auftrag = {
   "responsible-expert": {
     "userid": "50000000000015",
     "firstname": "Mario",
-    "lastname": "Fehrenbach",
-    "email": "fehrenbach@email.address",
+    "lastname": "Mustermann",
+    "email": "Mustermann@email.address",
     "fakultaete": null,
     "zusatzbezeichnung": null,
     "inOrgunitSpecialcase": false

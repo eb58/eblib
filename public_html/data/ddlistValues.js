@@ -1,4 +1,5 @@
 const valueLists = {
+  keywords: ["Schlagwort 1", "Schlagwort 2", "Schlagwort 3", "Schlagwort 4", "Schlagwort 5", "Schlagwort 6"],
   doctabs: [
     {v: null, txt: "Keine Auswahl"},
     {v: 1, txt: "Beauftragungsdokumente"},

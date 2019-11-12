@@ -17,6 +17,7 @@
     <script src='/data/akte/akte1.js'></script>
     <script src='/data/akte/akte2.js'></script>
     <script src='/data/akte/akte3.js'></script>
+    <script src='/data/akte/akte4.js'></script>
     <script src='/data/ddlistValues.js'></script>
 
     <script src='/vendor/Underscore-1.8.3/underscore-1.8.3.min.js'></script>
@@ -42,14 +43,17 @@
 
     <script>
 
-      const akte = akte1;
+      const akte = akte4;
 
       $(document).ready(function () {
-        $('#akte').auftragsakte(akte1)
+        $('#akte').auftragsakte(akte, {
+          readonly: false,
+          mode: $.fn.auftragsakte.MODE.VERSICHTERTEN_AKTE
+        })
       });
     </script>
   </head>
   <body>
-    <div id='akte'>
+    <div id='akte'></div>
   </body>
 </html>

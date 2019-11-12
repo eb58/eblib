@@ -4,36 +4,39 @@
   $.fn.auftragsakte = function (akte, opts) {
     const id = this[0].id;
     const self = this;
-    const valueLists = opener ? opener.top.valueLists: {};
+    const valueLists = opts.valueLists || {};
 
     const defopts = {
+      panel: 'tab-grid',
+      keywords: valueLists.keywords || [],
       doctypes: valueLists.doctypes || [],
-      doctabs:  valueLists.doctabs || [],
+      doctabs: valueLists.doctabs || [],
+      readonly: false,
     };
     const myopts = $.extend({}, defopts, opts);
     const actions = {
       dlgShowDocumentInfo: function (doc) {
         doc = _.isObject(doc) ? doc : akte.find(o => o['crypted-doc-id'] === doc).document
         const  docInfoOpts = {
-          readonly: false,
-          keywords: doc.keywords || [],
+          readonly: myopts.readonly,
+          keywords: myopts.keywords,
           doctypes: myopts.doctypes,
           doctabs: myopts.doctabs
         };
-        dlgDocAttrInfoEdit(doc, docInfoOpts, ajaxFunctions.saveDocumentAttributes);
+        dlgDocAttrInfoEdit(doc, docInfoOpts, ajaxFunctions && ajaxFunctions.saveDocumentAttributes);
       },
       dlgCreateStandardschreiben: function (doc) {
-        doc = _.isObject(doc) ? doc : akte.find(o => o['crypted-doc-id'] === doc).document
+        doc = _.isObject(doc) ? doc : akte.find(o => o['crypted-doc-id'] === doc);
         console.log('dlgCreateStandardschreiben', doc)
       },
     };
-    const renderDeliveryStatus = function (deliveryStatus) {
-      if (deliveryStatus === 1 || deliveryStatus === 2) {
-        const map1 = {1: 'angefordert', 2: 'angesto\u00dfen'};
-        const map2 = {1: 'yellow', 2: 'lightgreen'};
+    const renderDeliveryStatusId = function (deliveryStatusId) {
+      if (deliveryStatusId === 0 || deliveryStatusId === 1) {
+        const map1 = {0: 'angefordert', 1: 'angesto\u00dfen'};
+        const map2 = {0: 'yellow', 1: 'lightgreen'};
         return  _.template('<i class="fa fa-print fa-1x" title="<%=title%>" style="background-color:<%=backgroundColor%>"></i>')({
-          title: 'Serverdruck ' + map1[deliveryStatus],
-          backgroundColor: map2[deliveryStatus],
+          title: 'Serverdruck ' + map1[deliveryStatusId],
+          backgroundColor: map2[deliveryStatusId],
         })
       }
       return ''
@@ -56,13 +59,13 @@
           renderer: function (item) {
             const doc = item.data;
             const documentLabel = _.template('<%=doctype%> - <%= docdate%> - <%= author%> - <%= docname%>')({
-              doctype: doc.docType.doctypetext,
-              docdate: doc.docdate,
-              author: doc.author || '',
+              doctype: doc['doc-type-text'],
+              docdate: doc['doc-date'],
+              author: doc['author-name'] || '',
               docname: doc.name,
             });
             return _.template('<a href="actions.showContent(\'<%=id%>\')"><%=name%></a>')({
-              id: doc.crypteddocid,
+              id: doc['crypted-doc-id'],
               name: documentLabel,
             })
           },
@@ -79,13 +82,13 @@
         },
         'serverdruck-info': {
           renderer: function (item) {
-            return renderDeliveryStatus(item.data['delivery-status']);
+            return renderDeliveryStatusId(item.data['delivery-status-id']);
           },
         },
       };
       const computeActionsForDocument = function (doc) {
         const res = [];
-        if (doc.removable)
+        if ((myopts.mode === $.fn.auftragsakte.MODE.VERSICHTERTEN_AKTE) || (doc.removable && !myopts.readonly))
           res.push(availableActions['checkbox'])
 
         res.push(availableActions['show-info'])
@@ -93,7 +96,7 @@
         if (doc['doclink']) // ??? TODO ??? 
           res.push(availableActions['standard-schreiben'])
 
-        if (doc['delivery-status'])
+        if (doc['delivery-status-id'] !==null )
           res.push(availableActions['serverdruck-info'])
 
         res.push(availableActions['document-link'])
@@ -106,15 +109,15 @@
                 return o['source-workorder-id'] === 0
               })
               .groupBy(function (e) {
-                return e.document.tab.name
+                return e['tab-name']
               }), function (key, o) {
         return {
           label: key,
-          actions: [availableActions['checkbox']],
-          subitems: o.map(e => ({
+          actions: myopts.readonly ? '' : [availableActions['checkbox']],
+          subitems: o.map(d => ({
               label: ' ',
-              actions: computeActionsForDocument(e.document),
-              data: e.document
+              actions: computeActionsForDocument(d),
+              data: d,
             }))
         }
       });
@@ -125,20 +128,20 @@
               .groupBy(function (o) {
                 return o['source-workorder-id']
               }), function (o) {
-        return o.groupBy(e => e.document.tab.name)
+        return o.groupBy(e => e['tab-name'])
       }), function (key, o) {
         return {
           label: key,
-          actions: [availableActions['checkbox']],
+          actions: myopts.readonly ? '' : [availableActions['checkbox']],
           subitems: mapObjectToArray(o, function (key, o) {
             return{
               label: key,
-              actions: [availableActions['checkbox']],
+              actions: myopts.readonly ? '' : [availableActions['checkbox']],
               subitems: o.map(function (e) {
                 return {
                   label: ' ',
-                  actions: computeActionsForDocument(e.document),
-                  data: e.document,
+                  actions: computeActionsForDocument(d),
+                  data: d,
                 }
               })
             }
@@ -150,14 +153,14 @@
         tree.push({
           label: 'Dokumente zum Auftrag',
           isopen: true,
-          actions: [availableActions['checkbox']],
+          actions: myopts.readonly ? '' : [availableActions['checkbox']],
           subitems: subtree1
         })
       }
       if (subtree2.length) {
         tree.push({
           label: 'Dokumente aus fr\u00fcheren Auftr\u00e4gen',
-          actions: [availableActions['checkbox']],
+          actions: myopts.readonly ? '' : [availableActions['checkbox']],
           subitems: subtree2
         })
       }
@@ -169,16 +172,15 @@
       const initActions = function () {
         $('#tree .fa-info-circle').on('click', function (evt) {
           const item = tree.itemById(evt.target.id);
-          actions.dlgShowDocumentInfo(item.data.crypteddocid);
+          actions.dlgShowDocumentInfo(item.data['crypted-doc-id']);
         })
         $('#tree .fa-book').on('click', function (evt) {
           const item = tree.itemById(evt.target.id);
-          actions.dlgCreateStandardschreiben(item.data.crypteddocid);
+          actions.dlgCreateStandardschreiben(item.data['crypted-doc-id']);
         })
       }
       const treeopts = {
         initActions: initActions
-
       };
       const tree = $('#tree').ebtree(prepareAkteForTree(akte), treeopts)
 
@@ -201,18 +203,18 @@
           return data || ''
         },
         name: function (data, row, r) {
-          const doc = row[0].document;
+          const doc = row[0];
           const link = _.template('<a href="showContent(\'<%=id%>\')"><%=name%></a>')({
-            id: doc.crypteddocid,
+            id: doc['crypted-doc-id'],
             name: doc.name
           })
 
           // aus altem Code:  	<c:when test="${Row['RepId'] > '0' && deliveryStatus != '0' && deliveryStatus != '1'}">  TODO!!!! wofür steht RepId
-          const renderStandardschreibenErstellen = doc['delivery-status-id'] !== 0 &&  doc['delivery-status-id'] !== 1
+          const renderStandardschreibenErstellen = doc['delivery-status-id'] !== 0 && doc['delivery-status-id'] !== 1
 
-          const a = _.template('<i class="fa fa-info-circle fa-1x" id="<%=id%>" title="Informationen zu Dokument" ></i>')({id: doc.crypteddocid});
-          const b = !renderStandardschreibenErstellen ? '' : _.template('<i class="fa fa-book fa-1x" id="<%=id%>" title="Standardschreiben erstellen"></i>')({id: doc.crypteddocid});
-          const c = renderDeliveryStatus(doc['delivery-status']);
+          const a = _.template('<i class="fa fa-info-circle fa-1x" id="<%=id%>" title="Informationen zu Dokument" ></i>')({id: doc['crypted-doc-id']});
+          const b = !renderStandardschreibenErstellen ? '' : _.template('<i class="fa fa-book fa-1x" id="<%=id%>" title="Standardschreiben erstellen"></i>')({id: doc['crypted-doc-id']});
+          const c = renderDeliveryStatusId(doc['delivery-status-id']);
           return link + a + b + c;
         }
       };
@@ -230,14 +232,13 @@
         ],
         rowsPerPageSelectValues: [10, 15, 25, 50],
         rowsPerPage: 10,
-        selectionCol: true,          
+        selectionCol: !myopts.readonly,
         flags: {colsResizable: true},
         afterRedraw: afterRedraw,
       };
-      const data = akte.map(function (o) {
-        const d = o.document;
-        const rowData = [o, d.name, d.docsize, d.docdate, d.docType.doctypetext, d.author, d.tab.name, o['source-workorder-id']]
-        rowData.disabled = !d.removable;
+      const data = akte.map(function (d) {
+        const rowData = [d, d.name, d.size, d['doc-date'], d['doc-type-text'], d['author-name'], d['tab-name'], d['source-workorder-id']]
+        rowData.disabled = !d.removable && myopts.mode === $.fn.auftragsakte.MODE.AUFTRAG_AKTE;
         return rowData
       });
       const grid = $('#grid').ebtable(opts, data)
@@ -248,7 +249,7 @@
     const init = function () {
       const grid = initGrid(akte);
       const tree = initTree(akte);
-      let activePanel = 'grid';
+      let activePanel = myopts.panel;
 
       const getSelectedDocuments = function (panel) {
         return panel === 'tab-tree' ? tree.getSelectedItems() : grid.getSelectedRows().map(function (sel) {
@@ -257,11 +258,11 @@
       }
 
       const setSelectedDocuments = function (panel, selection) {
-        const checkedCrypteddocids = _.pluck(selection, 'crypteddocid')
+        const checkedCrypteddocids = _.pluck(selection, 'crypted-doc-id')
         if (panel === 'tab-tree') {
           tree.traverse(function (item) {
             if (item.data) {
-              const checked = checkedCrypteddocids.includes(item.data.crypteddocid)
+              const checked = checkedCrypteddocids.includes(item.data['crypted-doc-id'])
               $('#' + item.id + ' input[type=checkbox]').prop('checked', checked)
             }
           })
@@ -272,33 +273,113 @@
         }
       }
 
-      $("#tabs").tabs({
+      const ta = $("#tabs").tabs({
         beforeActivate: function (evt, ui) {
           const oldPanel = $(ui.oldPanel).prop('id');
           const newPanel = $(ui.newPanel).prop('id');
           const selection = getSelectedDocuments(oldPanel);
-          // selection.length || confirm('Warnung. Sie haben Dokumente selektiert. Wirklich Ansicht wechseln?');
+          myopts.panel = activePanel = newPanel;
+          console.log(newPanel);
           setSelectedDocuments(newPanel, selection);
           return true
         },
       });
       $('#btnDelete').button().on('click', function () {
         const selection = getSelectedDocuments(activePanel)
-        console.log('Delete', selection);
+        console.log('Delete', selection, akte);
+        if (selection.length) {
+          $.confirm('Frage', 'Dokumente wirklich aus Akte entfernen?', function () {
+            $.ajax({
+              url: 'ajax/workspace.do?action=delete-documents-from-orderfile&ajax=1',
+              method: 'POST',
+              data: {
+                cryptedDocIds: JSON.stringify(selection.map(function (doc) {
+                  return doc['crypted-doc-id']
+                }))
+              },
+              success: function (result) {
+                handleAjaxResult(result, function (data) {
+                  selection.forEach(function (doc) {
+                    akte = akte.filter(function (adoc) {
+                      return adoc['crypted-doc-id'] !== doc['crypted-doc-id']
+                    })
+                  })
+                  initTemplate(self);
+                });
+              },
+            })
+          })
+        }
       });
       $('#btnDeleteServerPrint').button().on('click', function () {
+        const selection = getSelectedDocuments(activePanel);
+        console.log('filtered', selection);
+        const filteredSelection = selection.filter(function(doc){
+          return doc['delivery-status-id'] === 1;
+        })
+        console.log('filtered', filteredSelection);
+        if (filteredSelection.length) {
+          $.confirm('Frage', 'Wirklich aus Serverdruck entfernen?', function () {
+            $.ajax({
+              url: 'searchServerPrint.do?action=remove-from-serverprint-list&ajax=1',
+              method: 'POST',
+              data: {
+                idList: JSON.stringify(filteredSelection.map(function (doc) {
+                  return doc['crypted-doc-id'];
+                }))
+              },
+              success: function (result) {
+                handleAjaxResult(result, function () {
+                  selection.forEach(function (doc) {
+                    const adoc = akte.find(function (x) {
+                      return x['crypted-doc-id'] === doc['crypted-doc-id']
+                    });
+                    adoc['delivery-status-id'] = null;
+                  })
+                  initTemplate(self);
+                });
+              },
+            })
+          });
+        }
+      })
+      $('#btnTakeover').button().on('click', function () {
         const selection = getSelectedDocuments(activePanel)
-        console.log(selection);
+        console.log('Übernehmen', selection, akte);
+        if (selection.length) {
+          $.confirm('Frage', 'Dokumente wirklich aus Akte entfernen?', function () {
+            $.ajax({ //  
+              url: 'ajax/workspace.do?action=assign-insurant-files-to-order&ajax=1',
+              method: 'POST',
+              data: {
+                insurantFiles: JSON.stringify(selection.map(function (doc) {
+                  return doc['crypted-doc-id']
+                }))
+              },
+              success: function (result) {
+                handleAjaxResult(result, function (data) {
+                  selection.forEach(function (doc) {
+                    akte = akte.filter(function (adoc) {
+                      return adoc['crypted-doc-id'] !== doc['crypted-doc-id']
+                    })
+                  })
+                  initTemplate(self);
+                });
+              },
+            })
+          })
+        }
       });
       // styling
       $('#tab-tree, #tab-grid', self).css({
         padding: '3px'
       })
+      return ta;
     }
 
     this.id = id;
-    (function (a) {
-      const s = '\
+    const initTemplate = function (a) {
+      const t = '\
       <div id="tabs">\
         <ul>\
           <li><a href="#tab-grid">Listenansicht</a></li>\
@@ -311,11 +392,23 @@
           <div id="tree"></div>\
         </div>\
       </div>\
-      <button id="btnDelete">Aus Akte entfernen</button>\
-      <button id="btnDeleteServerPrint">Aus Serverdruck entfernen</button>\
+      <%=buttons%>\
     </div>';
+      let btnStr = '';
+      if (!myopts.readonly) {
+        btnStr = (myopts.mode === $.fn.auftragsakte.MODE.AUFTRAG_AKTE)
+                ? '<button id="btnDelete">Aus Akte entfernen</button><button id="btnDeleteServerPrint">Aus Serverdruck entfernen</button>'
+                : '<button id="btnTakeover">In Auftragsakte übernehmen</button>'
+      }
+      const s = _.template(t)({buttons: btnStr})
       a.html(s);
-      init()
-    })(this);
+      const ta = init();
+      $('a[href=#' + myopts.panel + ']').click()
+    };
+    initTemplate(this);
+  }
+  $.fn.auftragsakte.MODE = {
+    AUFTRAG_AKTE: 1,
+    VERSICHTERTEN_AKTE: 2,
   }
 })(jQuery);

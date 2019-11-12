@@ -53,10 +53,10 @@
       myopts.disabled && $('#' + id + ' input' ).prop('disabled', true);
     })(this);
 
-    this.getSelectedValues = function getSelectedValues() {
+    this.getSelectedValues = function() {
       return _.pluck($('.ebselect input:checked',self), 'value');
     };
-    this.getSelectedValuesAsString = function getSelectedValues() {
+    this.getSelectedValuesAsString = function() {
       return this.getSelectedValues().map(function (o) {
         return _.findWhere(myopts.values,{v:parseInt(o)}).txt;
       });

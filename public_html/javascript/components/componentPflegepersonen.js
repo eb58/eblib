@@ -21,7 +21,7 @@
         $('#del-pflegeperson-' + idx).on('click', function () {
           console.log('click', idx);
           pflegepersonen.splice(idx, 1)
-          x(self)
+          initTemplate(self)
         })
       });
     };
@@ -34,7 +34,7 @@
     };
 
     this.id = id;
-    const x = function (a) {
+    const initTemplate = function (a) {
       const list = pflegepersonen.length === 0 ? 'Keine Pflegepesonen vorhanden' : pflegepersonen.map(function (p, idx) {
         return _.template('\
           <div style="display:inline-table" class="pflegeperson">\
@@ -46,7 +46,7 @@
       init();
       styling();
     };
-    x(this);
+    initTemplate(this);
 
   }
 }(jQuery));

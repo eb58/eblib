@@ -1,9 +1,9 @@
 .ebselect{
   height: 50px;
   overflow-y: auto;
-  border: solid black;
-  border-width: 1px;
+  border: 1px solid lightblue;
 }
+
 .ebselect ul {
   padding: 0;
   margin: 3px;
@@ -11,11 +11,5 @@
 .ebselect li {
   list-style-type: none;  
   text-align: left;
-  font-size: 10px;
-  
+  font-size : 12px;
 }
-.ebselect li input:checked {width:15px;}
-
-.selectable { list-style-type: none; padding: 0px; }
-.selectable li.selected   { margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:lightgray; background:lightgray;}
-.selectable li.notselected{ margin: 3px 0 0 0;  padding: 3px;font-size: 10px; font-weight: bold; background-color:#efefef;   background:#efefef;  }

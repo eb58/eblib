@@ -1,4 +1,4 @@
-/* global _ ,jQuery, top.objectIsChanged = editOrder save-Flag */
+/* global _ ,jQuery, top.objectIsChanged = editOrder save-Flag, top, timeUtils */
 (function ($) {
   "use strict";
   $.fn.ebbind = function (data, key, onChange, opts) {
@@ -8,13 +8,13 @@
 
     var utils = {
       changeInputField: function () {
-        data[key] = (opts && opts.marshalling) ? opts.marshalling.fromInputField(self.val()) : self.val();
+        data[key] = (opts && opts.marshalling) ?  opts.marshalling.fromInputField(self.val().trim()) : self.val().trim();
         if ($(this).hasClass('hasDatepicker')) {
           if (data[key].trim() === '')
             data[key] = null;
           else {
             timeUtils.formatDate(self);
-            data[key] = self.val();
+            data[key] = self.val() || null;
           }
         }
         top.objectIsChanged = true;
@@ -26,7 +26,7 @@
 
     if (type === 'text' || type === 'password') {
       var val = (opts && opts.marshalling) ? opts.marshalling.toInputField(data[key]) : data[key];
-      this.val(val).off().on('change', utils.changeInputField);
+      this.val(val).off().on('change', utils.changeInputField).on('blur', utils.changeInputField).on('input', utils.changeInputField);
     } else if (type === 'checkbox') {
       this.prop('checked', data[key]).off().on('click', function () {
         data[key] = self.prop('checked');
@@ -54,9 +54,9 @@
     } else if ($('select', this).length) {
       if (this.setSelectedValues && this.getSelectedValues) { // ebselect2!
         this.setSelectedValues(data[key]).on("change", function () {
-            data[key] = self.getSelectedValues() ;
-            top.objectIsChanged = true;
-            onChange && onChange(self);
+          data[key] = self.getSelectedValues();
+          top.objectIsChanged = true;
+          onChange && onChange(self);
         });
       } else {
         this.setSelectedValue(data[key]).off().on("selectmenuchange", function () {
@@ -80,25 +80,13 @@
           onChange && onChange(self);
         });
       }
-    } else if ($('input:radio', this).length) {
-      this.val(data[key]).off().on("change", function () {
-        data[key] = self.val();
-        top.objectIsChanged = true;
-        onChange && onChange(self);
-      });
     } else if ($('.ebselect', this).length) {
-      var $sel = $('input:checkbox', this);
-      data[key] && data[key].forEach(function (v) {
-        top.objectIsChanged = true;
-        onChange && onChange(self);
-        if (_.isNumber(v)) {
-          $($sel[v]).prop('checked', true);
-        } else {
-          $('#' + v.replace(/ /g, ''), self).prop('checked', true);
-        }
-      });
+      var $sel = $('input', this);
+      if (data[key]) {
+        self.setSelectedValues(data[key]);
+      }
       $sel.off().on('click', function () {
-        data[key] = self.getSelectedValuesAsString();
+        data[key] = self.getSelectedValues();
         top.objectIsChanged = true;
         onChange && onChange(self);
       });
@@ -115,6 +103,12 @@
       });
       $sel.off().on('click', function () {
         data[key] = self.getSelectedValuesAsString();
+        top.objectIsChanged = true;
+        onChange && onChange(self);
+      });
+    } else if ($('input:radio', this).length) {
+      this.val(data[key]).off().on("change", function () {
+        data[key] = self.val();
         top.objectIsChanged = true;
         onChange && onChange(self);
       });

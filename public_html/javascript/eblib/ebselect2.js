@@ -10,7 +10,7 @@
       width: 400,
       values: [{v: '1', txt: 'test1'}, {v: '2', txt: 'test2'}], //  just an example for docu
       selected: [],
-      onselchange: function (o) {
+      onChange: function (o) {
         console.log("ebselect2 -- selected values:" + o.getSelectedValues());
       }
     };
@@ -72,7 +72,7 @@
         multiple: myopts.multiple ? 'multiple' : '',
       });
       a.html(s);
-      const selectField = $('#' + id + 'X').select2({width: myopts.width});
+      const selectField = $('#' + id + 'X').select2({language: 'de', width: myopts.width});
       myopts.selected && api.setSelectedValues(myopts.selected);
 
       return api;

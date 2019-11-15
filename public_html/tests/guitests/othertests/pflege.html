@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<!-- pflege (<%=org.slf4j.MDC.get("Request")%>) -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de">
+  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <meta http-equiv='Content-Style-Type' content='text/css'/>
+
+    <title>Pflege</title>
+
+    <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
+    <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+    <link rel='stylesheet' href='/css/ebselect.css'/>
+    <link rel='stylesheet' href='/css/ebtable.css'/>
+    <link rel='stylesheet' href='/css/eblib.css'/>
+
+    <style>
+      /** { font-family:Arial; color: black; font-size: 12px;  }*/
+      ul.ui-menu { max-height: 300px; }
+      .ui-datepicker-trigger { border:none; background:none; }
+      #layout { width:100%; border-collapse: collapse; margin:5px 0px 5px 0px; background-color: #FEFEF9 }
+      #layout>tbody>tr>td{ border: 1px solid lightgrey; padding: 2px 2px; }
+      #layout>tbody>tr>td:nth-child(odd ) { width:20%; border-width: 1px 0px 1px 1px; }
+      #layout>tbody>tr>td:nth-child(even) { width:30%; border-width: 1px 1px 1px 0px; }
+      #layout>tbody>tr>td input{ padding:1px 3px 1px 3px; margin: 1px 1px 1px 1px; border-width: 1px; border-color:#cccccc }
+      #layout img.ui-datepicker-trigger{ margin: 1px 0px 0px 2px; vertical-align:middle; }
+      #layout input[type='checkbox']{ width:16px; margin:0px 15px 0px 0px; }
+      .date { width: 65px; }
+      .date-time { width: 100px; }
+    </style>
+
+    <script src='/vendor/Underscore-1.8.3/underscore-1.8.3.min.js'></script>
+    <script src='/vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
+    <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
+    <script src='/vendor/jQuery-contextmenu/jquery.contextMenu.min.js'></script>
+    <script src='/vendor/jquery.numeric.min.js'></script>
+    <script src='/vendor/jquery.mtz.monthpicker.js'></script>
+    <script src='/vendor/moment.min.js'></script>
+
+    <script src='/javascript/polyfill.js'></script>
+    <script src='/javascript/jquery-ui-datepicker-de.js'></script>
+    <script src='/javascript/jquery-ismed.js'></script>
+    <!--<script src='javascript/help_caller.js'></script>-->
+    <!--<script src='javascript/workspace.js'></script>-->
+
+    <script src='/javascript/eblib/ebutils.js'></script>
+    <script src='/javascript/eblib/ebviewer.js'></script>
+    <script src='/javascript/eblib/ebbind.js'></script>
+    <script src='/javascript/eblib/ebdropdown.js'></script>
+    <script src='/javascript/eblib/ebselect.js'></script>
+    <script src='/javascript/eblib/ebtextarea.js'></script>
+    <script src='/javascript/eblib/mx.js'></script>
+    <script src='/javascript/eblib/ebtable.js'></script>
+
+    <!--<script src='/javascript/ismed_script.js'></script>-->
+    <!--<script src='/javascript/prepareOrder.js'></script>-->
+
+    <script src='/data/order/valuelists.js'></script>
+    <script>
+
+      const readonly = true;
+      const now = moment(new Date());
+      moment([2007, 0, 29]).fromNow()
+      const monthpickerOptions = {
+        pattern: 'mm.yyyy',
+        selectedYear: now.format('YYYY'),
+        startYear: now.subtract(10, 'years').format('YYYY'),
+        finalYear: now.add(10, 'years').format('YYYY'),
+        monthNames: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+      };
+
+      const pflegeData = {
+        "workorder-id": 50000005667,
+        "date-of-death": "13.04.2011",
+        "receipt-date-applicant": "01.07.2011",
+        "regional-deadlines": false,
+        "care-degree-since": "12.2011",
+        "care-degree-until": "07.2021",
+        "limited-daily-living-skills-id": 2,
+        "limited-daily-living-skills-since": "08.2010",
+        "reason-ex-officio-decision-id": 2,
+        "reason-for-request-delay": "Das will keiner wissen!",
+        "additional-reasons": "Auch das will keiner wissen",
+        "expertise-deadline-reduction-id": 6,
+        "current-care-level-id": 9,
+        "aris-reason": {
+          "aris-reason": "03",
+          "changed-aris-reason": null,
+          "aris-type-number": "04",
+          "aris-deadline-number": "5",
+          "aris-type-text": null,
+          "aris-reason-text": "kombinierte Pflegeleistungen"
+        }
+      };
+      const today = moment(new Date()).format('YYYY-MM-DD');
+      const validReasonsExOfficioDecision = valueLists.reasonsExOfficioDecision.filter(function (o) {
+        return o.validfrom <= today && today <= o.validto
+      })
+
+      const optCcurrentCareLevels = {
+        height: 125,
+        width: 630,
+        type: 'radio',
+        values: valueLists.currentCareLevels.map(o => ({v: o.id, ...o})),
+      };
+      const optsLimitedDailyLivingSkills = {
+        height: 75,
+        type: 'radio',
+        values: valueLists.limitedDailyLivingSkills.map(o => ({v: o.id, ...o})),
+      };
+  
+      $(document).ready(function () {
+        $('#date-of-death').datepicker(datepickerOptions).ebbind(pflegeData);
+        $('#reason').css('width', '300px').val(pflegeData['aris-reason']['aris-reason'] + ' ' + pflegeData['aris-reason']['aris-reason-text']);
+        $('#reason-for-request-delay').ebbind(pflegeData);
+        $('#additional-reasons').ebbind(pflegeData);
+        $('#reason-ex-officio-decision-id').ebdropdown({}, validReasonsExOfficioDecision).ebbind(pflegeData);
+        $('#regional-deadlines').ebbind(pflegeData);
+        $('#expertise-deadline-reduction-id').ebdropdown({}, valueLists.expertiseDeadlineReductions).ebbind(pflegeData);
+        $('#current-care-level-id').ebselect(optCcurrentCareLevels).ebbind(pflegeData);
+        $('#limited-daily-living-skills-id').ebselect(optsLimitedDailyLivingSkills).ebbind(pflegeData);
+        $('#care-degree-since').ebbind(pflegeData).monthpicker(monthpickerOptions);
+        $('#care-degree-until').ebbind(pflegeData).monthpicker(monthpickerOptions);
+        $('#limited-daily-living-skills-since').ebbind(pflegeData).monthpicker(monthpickerOptions);
+      })
+
+    </script>
+
+  </head>
+  <body>
+    <div id='app'>
+      <div>
+        Readonly<input type='checkbox'  id='cbReadonly'/>
+        <button @click='saveWorkorder'>Test Speichern</button>
+      </div>
+      <hr/>
+
+      <table id='layout'>
+        <tr>
+          <td>Sterbedatum des Versicherten</td>
+          <td><input id='date-of-death' type='text'></td>
+          <td>Auftragsanlass der Kasse</td>
+          <td><input id='reason' disabled/></td>
+        </tr>
+        <tr>
+          <td>Gründe für die Verzögerung des Gutachtenauftrags</td>
+          <td colspan="3"><input id='reason-for-request-delay' disabled/></td>
+        </tr>
+        <tr>
+          <td>Gründe Begutachtung nach Aktenlage</td>
+          <td colspan="3"><div id='reason-ex-officio-decision-id'/></td>
+        </tr>
+        <tr>
+          <td>Sonstige Gründe</td>
+          <td colspan="3"><input id='additional-reasons' disabled/></td>
+        </tr>
+        <tr>
+          <td>Regionale Vereinbarung zu verkürzten Fristen</td>
+          <td colspan="3"><input id='regional-deadlines' type='checkbox'/></td>
+        </tr>
+        <tr>
+          <td>Verkürzte Begugutachtungsfrist</td>
+          <td colspan="3"><div id='expertise-deadline-reduction-id'/></td>
+        </tr>
+        <tr>
+          <td>Bisherige Pflegestufe</td>
+          <td colspan="3"><div id='current-care-level-id'/></td>
+        </tr>
+        <tr>
+          <td>Pflegestufe seit (MM.JJJJ)</td>
+          <td><input id='care-degree-since'/></td>
+          <td>Pflegestufe befristet bis (MM.JJJJ)</td>
+          <td><input id='care-degree-until'/></td>
+        </tr>
+        <tr>
+          <td>Eingeschränkte Alltagskompetenz</td>
+          <td><div id='limited-daily-living-skills-id'/></td>
+          <td>Eingeschränkte Alltagskompetenz seit (MM.JJJJ)</td>
+          <td><input id='limited-daily-living-skills-since'/></td>
+        </tr>
+      </table>
+    </div>
+
+  </body>
+</html>

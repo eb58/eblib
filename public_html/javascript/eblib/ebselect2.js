@@ -10,6 +10,7 @@
       width: 400,
       values: [{v: '1', txt: 'test1'}, {v: '2', txt: 'test2'}], //  just an example for docu
       selected: [],
+      disabled: false,
       onChange: function (o) {
         console.log("ebselect2 -- selected values:" + o.getSelectedValues());
       }
@@ -49,7 +50,7 @@
       const api = {
         getSelectedValues: function () {
           return selectField.select2('data').map(function (o) {
-            return Number(o.id)
+            return _.isNumber(o.id) ? Number(o.id): o.id;
           })
           return selectField;
         },
@@ -74,7 +75,8 @@
       a.html(s);
       const selectField = $('#' + id + 'X').select2({language: 'de', width: myopts.width});
       myopts.selected && api.setSelectedValues(myopts.selected);
-
+      selectField.prop('disabled', myopts.disabled)
+      selectField.on("change", myopts.onChange );
       return api;
     };
 

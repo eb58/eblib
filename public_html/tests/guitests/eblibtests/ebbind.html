@@ -110,9 +110,9 @@
         $('#choice2').ebradio({}, radios).ebbind(vm);
         $('#txt').ebtextarea(taopts1000).ebbind(vm);
         $('#haircolor1').ebselect({values: valueLists.haircolor}).ebbind(vm);
-        $('#haircolor2').ebselect2({values: valueLists.haircolor}).ebbind(vm);
+        $('#haircolor2').ebselect2({ values: valueLists.haircolor}).ebbind(vm);
         tags = $('#tags').ebselect2({values: valueLists.tags}).ebbind(vm);
-        $('#countries').ebselect2({values: valueLists.countries}).ebbind(vm);
+        $('#countries').ebselect2({disabled: true,values: valueLists.countries}).ebbind(vm);
       });
     </script>
   </head>

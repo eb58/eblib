@@ -1,18 +1,16 @@
-/* global _,jQuery */
-var logtor = (function () {
+/* global _ */
+const logtor = (function () {
   'use esversion: 6';
-  var lev = 0;
-  var blanks = _.range(100).map(function(){return ' ';}).join(' ');
-
-  function indent(lev) {
-    return blanks.substring(0, lev * 3);
-  }
-
+  let lev = 0;
+  const blanks = n => _.range(n).map(()=> ' ').join(' ');
+  const blanks100 = blanks(100);
+  const indent = lev => blanks100.substring(0, lev * 3);
+  
   function apply(f) {
-    var logf = function () {
-      var start = new Date().getTime();
+    const logf = function () {
+      const start = new Date().getTime();
       console.log(indent(lev++), '>', f.name, 'args=', [].slice.call(arguments, 0).toString());
-      var ret = f.apply(this, [].slice.call(arguments, 0));
+      const ret = f.apply(this, [].slice.call(arguments, 0));
       console.log(indent(--lev), '<', f.name, 'ret=', ret, 'time', Date().getTime() - start);
       return ret;
     };
@@ -38,9 +36,7 @@ function f2(a) {
   return '(f2-' + a + ')';
 }
 
-var fib = function fib(n) {
-  return n < 2 ? 1 : fib(n - 1) + fib(n - 2);
-};
+const fib = n => n < 2 ? 1 : fib(n - 1) + fib(n - 2);
 
 //f1 = logtor.apply(f1);
 //f2 = logtor.apply(f2);

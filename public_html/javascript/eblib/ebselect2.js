@@ -12,7 +12,7 @@
       selected: [],
       disabled: false,
       onChange: function (o) {
-        console.log("ebselect2 -- selected values:" + o.getSelectedValues());
+        console.log("ebselect2 -- selected values:" + o );
       }
     };
     const myopts = $.extend({}, defopts, opts);

@@ -87,9 +87,9 @@ var dlgBearbeitungsZeiten = function (opts) {
       $('#vga').componentBearbeitungszeiten(opts.zeitdata['vga'], _.extend(actops, {title: 'Verantwortlicher Gutachter',category: 'vga', maxrows: 3}));
 
       if (!opts.readonly) {
-        var currProductid = top.frames[2].$('#Productid').val();
-        if (currProductid.trim().length > 0)
-          checkTimes = _.findWhere(top.valueLists.workingtimesCheckList, {productid:Number(currProductid)});
+        // var currProductid = "1"// top.frames[2].$('#Productid').val();
+        // if (currProductid.trim().length > 0)
+        //   checkTimes = _.findWhere(top.valueLists.workingtimesCheckList, {productid:Number(currProductid)});
       }
 
       style();

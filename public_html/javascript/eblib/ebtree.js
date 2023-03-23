@@ -192,7 +192,7 @@
       redraw();
 
       // init actions
-      myopts.initActions()
+      myopts.initActions && myopts.initActions()
       $('#' + treeid + ' input[type=checkbox]').each(function (idx, elem) {
         $(elem).on('click', function (evt) {
           evt.stopPropagation();

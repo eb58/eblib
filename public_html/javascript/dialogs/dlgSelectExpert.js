@@ -17,6 +17,7 @@ const dlgSelectExperts = function (onTakeOverCallback, opts) {
     hide: {effect: "blind", duration: 200},
     modal: true,
     usertypeNames: ['Vorgangsbearbeiter'],
+    selectedExperts: [],
     buttons: {
       '\u00dcbernehmen': function () {
         utils.overtake() && $(this).dialog("destroy");
@@ -61,7 +62,6 @@ const dlgSelectExperts = function (onTakeOverCallback, opts) {
             {userid: 50000000000018, lastname: 'Wollmann', firstname: 'Piot', fakultaete: ['Geriatrie'], zusatzbezeichnung: ['Akkupunktur', 'Andrologie', 'Sportmedizin']},
             {userid: 50000000000019, lastname: 'Burka', firstname: 'Anne', fakultaete: ['Allgemeinmedizin'], zusatzbezeichnung: ['ZusatzbezTest1', 'ZusatzbezTest2', 'ZusatzbezTest3']},
             {userid: 50000000000017, lastname: 'Schmiester', firstname: 'Bernd', fakultaete: [], zusatzbezeichnung: []},
-            {userid: 50000000000018, lastname: 'Wollmann', firstname: 'Piot', fakultaete: ['Geriatrie'], zusatzbezeichnung: ['Akkupunktur', 'Andrologie', 'Sportmedizin']},
           ];
         }
       });

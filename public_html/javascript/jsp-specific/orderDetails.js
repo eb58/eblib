@@ -517,7 +517,7 @@ function initAuftrag(auftrag, readonly) {
                     heading: 'Bitte w\u00e4hlen Sie die Gutachter aus',
                     dlgContext: 'Auftrag',
                     singleSelection: false,
-                    selectedExperts: bgas
+                    selectedExperts: bgas || []
                 });
             },
             deleteBeteiligteGutachter: function () {

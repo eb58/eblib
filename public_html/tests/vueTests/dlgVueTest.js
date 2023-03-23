@@ -18,7 +18,7 @@ var dlgVueTest = function (opts) {
     vue = new Vue({
       el: '#dlgVueTest',
       data: {
-        name: 'testname',
+        name: 'testname1',
         date: '01.01.2014',
         doctypeid: 1,
         tabid: 1,

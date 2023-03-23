@@ -1,404 +1,551 @@
 <!DOCTYPE html>
 
 
-
-
-
 <html lang='de'>
-  <head>
+<head>
     <title>Arbeitsunfähigkeit</title>
     <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
-    <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
-    <link rel='stylesheet' href='/javascript/eblib/ebtable.css'/>
-    <link rel='stylesheet' href='/css/eblib.css'/>
+    <link rel='stylesheet' href='../../../vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
+    <link rel='stylesheet' href='../../../css/ebtable.css'/>
+    <link rel='stylesheet' href='../../../css/eblib.css'/>
     <style>
-      textarea[readonly]{ background-color: #efefe0; }
-      .ui-datepicker-trigger {vertical-align:bottom; }
-      h1 {font-size: 14px;}
-      .auitem { padding-top: 10px;}
-      .auheader { font-size: 14px; font-weight: bold;}
-      #questionsTable .ebtable td:nth-child(3) { vertical-align:top; width:260px;}
-      #questionsTable .ebtable .ctrl { display: none}
-      #questionsTable .ebtable thead { display: none}
+        textarea[readonly] {
+            background-color: #efefe0;
+        }
+
+        .ui-datepicker-trigger {
+            vertical-align: bottom;
+        }
+
+        h1 {
+            font-size: 14px;
+        }
+
+        .auitem {
+            padding-top: 10px;
+        }
+
+        .auheader {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        #questionsTable .ebtable td:nth-child(3) {
+            vertical-align: top;
+            width: 260px;
+        }
+
+        #questionsTable .ebtable .ctrl {
+            display: none
+        }
+
+        #questionsTable .ebtable thead {
+            display: none
+        }
     </style>
-    <script src='/vendor/Underscore-1.8.3/underscore-1.8.3.min.js'></script>
-    <script src='/vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
-    <script src='/vendor/jQueryUI-1.12.0/jquery-ui.js'></script>
-    <script src='/vendor/numeric.js'></script>
-    <script src='/vendor/moment.min.js'></script>
+    <script src='../../../vendor/underscore-1.8.3/underscore-1.8.3.min.js'></script>
+    <script src='../../../vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
+    <script src='../../../vendor/jQueryUI-1.12.0/jquery-ui.js'></script>
+    <script src='../../../vendor/moment.min.js'></script>
+    <script src='../../../vendor/jquery.numeric.min.js'></script>
 
-    <script src="/javascript/polyfill.js"></script>
-    <script src='/javascript/jquery-ui-datepicker-de.js'></script>
+    <script src="../../../javascript/polyfill.js"></script>
+    <script src='../../../javascript/jquery-ui-datepicker-de.js'></script>
 
-    <script src='/javascript/eblib/ebutils.js'></script>
-    <script src='/javascript/eblib/ebbind.js'></script>
-    <script src='/javascript/eblib/ebdropdown.js'></script>  
-    <script src='/javascript/eblib/ebselect.js'></script>  
-    <script src='/javascript/eblib/ebtextarea.js'></script>  
-    <script src='/javascript/eblib/mx.js'></script>
-    <script src='/javascript/eblib/ebtable.js'></script>  
+    <script src='../../../javascript/eblib/ebutils.js'></script>
+    <script src='../../../javascript/eblib/ebbind.js'></script>
+    <script src='../../../javascript/eblib/ebdropdown.js'></script>
+    <script src='../../../javascript/eblib/ebselect.js'></script>
+    <script src='../../../javascript/eblib/ebtextarea.js'></script>
+    <script src='../../../javascript/eblib/mx.js'></script>
+    <script src='../../../javascript/eblib/ebtable.js'></script>
+    <script src='../../../javascript/components/icdlist.js'></script>
 
-    <script src='/javascript/components/icdlist.js'></script>  
+    <script src='../../../javascript/jquery-ismed.js'></script>
+    <script src='../../../javascript/icdUtils.js'></script>
+    <script src='../../../javascript/dialogs/dlgIcdcode.js'></script>
 
-    <script src='/javascript/icdUtils.js'></script>
-    <script src='/javascript/dialogs/dlgIcdcode.js'></script>
-
-    <script src='/data/icddata.js'></script>    
-    <script src='/data/au/aulists.js'></script>    
-    <script src='/data/au/audata3.js'></script>    
+    <script src='../../../data/icddata.js'></script>
+    <script src='../../../data/au/aulists.js'></script>
+    <script src='../../../data/au/audata3.js'></script>
 
     <script>
-      var taopts1000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 1000, maxNrOfVisibleRows: 10};
-      var taopts4000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 4000, maxNrOfVisibleRows: 10};
-      var taopts10000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 10000, maxNrOfVisibleRows: 10};
+        var taopts1000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 1000, maxNrOfVisibleRows: 10};
+        var taopts4000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 4000, maxNrOfVisibleRows: 10};
+        var taopts10000 = {counter: {fontSize: '8px', pos: 'top'}, maxByte: 10000, maxNrOfVisibleRows: 10};
 
-      function mkDropdownList(vals, id, text, bWithNullVal) {
-        bWithNullVal = bWithNullVal === undefined ? true : bWithNullVal;
-        var listVals = vals.map(function (o) {
-          return {v: o[id], txt: o[text]};
-        });
-        return bWithNullVal ? [{v: null, txt: 'keine Auswahl'}].concat(listVals) : listVals;
-      }
-      function mkDropdownList2(vals, id, number, text, bWithNullVal) {
-        bWithNullVal = bWithNullVal === undefined ? true : bWithNullVal;
-        var listVals = vals.map(function (o) {
-          return {v: o[id], txt: o[number] + ' ' + o[text]};
-        });
-        return bWithNullVal ? [{v: null, txt: 'keine Auswahl'}].concat(listVals) : listVals;
-      }
+        function mkDropdownList(vals, id, text, bWithNullVal) {
+            bWithNullVal = bWithNullVal === undefined ? true : bWithNullVal;
+            var listVals = vals.map(function (o) {
+                return {v: o[id], txt: o[text]};
+            });
+            return bWithNullVal ? [{v: null, txt: 'keine Auswahl'}].concat(listVals) : listVals;
+        }
 
-//        var attrconfig = [
-//          <c:forEach var="row" items="${context.valuelist['product-attrtab-conf']}"><c:if test="${ row.tabid  == 'au'}">{'prodid':${row.productid},'fieldid':"${row.attrid}",'label':"${row.label}", 'effect':${row.effects}},</c:if>
-//          </c:forEach>
-//        ];
+        function mkDropdownList2(vals, id, number, text, bWithNullVal) {
+            bWithNullVal = bWithNullVal === undefined ? true : bWithNullVal;
+            var listVals = vals.map(function (o) {
+                return {v: o[id], txt: o[number] + ' ' + o[text]};
+            });
+            return bWithNullVal ? [{v: null, txt: 'keine Auswahl'}].concat(listVals) : listVals;
+        }
 
-      var ddlists = {
-        questionList: mkDropdownList2(auListQuests, 'question-id', 'question-number', 'question-text', false),
-        answerList: mkDropdownList(auListAnswers, 'answer-id', 'answer-text'),
-        statementList: mkDropdownList(auListStatement, 'statement-id', 'statement-text'),
-        reductionList: mkDropdownList(auListReduction, 'reduction-id', 'reduction-text'),
-        effortList: mkDropdownList(auListEffort, 'effort-id', 'effort-text'),
-        suggestionList: mkDropdownList(auListSuggestion, 'suggestion-id', 'suggestion-text'),
-        deliveryConfigLeistungserbringerList: mkDropdownList(_.filter(auListDeliveryConfig, function (o) {
-          return o.flags & 1;
-        }), 'delivery-config-id', 'delivery-config-text'),
-        deliveryConfigAuftraggeberList: mkDropdownList(_.filter(auListDeliveryConfig, function (o) {
-          return o.flags & 4;
-        }), 'delivery-config-id', 'delivery-config-text'),
-        resultList: (function resultList() {
-          var productid = 104; //Number(top.frames[2].$('input[name=Productid]:hidden').val());
-          var ids = _.pluck(_.where(product2result, {productid: productid}), 'resultid');
-          var res = _.compact(ids.map(function (o) {
-            return _.findWhere(result, {id: o});
-          }));
-          return mkDropdownList2(res, 'id', 'number', 'text', true);
-        })()
-      };
-      //var icddata = icdUtils.getIcdData();
+        //        var attrconfig = [
+        //          <c:forEach var="row" items="${context.valuelist['product-attrtab-conf']}"><c:if test="${ row.tabid  == 'au'}">{'prodid':${row.productid},'fieldid':"${row.attrid}",'label':"${row.label}", 'effect':${row.effects}},</c:if>
+        //          </c:forEach>
+        //        ];
+
+        var ddlists = {
+            questionList: mkDropdownList2(auListQuests, 'question-id', 'question-number', 'question-text', false),
+            answerList: mkDropdownList(auListAnswers, 'answer-id', 'answer-text'),
+            statementList: mkDropdownList(auListStatement, 'statement-id', 'statement-text'),
+            reductionList: mkDropdownList(auListReduction, 'reduction-id', 'reduction-text'),
+            effortList: mkDropdownList(auListEffort, 'effort-id', 'effort-text'),
+            suggestionList: mkDropdownList(auListSuggestion, 'suggestion-id', 'suggestion-text'),
+            deliveryConfigLeistungserbringerList: mkDropdownList(_.filter(auListDeliveryConfig, function (o) {
+                return o.flags & 1;
+            }), 'delivery-config-id', 'delivery-config-text'),
+            deliveryConfigAuftraggeberList: mkDropdownList(_.filter(auListDeliveryConfig, function (o) {
+                return o.flags & 4;
+            }), 'delivery-config-id', 'delivery-config-text'),
+            resultList: (function resultList() {
+                var productid = 104; //Number(top.frames[2].$('input[name=Productid]:hidden').val());
+                var ids = _.pluck(_.where(product2result, {productid: productid}), 'resultid');
+                var res = _.compact(ids.map(function (o) {
+                    return _.findWhere(result, {id: o});
+                }));
+                return mkDropdownList2(res, 'id', 'number', 'text', true);
+            })()
+        };
+        //var icddata = icdUtils.getIcdData();
     </script>
     <script>
-      var dialogName = 'au';
-      var readonly = false;// ${context.workspace.state eq 'show'};
-      var isDta = false; //top.frames[2].isDtaOrder;
-      var isSFB = false; //Number(top.frames[2].$('input:hidden[name=IsSFBProduct]').val() || 0);
-      var audata;
+        var dialogName = 'au';
+        var readonly = false;// ${context.workspace.state eq 'show'};
+        var isDta = false; //top.frames[2].isDtaOrder;
+        var isSFB = false; //Number(top.frames[2].$('input:hidden[name=IsSFBProduct]').val() || 0);
+        var audata;
 
-      ///////////////////////////////////////////////////
+        ///////////////////////////////////////////////////
 
-      var setOrderParameter = function () { // just stub, will be overwritten in 'doLoad'
-      };
-
-      var validateDialogValues = function () {
-        return '';
-      };
-
-      var auquests = (function () {
-        var grid;
-        var renderers = {
-          question: function question(data, row, r) {
-            var isLead = row[0].lead;
-            var s = isLead ? '<b>' + data + '</b>' : data;
-            return s + '<div id="qas-ta' + r + '" class="question-comment"></div>';
-          },
-          answer: function answer(data, row) {
-            return '<div class="answer" id="answ_au' + row[0]['question-id'] + '"></div>';
-          },
-          setIsLeading: function deleteItem(data, row) {
-            return data ? 
-              "<span id='au" + row[0]['question-id'] + "' class='ui-icon ui-icon-circle-check' title='Ist führend'></span>": 
-              "<span id='au" + row[0]['question-id'] + "' class='ui-icon ui-icon-blank' title='AAA'></span>";
-          },
-          deleteItem: function deleteItem(data, row) {
-            var isDta = row[0].dta;
-            return isDta ? "<span class='ui-icon ui-icon-blank'></span>" : "<span id='au" + row[0]['question-id'] + "' class='ui-icon ui-icon-trash' title='Lösche Frage'></span>";
-          }
-
+        var setOrderParameter = function () { // just stub, will be overwritten in 'doLoad'
         };
-        var opts = {
-          rowsPerPage: 200,
-          columns: [
-            {name: "quest", invisible: true},
-            {name: "Code"},
-            {name: "Frage", render: renderers.question},
-            {name: "Antwort", render: renderers.answer},
-            {name: "", render: renderers.setIsLeading},
-            {name: "", render: renderers.deleteItem},
-          ],
-          flags: {filter: false, pagelenctrl: false, config: false, withsorting: false},
+
+        var validateDialogValues = function () {
+            return '';
         };
-        // API
-        return {
-          initQuestionsTable: function initQuestionsTable(audata) {
 
-            var d = audata.qas.sort(function (q1, q2) {
-              if (q1.lead)
-                return -1;
-              return Number(q1['question-number']) - Number(q2['question-number']);
-            }).map(function (q) {
-              return [q, q['question-number'], q['question-text'], q['question-comment'],  q['lead'],''];
-            });
+        var auquests = (function () {
+            var grid;
+            var renderers = {
+                question: function question(data, row, r) {
+                    var isLead = row[0].lead;
+                    var s = isLead ? '<b>' + data + '</b>' : data;
+                    return s + '<div id="qas-ta' + r + '" class="question-comment"></div>';
+                },
+                answer: function answer(data, row) {
+                    return '<div class="answer" id="answ_au' + row[0]['question-id'] + '"></div>';
+                },
+                setIsLeading: function deleteItem(data, row) {
+                    return data ?
+                        "<span id='au" + row[0]['question-id'] + "' class='ui-icon ui-icon-circle-check' title='Ist führend'></span>" :
+                        "<span id='au" + row[0]['question-id'] + "' class='ui-icon ui-icon-blank' title='AAA'></span>";
+                },
+                deleteItem: function deleteItem(data, row) {
+                    var isDta = row[0].dta;
+                    return isDta ? "<span class='ui-icon ui-icon-blank'></span>" : "<span id='au" + row[0]['question-id'] + "' class='ui-icon ui-icon-trash' title='Lösche Frage'></span>";
+                }
 
-            grid = $('#questionsTable').ebtable(opts, d);
-            $('.answer').each(function (idx, a) {
-              var id = Number($(a).prop('id').replace('answ_au', '').replace('X', ''));
-              var o = _.findWhere(audata.qas, {'question-id': id});
-              $(a).ebdropdown({disabled: readonly, width: '260px'}, ddlists.answerList).ebbind(o, 'answer-id');
-            });
-            $('#questionsTable .ui-icon-trash').on('click', function () { // Lösche Eintrag
-              var id = Number($(this).prop('id').replace('au', ''));
-              audata.qas = audata.qas.filter(function (item) {
-                return item['question-id'] !== id;
-              });
-              initQuestionsTable(audata);
-              ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
-                return !_.findWhere(audata.qas, {'question-id': q.v});
-              }));
-              if (id === 49) { // ~ number '04' 
-                top.frames[2].associatedAU = audata.associated = false;
-                //top.frames[2].checkTabs4Enabling(<%=OrderType.au.id%>);
-              }
-            });
-            $('.question-comment').each(function (idx, elem) {
-              var taopts = {title: {text: 'Erläuterung:', fontSize: '12px', fontWeight:'bold', pos: 'top'}, counter: {fontSize: '8px', pos: 'top'}, maxByte: 1000, maxNrOfVisibleRows: 10, width: '98%', nrRows: 3};
-              var taid = $(elem).attr('id');
-              $('#' + taid).ebtextarea(_.extend(taopts, {disabled: audata.qas[idx].dta})).ebbind(audata.qas[idx], 'question-comment');
-            });
-          }
-        };
-      })();
+            };
+            var opts = {
+                rowsPerPage: 200,
+                columns: [
+                    {name: "quest", invisible: true},
+                    {name: "Code"},
+                    {name: "Frage", render: renderers.question},
+                    {name: "Antwort", render: renderers.answer},
+                    {name: "", render: renderers.setIsLeading},
+                    {name: "", render: renderers.deleteItem},
+                ],
+                flags: {filter: false, pagelenctrl: false, config: false, withsorting: false},
+            };
+            // API
+            return {
+                initQuestionsTable: function initQuestionsTable(audata) {
+
+                    var d = audata.qas.sort(function (q1, q2) {
+                        if (q1.lead)
+                            return -1;
+                        return Number(q1['question-number']) - Number(q2['question-number']);
+                    }).map(function (q) {
+                        return [q, q['question-number'], q['question-text'], q['question-comment'], q['lead'], ''];
+                    });
+
+                    grid = $('#questionsTable').ebtable(opts, d);
+                    $('.answer').each(function (idx, a) {
+                        var id = Number($(a).prop('id').replace('answ_au', '').replace('X', ''));
+                        var o = _.findWhere(audata.qas, {'question-id': id});
+                        $(a).ebdropdown({
+                            disabled: readonly,
+                            width: '260px'
+                        }, ddlists.answerList).ebbind(o, 'answer-id');
+                    });
+                    $('#questionsTable .ui-icon-trash').on('click', function () { // Lösche Eintrag
+                        var id = Number($(this).prop('id').replace('au', ''));
+                        audata.qas = audata.qas.filter(function (item) {
+                            return item['question-id'] !== id;
+                        });
+                        initQuestionsTable(audata);
+                        ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
+                            return !_.findWhere(audata.qas, {'question-id': q.v});
+                        }));
+                        if (id === 49) { // ~ number '04'
+                            top.frames[2].associatedAU = audata.associated = false;
+                            //top.frames[2].checkTabs4Enabling(<%=OrderType.au.id%>);
+                        }
+                    });
+                    $('.question-comment').each(function (idx, elem) {
+                        var taopts = {
+                            title: {text: 'Erläuterung:', fontSize: '12px', fontWeight: 'bold', pos: 'top'},
+                            counter: {fontSize: '8px', pos: 'top'},
+                            maxByte: 1000,
+                            maxNrOfVisibleRows: 10,
+                            width: '98%',
+                            nrRows: 3
+                        };
+                        var taid = $(elem).attr('id');
+                        $('#' + taid).ebtextarea(_.extend(taopts, {disabled: audata.qas[idx].dta})).ebbind(audata.qas[idx], 'question-comment');
+                    });
+                }
+            };
+        })();
 
 
-      function applyTabConfig() {
-        prodid = $('input[name="Productid"]', parent.document).val();
-        if (prodid == '' || prodid == '-1')
-          return;
-        $.each(attrconfig, function (key, confLine) {
-          if (confLine.prodid == prodid) {
-            if (confLine.label != '') {
-              var currLabel = $('#' + confLine.fieldid + ' h1:first').text();
-              var newLabel = confLine.label;
-              if (currLabel.indexOf("(*)") > -1)
-                newLabel += "(*)";
-              $('#' + confLine.fieldid + ' h1:first').text(newLabel);
+        function applyTabConfig() {
+            prodid = $('input[name="Productid"]', parent.document).val();
+            if (prodid == '' || prodid == '-1')
+                return;
+            $.each(attrconfig, function (key, confLine) {
+                if (confLine.prodid == prodid) {
+                    if (confLine.label != '') {
+                        var currLabel = $('#' + confLine.fieldid + ' h1:first').text();
+                        var newLabel = confLine.label;
+                        if (currLabel.indexOf("(*)") > -1)
+                            newLabel += "(*)";
+                        $('#' + confLine.fieldid + ' h1:first').text(newLabel);
+                    }
+                    if (confLine.effect == 1)
+                        $('#' + confLine.fieldid).hide();
+                    if (confLine.effect == 2)
+                        $('#' + confLine.fieldid).prop("readonly", true);
+                }
+            });
+        }
+
+        function initDialog(audata) {
+            $('.positive-integer').numeric({decimal: false, negative: false});
+
+            var ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
+                return !_.findWhere(audata, {'question-id': q.v});
+            }));
+            auquests.initQuestionsTable(audata);
+            //icdfct.initIcdTable(audata.icds);
+            $('#diags').icdlist(audata.icds, {type: 'AU', disable: readonly, isDta: isDta});
+
+            $('#addAuQuest').on('click', function () {
+                var questId = Number(ddQuestions.getSelectedValue());
+                if (!questId)
+                    return;
+                var q = _.extend(_.findWhere(auListQuests, {'question-id': questId}), {
+                    'question-comment': '',
+                    'answer-id': null
+                });
+                audata.qas.push(q);
+                ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
+                    return !_.findWhere(audata.qas, {'question-id': q.v});
+                }));
+                auquests.initQuestionsTable(audata);
+
+                if (q['question-number'] === '04') {
+                    top.frames[2].associatedAU = audata.associated = true;
+                    //top.frames[2].checkTabs4Enabling(<%=OrderType.au.id%>);
+                }
+            });
+            $('#start-date').datepicker(datepickerOptions).ebbind(audata);
+
+            var sAccordance = 'Übereinstimmung von Leistungsvermögen mit Anforderungsprofil der zuletzt ausgeübten/maßgeblichen Tätigkeit';
+            var sHint = 'Hinweise auf besondere Ursachen / mögliche andere Leistungsträger';
+            $('#medical-base').ebtextarea(_.extend({
+                title: {
+                    text: 'Medizinische Unterlagen:(*)',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#anamnesis').ebtextarea(_.extend({
+                title: {
+                    text: 'Anamnese:(*)',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts10000)).ebbind(audata);
+            $('#practice').ebtextarea(_.extend({
+                title: {
+                    text: 'Rehabilitations- und Rentenverfahren, GdB, GdS',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#profile').ebtextarea(_.extend({
+                title: {
+                    text: 'Anforderungsprofil der Bezugstätigkeit(*)',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#indication').ebtextarea(_.extend({
+                title: {
+                    text: 'Befund:(*)',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#indicationInformation').ebtextarea(_.extend({
+                title: {
+                    text: 'Erforderliche Angaben über den Befund',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#summary').ebtextarea(_.extend({
+                title: {
+                    text: 'Zusammenfassung:',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#rating').ebtextarea(_.extend({
+                title: {
+                    text: 'Sozialmedizinische Beurteilung der AU',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#accordance').ebtextarea(_.extend({
+                title: {
+                    text: sAccordance,
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#suggestion-comment').ebtextarea(_.extend({
+                title: {
+                    text: 'Erläuterung Sozialmedizinische Empfehlung',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            $('#hints').ebtextarea(_.extend({
+                title: {
+                    text: sHint,
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+
+            $('#statement-id').ebdropdown({disabled: readonly}, ddlists.statementList).ebbind(audata);
+            $('#agency-start-date').datepicker(datepickerOptions).ebbind(audata);
+            $('#effort-id').ebdropdown({disabled: readonly}, ddlists.effortList).ebbind(audata);
+
+            var cbChangeResult = function cbChangeResult(event, ui) {
+                var result = ddlists.resultList[ui.item.index];
+                top.frames[2].$('input[name=Resultid]:hidden').val(result ? result.v : 0);
+                top.objectIsChanged = true;
             }
-            if (confLine.effect == 1)
-              $('#' + confLine.fieldid).hide();
-            if (confLine.effect == 2)
-              $('#' + confLine.fieldid).prop("readonly", true);
-          }
-        });
-      }
+            $('#result').ebdropdown({disabled: readonly, change: cbChangeResult}, ddlists.resultList).ebbind(audata);
+            $('#duration').ebbind(audata, 'duration', function () {
+                var t = Number($('#duration').val() || '0');
+                top.frames[2].$('input[name=TimetoproduceproductHours]:hidden').val(('00' + Math.floor(t / 60)).substr(-2));
+                top.frames[2].$('input[name=TimetoproduceproductMinutes]:hidden').val(('00' + (t % 60)).substr(-2));
+                top.objectIsChanged = true;
+            });
+            $('#setup-time').ebbind(audata, 'setup-time', function () {
+                var t = Number($('#setup-time').val() || '0');
+                top.frames[2].$('input[name=TotalworkingtimeHours]:hidden').val(('00' + Math.floor(t / 60)).substr(-2));
+                top.frames[2].$('input[name=TotalworkingtimeMinutes]:hidden').val(('00' + (t % 60)).substr(-2));
+                top.objectIsChanged = true;
+            });
+            $('#expertise-date').datepicker(datepickerOptions).ebbind(audata, 'expertise-date', function () {
+                top.frames[2].$('input[name=Resultdate]:hidden').val($('#expertise-date').val());
+                top.objectIsChanged = true;
+            });
 
-      function initDialog(audata) {
-        $('.positive-integer').numeric({decimal: false, negative: false});
+            $('#suggestion-id').ebdropdown({disabled: readonly}, ddlists.suggestionList).ebbind(audata);
+            $('#reduction-id').ebdropdown({disabled: readonly}, ddlists.reductionList).ebbind(audata);
+            $('#notification').ebbind(audata);
 
-        var ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
-          return !_.findWhere(audata, {'question-id': q.v});
-        }));
-        auquests.initQuestionsTable(audata);
-        //icdfct.initIcdTable(audata.icds);
-        $('#diags').icdlist(audata.icds, {type: 'AU', disable: readonly, isDta: isDta});
+            $('#reminder').ebbind(audata, 'reminder', function () {
+                $('#reminder-comment').toggle($('#reminder').val());
+            });
+            $('#reminder-comment').ebtextarea(_.extend({
+                title: {
+                    text: 'Erläuterung, wenn erneute Vorlage',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    pos: 'top'
+                }
+            }, taopts4000)).ebbind(audata);
+            if (!$('#reminder').prop('checked')) {
+                $('#reminder-comment').hide();
+            }
 
-        $('#addAuQuest').on('click', function () {
-          var questId = Number(ddQuestions.getSelectedValue());
-          if (!questId)
-            return;
-          var q = _.extend(_.findWhere(auListQuests, {'question-id': questId}), {'question-comment': '', 'answer-id': null});
-          audata.qas.push(q);
-          ddQuestions = $('#questions').ebdropdown({disabled: readonly}, ddlists.questionList.filter(function (q) {
-            return !_.findWhere(audata.qas, {'question-id': q.v});
-          }));
-          auquests.initQuestionsTable(audata);
+            $('#preventSrInformation').ebbind(audata, 'preventSrInformation', function () {
+                if ($('#preventSrInformation').prop('checked')) {
+                    ddLE.setSelectedValue(6); // 6 -> „Eingeschränkt (Ohne Anamnese & Befund, ohne Erforderliche Angaben über den Befund)“
+                }
+            });
 
-          if (q['question-number'] === '04') {
-            top.frames[2].associatedAU = audata.associated = true;
-            //top.frames[2].checkTabs4Enabling(<%=OrderType.au.id%>);
-          }
-        });
-        $('#start-date').datepicker(datepickerOptions).ebbind(audata);
+            $('#delivery-config-ag').ebdropdown({disabled: readonly}, ddlists.deliveryConfigAuftraggeberList).ebbind(audata);
+            var ddLE = $('#delivery-config-le').ebdropdown({disabled: readonly}, ddlists.deliveryConfigLeistungserbringerList).ebbind(audata);
 
-        var sAccordance = 'Übereinstimmung von Leistungsvermögen mit Anforderungsprofil der zuletzt ausgeübten/maßgeblichen Tätigkeit';
-        var sHint = 'Hinweise auf besondere Ursachen / mögliche andere Leistungsträger';
-        $('#medical-base').ebtextarea(_.extend({title: {text: 'Medizinische Unterlagen:(*)', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#anamnesis').ebtextarea(_.extend({title: {text: 'Anamnese:(*)', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts10000)).ebbind(audata);
-        $('#practice').ebtextarea(_.extend({title: {text: 'Rehabilitations- und Rentenverfahren, GdB, GdS', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#profile').ebtextarea(_.extend({title: {text: 'Anforderungsprofil der Bezugstätigkeit(*)', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#indication').ebtextarea(_.extend({title: {text: 'Befund:(*)', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#indicationInformation').ebtextarea(_.extend({title: {text: 'Erforderliche Angaben über den Befund', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#summary').ebtextarea(_.extend({title: {text: 'Zusammenfassung:', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#rating').ebtextarea(_.extend({title: {text: 'Sozialmedizinische Beurteilung der AU', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#accordance').ebtextarea(_.extend({title: {text: sAccordance, fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#suggestion-comment').ebtextarea(_.extend({title: {text: 'Erläuterung Sozialmedizinische Empfehlung', fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        $('#hints').ebtextarea(_.extend({title: {text: sHint, fontSize: '14px', fontWeight: 'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-
-        $('#statement-id').ebdropdown({disabled: readonly}, ddlists.statementList).ebbind(audata);
-        $('#agency-start-date').datepicker(datepickerOptions).ebbind(audata);
-        $('#effort-id').ebdropdown({disabled: readonly}, ddlists.effortList).ebbind(audata);
-
-        var cbChangeResult = function cbChangeResult(event, ui) {
-          var result = ddlists.resultList[ui.item.index];
-          top.frames[2].$('input[name=Resultid]:hidden').val(result ? result.v : 0);
-          top.objectIsChanged = true;
-        }
-        $('#result').ebdropdown({disabled: readonly, change: cbChangeResult}, ddlists.resultList).ebbind(audata);
-        $('#duration').ebbind(audata, 'duration', function () {
-          var t = Number($('#duration').val() || '0');
-          top.frames[2].$('input[name=TimetoproduceproductHours]:hidden').val(('00' + Math.floor(t / 60)).substr(-2));
-          top.frames[2].$('input[name=TimetoproduceproductMinutes]:hidden').val(('00' + (t % 60)).substr(-2));
-          top.objectIsChanged = true;
-        });
-        $('#setup-time').ebbind(audata, 'setup-time', function () {
-          var t = Number($('#setup-time').val() || '0');
-          top.frames[2].$('input[name=TotalworkingtimeHours]:hidden').val(('00' + Math.floor(t / 60)).substr(-2));
-          top.frames[2].$('input[name=TotalworkingtimeMinutes]:hidden').val(('00' + (t % 60)).substr(-2));
-          top.objectIsChanged = true;
-        });
-        $('#expertise-date').datepicker(datepickerOptions).ebbind(audata, 'expertise-date', function () {
-          top.frames[2].$('input[name=Resultdate]:hidden').val($('#expertise-date').val());
-          top.objectIsChanged = true;
-        });
-
-        $('#suggestion-id').ebdropdown({disabled: readonly}, ddlists.suggestionList).ebbind(audata);
-        $('#reduction-id').ebdropdown({disabled: readonly}, ddlists.reductionList).ebbind(audata);
-        $('#notification').ebbind(audata);
-
-        $('#reminder').ebbind(audata, 'reminder', function () {
-          $('#reminder-comment').toggle($('#reminder').val());
-        });
-        $('#reminder-comment').ebtextarea(_.extend({title: {text: 'Erläuterung, wenn erneute Vorlage', fontSize: '14px', fontWeight:'bold', pos: 'top'}}, taopts4000)).ebbind(audata);
-        if (!$('#reminder').prop('checked')) {
-          $('#reminder-comment').hide();
+            if (readonly) {
+                $("input").prop('disabled', true);
+                $('#addAuQuest').hide();
+                $("textarea").prop('disabled', false).prop('readonly', true).on('keydown', function (evt) {
+                    evt.preventDefault();
+                });
+                $('#questionsTable td:nth-child(4)').hide();
+                $('h1:contains(*)').each(function (idx, o) {
+                    $(o).text($(o).text().replace('(*)', '').replace('*', ''));
+                });
+                $('img.ui-datepicker-trigger').hide();
+            }
+            if (isDta) {
+                $('#divresult,#divduration,#divsetuptime').hide();
+            }
         }
 
-        $('#preventSrInformation').ebbind(audata, 'preventSrInformation', function () {
-          if ($('#preventSrInformation').prop('checked')) {
-            ddLE.setSelectedValue(6); // 6 -> „Eingeschränkt (Ohne Anamnese & Befund, ohne Erforderliche Angaben über den Befund)“
-          }
-        });
+        $(document).ready(function () {
+            $('body').hide();
+            top.DialogID = "au";
+            //auUtils.doLoad(function (result) {
+            audata = audata3;
+            audata.icds = audata.icds.filter(function (o) {
+                return !!o['icd-code-id'];
+            });
 
-        $('#delivery-config-ag').ebdropdown({disabled: readonly}, ddlists.deliveryConfigAuftraggeberList).ebbind(audata);
-        var ddLE = $('#delivery-config-le').ebdropdown({disabled: readonly}, ddlists.deliveryConfigLeistungserbringerList).ebbind(audata);
-
-        if (readonly) {
-          $("input").prop('disabled', true);
-          $('#addAuQuest').hide();
-          $("textarea").prop('disabled', false).prop('readonly', true).on('keydown', function (evt) {
-            evt.preventDefault();
-          });
-          $('#questionsTable td:nth-child(4)').hide();
-          $('h1:contains(*)').each(function (idx, o) {
-            $(o).text($(o).text().replace('(*)', '').replace('*', ''));
-          });
-          $('img.ui-datepicker-trigger').hide();
-        }
-        if (isDta) {
-          $('#divresult,#divduration,#divsetuptime').hide();
-        }
-      }
-
-      $(document).ready(function () {
-        $('body').hide();
-        top.DialogID = "au";
-        //auUtils.doLoad(function (result) {
-        audata = audata3;
-        audata.icds = audata.icds.filter(function (o) {
-          return !!o['icd-code-id'];
-        });
-
-        // get Values from first TAB (Auftrag-TAB)
+            // get Values from first TAB (Auftrag-TAB)
 //          audata['result'] = top.frames[2].$('input[name=Resultid]:hidden').val();
 //          audata['duration'] = Number(top.frames[2].$('input[name=TimetoproduceproductHours]:hidden').val()) * 60 + Number(top.frames[2].$('input[name=TimetoproduceproductMinutes]:hidden').val());
 //          audata['setup-time'] = Number(top.frames[2].$('input[name=TotalworkingtimeHours]:hidden').val()) * 60 + Number(top.frames[2].$('input[name=TotalworkingtimeMinutes]:hidden').val());
 //          audata['expertise-date'] = top.frames[2].$('input[name=Resultdate]:hidden').val() || null;
 
-        if (isSFB) {  // ???
-        }
+            if (isSFB) {  // ???
+            }
 
-        initDialog(audata);
-        $('body').show();
+            initDialog(audata);
+            $('body').show();
 
-        setOrderParameter = function () {
-          audata.icds = _.compact(audata.icds);
-          return auUtils.doSave(audata);
-        };
-        //});
-        //applyTabConfig();
+            setOrderParameter = function () {
+                audata.icds = _.compact(audata.icds);
+                return auUtils.doSave(audata);
+            };
+            //});
+            //applyTabConfig();
 
-      });
+        });
     </script>
 
-  </head>
-  <body>
+</head>
+<body>
 
-    <div id='orderattr'>
+<div id='orderattr'>
 
-      <div><h1>AU Fragen                                      </h1> <span  id='questions'></span>&nbsp;<span id='addAuQuest' class='ui-icon ui-icon-circle-plus'></span></div>
-      <div><h1>Vorhandene AU Fragen                           </h1> <div   id='questionsTable'></div></div>
+    <div><h1>AU Fragen </h1> <span id='questions'></span>&nbsp;<span id='addAuQuest'
+                                                                     class='ui-icon ui-icon-circle-plus'></span></div>
+    <div><h1>Vorhandene AU Fragen </h1>
+        <div id='questionsTable'></div>
+    </div>
 
-      <div class='auitem'><span class='auheader'>Arbeitsunfähigkeit seit                        </span> <input id='start-date'></div>
-      <div id='medical-base'></div>
-      <div id='anamnesis' ></div>
-      <div id='practice'></div>
-      <div id='profile'></div>
-      <div id='div-statement-id'><h1>Nach Angaben             </h1> <div   id='statement-id'></div></div>
-      <div id='div-agency-start-date'><h1>Bei der Arbeitsagentur in Vermittlung seit     </h1> <input id='agency-start-date'></div>
-      <div id='div-effort-id'><h1>Zeitlicher Vermittlungsaufwand                 </h1> <div   id='effort-id'></div></div>
-      <div id='indication'></div>
+    <div class='auitem'><span class='auheader'>Arbeitsunfähigkeit seit                        </span> <input
+            id='start-date'></div>
+    <div id='medical-base'></div>
+    <div id='anamnesis'></div>
+    <div id='practice'></div>
+    <div id='profile'></div>
+    <div id='div-statement-id'><h1>Nach Angaben </h1>
+        <div id='statement-id'></div>
+    </div>
+    <div id='div-agency-start-date'><h1>Bei der Arbeitsagentur in Vermittlung seit </h1> <input id='agency-start-date'>
+    </div>
+    <div id='div-effort-id'><h1>Zeitlicher Vermittlungsaufwand </h1>
+        <div id='effort-id'></div>
+    </div>
+    <div id='indication'></div>
 
-      <div id='diagnosen'>
+    <div id='diagnosen'>
         <h1>Diagnosen</h1>
         <div id='diags'></div>
-      </div>
+    </div>
 
-      <div id='summary'></div>
-      <div id='indicationInformation'></div>
-      <div id='rating'></div>
-      <div id='accordance'></div>
-      <div id='divresult'><h1>Ergebnis                          </h1> <div   id='result'></div></div>
-      <div id='divduration'><h1>Erledigungszeit in Minuten      </h1> <input id='duration' class='positive-integer' type='text'></div>
-      <div id='divsetuptime'><h1>Rüstzeit in Minuten            </h1> <input id='setup-time' class='positive-integer' type='text'></div>
-      <div><h1>Begutachtungsdatum                               </h1> <input id='expertise-date'></div>
-      <div id='div-reduction-id'><h1>Gefährdung/Minderung der Erwerbsfähigkeit        </h1> <div id='reduction-id'></div></div>
-      <div id='div-suggestion-id'><h1>Sozialmedizinische Empfehlung                    </h1> <div id='suggestion-id'></div></div>
-      <div id='suggestion-comment'></div>
-      <div id='hints'></div>
+    <div id='summary'></div>
+    <div id='indicationInformation'></div>
+    <div id='rating'></div>
+    <div id='accordance'></div>
+    <div id='divresult'><h1>Ergebnis </h1>
+        <div id='result'></div>
+    </div>
+    <div id='divduration'><h1>Erledigungszeit in Minuten </h1> <input id='duration' class='positive-integer'
+                                                                      type='text'></div>
+    <div id='divsetuptime'><h1>Rüstzeit in Minuten </h1> <input id='setup-time' class='positive-integer' type='text'>
+    </div>
+    <div><h1>Begutachtungsdatum </h1> <input id='expertise-date'></div>
+    <div id='div-reduction-id'><h1>Gefährdung/Minderung der Erwerbsfähigkeit </h1>
+        <div id='reduction-id'></div>
+    </div>
+    <div id='div-suggestion-id'><h1>Sozialmedizinische Empfehlung </h1>
+        <div id='suggestion-id'></div>
+    </div>
+    <div id='suggestion-comment'></div>
+    <div id='hints'></div>
 
-      <div id='div-notification' class='auitem'><span class='auheader'>Das Begutachtungsergebnis wurde der/dem 
+    <div id='div-notification' class='auitem'><span class='auheader'>Das Begutachtungsergebnis wurde der/dem
           Versicherten mitgeteilt                               </span> <input id='notification' type="checkbox"></div>
-      <div id='div-reminder' class='auitem'><span class='auheader'>Erneute Vorlage                </span> <input id='reminder' type="checkbox"></div>
-      <div id='reminder-comment' class='auitem'></div>
-      <div class='auitem'><span class='auheader'>Der Versicherte hat der Mitteilung über den 
-          Befund an die Leistungserbringer widersprochen        </span> <input id='preventSrInformation' type="checkbox"></div>
+    <div id='div-reminder' class='auitem'><span class='auheader'>Erneute Vorlage                </span> <input
+            id='reminder' type="checkbox"></div>
+    <div id='reminder-comment' class='auitem'></div>
+    <div class='auitem'><span class='auheader'>Der Versicherte hat der Mitteilung über den
+          Befund an die Leistungserbringer widersprochen        </span> <input id='preventSrInformation'
+                                                                               type="checkbox"></div>
 
-      <div id='versandeinstellungen'>
+    <div id='versandeinstellungen'>
         <h1>Versandeinstellungen</h1>
         <table>
-          <tr><td>Auftraggeber      </td><td><div id='delivery-config-ag'></div></td>
-          <tr><td>Leistungserbringer</td><td><div id='delivery-config-le'></div></td>
+            <tr>
+                <td>Auftraggeber</td>
+                <td>
+                    <div id='delivery-config-ag'></div>
+                </td>
+            <tr>
+                <td>Leistungserbringer</td>
+                <td>
+                    <div id='delivery-config-le'></div>
+                </td>
         </table>
-      </div>
-      <!--  Platz unten reservieren, damit Klapplist voll aufgeklappt werden kann-->
-      <div style='height:150px'></div> 
+    </div>
+    <!--  Platz unten reservieren, damit Klapplist voll aufgeklappt werden kann-->
+    <div style='height:150px'></div>
 
-  </body>
+</body>
 </html>

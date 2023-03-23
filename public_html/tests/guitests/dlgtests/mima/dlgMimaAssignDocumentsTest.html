@@ -1,33 +1,37 @@
 <!DOCTYPE html>
 <head>
-  <meta charset="utf-8">
-  <title>Mimas zuordnen</title>
+    <meta charset="utf-8">
+    <title>Mimas zuordnen</title>
 
-  <link rel="stylesheet" href="/vendor/jQueryUI-1.12.0/jquery-ui.css">
-  <link rel="stylesheet" href="/javascript/eblib/ebtable.css">
-  <style>
-    * {font-family:Arial; color: black; font-size: 18px; }
-  </style>
+    <link rel="stylesheet" href="../../../vendor/jQueryUI-1.12.0/jquery-ui.css">
+    <link rel="stylesheet" href="../../../javascript/eblib/ebtable.css">
+    <style>
+        * {
+            font-family: Arial;
+            color: black;
+            font-size: 18px;
+        }
+    </style>
 
-  <script src="/vendor/underscore-1.8.3/underscore-1.8.3.js"></script>
-  <script src="/vendor/jQuery-1.11.3/jquery-1.11.3.min.js"></script>
-  <script src="/vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
-  <script src="/vendor/vue-1.0.26/vue.js"></script>
+    <script src="../../../vendor/underscore-1.8.3/underscore-1.8.3.js"></script>
+    <script src="../../../vendor/jQuery-1.11.3/jquery-1.11.3.min.js"></script>
+    <script src="../../../vendor/jQueryUI-1.12.0/jquery-ui.js"></script>
+    <script src="../../../vendor/vue-1.0.26/vue.js"></script>
 
-  <script src='/javascript/jquery-ui-datepicker-de.js'></script>
-  <script src="/javascript/vue-eb.js"></script>
-  <script src="/javascript/eblib/mx.js"></script>  
-  <script src="/javascript/eblib/ebtable.js"></script>  
-  <script src="/javascript/eblib/ebutils.js"></script>  
-  <script src="/tests/guitests/dlgtests/mima/mimaUtils.js"></script>
-  <script src="/tests/guitests/dlgtests/mima/dlgMimaAssignDocuments.js"></script>
-  <script src="/data/mimadata.js"></script>
-  <script>
-    var sessionId = '';
-    $(document).ready(function () {
-      dlgMimaAssignDocuments(mimadata.mimas);
-    });
-  </script>
+    <script src='../../../javascript/jquery-ui-datepicker-de.js'></script>
+    <script src="../../../javascript/vue-eb.js"></script>
+    <script src="../../../javascript/eblib/mx.js"></script>
+    <script src="../../../javascript/eblib/ebtable.js"></script>
+    <script src="../../../javascript/eblib/ebutils.js"></script>
+    <script src="../../../tests/guitests/dlgtests/mima/mimaUtils.js"></script>
+    <script src="../../../tests/guitests/dlgtests/mima/dlgMimaAssignDocuments.js"></script>
+    <script src="../../../data/mimadata.js"></script>
+    <script>
+        var sessionId = '';
+        $(document).ready(function () {
+            dlgMimaAssignDocuments(mimadata.mimas);
+        });
+    </script>
 </head>
 <body>
 </body>

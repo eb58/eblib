@@ -1,98 +1,88 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <title>Vue Test</title>
+    <title>Vue Test</title>
 
-        <link rel='stylesheet' href='/vendor/font-awesome-4.7.0/css/font-awesome.min.css'/>
-        <link rel='stylesheet' href='/vendor/jQueryUI-1.12.0/jquery-ui.min.css'/>
-        <link rel='stylesheet' href='https://unpkg.com/select2@4.0.3/dist/css/select2.min.css'/>
-        <link rel='stylesheet' href='/javascript/eblib/ebtable.css'/>
-        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <link rel='stylesheet' href='https://unpkg.com/select2@4.0.3/dist/css/select2.min.css'/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.5.2/vuetify.css">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'/>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css'/>
+    <link rel='stylesheet' href='../../css/ebtable.css'/>
 
-        <style>
-            * {font-family: Arial; color: black;font-size: 12px;}
-            #app { width: 800px; background-color: #f3f3f0; margin:5px; padding: 10px}
-            .ui-datepicker-trigger { border:none; background:none; }
-            .sel {
-                min-width: 300px;
-            }
-        </style>
-        <script src="/vendor/moment.min.js"></script>
+    <style>
+        * {
+            font-family: Arial;
+            color: black;
+            font-size: 12px;
+        }
 
-        <script src="/vendor/underscore-1.8.3/underscore-1.8.3.js"></script>
-        <script src='/vendor/jQuery-1.11.3/jquery-1.11.3.min.js'></script>
-        <script src='/vendor/jQueryUI-1.12.0/jquery-ui.min.js'></script>
-        <script src="https://unpkg.com/select2@4.0.3/dist/js/select2.js"></script>
+        #app {
+            width: 800px;
+            background-color: #f3f3f0;
+            margin: 5px;
+            padding: 10px
+        }
 
-        <script src="/vendor/vue-2.6.0/vue.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+        .ui-datepicker-trigger {
+            border: none;
+            background: none;
+        }
 
-        <script src="/javascript/polyfill.js"></script>
-        <script src='/javascript/jquery-ui-datepicker-de.js'></script>
+        .sel {
+            min-width: 300px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script src="../../javascript/polyfill.js"></script>
+    <script src='../../javascript/jquery-ui-datepicker-de.js'></script>
 
-        <script>
-
-            const initApp = () => {
-                new Vue({
-                    el: '#el',
-                    vuetify: new Vuetify(),
-                    data: () => ({
-                            items: ['Foo', 'Bar', 'Fizz', 'Buzz'],
-                            date: '01.03.1958',
-                            selected1: 1,
-                            selected2: 1,
-                            options1: [
-                                {id: null, text: ''},
-                                {id: 1, text: 'Variante1'},
-                                {id: 2, text: 'Variante2'}
-                            ],
-                            opts1: [{id: null, text: ''}, {id: 1, text: 'AAAA'}, {id: 2, text: 'BBBB'}, ],
-                            opts2: [{id: null, text: ''}, {id: 3, text: 'XXXX'}, {id: 4, text: 'YYYY'}, ],
-                        }),
-                })
-            }
-
-            $(document).ready(() => {
-                Vue.component('vue-multiselect', window.VueMultiselect.default)
-                new Vue({
-                    el: '#app',
-                    vuetify: new Vuetify(),
-                    data: () => ({
-                            selected1: 'Foo',
-                            selected2: null,
-                            items1: ['Foo', 'Bar', 'Fizz', 'Buzz'],
-                        }),
-                    computed: {
-                        items2: function () {
-                            return this.selected1 === 'Foo' ? ['AAA', 'BBB', 'CCC'] : ['XXX', 'YYY', 'ZZZ']
-                        }
+    <script>
+        $(document).ready(() => {
+            Vue.component('vue-multiselect')
+            new Vue({
+                el: '#app',
+                vuetify: new Vuetify(),
+                data: () => ({
+                    selected1: 'Foo',
+                    selected2: null,
+                    items1: ['Foo', 'Bar', 'Fizz', 'Buzz'],
+                }),
+                computed: {
+                    items2: function () {
+                        return this.selected1 === 'Foo' ? ['AAA', 'BBB', 'CCC'] : ['XXX', 'YYY', 'ZZZ']
                     }
-                })
-            }
-            )
-        </script>
+                }
+            })
+        })
+    </script>
 
-    </head>
-    <body>
-        <div id="app">
-            <v-app id="inspire">
-                <v-container fluid>
-                    <v-row align="center">
-                        <v-col class="d-flex" cols="12" sm="6">
-                            <v-select  :items="items1"  label="Standard" dense v-model="selected1" ></v-select>
-                        </v-col>
+</head>
+<body>
+<div id="app">
+    <v-app id="inspire">
+        <v-container fluid>
+            <v-row align="center">
+                <v-col class="d-flex" cols="12" sm="6">
+                    <v-select :items="items1" label="Standard" dense v-model="selected1"></v-select>
+                </v-col>
 
-                        <v-col class="d-flex" cols="12" sm="6">
-                            <v-select :items="items2" filled label="Filled style"dense v-model="selected2"></v-select>
-                        </v-col>
+                <v-col class="d-flex" cols="12" sm="6">
+                    <v-select :items="items2" filled label="Filled style" dense v-model="selected2"></v-select>
+                </v-col>
 
-                    </v-row>
-                </v-container>
-            </v-app>
-        </div>
-    </body>
+            </v-row>
+        </v-container>
+    </v-app>
+</div>
+</body>
 </html>
